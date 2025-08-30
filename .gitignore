@@ -3,3 +3,4 @@ node_modules/
 data/html/package-lock.json
 .gitignore
 data/html/package.json
+secrets/

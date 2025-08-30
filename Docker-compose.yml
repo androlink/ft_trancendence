@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx
+    image: nginx
+    secrets:
+     - ssl_cert
+     - ssl_key
+    build:
+      context: services/nginx/
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - trancendence
+    volumes:
+      - html:/var/www/html
+
+
+volumes:
+  html:
+    name: html
+    driver: local
+    driver_opts:
+      device: ./data/html
+      o: bind
+      type: none
+
+networks:
+  trancendence:
+    name: trancendence
+    driver: bridge
+
+secrets:
+  ssl_cert:
+    file: ./secrets/ssl/ssl.crt
+  ssl_key:
+    file: ./secrets/ssl/ssl.key
