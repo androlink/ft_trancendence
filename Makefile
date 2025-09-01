@@ -7,12 +7,11 @@ all: start
 
 .PHONY: build
 build:
-	mkdir -p secrets
-	./script/ssl_setup.sh
+	./script/setup.sh
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) build
 
 .PHONY: start
-start: build
+start: stop build
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
 
 .PHONY: restart
@@ -36,5 +35,5 @@ rm: stop
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) rm
 
 .PHONY: prune
-prune:
+prune: stop
 	docker system prune --all --force
