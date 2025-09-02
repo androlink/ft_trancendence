@@ -52,6 +52,7 @@ services:
       - trancendence
     volumes:
       - srcs:/var/
+      - node_modules:/var/server/node_modules
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
       interval: 5s
@@ -74,6 +75,8 @@ volumes:
       device: ./src/
       o: bind
       type: none
+  node_modules:
+
 
 networks:
   trancendence:

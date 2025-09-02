@@ -6,5 +6,6 @@ RUN npm i -D fastify
 RUN npm i -D typescript @types/node
 run npm i -D @fastify/static
 RUN npm install -g tsx
+RUN npm install
 EXPOSE 3000
 CMD ["tsx", "watch", "server.ts"]
