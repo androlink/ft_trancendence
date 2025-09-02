@@ -15,7 +15,6 @@ services:
     networks:
       - trancendence
     volumes:
-      - html:/var/www/html
       - certificate:/var/ssl_cert/
     healthcheck:
       interval: 10s
@@ -61,13 +60,6 @@ services:
 
 
 volumes:
-  html:
-    name: html
-    driver: local
-    driver_opts:
-      device: ./data/html
-      o: bind
-      type: none
   certificate:
     name: certificate
     driver: local
