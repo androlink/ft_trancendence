@@ -21,6 +21,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    depends_on:
+      server:
+        condition: service_healthy
+        restart: true
+    restart: "always"
 
   #----------------------------------------------------------------------------#
   #                                    CERTIFICATE                             #
@@ -36,6 +41,24 @@ services:
       - trancendence
     restart: "no"
 
+  #----------------------------------------------------------------------------#
+  #                                    SERVER                                  #
+  #----------------------------------------------------------------------------#
+  server:
+    container_name: server
+    image: server
+    build:
+      context: services/server/
+    networks:
+      - trancendence
+    volumes:
+      - srcs:/var/
+    healthcheck:
+      test: ["CMD", "curl", "http://server:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 
 volumes:
   html:
@@ -50,6 +73,13 @@ volumes:
     driver: local
     driver_opts:
       device: ./data/certificate
+      o: bind
+      type: none
+  srcs:
+    name: src
+    driver: local
+    driver_opts:
+      device: ./src/
       o: bind
       type: none
 
