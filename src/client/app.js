@@ -50,6 +50,9 @@ function fetchApi() {
         });
     });
 }
+window.addEventListener('popstate', function (event) {
+    main();
+}, false);
 function main() {
     return __awaiter(this, void 0, void 0, function () {
         var data, app, text, button;

@@ -4,6 +4,10 @@ async function fetchApi() {
 	return data
 }
 
+window.addEventListener('popstate', function(event) {
+	main()
+}, false);
+
 async function main() {
 	const data = await fetchApi()
 

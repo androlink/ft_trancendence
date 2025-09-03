@@ -21,6 +21,10 @@ fastify.get('/api/*', function (req, reply) {
   return {content: "404 Not Found"}
 })
 
+fastify.get('/api', function (req, reply) {
+  return {content: "Welcome"}
+})
+
 fastify.setNotFoundHandler((req, reply) => {
   reply.sendFile('page.html');
 });
