@@ -59,6 +59,17 @@ services:
       timeout: 5s
       retries: 10
 
+  #----------------------------------------------------------------------------#
+  #                                    CLIENT                                  #
+  #----------------------------------------------------------------------------#
+  client:
+    container_name: client
+    image: client 
+    build:
+      context: services/client/
+    volumes:
+      - srcs:/var/
+    restart: "always"
 
 volumes:
   certificate:

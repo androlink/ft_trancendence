@@ -3,4 +3,6 @@ node_modules/
 data/html/package-lock.json
 .gitignore
 secrets/
+*.js
+.*.swp
 data/certificate/
