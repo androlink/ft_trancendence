@@ -10,17 +10,20 @@ services:
     build:
       context: services/nginx/
     ports:
-      - 80:80
       - 443:443
     networks:
       - trancendence
     volumes:
-      - html:/var/www/html
       - certificate:/var/ssl_cert/
     healthcheck:
       interval: 10s
       timeout: 5s
       retries: 10
+    depends_on:
+      server:
+        condition: service_healthy
+        restart: true
+    restart: "always"
 
   #----------------------------------------------------------------------------#
   #                                    CERTIFICATE                             #
@@ -36,15 +39,38 @@ services:
       - trancendence
     restart: "no"
 
+  #----------------------------------------------------------------------------#
+  #                                    SERVER                                  #
+  #----------------------------------------------------------------------------#
+  server:
+    container_name: server
+    image: server
+    build:
+      context: services/server/
+    networks:
+      - trancendence
+    volumes:
+      - srcs:/var/
+      - node_modules:/var/server/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "http://server:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  #----------------------------------------------------------------------------#
+  #                                    CLIENT                                  #
+  #----------------------------------------------------------------------------#
+  client:
+    container_name: client
+    image: client 
+    build:
+      context: services/client/
+    volumes:
+      - srcs:/var/
+    restart: "always"
 
 volumes:
-  html:
-    name: html
-    driver: local
-    driver_opts:
-      device: ./data/html
-      o: bind
-      type: none
   certificate:
     name: certificate
     driver: local
@@ -52,6 +78,15 @@ volumes:
       device: ./data/certificate
       o: bind
       type: none
+  srcs:
+    name: src
+    driver: local
+    driver_opts:
+      device: ./src/
+      o: bind
+      type: none
+  node_modules:
+
 
 networks:
   trancendence:
