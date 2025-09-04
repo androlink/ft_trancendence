@@ -18,6 +18,10 @@ fastify.get('/api/home', function (req, reply) {
   return {template: "Home", title: "ft_transcendence"}
 })
 
+fastify.get('/api/game', function (req, reply) {
+  return {template: "Game", title: "Pong soon"}
+})
+
 fastify.get('/api/*', function (req, reply) {
   return {template: "Error", replace: {status: "Error 404", message: "are you lost by any chance ?"}, title: "404 Not Found"}
 })
