@@ -1,6 +1,12 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "target": "ES2017"
+  },
+    "watchOptions": {
+    "watchFile": "fixedpollinginterval"
+  },
   "files": [
-    "app.ts"
+    "app.ts",
+    "templates.ts"
   ]
 }

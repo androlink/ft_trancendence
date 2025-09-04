@@ -3,26 +3,23 @@ const fastify = require('fastify')({
     ignoreTrailingSlash: true
   }
 });
+
 const path = require('node:path')
 
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, '../client'),
 })
 
-fastify.get('/api/yes', async function (req, reply) {
-  return {content: "yes", button_fetch: {name: "go to no", url: "/no", title: "nay"}}
-})
-
-fastify.get('/api/no', async function (req, reply) {
-  return {content: "no", button_fetch: {name: "go to yes", url: "/yes", title: "yay"}}
+fastify.get('/api/home', function (req, reply) {
+  return( {content: "no", button_fetch: {name: "go to yes", url: "/yes", title: "yay"}} )
 })
 
 fastify.get('/api/*', function (req, reply) {
-  return {content: "404 Not Found"}
+  return {template: "Error", replace: {status: "Error 404", message: "are you lost by any chance ?"}, title: "404 Not Found"}
 })
 
 fastify.get('/api', function (req, reply) {
-  return {content: "Welcome"}
+  return {template: "Welcome", title: "welcome"}
 })
 
 fastify.setNotFoundHandler((req, reply) => {
