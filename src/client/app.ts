@@ -1,10 +1,21 @@
 import { templates } from "./templates.js"
 
 interface ServerResponse {
-	template?:string,
-	title?:string,
+	template?: string,
+	title?: string,
 	replace?: {[key:string]:string}
 }
+
+function keyExist(dict:object, key:PropertyKey) : boolean {
+	return Object.hasOwn(dict, key)
+}
+
+export function goToURL(NextURL:string) {
+	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL:"/");
+	main();
+}
+
+(window as any).goToURL = goToURL;
 
 async function fetchApi(): Promise<ServerResponse> {
 	const response = await fetch(window.location.origin
@@ -22,9 +33,7 @@ function setElement(text: string, element: HTMLElement) : void {
 }
 
 function replaceElements(toReplace: {[key:string]:string}) : void {
-	console.log(toReplace)
 	for (const key in toReplace) {
-		console.log(key)
 		setElement(toReplace[key], document.getElementById(key))
 	}
 }
@@ -32,24 +41,23 @@ function replaceElements(toReplace: {[key:string]:string}) : void {
 async function main() {
 	const data = await fetchApi()
 	const app: HTMLElement | null = document.getElementById("app")
-	if (!app)
+	if (app === null)
 		return
-	app.innerHTML = ""
-
-	if ("title" in data) {
+	app.innerHTML = "fetch didn't get template element. Not normal"
+	if (keyExist(data, "title")) {
 		document.title = data.title;
 	}
-	if ("template" in data) {
-		if (templates.hasOwnProperty(data.template)) {
+	if (keyExist(data, "template")) {
+		if (keyExist(templates, data.template)) {
 			setElement(templates[data.template], app)
-			if ("replace" in data)
+			if (keyExist(data, "replace"))
 				replaceElements(data.replace)
 		} else {
-			app.innerHTML = "Template not Found"
+			app.innerHTML = "Template " +
+				data.template + " not Found in template.js"
 		}
 	}
 }
 
-// Start app when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
 	main().catch(err => console.error(err))})

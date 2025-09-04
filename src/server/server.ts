@@ -10,8 +10,12 @@ fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, '../client'),
 })
 
+fastify.get('/api/login', function (req, reply) {
+  return {template: "Login", title: "login"}
+})
+
 fastify.get('/api/home', function (req, reply) {
-  return( {content: "no", button_fetch: {name: "go to yes", url: "/yes", title: "yay"}} )
+  return {template: "Home", title: "ft_transcendence"}
 })
 
 fastify.get('/api/*', function (req, reply) {
