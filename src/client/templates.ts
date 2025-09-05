@@ -12,7 +12,7 @@ export const templates = {
 	<label for="lname">password:</label>
 		<input type="password" id="lname" name="lname"><br><br>
 	<div id="demo">
-	<button onclick="document.getElementById('demo').innerHTML = '<p>Tu pensais vraiment qu il y avait de quoi se login ?</p><button onclick=&quot;goToURL\`home\`()&quot; type=&quot;button&quot;>Home Page</button>'">Click me</button>
+	<button onclick="document.getElementById('demo').innerHTML = '<p>Tu pensais vraiment qu il y avait de quoi se login ?</p><button onclick=&quot;goToURL\`home\`()&quot; type=&quot;button&quot;>Home Page</button>'">login/register</button>
 	</div>
 	`,
 	"Home":
