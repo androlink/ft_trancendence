@@ -14,7 +14,7 @@ fastify.get('/api/login', function (req, reply) {
   return {template: "Login", title: "login"}
 })
 
-fastify.get('/api/home', function (req, reply) {
+fastify.get('/api/', function (req, reply) {
   return {template: "Home", title: "ft_transcendence", inner: "Pdf"}
 })
 
@@ -30,10 +30,6 @@ fastify.get('/api/*', function (req, reply) {
   return {template: "Error", replace: {status: "Error 404", message: "are you lost by any chance ?"}, title: "404 Not Found"}
 })
 
-fastify.get('/api', function (req, reply) {
-  return {template: "Welcome", title: "welcome"}
-})
-
 fastify.setNotFoundHandler((req, reply) => {
   reply.sendFile('page.html');
 });
@@ -41,6 +37,6 @@ fastify.setNotFoundHandler((req, reply) => {
 // note to whoever read : https://github.com/fastify/fastify-static
 
 // Run the server!
-fastify.listen({ port: 3000,  host: '0.0.0.0'}, (err, address) => {
+fastify.listen({port: 3000,  host: '0.0.0.0'}, (err, address) => {
   if (err) throw err
 })

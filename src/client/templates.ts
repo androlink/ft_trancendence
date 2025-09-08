@@ -27,7 +27,7 @@ export const templates = {
 	"Home":
 		`
 	<p>Make yourself cosy</p>
-	<button onclick="goToURL('home')" type="button">pdf</button>
+	<button onclick="goToURL( )" type="button">pdf</button>
 	<button onclick="goToURL('game')" type="button">game</button>
 	<button onclick="goToURL('video')" type="button">trailer</button>
 	<div id="inner" style="width: 75vw; height: 75dvh;"></div>
@@ -55,6 +55,6 @@ export const templates = {
 	<h1 id=status></h1>
 	<h2 id=message></h2>
 	<img src="error.png" alt="error" width="250" height="300">
-	<button onclick="goToURL('home')" type="button">home</button>
+	<button onclick="goToURL( )" type="button">home</button>
 	`
 }
