@@ -15,11 +15,15 @@ fastify.get('/api/login', function (req, reply) {
 })
 
 fastify.get('/api/home', function (req, reply) {
-  return {template: "Home", title: "ft_transcendence"}
+  return {template: "Home", title: "ft_transcendence", inner: "Pdf"}
 })
 
 fastify.get('/api/game', function (req, reply) {
-  return {template: "Game", title: "Pong soon"}
+  return {template: "Home", title: "Pong soon", inner: "Game"}
+})
+
+fastify.get('/api/video', function (req, reply) {
+  return {template: "Home", title: "Dana Terrace", inner: "Video"}
 })
 
 fastify.get('/api/*', function (req, reply) {

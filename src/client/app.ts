@@ -10,13 +10,6 @@ function keyExist(dict:object, key:PropertyKey) : boolean {
 	return Object.hasOwn(dict, key)
 }
 
-export function goToURL(NextURL:string) {
-	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL:"/");
-	main();
-}
-
-(window as any).goToURL = goToURL;
-
 async function fetchApi(): Promise<ServerResponse> {
 	const response = await fetch(window.location.origin
 				     + "/api" + window.location.pathname);
@@ -28,28 +21,28 @@ window.addEventListener('popstate', function(event) {
 	main()
 }, false);
 
-function setElement(text: string, element: HTMLElement) : void {
+function setHTML(element: HTMLElement, text: string) : void {
 	element.innerHTML = text
 }
 
 function replaceElements(toReplace: {[key:string]:string}) : void {
 	for (const key in toReplace) {
-		setElement(toReplace[key], document.getElementById(key))
+		setHTML(document.getElementById(key), toReplace[key])
 	}
 }
 
 async function main() {
-	const data = await fetchApi()
+	const data: ServerResponse = await fetchApi()
 	const app: HTMLElement | null = document.getElementById("app")
 	if (app === null)
 		return
-	app.innerHTML = "fetch didn't get template element. Not normal"
 	if (keyExist(data, "title")) {
 		document.title = data.title;
 	}
-	if (keyExist(data, "template")) {
+	if (keyExist(data, "template") && data.template != main.template) {
+		main.template = data.template
 		if (keyExist(templates, data.template)) {
-			setElement(templates[data.template], app)
+			setHTML(app, templates[data.template])
 			if (keyExist(data, "replace"))
 				replaceElements(data.replace)
 		} else {
@@ -57,7 +50,20 @@ async function main() {
 				data.template + " not Found in template.js"
 		}
 	}
+	const inner: HTMLElement | null = document.getElementById("inner");
+	if (inner && keyExist(data, "inner") && keyExist(templates, data.inner) && data.inner != main.inner){
+		main.inner = data.inner
+		setHTML(inner, templates[data.inner])
+	}
 }
 
 document.addEventListener("DOMContentLoaded", () => {
 	main().catch(err => console.error(err))})
+
+
+// for moving page to page, used by html
+export function goToURL(NextURL:string | void) {
+	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL:"/");
+	main();
+}
+(window as any).goToURL = goToURL;

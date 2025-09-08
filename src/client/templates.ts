@@ -1,3 +1,12 @@
+
+// Can't really project due to not having a "graphic identity
+// but i think we should only have "Login", "Home", "Error", "Profile" and maybe "Welcome"
+// Game is there for now because it's a new page
+// however when we'll have a true game I think it would look better as an integreation instead of a whole new page
+// meaning it would necessite a redesign on how the code is done
+
+
+
 export const templates = {
 	"Welcome":
 		`
@@ -18,12 +27,28 @@ export const templates = {
 	"Home":
 		`
 	<p>Make yourself cosy</p>
-	<button onclick="goToURL()" type="button">leave</button>
-	<button onclick="goToURL('game')" type="game">game</button>
+	<button onclick="goToURL('home')" type="button">pdf</button>
+	<button onclick="goToURL('game')" type="button">game</button>
+	<button onclick="goToURL('video')" type="button">trailer</button>
+	<div id="inner" style="width: 75vw; height: 75dvh;"></div>
 	`,
 	"Game":
 		`
-	<iframe src="https://ivark.github.io/AntimatterDimensions/" style="position:fixed; top:0; left:0; width:100%; height:100%; border:none;" frameborder="0" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
+	<iframe src="https://ivark.github.io/AntimatterDimensions/" style="height: 100%; width:100%" frameborder="0" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
+		`,
+	"Video":
+		`
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/G4Df2vAnKZo?si=Ipkn9vWNl5og77iJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+		`,
+	"Pdf":
+		`
+	<iframe
+	src="en.subject.pdf"
+	width="100%"
+	height="100%"
+	style="border:none"
+	title="Embedded PDF Viewer"
+	></iframe>
 	`,
 	"Error":
 		`
