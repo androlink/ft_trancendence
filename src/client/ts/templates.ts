@@ -26,7 +26,7 @@ export const templates = {
 	`,
 	"Home":
 		`
-	<p class="shadow-xl rounded-md">Make yourself cosy</p>
+	<p class="rounded-md">Make yourself cosy</p>
 	<button onclick="goToURL( )" type="button">pdf</button>
 	<button onclick="goToURL('game')" type="button">game</button>
 	<button onclick="goToURL('video')" type="button">trailer</button>

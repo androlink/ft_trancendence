@@ -7,7 +7,7 @@ RUN apt update
 RUN apt install curl bash watchman -y
 
 
-WORKDIR /var/client
+WORKDIR /var/src/client
 RUN npm install -g typescript @types/node
 
 

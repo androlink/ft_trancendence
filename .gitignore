@@ -3,6 +3,6 @@ node_modules/
 .gitignore
 secrets/
 src/client/web/style.css
-*.js
+data/www/*.js
 .*.swp
 data/certificate/

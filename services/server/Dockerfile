@@ -1,6 +1,6 @@
 FROM node:20-alpine
 RUN apk add --no-cache curl bash
-WORKDIR /var/server
+WORKDIR /var/src/server
 RUN npm init -y
 RUN npm i -D fastify
 RUN npm install
