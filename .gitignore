@@ -2,6 +2,7 @@ node_modules/
 .build/
 .gitignore
 secrets/
+src/client/web/style.css
 *.js
 .*.swp
 data/certificate/

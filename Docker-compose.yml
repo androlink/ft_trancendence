@@ -52,6 +52,7 @@ services:
     volumes:
       - srcs:/var/
       - node_modules:/var/server/node_modules
+      - www:/var/www
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
       interval: 5s
@@ -68,6 +69,7 @@ services:
       context: services/client/
     volumes:
       - srcs:/var/
+      - www:/var/www
     restart: "always"
 
 volumes:
@@ -83,6 +85,13 @@ volumes:
     driver: local
     driver_opts:
       device: ./src/
+      o: bind
+      type: none
+  www:
+    name: www
+    drive: local
+    driver_opts:
+      device: ./data/www
       o: bind
       type: none
   node_modules:
