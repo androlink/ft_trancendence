@@ -1,19 +1,5 @@
 
-// Can't really project due to not having a "graphic identity
-// but i think we should only have "Login", "Home", "Error", "Profile" and maybe "Welcome"
-// Game is there for now because it's a new page
-// however when we'll have a true game I think it would look better as an integreation instead of a whole new page
-// meaning it would necessite a redesign on how the code is done
-
-
-
 export const templates = {
-	"Welcome":
-		`
-	<h1>Finally some cool looking spa stuff</h1>
-	<button onclick="goToURL('login')" type="button">login</button>
-
-	`,
 	"Login":
 		`
 	<label for="fname">login:</label>
@@ -26,29 +12,23 @@ export const templates = {
 	`,
 	"Home":
 		`
-	<p class="rounded-md">Make yourself cosy</p>
-	<button onclick="goToURL( )" type="button">pdf</button>
-	<button onclick="goToURL('game')" type="button">game</button>
-	<button onclick="goToURL('video')" type="button">trailer</button>
-	<div id="inner" style="width: 75vw; height: 75dvh;"></div>
+	<p class="text-white italic h-1/25">Make yourself cosy</p>
+	<button onclick="goToURL( )" class="rounded hover:border-transparent active:text-white active:bg-gray-500 bg-gray-700 text-gray-300 h-1/25 m-2">&nbsp;pdf&nbsp;</button>
+	<button onclick="goToURL('game')" class="rounded hover:border-transparent active:text-white active:bg-gray-500 bg-gray-700 text-gray-300 m-2">&nbsp;game&nbsp;</button>
+	<button onclick="goToURL('video')" class="rounded hover:border-transparent active:text-white active:bg-gray-500 bg-gray-700 text-gray-300 m-2">&nbsp;trailer&nbsp;</button>
+	<div id="inner" class="m-auto w-90/100 h-85/100"></div>
 	`,
 	"Game":
 		`
-	<iframe src="https://ivark.github.io/AntimatterDimensions/" style="height: 100%; width:100%" frameborder="0" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
+	<iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full" frameborder="0" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
 		`,
 	"Video":
 		`
-	<iframe width="560" height="315" src="https://www.youtube.com/embed/G4Df2vAnKZo?si=Ipkn9vWNl5og77iJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+	<iframe class="size-full" src="https://www.youtube.com/embed/G4Df2vAnKZo?si=Ipkn9vWNl5og77iJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 		`,
 	"Pdf":
 		`
-	<iframe
-	src="en.subject.pdf"
-	width="100%"
-	height="100%"
-	style="border:none"
-	title="Embedded PDF Viewer"
-	></iframe>
+	<iframe src="sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
 	`,
 	"Error":
 		`
