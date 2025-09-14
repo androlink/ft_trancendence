@@ -12,19 +12,38 @@ export const templates = {
 	`,
 	"Home":
 		`
-	<p class="text-white italic h-1/25">Make yourself cosy</p>
-	<button onclick="goToURL( )" class="rounded hover:border-transparent active:text-white active:bg-gray-500 bg-gray-700 text-gray-300 h-1/25 m-2">&nbsp;pdf&nbsp;</button>
-	<button onclick="goToURL('game')" class="rounded hover:border-transparent active:text-white active:bg-gray-500 bg-gray-700 text-gray-300 m-2">&nbsp;game&nbsp;</button>
-	<button onclick="goToURL('video')" class="rounded hover:border-transparent active:text-white active:bg-gray-500 bg-gray-700 text-gray-300 m-2">&nbsp;trailer&nbsp;</button>
-	<div id="inner" class="m-auto w-90/100 h-85/100"></div>
+	<div class="flex justify-between space-x-2 mx-8 my-2">
+		<div class="flex">
+			<input type="text" placeholder="login" class="text-sm rounded-lg block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white checked:ring-blue-500 checked:border-blue-500"/>
+		</div>
+		<div class="flex space-x-2">
+			<img src="notification-icon.png" class="invert-50 size-10 cursor-pointer">
+			<img src="settings-icon.png" class="invert-50 size-10 cursor-pointer">
+		</div>
+	</div>
+	<div class="flex space-x-2 mx-8">
+		<label class="cursor-pointer">
+			<input type="radio" name="option" class="peer hidden">
+			<div onclick="goToURL( )"		class="cursor-pointer peer-checked:cursor-default select-none rounded hover:border-transparent peer-checked:text-white peer-checked:bg-gray-500 bg-gray-700 text-gray-300">&nbsp;pdf&nbsp;</div>
+  		</label>
+    	<label>
+			<input type="radio" name="option" class="peer hidden">
+			<div onclick="goToURL('game')"	class="cursor-pointer peer-checked:cursor-default select-none rounded hover:border-transparent peer-checked:text-white peer-checked:bg-gray-500 bg-gray-700 text-gray-300">&nbsp;game&nbsp;</div>
+		</label>
+    	<label class="cursor-pointer">
+			<input type="radio" name="option" class="peer hidden">
+			<div onclick="goToURL('video')"class="cursor-pointer peer-checked:cursor-default select-none rounded hover:border-transparent peer-checked:text-white peer-checked:bg-gray-500 bg-gray-700 text-gray-300">&nbsp;video&nbsp;</div>
+		</label>
+	</div>
+	<div id="inner" class="flex-1 mx-8 mb-8 mt-4"></div>
 	`,
 	"Game":
 		`
-	<iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full" frameborder="0" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
+	<iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
 		`,
 	"Video":
 		`
-	<iframe class="size-full" src="https://www.youtube.com/embed/G4Df2vAnKZo?si=Ipkn9vWNl5og77iJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+	<iframe src="https://www.youtube.com/embed/G4Df2vAnKZo?si=Ipkn9vWNl5og77iJ" class="size-full border-transparent" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 		`,
 	"Pdf":
 		`
