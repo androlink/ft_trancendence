@@ -115,6 +115,7 @@ export function sendMessage() {
 	if (chat && textarea && textarea.value){
 		chat.innerHTML += "<p>" + textarea.value + "</p>";
 		textarea.value = "";
+		chat.scrollTop = chat.scrollHeight;
 	}
 }
 (window as any).sendMessage = sendMessage;
