@@ -4,10 +4,18 @@ const fastify = require('fastify')({
   }
 });
 
-const path = require('node:path')
+// fastify.register(require('@fastify/websocket'))
+// fastify.register(async function (fastify) {
+//   fastify.get('/', { websocket: true }, (socket /* WebSocket */, req /* FastifyRequest */) => {
+//     socket.on('message', message => {
+//       // message.toString() === 'hi from client'
+//       socket.send('hi from server')
+//     })
+//   })
+// })
 
 fastify.register(require('@fastify/static'), {
-  root: '/var/www',
+  root: '/var/www'
 })
 
 fastify.get('/api/login', function (req, reply) {
@@ -27,6 +35,7 @@ fastify.get('/api/video', function (req, reply) {
 })
 
 fastify.get('/api/*', function (req, reply) {
+  reply.status(404)
   return {template: "Error", replace: {status: "Error 404", message: "are you lost by any chance ?"}, title: "404 Not Found"}
 })
 
@@ -36,7 +45,6 @@ fastify.setNotFoundHandler((req, reply) => {
 
 // note to whoever read : https://github.com/fastify/fastify-static
 
-// Run the server!
 fastify.listen({port: 3000,  host: '0.0.0.0'}, (err, address) => {
   if (err) throw err
 })

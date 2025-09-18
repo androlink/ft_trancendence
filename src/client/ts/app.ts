@@ -32,32 +32,66 @@ function replaceElements(toReplace: {[key:string]:string}) : void {
 	}
 }
 
+function changeTemplate(app: HTMLElement, data: ServerResponse) : void
+{
+	if (keyExist(templates, data.template)) {
+		setHTML(app, templates[data.template]);
+		if (keyExist(data, "replace"))
+			replaceElements(data.replace);
+	} else {
+		app.innerHTML = "Template " +
+			data.template + " not Found in template.js";
+	}
+}
+
+
+function changeInner(inner: HTMLElement, data: ServerResponse) : void {
+	setHTML(inner, templates[data.inner]);
+	const parent = document.getElementById("inner-buttons");
+	if (parent){
+		const elements = parent.children;
+		for (let i = 0; i < elements.length; i++) {
+			elements[i].toggleAttribute("data-checked", (elements[i].getAttribute("name") === data.inner));
+			// the 4 lines below are 'better written' because of the use of dataset.
+			// But I find the line above more readable
+
+			// if (elements[i].getAttribute("name") === data.inner)
+			// 	(elements[i] as HTMLElement).dataset.checked = "true";
+			// else
+			// 	delete (elements[i] as HTMLElement).dataset.checked;
+		}
+	}
+}
+
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
 async function main() {
-	const data: ServerResponse = await fetchApi();
-	const app: HTMLElement | null = document.getElementById("app");
-	if (app === null)
+	const data = await fetchApi();
+	const app = document.getElementById("app");
+	if (!app)
 		return;
 	if (keyExist(data, "title")) {
 		document.title = data.title;
 	}
 	if (keyExist(data, "template") && data.template !== mainTemplate) {
 		mainTemplate = data.template;
-		if (keyExist(templates, data.template)) {
-			setHTML(app, templates[data.template]);
-			if (keyExist(data, "replace"))
-				replaceElements(data.replace);
-		} else {
-			app.innerHTML = "Template " +
-				data.template + " not Found in template.js";
-		}
+		changeTemplate(app, data);
 	}
-	const inner: HTMLElement | null = document.getElementById("inner");
+	const inner = document.getElementById("inner");
 	if (inner && keyExist(data, "inner") && keyExist(templates, data.inner) && data.inner != mainInner){
 		mainInner = data.inner;
-		setHTML(inner, templates[data.inner]);
+		changeInner(inner, data);
 	}
+	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
+	if (textarea) {
+		textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+			if (event.key === "Enter" && !event.shiftKey) {
+				event.preventDefault();
+				sendMessage();
+			}
+		});
+	}
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -70,3 +104,17 @@ export function goToURL(NextURL:string | void) {
 	main();
 }
 (window as any).goToURL = goToURL;
+
+// to add something to the chat
+// NOT DEFINITIVE
+// NEED TO ADD sockets
+// ONLY THERE (for now) TO TEST THE APPEARANCE
+export function sendMessage() {
+	const chat = document.getElementById("chat-content");
+	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+	if (chat && textarea && textarea.value){
+		chat.innerHTML += "<p>" + textarea.value + "</p>";
+		textarea.value = "";
+	}
+}
+(window as any).sendMessage = sendMessage;

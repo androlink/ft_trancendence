@@ -17,7 +17,7 @@ export const templates = {
 			<input type="text" placeholder="login" class="text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
 		</span>
 		<p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
-		<span class="justify-self-end flex space-x-2">
+		<span class="justify-self-end flex gap-x-2">
 			<span class="relative size-x-10">
 				<img src="notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer">
 				<span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
@@ -25,21 +25,21 @@ export const templates = {
 			<img src="settings-icon.png" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer">
 		</span>
 	</span>
-	<span class="flex space-x-2 mx-8">
-		<label class="cursor-pointer">
-			<input type="radio" name="option" class="peer hidden">
-			<div onclick="goToURL( )"		class="cursor-pointer peer-checked:cursor-default select-none rounded hover:border-transparent peer-checked:text-white peer-checked:bg-gray-500 bg-gray-700 text-gray-300">&nbsp;pdf&nbsp;</div>
-  		</label>
-    	<label>
-			<input type="radio" name="option" class="peer hidden">
-			<div onclick="goToURL('game')"	class="cursor-pointer peer-checked:cursor-default select-none rounded hover:border-transparent peer-checked:text-white peer-checked:bg-gray-500 bg-gray-700 text-gray-300">&nbsp;game&nbsp;</div>
-		</label>
-    	<label class="cursor-pointer">
-			<input type="radio" name="option" class="peer hidden">
-			<div onclick="goToURL('video')"	class="cursor-pointer peer-checked:cursor-default select-none rounded hover:border-transparent peer-checked:text-white peer-checked:bg-gray-500 bg-gray-700 text-gray-300">&nbsp;video&nbsp;</div>
-		</label>
+	<span id="inner-buttons" class="flex gap-x-2 mx-8 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
+    	<div onclick="goToURL( )" name="Pdf">&nbsp;pdf&nbsp;</div>
+    	<div onclick="goToURL('game')" name="Game">&nbsp;game&nbsp;</div>		
+    	<div onclick="goToURL('video')" name="Video">&nbsp;video&nbsp;</div>
 	</span>
-	<div id="inner" class="flex-1 mx-8 mb-8 mt-4 select-none"></div>
+	<span class="flex-1 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
+		<div id="inner" class="h-full w-3/4"></div>
+		<div class="h-full bg-white w-1/4 rounded flex flex-col">
+			<div id="chat-content" class="bg-white overflow-scroll w-full h-0 grow *:px-1 *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
+			<span class="flex justify-items-stretch">
+				<textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
+				<img src="send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer">
+			</span>
+		</div>
+	</span>
 	`,
 	"Game":
 		`
