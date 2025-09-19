@@ -1,3 +1,4 @@
+cp static/* /var/www
 tsc --watch -p ts &
 pid1=$!
 tailwindcss -i css/input.css -o /var/www/styles.css --watch=always &
