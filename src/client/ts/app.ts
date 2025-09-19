@@ -63,6 +63,15 @@ function changeInner(inner: HTMLElement, data: ServerResponse) : void {
 	}
 }
 
+function setEnterEvent(textarea: HTMLTextAreaElement): void {
+	textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+		if (event.key === "Enter" && !event.shiftKey) {
+			event.preventDefault();
+			sendMessage();
+		}
+	});
+}
+
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
 async function main() {
@@ -75,6 +84,7 @@ async function main() {
 	}
 	if (keyExist(data, "template") && data.template !== mainTemplate) {
 		mainTemplate = data.template;
+		mainInner = null;
 		changeTemplate(app, data);
 	}
 	const inner = document.getElementById("inner");
@@ -84,14 +94,8 @@ async function main() {
 	}
 	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
 	if (textarea) {
-		textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-			if (event.key === "Enter" && !event.shiftKey) {
-				event.preventDefault();
-				sendMessage();
-			}
-		});
+		setEnterEvent(textarea);
 	}
-
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -100,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // for moving page to page, used by html
 export function goToURL(NextURL:string | void) {
-	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL:"/");
+	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL : "/");
 	main();
 }
 (window as any).goToURL = goToURL;
@@ -112,10 +116,16 @@ export function goToURL(NextURL:string | void) {
 export function sendMessage() {
 	const chat = document.getElementById("chat-content");
 	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	if (chat && textarea && textarea.value){
+	if (chat && textarea && textarea.value) {
+		let scroll = false;
+		if (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1) {
+			scroll = true;
+		}
 		chat.innerHTML += "<p>" + textarea.value + "</p>";
 		textarea.value = "";
-		chat.scrollTop = chat.scrollHeight;
+		if (scroll) {
+			chat.scrollTop = chat.scrollHeight;
+		}
 	}
 }
 (window as any).sendMessage = sendMessage;
