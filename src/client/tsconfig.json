@@ -1,6 +1,7 @@
 {
   "compilerOptions": {},
   "files": [
-    "app.ts"
+    "app.ts",
+    "game.ts"
   ]
 }
