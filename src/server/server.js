@@ -4,16 +4,6 @@ const fastify = require('fastify')({
   }
 });
 
-// fastify.register(require('@fastify/websocket'))
-// fastify.register(async function (fastify) {
-//   fastify.get('/', { websocket: true }, (socket /* WebSocket */, req /* FastifyRequest */) => {
-//     socket.on('message', message => {
-//       // message.toString() === 'hi from client'
-//       socket.send('hi from server')
-//     })
-//   })
-// })
-
 fastify.register(require('@fastify/static'), {
   root: '/var/www'
 })
@@ -32,6 +22,10 @@ fastify.get('/api/game', function (req, reply) {
 
 fastify.get('/api/video', function (req, reply) {
   return {template: "Home", title: "Dana Terrace", inner: "Video"}
+})
+
+fastify.get('/api/blank', function (req, reply) {
+  return {template: "Home", title: "Boooriiing", inner: "Blank"}
 })
 
 fastify.get('/api/*', function (req, reply) {

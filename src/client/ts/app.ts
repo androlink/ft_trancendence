@@ -38,6 +38,9 @@ function changeTemplate(app: HTMLElement, data: ServerResponse) : void
 		setHTML(app, templates[data.template]);
 		if (keyExist(data, "replace"))
 			replaceElements(data.replace);
+		const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
+		if (textarea)
+			setEnterEvent(textarea);
 	} else {
 		app.innerHTML = "Template " +
 			data.template + " not Found in template.js";
@@ -91,10 +94,6 @@ async function main() {
 	if (inner && keyExist(data, "inner") && keyExist(templates, data.inner) && data.inner != mainInner){
 		mainInner = data.inner;
 		changeInner(inner, data);
-	}
-	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
-	if (textarea) {
-		setEnterEvent(textarea);
 	}
 }
 

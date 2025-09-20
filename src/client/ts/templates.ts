@@ -29,6 +29,7 @@ export const templates = {
     	<div onclick="goToURL( )" name="Pdf">pdf</div>
     	<div onclick="goToURL('game')" name="Game">game</div>		
     	<div onclick="goToURL('video')" name="Video">video</div>
+    	<div onclick="goToURL('blank')" name="Blank">debug</div>
 	</span>
 	<span class="flex-1 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
 		<div id="inner" class="h-full w-3/4"></div>
@@ -52,6 +53,9 @@ export const templates = {
 	"Pdf":
 		`
 	<iframe src="sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
+	`,
+	"Blank":
+		`
 	`,
 	"Error":
 		`
