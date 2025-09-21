@@ -33,8 +33,8 @@ export const templates = {
 	</span>
 	<span class="flex-1 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
 		<div id="inner" class="h-full w-3/4"></div>
-		<div class="h-full bg-white w-1/4 rounded flex flex-col">
-			<div id="chat-content" class="overflow-scroll w-full h-0 grow *:px-1 *:break-all *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
+		<div class="h-full bg-white w-1/4 flex flex-col">
+			<div id="chat-content" class="overflow-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
 			<span class="flex justify-items-stretch">
 				<textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
 				<img src="send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer">
