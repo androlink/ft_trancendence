@@ -120,7 +120,10 @@ export function sendMessage() {
 		if (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1) {
 			scroll = true;
 		}
-		chat.innerHTML += "<p>" + textarea.value + "</p>";
+		const para = document.createElement("p");
+		const node = document.createTextNode(textarea.value);
+		para.appendChild(node);
+		chat.appendChild(para);
 		textarea.value = "";
 		if (scroll) {
 			chat.scrollTop = chat.scrollHeight;
