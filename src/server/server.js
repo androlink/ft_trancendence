@@ -1,43 +1,24 @@
-const fastify = require('fastify')({
-   routerOptions: {
+import fastifyModule from 'fastify';
+import fastifyStatic from '@fastify/static';
+import fastifyJWT from '@fastify/jwt';
+import { userRoutesGet } from './fastify_get.js';
+import { userRoutesLogin } from './fastify_login.js';
+
+const fastify = fastifyModule({
+  routerOptions: {
     ignoreTrailingSlash: true
   }
 });
 
-fastify.register(require('@fastify/static'), {
+fastify.register(fastifyStatic, {
   root: '/var/www'
-})
-
-fastify.get('/api/login', function (req, reply) {
-  return {template: "Login", title: "login"}
-})
-
-fastify.get('/api/', function (req, reply) {
-  return {template: "Home", title: "ft_transcendence", inner: "Pdf"}
-})
-
-fastify.get('/api/game', function (req, reply) {
-  return {template: "Home", title: "Pong soon", inner: "Game"}
-})
-
-fastify.get('/api/video', function (req, reply) {
-  return {template: "Home", title: "Dana Terrace", inner: "Video"}
-})
-
-fastify.get('/api/blank', function (req, reply) {
-  return {template: "Home", title: "Boooriiing", inner: "Blank"}
-})
-
-fastify.get('/api/*', function (req, reply) {
-  reply.status(404)
-  return {template: "Error", replace: {status: "Error 404", message: "are you lost by any chance ?"}, title: "404 Not Found"}
-})
-
-fastify.setNotFoundHandler((req, reply) => {
-  reply.sendFile('page.html');
 });
 
-// note to whoever read : https://github.com/fastify/fastify-static
+fastify.register(fastifyJWT, {
+  secret: 'KEY'
+});
+
+fastify.register(userRoutesGet);
 
 fastify.listen({port: 3000,  host: '0.0.0.0'}, (err, address) => {
   if (err) throw err

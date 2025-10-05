@@ -1,3 +1,4 @@
+var exports = {};
 import { templates } from "./templates.js"
 
 interface ServerResponse {
@@ -28,45 +29,57 @@ function setHTML(element: HTMLElement, text: string) : void {
 
 function replaceElements(toReplace: {[key:string]:string}) : void {
 	for (const key in toReplace) {
-		setHTML(document.getElementById(key), toReplace[key]);
+		let element = document.getElementById(key);
+		if (element) {
+			element.innerText = toReplace[key];
+		}
 	}
 }
 
 function changeTemplate(app: HTMLElement, data: ServerResponse) : void
 {
-	if (keyExist(templates, data.template)) {
-		setHTML(app, templates[data.template]);
-		if (keyExist(data, "replace"))
-			replaceElements(data.replace);
-		const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
-		if (textarea)
-			setEnterEvent(textarea);
-	} else {
-		app.innerHTML = "Template " +
-			data.template + " not Found in template.js";
+	if (!keyExist(templates, data.template)) {
+		app.innerHTML = "";
+		app.innerText = "Template " + data.template + " not Found in template.js";
+		return;
 	}
+	setHTML(app, templates[data.template]);
+	if (keyExist(data, "replace"))
+		replaceElements(data.replace);
+	let textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
+	if (textarea)
+		setEnterEventChat(textarea);
+	textarea = document.getElementById("username-search") as HTMLTextAreaElement;
+	if (textarea)
+		setEnterEventUsername(textarea);
 }
 
 
 function changeInner(inner: HTMLElement, data: ServerResponse) : void {
 	setHTML(inner, templates[data.inner]);
+	if (keyExist(data, "replace"))
+		replaceElements(data.replace);
 	const parent = document.getElementById("inner-buttons");
 	if (parent){
 		const elements = parent.children;
 		for (let i = 0; i < elements.length; i++) {
 			elements[i].toggleAttribute("data-checked", (elements[i].getAttribute("name") === data.inner));
-			// the 4 lines below are 'better written' because of the use of dataset.
-			// But I find the line above more readable
-
-			// if (elements[i].getAttribute("name") === data.inner)
-			// 	(elements[i] as HTMLElement).dataset.checked = "true";
-			// else
-			// 	delete (elements[i] as HTMLElement).dataset.checked;
 		}
 	}
 }
 
-function setEnterEvent(textarea: HTMLTextAreaElement): void {
+
+function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
+	textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+		if (event.key === "Enter" && textarea.value) {
+			event.preventDefault();
+			goToURL("profile/" + textarea.value);
+			textarea.value = "";
+		}
+	});
+}
+
+function setEnterEventChat(textarea: HTMLTextAreaElement): void {
 	textarea.addEventListener("keydown", (event: KeyboardEvent) => {
 		if (event.key === "Enter" && !event.shiftKey) {
 			event.preventDefault();
@@ -103,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // for moving page to page, used by html
 export function goToURL(NextURL:string | void) {
-	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL : "/");
+	history.pushState( {page: "not used"}, "depracated", NextURL ? "/" + NextURL : "/");
 	main();
 }
 (window as any).goToURL = goToURL;
@@ -115,19 +128,20 @@ export function goToURL(NextURL:string | void) {
 export function sendMessage() {
 	const chat = document.getElementById("chat-content");
 	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	if (chat && textarea && textarea.value) {
-		let scroll = false;
-		if (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1) {
-			scroll = true;
-		}
-		const para = document.createElement("p");
-		const node = document.createTextNode(textarea.value);
-		para.appendChild(node);
-		chat.appendChild(para);
-		textarea.value = "";
-		if (scroll) {
-			chat.scrollTop = chat.scrollHeight;
-		}
+	if (!chat || !textarea || !textarea.value) {
+		return;
+	}
+
+	let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
+	// true if at the end of the chat
+
+	const para = document.createElement("p");
+	const node = document.createTextNode(textarea.value);
+	para.appendChild(node);
+	chat.appendChild(para);
+	textarea.value = "";
+	if (scroll) {
+		chat.scrollTop = chat.scrollHeight;
 	}
 }
 (window as any).sendMessage = sendMessage;

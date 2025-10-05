@@ -14,7 +14,7 @@ export const templates = {
 		`
 	<span class="grid grid-cols-3 mx-8 my-2">
 		<span class="flex justify-self-start">
-			<input type="text" placeholder="login" class="text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
+			<input id="username-search" type="text" placeholder="username" class="text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
 		</span>
 		<p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
 		<span class="justify-self-end flex gap-x-2">
@@ -28,8 +28,8 @@ export const templates = {
 	<span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
     	<div onclick="goToURL( )" name="Pdf">pdf</div>
     	<div onclick="goToURL('game')" name="Game">game</div>		
-    	<div onclick="goToURL('video')" name="Video">video</div>
     	<div onclick="goToURL('blank')" name="Blank">debug</div>
+    	<div onclick="goToURL('profile')" name="Profile1">your profile</div>
 	</span>
 	<span class="flex-1 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
 		<div id="inner" class="h-full w-3/4"></div>
@@ -46,9 +46,27 @@ export const templates = {
 		`
 	<iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent outline" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
 	`,
-	"Video":
+	"Profile1":
 		`
-	<iframe src="https://www.youtube.com/embed/G4Df2vAnKZo?si=Ipkn9vWNl5og77iJ" class="size-full border-transparent" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+		<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
+			<span class="flex justify-around place-items-center">
+				<h1 class="text-white" id="username"></h1>
+				<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg">
+			</span>
+			<p class="text-white">biography:</p>
+			<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
+		</div>
+	`,
+	"Profile2":
+		`
+		<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
+			<span class="flex justify-around place-items-center">
+				<h1 class="text-white" id="username"></h1>
+				<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg">
+			</span>
+			<p class="text-white">biography:</p>
+			<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
+		</div>
 	`,
 	"Pdf":
 		`
