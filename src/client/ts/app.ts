@@ -44,8 +44,6 @@ function changeTemplate(app: HTMLElement, data: ServerResponse) : void
 		return;
 	}
 	setHTML(app, templates[data.template]);
-	if (keyExist(data, "replace"))
-		replaceElements(data.replace);
 	let textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
 	if (textarea)
 		setEnterEventChat(textarea);
@@ -54,11 +52,47 @@ function changeTemplate(app: HTMLElement, data: ServerResponse) : void
 		setEnterEventUsername(textarea);
 }
 
+function setSubmitEventLogin(form: HTMLFormElement) {
+	form.addEventListener('submit', async (event: SubmitEvent) => {
+		event.preventDefault();
+		const formData = new FormData(form);
+		try {
+			const response = await fetch('/login', {
+				method: 'POST',
+				headers: {"Content-Type": "application/x-www-form-urlencoded"},
+				body: new URLSearchParams({username: formData.get('username') as string, password: formData.get('password') as string})
+			});
+
+			if (!response.ok) {
+				alert(`Server responded with ${response.status}`);
+				return ;
+			}
+
+			const result: {success?: boolean, reason?:string} = await response.json();
+
+			if (!keyExist(result, "success")){
+				alert('Wrong response format, not normal');
+			} else if (result.success) {
+				if (historyCounter > 1) {
+					historyCounter--;
+					history.back();
+				} else {
+					goToURL("profile");
+				}
+			} else if (keyExist(result, "reason")) {
+				const child = form.lastElementChild;
+				if (child) child.textContent = result.reason;
+				else alert(result.reason)
+			}
+		} catch (error) {
+			alert('An error occurred');
+		}
+	});
+}
+
 
 function changeInner(inner: HTMLElement, data: ServerResponse) : void {
 	setHTML(inner, templates[data.inner]);
-	if (keyExist(data, "replace"))
-		replaceElements(data.replace);
 	const parent = document.getElementById("inner-buttons");
 	if (parent){
 		const elements = parent.children;
@@ -66,6 +100,9 @@ function changeInner(inner: HTMLElement, data: ServerResponse) : void {
 			elements[i].toggleAttribute("data-checked", (elements[i].getAttribute("name") === data.inner));
 		}
 	}
+	const form = document.getElementById('login-form') as HTMLFormElement;
+	if (form)
+		setSubmitEventLogin(form);
 }
 
 
@@ -90,6 +127,7 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
 
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
+let historyCounter = 1;
 async function main() {
 	const data = await fetchApi();
 	const app = document.getElementById("app");
@@ -108,6 +146,8 @@ async function main() {
 		mainInner = data.inner;
 		changeInner(inner, data);
 	}
+	if (keyExist(data, "replace"))
+		replaceElements(data.replace);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -117,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // for moving page to page, used by html
 export function goToURL(NextURL:string | void) {
 	history.pushState( {page: "not used"}, "depracated", NextURL ? "/" + NextURL : "/");
+	historyCounter++;
 	main();
 }
 (window as any).goToURL = goToURL;

@@ -1,15 +1,5 @@
 
 export const templates = {
-	"Login":
-		`
-	<label for="fname">login:</label>
-		<input type="text" id="fname" name="fname"><br><br>
-	<label for="lname">password:</label>
-		<input type="password" id="lname" name="lname"><br><br>
-	<div id="demo">
-	<button onclick="document.getElementById('demo').innerHTML = '<p>Tu pensais vraiment qu il y avait de quoi se login ?</p><button onclick=&quot;goToURL\`home\`()&quot; type=&quot;button&quot;>Home Page</button>'">login/register</button>
-	</div>
-	`,
 	"Home":
 		`
 	<span class="grid grid-cols-3 mx-8 my-2">
@@ -19,10 +9,10 @@ export const templates = {
 		<p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
 		<span class="justify-self-end flex gap-x-2">
 			<span class="relative size-x-10">
-				<img src="notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer">
+				<img src="/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer">
 				<span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
 			</span>
-			<img src="settings-icon.png" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer">
+			<img src="/settings-icon.png" onclick="goToURL('login')" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer">
 		</span>
 	</span>
 	<span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
@@ -37,7 +27,7 @@ export const templates = {
 			<div id="chat-content" class="overflow-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
 			<span class="flex justify-items-stretch">
 				<textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
-				<img src="send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer">
+				<img src="/send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer">
 			</span>
 		</div>
 	</span>
@@ -48,29 +38,43 @@ export const templates = {
 	`,
 	"Profile1":
 		`
-		<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
-			<span class="flex justify-around place-items-center">
-				<h1 class="text-white" id="username"></h1>
-				<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg">
-			</span>
-			<p class="text-white">biography:</p>
-			<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
-		</div>
+	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
+		<span class="flex justify-around place-items-center">
+			<h1 class="text-white" id="username"></h1>
+			<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg">
+		</span>
+		<p class="text-white">biography:</p>
+		<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
+	</div>
 	`,
 	"Profile2":
 		`
-		<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
-			<span class="flex justify-around place-items-center">
-				<h1 class="text-white" id="username"></h1>
-				<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg">
-			</span>
-			<p class="text-white">biography:</p>
-			<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
-		</div>
+	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
+		<span class="flex justify-around place-items-center">
+			<h1 class="text-white" id="username"></h1>
+			<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg">
+		</span>
+		<p class="text-white">biography:</p>
+		<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
+	</div>
 	`,
 	"Pdf":
 		`
-	<iframe src="sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
+	<iframe src="/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
+	`,
+	"Login":
+		`
+	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col gap-y-1">
+	<form method="POST" id="login-form" enctype="multipart/form-data">
+		<label class="text-white rounded size-fit" for="username">username:</label>
+		<input class="text-white rounded bg-gray-500 size-fit" type="text" name="username"><br><br>
+		<label class="text-white rounded size-fit" for="password">password:</label>
+		<input class="text-white rounded bg-gray-500 size-fit" type="password" name="password"><br><br>
+		<button class="bg-white rounded size-fit p-1" type="submit">submit</button>
+		<p name="error-handler" class="text-red-500 font-bold" ></p>
+    </form>
+
+	</div>
 	`,
 	"Blank":
 		`
@@ -80,7 +84,7 @@ export const templates = {
 	<div class="flex flex-col items-center size-1/2 m-40 place-self-center">
 		<h1 id=status class="text-white font-bold"></h1>
 		<h2 id=message class="text-white"></h2>
-		<img src="error.png" alt="error" class="justify-self-start h-full">
+		<img src="/error.png" alt="error" class="justify-self-start h-full">
 		<button onclick="goToURL( )" type="button" class="cursor-pointer data-checked:cursor-default select-none rounded hover:text-white hover:bg-gray-500 bg-gray-700 text-gray-300 px-1">home</button>
 	</div>
 	`
