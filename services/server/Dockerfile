@@ -2,6 +2,7 @@ FROM node:20-alpine
 RUN apk add --no-cache curl bash
 WORKDIR /var/src/server
 RUN npm init -y
+RUN npm pkg set type=module
 RUN npm i fastify 
 RUN npm i @fastify/static
 RUN npm i @fastify/jwt

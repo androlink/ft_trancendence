@@ -156,8 +156,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // for moving page to page, used by html
 export function goToURL(NextURL:string | void) {
-	history.pushState( {page: "not used"}, "depracated", NextURL ? "/" + NextURL : "/");
+	NextURL = NextURL ? "/" + NextURL : "/";
+	if (location.pathname === NextURL)
+		return ;
 	historyCounter++;
+	history.pushState( {page: "not used"}, "depracated", NextURL);
 	main();
 }
 (window as any).goToURL = goToURL;
