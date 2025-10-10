@@ -9,10 +9,10 @@ export const templates = {
 		<p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
 		<span class="justify-self-end flex gap-x-2">
 			<span class="relative size-x-10">
-				<img src="/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer">
+				<img src="/ressources/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer">
 				<span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
 			</span>
-			<img src="/settings-icon.png" onclick="goToURL('login')" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer">
+			<img src="/ressources/settings-icon.png" onclick="goToURL('login')" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer">
 		</span>
 	</span>
 	<span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
@@ -27,7 +27,7 @@ export const templates = {
 			<div id="chat-content" class="overflow-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
 			<span class="flex justify-items-stretch">
 				<textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
-				<img src="/send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer">
+				<img src="/ressources/send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer">
 			</span>
 		</div>
 	</span>
@@ -60,7 +60,7 @@ export const templates = {
 	`,
 	"Pdf":
 		`
-	<iframe src="/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
+	<iframe src="/ressources/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
 	`,
 	"Login":
 		`
@@ -84,7 +84,7 @@ export const templates = {
 	<div class="flex flex-col items-center size-1/2 m-40 place-self-center">
 		<h1 id=status class="text-white font-bold"></h1>
 		<h2 id=message class="text-white"></h2>
-		<img src="/error.png" alt="error" class="justify-self-start h-full">
+		<img src="/ressources/error.png" alt="error" class="justify-self-start h-full">
 		<button onclick="goToURL( )" type="button" class="cursor-pointer data-checked:cursor-default select-none rounded hover:text-white hover:bg-gray-500 bg-gray-700 text-gray-300 px-1">home</button>
 	</div>
 	`
