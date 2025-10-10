@@ -2,7 +2,6 @@
 
 import { goToURL, keyExist, setHTML,  goBack } from "./utils.js";
 
-
 export function setTemplateEvents() {
         let textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
         if (textarea)
@@ -18,6 +17,7 @@ export function setInnerEvents() {
 		setSubmitEventLogin(form);
 }
 
+// used by the login form, the default event can't be used in SPA (redirect)
 function setSubmitEventLogin(form: HTMLFormElement) {
     form.addEventListener('submit', async (event: SubmitEvent) => {
         event.preventDefault();
@@ -26,7 +26,10 @@ function setSubmitEventLogin(form: HTMLFormElement) {
             const response = await fetch('/login', {
                 method: 'POST',
                 headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                body: new URLSearchParams({username: formData.get('username') as string, password: formData.get('password') as string})
+                body: new URLSearchParams({
+                    username: formData.get('username') as string, 
+                    password: formData.get('password') as string,
+                }),
             });
 
             if (!response.ok) {
@@ -36,21 +39,25 @@ function setSubmitEventLogin(form: HTMLFormElement) {
 
             const result: {success?: boolean, reason?:string} = await response.json();
 
-            if (!keyExist(result, "success")){
+            if (!keyExist(result, "success")) {
                 alert('Wrong response format, not normal');
             } else if (result.success) {
                 goBack();
             } else if (keyExist(result, "reason")) {
                 const child = form.lastElementChild;
-                if (child) child.textContent = result.reason;
-                else alert(result.reason)
+                if (child && child.getAttribute("name") === "error-handler") {
+                    child.textContent = result.reason;
+                } else {
+                    alert(result.reason)
+                }
             }
         } catch (error) {
             alert('An error occurred');
         }
     });
-};
+}
 
+// used by the chat input, send message on enter
 function setEnterEventChat(textarea: HTMLTextAreaElement) {
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey) {

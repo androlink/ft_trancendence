@@ -34,8 +34,9 @@ export async function main() {
 		mainInner = data.inner;
 		changeInner(inner, data);
 	}
-	if (keyExist(data, "replace"))
+	if (keyExist(data, "replace")) {
 		replaceElements(data.replace);
+	}
 }
 
 async function fetchApi(): Promise<ServerResponse> {
