@@ -1,6 +1,7 @@
 
 
-import { goToURL, keyExist, setHTML,  goBack } from "./utils.js";
+import { goToURL, keyExist, setHTML } from "./utils.js";
+import { main } from "./app.js";
 
 export function setTemplateEvents() {
         let textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
@@ -12,9 +13,12 @@ export function setTemplateEvents() {
 }
 
 export function setInnerEvents() {
-	const form = document.getElementById('login-form') as HTMLFormElement;
+	let form = document.getElementById('login-form') as HTMLFormElement;
 	if (form)
 		setSubmitEventLogin(form);
+    form = document.getElementById('profile-form') as HTMLFormElement;
+	if (form)
+		setSubmitEventProfile(form);
 }
 
 // used by the login form, the default event can't be used in SPA (redirect)
@@ -42,7 +46,48 @@ function setSubmitEventLogin(form: HTMLFormElement) {
             if (!keyExist(result, "success")) {
                 alert('Wrong response format, not normal');
             } else if (result.success) {
-                goBack();
+                main();
+            } else if (keyExist(result, "reason")) {
+                const child = form.lastElementChild;
+                if (child && child.getAttribute("name") === "error-handler") {
+                    child.textContent = result.reason;
+                } else {
+                    alert(result.reason)
+                }
+            }
+        } catch (error) {
+            alert('An error occurred');
+        }
+    });
+}
+
+
+// used by the login form, the default event can't be used in SPA (redirect)
+function setSubmitEventProfile(form: HTMLFormElement) {
+    form.addEventListener('submit', async (event: SubmitEvent) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        try {
+            const response = await fetch('/profile', {
+                method: 'POST',
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: new URLSearchParams({
+                    username: formData.get('username') as string,
+                    password: formData.get('biography') as string,
+                }),
+            });
+
+            if (!response.ok) {
+                alert(`Server responded with ${response.status} ${response.statusText}`);
+                return ;
+            }
+
+            const result: {success?: boolean, reason?:string} = await response.json();
+
+            if (!keyExist(result, "success")) {
+                alert('Wrong response format, not normal');
+            } else if (result.success) {
+                goToURL(`profile/${formData.get('username') as string}`);
             } else if (keyExist(result, "reason")) {
                 const child = form.lastElementChild;
                 if (child && child.getAttribute("name") === "error-handler") {

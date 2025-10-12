@@ -5,9 +5,6 @@ import { main } from "./app.js"
 //                               HISTORY STUFF                                #
 //----------------------------------------------------------------------------#
 
-// to keep knowing how deep we went into the history
-let historyCounter = 1;
-
 // for moving page to page, used (not only) by html
 export function goToURL(NextURL:string | void) {
     if (arguments.length > 1) {
@@ -20,25 +17,15 @@ export function goToURL(NextURL:string | void) {
 	NextURL = NextURL ? "/" + NextURL : "/";
 	if (location.pathname === NextURL)
 		return ;
-	historyCounter++;
-	history.pushState( {page: "not used"}, "depracated", NextURL);
+	history.pushState({page: ""}, "", NextURL);
 	main();
 }
 (window as any).goToURL = goToURL;
 
-// for moving back, used by /login button event
-export function goBack() {
-    if (historyCounter > 1) {
-        historyCounter--;
-        history.back();
-        return ;
-    }
-    goToURL("profile");
-}
 
 // reload the page when user touch history arrow buttons
 function setArrowButton() {
-    window.addEventListener('popstate', () => main(), false);
+    window.addEventListener('popstate', main);
 };
 
 //----------------------------------------------------------------------------#
