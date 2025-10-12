@@ -12,6 +12,8 @@ const fastify = fastifyModule({
   }
 });
 
+
+
 fastify.register(fastifyFormbody);
 
 fastify.register(fastifyStatic, {

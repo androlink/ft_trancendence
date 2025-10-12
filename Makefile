@@ -1,6 +1,8 @@
 DOCKER_COMPOSE = docker compose
 DOCKER_TARGET = Docker-compose.yml
 
+export COMPOSE_BAKE=true
+
 .PHONY: all
 all: start
 

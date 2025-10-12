@@ -19,6 +19,37 @@ async function fetchApi(): Promise<ServerResponse> {
 	return data;
 }
 
+type ApiResponse = {message: string };
+
+async function get(path: string, cache: RequestCache = "default"): Promise<ApiResponse> {
+    return await fetch(`https://${window.location.hostname}/${encodeURI(path)}`, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+        credentials: "include",
+        cache,
+    }).then(function (res) {
+        return res.json() as any as ApiResponse;
+    });
+}
+
+async function post(path: string, body: object = {}): Promise<ApiResponse> {
+    return await fetch(`https://${window.location.hostname}${encodeURI(path)}`, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(body)
+    }).then(function (res) {
+        return res.json() as any as ApiResponse;
+    });
+}
+
+
 window.addEventListener('popstate', function(event) {
 	main();
 }, false);
@@ -162,6 +193,15 @@ export function goToURL(NextURL:string | void) {
 }
 (window as any).goToURL = goToURL;
 
+
+//CHAT ========================================================================
+
+
+
+
+
+//============================================================================
+
 // to add something to the chat
 // NOT DEFINITIVE
 // NEED TO ADD sockets
@@ -172,6 +212,7 @@ export function sendMessage() {
 	if (!chat || !textarea || !textarea.value) {
 		return;
 	}
+	const textthing = textarea.value;
 
 	let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
 	// true if at the end of the chat
