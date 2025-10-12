@@ -1,6 +1,7 @@
 import fastifyModule from 'fastify';
 import fastifyStatic from '@fastify/static';
 import fastifyJWT from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
 
 // if changed for better naming convention
@@ -23,6 +24,10 @@ export default function () {
         wildcard: false
     });
 
+    fastify.register(fastifyCookie, {
+        secret: process.env.JWT_SECRET,
+    });
+
     fastify.register(function (fastifyInstance) {
         fastifyInstance.get('/', (req, reply) =>
             reply.send("Hello user, that's where we keep our static files"));
@@ -32,6 +37,10 @@ export default function () {
 
     fastify.register(fastifyJWT, {
         secret: 'KEY',
+        cookie: {
+            cookieName: 'account',
+            signed: false,
+        }
     });
 
     return fastify;

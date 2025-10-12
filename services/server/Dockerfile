@@ -8,6 +8,7 @@ RUN npm i @fastify/static
 RUN npm i @fastify/jwt
 RUN npm i @fastify/websocket
 RUN npm i @fastify/formbody
+RUN npm i @fastify/cookie
 RUN npm i better-sqlite3
 RUN npm install
 # when changing the installs above 

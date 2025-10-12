@@ -12,20 +12,32 @@ export async function loginRoutes(fastifyInstance) {
         if (req.headers["content-type"] !== "application/x-www-form-urlencoded"){
             return reply.code(415).send("We only support application/x-www-form-urlencoded");
         }
-        const data = req.body
+        const data = req.body;
         if (!Object.hasOwn(data, "username"))
-            return { success: false, reason: "query username missing" };
+            return reply.code(401).send("query username missing");
         if (!Object.hasOwn(data, "password"))
-            return { success: false, reason: "query password missing" };
-        const username = data["username"];
-        const password = data["password"]; // add cryptage and everything
+            return reply.code(401).send("query password missing");
+        const username = data["username"]; 
+        const password = data["password"]; // add security soon and everything
+        if (!username)
+            return {success: false, reason: "No username given"};
         const db = new Database(dbPath);
         let row = db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').get(username, password);
-        if (row)
-            return { success: true, reason: `welcome ${username}`};
+        if (row) {
+            // success HERE
+            const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
+            return reply.setCookie('account', token,
+                {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, }
+                ).send({success: true, reason: `welcome ${username}`});
+        }
         row = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (!row)
-            return { success: false, reason: `no account with username ${username}`};
-        return { success: false, reason: "wrong password" };
+            return {success: false, reason: `no account with username "${username}"`};
+        return {success: false, reason: "wrong password"};
+    });
+
+    fastifyInstance.post('/logout', async (req, reply) => {
+        reply.clearCookie('account');
+        return reply.header('x-authenticated', false).send("Goodbye");
     });
 }

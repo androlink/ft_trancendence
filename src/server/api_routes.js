@@ -3,6 +3,17 @@ import Database from "better-sqlite3";
 import { dbPath } from "./database.js";
 
 export async function apiRoutes(fastifyInstance) {
+    fastifyInstance.addHook('onRequest', async (req, reply) => {
+        try {
+            await req.jwtVerify();
+            const token = fastifyInstance.jwt.sign({id: req.user.id},  {expiresIn: '15m'});
+            reply.setCookie('account', token, {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, });
+            reply.header('x-authenticated', true);
+        } catch (err) {
+            req.user = {id: -1};
+        }
+    });
+
     fastifyInstance.setNotFoundHandler ( (req, reply) => {
         return reply.code(404).send({
             template: "Error",
@@ -35,16 +46,30 @@ export async function apiRoutes(fastifyInstance) {
         });
     });
 
-    fastifyInstance.get('/profile', (req, reply) => {
-        if (1) {
-            // redirection change the UI, not the url of the browser. 
-            // It's intended, can be changed if needed
+
+    const needConnection = async (req, reply) => {
+        try {
+            await req.jwtVerify();
+        } catch (err) {
             return reply.redirect('login');
+        }
+    };
+
+    fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
+        const db = new Database(dbPath);
+        const row = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+        if (!row) {
+            // might happen if needConnection don't check the user exist 
+            // and the account changed its 
+            return reply.code(404).send({
+                template: "Home", title: "who ?", inner: "Error",
+                replace: {status: "Error 404", message: "You don't exist in the DB for some reason"},
+            });
         }
         return reply.send({
             template: "Home",
-            replace: {username: "You apparently", biography: "Is a dev"},
-            title: "You", inner: "Profile1",
+            replace: {username: row.username, biography: row.bio},
+            title: req.user.username, inner: "Profile1",
         });
     });
 
