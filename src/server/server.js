@@ -24,6 +24,8 @@ fastify.register(fastifyJWT, {
   secret: 'KEY'
 });
 
+
+
 fastify.setNotFoundHandler((req, reply) => {
   return reply.code(200).sendFile('/page.html');
 });
