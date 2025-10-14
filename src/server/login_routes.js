@@ -26,7 +26,7 @@ export async function loginRoutes(fastifyInstance) {
         if (row) {
             // success HERE
             const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
-            return reply.setCookie('account', token,
+            return reply.header('x-authenticated', true).setCookie('account', token,
                 {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, }
                 ).send({success: true, reason: `welcome ${username}`});
         }

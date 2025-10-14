@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "/var/www",
-    "target": "ES2017",
+    "target": "es2024",
     "lib": ["esnext", "dom"]
   },
     "watchOptions": {

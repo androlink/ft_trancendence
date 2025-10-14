@@ -6,7 +6,7 @@ import fastifyFormbody from '@fastify/formbody';
 
 // if changed for better naming convention
 // need to be changed in page.html and template.ts too
-const assetsPath = '/ressources';
+const assetsPath = '/resources';
 
 export default function () {
     const fastify = fastifyModule({
@@ -24,9 +24,9 @@ export default function () {
         wildcard: false
     });
 
-    fastify.register(fastifyCookie, {
-        secret: process.env.JWT_SECRET,
-    });
+    fastify.register(fastifyCookie);
+    // would be good to add a signature for the cookies.
+    // It's an easy security to add
 
     fastify.register(function (fastifyInstance) {
         fastifyInstance.get('/', (req, reply) =>
@@ -36,7 +36,8 @@ export default function () {
     }, { prefix: assetsPath });
 
     fastify.register(fastifyJWT, {
-        secret: 'KEY',
+        secret: "We should have a secret that's long so it's secure against bruteforce",
+        // need to be changed for something hidden
         cookie: {
             cookieName: 'account',
             signed: false,

@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 
 export const dbPath = '/var/www/example.db';
-export function LaunchDB() {
+export function launchDB() {
     // Create a connection to the database
     const db = new Database(dbPath);
     // Execute a query to create a table

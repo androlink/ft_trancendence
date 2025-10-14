@@ -3,10 +3,10 @@ import fastifyConf from './config.js'
 
 import { apiRoutes } from './api_routes.js';
 import { loginRoutes } from './login_routes.js';
-import { LaunchDB } from './database.js';
+import { launchDB } from './database.js';
 
 const fastify = fastifyConf();
-LaunchDB();
+launchDB();
 
 fastify.setNotFoundHandler((req, reply) => {
   if (req.method === "GET") return reply.code(200).sendFile('/page.html');

@@ -5,8 +5,11 @@ import { main } from "./app.js"
 //                               HISTORY STUFF                                #
 //----------------------------------------------------------------------------#
 
-// for moving page to page, used (not only) by html
-export function goToURL(NextURL:string | void) {
+/**
+ * for moving page to page, used (not only) by html
+ * @param NextURL the page we wanna go to
+ */
+export function goToURL(NextURL:string | void): void {
     if (arguments.length > 1) {
         throw new SyntaxError('expected 0 to 1 argument');
     }
@@ -20,10 +23,11 @@ export function goToURL(NextURL:string | void) {
 	history.pushState({page: ""}, "", NextURL);
 	main();
 }
-(window as any).goToURL = goToURL;
+window["goToURL"] = goToURL;
 
-
-// reload the page when user touch history arrow buttons
+/** 
+ * reload the page when user touch history arrow buttons
+ */
 function setArrowButton() {
     window.addEventListener('popstate', main);
 };
@@ -32,10 +36,15 @@ function setArrowButton() {
 //                               TIMER STUFF                                  #
 //----------------------------------------------------------------------------#
 
-let disconnectTimer: number;
+let disconnectTimer1: number;
+let disconnectTimer2: number;
 
-// it's to make a pop up to the right that tells you you're gonna be disconnected
-export function resetDisconnectTimer(auth: string | null) {
+/**
+ * sets a timer to tell you when you're gonna be disconnected soon
+ * @param auth the header X-authenticated after a fresh request
+ * @returns true if the timer got 14 more minutes
+ */
+export function resetDisconnectTimer(auth: string | null): boolean {
     if (arguments.length !== 1) {
         throw new SyntaxError('expected 1 argument');
     }
@@ -44,45 +53,74 @@ export function resetDisconnectTimer(auth: string | null) {
     }
 
     if (auth === null) {
-        return;
+        return false;
     }
-	clearTimeout(disconnectTimer);
-    const elem = document.getElementById("timer-disconnect");
-    if (elem) {
-        elem.toggleAttribute("hidden", true);
+
+    let setVisibility = (id: string, state: boolean) => {
+        const elem = document.getElementById(id);
+        if (elem) elem.toggleAttribute("hidden", !state);
+    };
+	clearTimeout(disconnectTimer1);
+	clearTimeout(disconnectTimer2);
+    setVisibility("timer-disconnect", false);
+    if (auth !== 'true') {
+        setVisibility("account-disconnected", true);
+        return false;
     }
-    if (auth !== 'true'){
-        return ;
-    }
-	disconnectTimer = setTimeout(
-		() => {
-            const elem = document.getElementById("timer-disconnect");
-            if (elem) {
-                elem.toggleAttribute("hidden", false);
-            }
-		},
+    setVisibility("account-disconnected", false);
+	disconnectTimer1 = setTimeout(
+		() => setVisibility("timer-disconnect", true),
         14 * 60 * 1000
 	);
+	disconnectTimer2 = setTimeout(
+		() => {
+            setVisibility("timer-disconnect", false);
+            setVisibility("account-disconnected", true);
+        },
+        15 * 60 * 1000
+	);
+    return true;
 }
-(window as any).resetDisconnectTimer = resetDisconnectTimer;
+window["resetDisconnectTimer"] = resetDisconnectTimer;
 
 //----------------------------------------------------------------------------#
 //                              PURELY COMFORT                                #
 //----------------------------------------------------------------------------#
 
-// loading the page
+/**
+ * launch the SPA at the end of loading
+ * and set history control
+ */
 export function launchSinglePageApp() {
     document.addEventListener("DOMContentLoaded", () => {
-	    main().catch(err => console.error(err))});
-    setArrowButton();
+        setArrowButton();
+	    main().catch(err => console.error(err));
+    });
+    console.log("Hello dear user.\n" +
+        "Just so you know, this website rely heavily on javascript running in the front, " +
+        "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
+        "(example: a popup saying you are disconnected even tho you are not)\n" +
+        "This been said, have fun breaking the website");
 }
 
-// check if the json has a key, prevent crash
-export function keyExist(dict: object, key: PropertyKey) {
-	return Object.hasOwn(dict, key);
+
+/**
+ * Check if object has the key to prevent crash,
+ * easier to use than native js
+ * @param object
+ * @param key 
+ * @returns Object.hasOwn(object, key);
+ */
+export function keyExist(object: object, key: PropertyKey) {
+	return Object.hasOwn(object, key);
 }
 
-// replace the HTML of the element, bit more readable
+/**
+ * Replace the HTML of the element, bit more readable than native js.
+ * Might not be definitive
+ * @param element The element whose innerHTML gonna be filled
+ * @param text an html snipplet 
+ */
 export function setHTML(element: HTMLElement, text: string) {
 	element.innerHTML = text;
 }

@@ -3,8 +3,12 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>ft_transcendence</title>
-		<link rel="stylesheet" href="/ressources/styles.css">
-		<script type="module" src="/ressources/app.js" defer></script>
+		<link rel="stylesheet" href="/resources/styles.css">
+		<script type="module" src="/resources/app.js" defer></script>
+		<!-- theorically only need app.js, but allow the loading to start before execution-->
+		<script type="module" src="/resources/events.js" defer></script>
+		<script type="module" src="/resources/templates.js" defer></script>
+		<script type="module" src="/resources/utils.js" defer></script>
 	</head>
 	<body class="bg-gray-950 w-screen h-screen">
 		<div id="app" class="size-full flex flex-col"><noscript><h1 class="text-white">This page is a single-page app that doesn't work without JavaScript enabled.</h1></noscript>

@@ -11,6 +11,7 @@ export async function apiRoutes(fastifyInstance) {
             reply.header('x-authenticated', true);
         } catch (err) {
             req.user = {id: -1};
+            reply.header('x-authenticated', false);
         }
     });
 
@@ -22,13 +23,18 @@ export async function apiRoutes(fastifyInstance) {
         });
     });
 
-    fastifyInstance.get('/login', (req, reply) => {
-        return reply.send({
-            template: "Home",
-            title: "login",
-            inner: "Login",
-        });
-    });
+    // login now only use the profile route due to consistency
+    // and because it made no sense to have a login page when connected
+    
+    // those comments will be removed in a future pull request
+
+    // fastifyInstance.get('/login', (req, reply) => {
+    //     return reply.send({
+    //         template: "Home",
+    //         title: "login",
+    //         inner: "Login",
+    //     });
+    // });
 
     fastifyInstance.get('/', (req, reply) => {
         return reply.send({
@@ -51,7 +57,11 @@ export async function apiRoutes(fastifyInstance) {
         try {
             await req.jwtVerify();
         } catch (err) {
-            return reply.redirect('login');
+            return reply.send({
+                template: "Home",
+                title: "login",
+                inner: "Login",
+            });
         }
     };
 
@@ -69,7 +79,7 @@ export async function apiRoutes(fastifyInstance) {
         return reply.send({
             template: "Home",
             replace: {username: row.username, biography: row.bio},
-            title: req.user.username, inner: "Profile1",
+            title: "You", inner: "Profile1",
         });
     });
 

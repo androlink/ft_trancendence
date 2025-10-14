@@ -3,26 +3,32 @@
 import { goToURL, keyExist, setHTML } from "./utils.js";
 import { main } from "./app.js";
 
-export function setTemplateEvents() {
-        let textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
-        if (textarea)
-            setEnterEventChat(textarea);
-        textarea = document.getElementById("username-search") as HTMLTextAreaElement;
-        if (textarea)
-            setEnterEventUsername(textarea);
+/**
+ * set all the events that the page need to work properly
+ */
+export function setEvents(): void {
+    let elem: HTMLTextAreaElement | HTMLFormElement;
+    elem = document.getElementById("chat-input") as HTMLTextAreaElement;
+    if (elem && !elem.hasAttribute("data-custom"))
+        setEnterEventChat(elem);
+    elem = document.getElementById("username-search") as HTMLTextAreaElement;
+    if (elem && !elem.hasAttribute("data-custom"))
+        setEnterEventUsername(elem);
+    elem = document.getElementById('login-form') as HTMLFormElement;
+	if (elem && !elem.hasAttribute('data-custom'))
+		setSubmitEventLogin(elem);
+    elem = document.getElementById('profile-form') as HTMLFormElement;
+	if (elem && !elem.hasAttribute('data-custom'))
+		setSubmitEventProfile(elem);
+
 }
 
-export function setInnerEvents() {
-	let form = document.getElementById('login-form') as HTMLFormElement;
-	if (form)
-		setSubmitEventLogin(form);
-    form = document.getElementById('profile-form') as HTMLFormElement;
-	if (form)
-		setSubmitEventProfile(form);
-}
-
-// used by the login form, the default event can't be used in SPA (redirect)
-function setSubmitEventLogin(form: HTMLFormElement) {
+/**
+ * used by the login form, the default event can't be used in SPA (redirect)
+ * @param form the said form element
+ */
+function setSubmitEventLogin(form: HTMLFormElement): void {
+    form.toggleAttribute("data-custom", true);
     form.addEventListener('submit', async (event: SubmitEvent) => {
         event.preventDefault();
         const formData = new FormData(form);
@@ -61,9 +67,12 @@ function setSubmitEventLogin(form: HTMLFormElement) {
     });
 }
 
-
-// used by the login form, the default event can't be used in SPA (redirect)
-function setSubmitEventProfile(form: HTMLFormElement) {
+/**
+ * used by the Profile form, the default event can't be used in SPA (redirect)
+ * @param form the said form element
+ */
+function setSubmitEventProfile(form: HTMLFormElement): void {
+    form.toggleAttribute("data-custom", true);
     form.addEventListener('submit', async (event: SubmitEvent) => {
         event.preventDefault();
         const formData = new FormData(form);
@@ -102,12 +111,16 @@ function setSubmitEventProfile(form: HTMLFormElement) {
     });
 }
 
-// used by the chat input, send message on enter
-function setEnterEventChat(textarea: HTMLTextAreaElement) {
+/**
+ * used by the chat input, send message on enter
+ * @param textarea the said chat input element
+ */
+function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+    textarea.toggleAttribute("data-custom", true);
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-	        const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+	        //const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
             if (textarea && textarea.value) {
                 sendMessage(textarea.value);
                 textarea.value = "";
@@ -116,21 +129,26 @@ function setEnterEventChat(textarea: HTMLTextAreaElement) {
     });
 }
 
-// to add something to the chat
-// NOT DEFINITIVE
-// NEED TO ADD sockets
-// ONLY THERE (for now) TO TEST THE APPEARANCE
-//
-// also, return boolean if the user has "seen" the message
-// for instance to make a notif system. Just an example, not definitive too
-export function sendMessage(message: string) {
-    if (arguments.length > 1) {
+
+/**
+ * to add a new message to the chat.
+ *
+ * NOT DEFINITIVE,
+ * NEED TO ADD SOCKETS,
+ * ONLY THERE (for now) TO TEST THE APPEARANCE
+ *
+ * @param message the message
+ * @returns true if the user has "seen" the message.
+ * For instance to make a notif system.
+ */
+export function sendMessage(message: string): boolean {
+    if (arguments.length !== 1) {
         throw new SyntaxError('expected 1 argument');
     }
     if (typeof message !== "string") {
         throw new TypeError('argument must be a string, not ' +  typeof message);
     }
-    if (message.length === 0) {
+    if (!message.length) {
         throw new SyntaxError('argument must be a string WITH CHARS IN IT');
     }
 
@@ -152,11 +170,15 @@ export function sendMessage(message: string) {
 	}
     return scroll;
 }
-(window as any).sendMessage = sendMessage;
+window["sendMessage"] = sendMessage;
 
-// used by the username input at the top of the UI
-// preferably NOT DEFINITIVE (annoying to use)
+/**
+ * Used by the username input at the top of the UI.
+ * Preferably NOT DEFINITIVE (annoying to use)
+ * @param textarea the said username input
+ */
 function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
+    textarea.toggleAttribute("data-custom", true);
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Enter" && textarea.value) {
             event.preventDefault();

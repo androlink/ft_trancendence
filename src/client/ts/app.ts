@@ -1,20 +1,31 @@
 var exports = {};
-import { templates } from "./templates.js"
+import { htmlSnippets } from "./templates.js"
 import { goToURL, keyExist, setHTML, launchSinglePageApp, resetDisconnectTimer } from "./utils.js";
-import { setTemplateEvents, setInnerEvents } from "./events.js";
+import { setEvents } from "./events.js";
 
+/**
+ * the infos we consider important that we get from a fetch to the server
+ */
 interface ServerResponse {
 	template?: string,
 	title?: string,
 	replace?: {[key: string]: string},
 	inner?: string,
-	reload?: boolean
+	reload?: boolean,
+	headers?: Headers,
 }
 
-export async function main() {
-	const app = document.getElementById("app");
+let mainTemplate: string | null = null;
+let mainInner: string | null = null;
+/**
+ * The main function of the Single-Page-Application:
+ *  - fetch the website infos
+ *  - set the UI accordingly
+ */
+export async function main(): Promise<void> {
+	const app = document.getElementById('app');
 	if (!app) {
-		console.error("We need an element (preferably a div) with id=\"app\"");
+		console.error('We need an element (preferably a div) with id="app"');
 		return;
 	}
 
@@ -22,67 +33,97 @@ export async function main() {
 	if (!data) {
 		return;
 	}
-	if (keyExist(data, "title")) {
+	if (keyExist(data, 'title')) {
 		document.title = data.title;
 	}
-	if (keyExist(data, "template")) {
-		changeTemplate(app, data);
+	if (keyExist(data, 'template') && data.template !== mainTemplate) {
+		mainTemplate = data.template;
+		mainInner = null;
+		changeSnippet(app, data['template']);
 	}
-	const inner = document.getElementById("inner");
-	if (inner && keyExist(data, "inner")) {
-		changeInner(inner, data);
+	const inner = document.getElementById('inner');
+	if (inner) {
+		const parent = document.getElementById('inner-buttons');
+		if (parent){
+			toggleButtons(parent);
+		}
+		if (keyExist(data, 'inner') && data.inner != mainInner) {
+			mainInner = data.inner;
+			changeSnippet(inner, data['inner']);
+		}
 	}
 	if (keyExist(data, "replace")) {
 		replaceElements(data.replace);
 	}
+	if (keyExist(data, 'headers')) {
+		resetDisconnectTimer(data.headers.get('x-authenticated'));
+	}
+	setEvents();
 }
-(window as any).main = main;
+window["main"] = main;
 
-async function fetchApi() {
-	let response: Response | null = null;
+/**
+ * Fetchs the api page corresponding to the current page
+ * @returns a ServerResponse for main (or null on critical error)
+ */
+async function fetchApi(): Promise<ServerResponse> {
 	try {
-		response = await fetch(`${window.location.origin}/api${window.location.pathname}`, {credentials: 'include'});
-		resetDisconnectTimer(response.headers.get('x-authenticated'));
-		if (response.status >= 500 && response.status < 600 ||
-			!(response.headers.has("content-type")) || !response.headers.get("content-type").startsWith("application/json")) {
-			return {template: "Home", replace: {"container-iframe": await response.text()}, title: `${response.status} ${response.statusText}`, inner: "Ouch"};
+		const response = await fetch(`${window.location.origin}/api${window.location.pathname}`);
+		if (response.status >= 500 && response.status < 600
+			|| !(response.headers.has('content-type'))
+			|| !response.headers.get("content-type").startsWith("application/json")) {
+			return {template: "Home",
+				replace: {"container-iframe": await response.text()},
+				title: `${response.status} ${response.statusText}`,
+				inner: "Ouch",
+				headers: response.headers,
+			};
 		}
-		return await response.json() as ServerResponse;
+		const data = await response.json() as ServerResponse;
+		data.headers = response.headers;
+		return data;
 	} catch (error) {
 		alert(error instanceof Error ? error.message : String(error));
 		return null;
 	}
 }
 
-function changeTemplate(app: HTMLElement, data: ServerResponse) {
-	if (!keyExist(templates, data.template)) {
-		app.innerHTML = "";
-		app.innerText = `Template ${data.template} not Found in template.js`;
-		return;
+/**
+ * used to set the innerHTML of elem by an html snippet 
+ * @param elem the element that will be changed
+ * @param template a key for the object htmlSnippets
+ * @returns true if template found in htmlSnippets
+ */
+function changeSnippet(elem: HTMLElement, template: string): boolean {
+	if (!keyExist(htmlSnippets, template)) {
+		elem.innerHTML = "";
+		elem.innerText = `Snippet ${template} not Found in template.js`;
+		return false;
 	}
-	setHTML(app, templates[data.template]);
-	setTemplateEvents();
+	setHTML(elem, htmlSnippets[template]);
+	return true;
 }
 
-function changeInner(inner: HTMLElement, data: ServerResponse) {
-	if (!keyExist(templates, data.inner)) {
-		inner.innerHTML = "";
-		inner.innerText = `Template ${data.inner} not Found in template.js`;
-		return;
+/**
+ * toggle the attribute data-checked of the button,
+ * true when button name is the same as location.pathname
+ * @param parent The buttons' parent
+ */
+function toggleButtons(parent: HTMLElement) {
+	const elements = parent.children;
+	for (let i = 0; i < elements.length; i++) {
+		const name = elements[i].getAttribute("name");
+		elements[i].toggleAttribute("data-checked",
+			name !== null && (`/${name}` === location.pathname));
 	}
-	setHTML(inner, templates[data.inner]);
-	const parent = document.getElementById("inner-buttons");
-	if (parent){
-		const elements = parent.children;
-		for (let i = 0; i < elements.length; i++) {
-			elements[i].toggleAttribute("data-checked",
-				('/' + elements[i].getAttribute("name") === document.location.pathname));
-		}
-	}
-	setInnerEvents();
 }
 
-function replaceElements(toReplace: {[key:string]:string}) {
+/**
+ * tries finding HTML elements and change (stop when one worked) either 
+ * their attribute value, srcdoc or their innertext 
+ * @param toReplace toReplace[key] = val — 'key' are the id of the elements selected, 'val' are the new values
+ */
+function replaceElements(toReplace: {[key:string]:string}): void {
 	for (const key in toReplace) {
 		let element = document.getElementById(key);
 		if (element) {

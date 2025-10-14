@@ -1,8 +1,23 @@
 
-const assetsPath = '/ressources';
+const assetsPath = '/resources';
 
-export const templates = {
-	"Home":
+// theorically should use to say "as const" at the end and not TemplateType,
+// to make the string readonly, but it would make the type of htmlSnippets un-readable
+/**
+ * all the HTML (and CSS) of the Single-Page-Application
+ */
+export const htmlSnippets:	{
+  readonly Home: string;
+  readonly Game: string;
+  readonly Profile1: string;
+  readonly Profile2: string;
+  readonly Pdf: string;
+  readonly Login: string;
+  readonly Blank: string;
+  readonly Error: string;
+  readonly Ouch: string;
+} = {
+	Home:
 		`
 	<span class="grid grid-cols-3 mx-8 my-2">
 		<span class="flex justify-self-start">
@@ -26,12 +41,16 @@ export const templates = {
 	<span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
 		<div id="inner" class="h-full w-3/4"></div>
 		<div class="h-full w-1/4 flex flex-col">
-			<div id="timer-disconnect" hidden="false" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center">
+			<div id="timer-disconnect" hidden="" class="mb-2 rounded border bg-orange-100 border-red-400 w-full h-1/2 flex justify-around flex-col items-center">
 				<p class="m-2 font-bold">You're gonna be disconnected in less than a minute</p>
 				<button class="bg-white rounded size-fit p-1" onclick="fetch('/api').then(res => resetDisconnectTimer(res.headers.get('x-authenticated')))">reconnect</button>
 			</div>
+			<div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center">
+				<p class="m-2 font-bold">You are not connected</p>
+				<button class="bg-white rounded size-fit p-1" onclick="goToURL('profile')">login page</button>
+			</div>
 			<div class="size-full bg-white flex flex-col">
-				<div id="chat-content" class="overflow-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
+				<div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
 				<span class="flex justify-items-stretch">
 					<textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
 					<img src="${assetsPath}/send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
@@ -40,11 +59,11 @@ export const templates = {
 		</div>
 	</span>
 	`,
-	"Game":
+	Game:
 		`
 	<iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent outline" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
 	`,
-	"Profile1":
+	Profile1:
 		`
 	<form id="profile-form"class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
 		<span class="flex justify-around place-items-center">
@@ -58,7 +77,7 @@ export const templates = {
 	</form>
 
 	`,
-	"Profile2":
+	Profile2:
 		`
 	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
 		<span class="flex justify-around place-items-center">
@@ -69,11 +88,11 @@ export const templates = {
 		<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
 	</div>
 	`,
-	"Pdf":
+	Pdf:
 		`
 	<iframe src="${assetsPath}/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
 	`,
-	"Login":
+	Login:
 		`
 	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col gap-y-1">
 		<form id="login-form">
@@ -86,10 +105,10 @@ export const templates = {
 		</form>
 	</div>
 	`,
-	"Blank":
+	Blank:
 		`
 	`,
-	"Error":
+	Error:
 		`
 	<div class="flex flex-col items-center size-1/2 m-40 place-self-center">
 		<h1 id=status class="text-white font-bold"></h1>
@@ -99,9 +118,9 @@ export const templates = {
 	</div>
 	`,
 
-	"Ouch":
+	Ouch:
 		`
 	<iframe id="container-iframe" class="size-full bg-gray-200" srcdoc="">
 	</iframe>
 	`
-}
+} as const;
