@@ -1,5 +1,6 @@
 
 import { main } from "./app.js"
+import { setCtrlfEventUsername } from "./events.js";
 
 //----------------------------------------------------------------------------#
 //                               HISTORY STUFF                                #
@@ -7,20 +8,23 @@ import { main } from "./app.js"
 
 /**
  * for moving page to page, used (not only) by html
- * @param NextURL the page we wanna go to
+ * @param nextURL the page we wanna go to
+ * @param force go to the page even if already on it, default to false
  */
-export function goToURL(NextURL:string | void): void {
-    if (arguments.length > 1) {
-        throw new SyntaxError('expected 0 to 1 argument');
+export function goToURL(nextURL: string = "", force: boolean = false): void {
+    if (arguments.length > 2) {
+        throw new SyntaxError('expected 0 to 2 argument');
     }
-    if (!["undefined", "string"].includes(typeof NextURL)) {
-        throw new TypeError(`argument must be a string, not ${typeof NextURL}`);
+    if (typeof nextURL !== 'string') {
+        throw new TypeError(`first argument must be a string, not ${typeof nextURL}`);
+    }
+    if (typeof force !== 'boolean') {
+        throw new TypeError(`second argument must be a string, not ${typeof force}`);
     }
 
-	NextURL = NextURL ? "/" + NextURL : "/";
-	if (location.pathname === NextURL)
+	if (!force && location.pathname === nextURL)
 		return ;
-	history.pushState({page: ""}, "", NextURL);
+	history.pushState({page: ""}, "", `/${nextURL}`);
 	main();
 }
 window["goToURL"] = goToURL;
@@ -38,6 +42,7 @@ function setArrowButton() {
 
 let disconnectTimer1: number;
 let disconnectTimer2: number;
+window["isConnected"] = false;
 
 /**
  * sets a timer to tell you when you're gonna be disconnected soon
@@ -65,9 +70,11 @@ export function resetDisconnectTimer(auth: string | null): boolean {
     setVisibility("timer-disconnect", false);
     if (auth !== 'true') {
         setVisibility("account-disconnected", true);
+        window["isConnected"] = false;
         return false;
     }
     setVisibility("account-disconnected", false);
+    window["isConnected"] = true;
 	disconnectTimer1 = setTimeout(
 		() => setVisibility("timer-disconnect", true),
         14 * 60 * 1000
@@ -76,6 +83,7 @@ export function resetDisconnectTimer(auth: string | null): boolean {
 		() => {
             setVisibility("timer-disconnect", false);
             setVisibility("account-disconnected", true);
+            window["isConnected"] = false;
         },
         15 * 60 * 1000
 	);
@@ -92,15 +100,17 @@ window["resetDisconnectTimer"] = resetDisconnectTimer;
  * and set history control
  */
 export function launchSinglePageApp() {
-    document.addEventListener("DOMContentLoaded", () => {
-        setArrowButton();
-	    main().catch(err => console.error(err));
-    });
     console.log("Hello dear user.\n" +
         "Just so you know, this website rely heavily on javascript running in the front, " +
         "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
         "(example: a popup saying you are disconnected even tho you are not)\n" +
         "This been said, have fun breaking the website");
+    document.addEventListener("DOMContentLoaded", () => {
+        setArrowButton();
+	    main().catch(err => console.error(err));
+        setCtrlfEventUsername();
+    });
+    
 }
 
 
@@ -113,14 +123,4 @@ export function launchSinglePageApp() {
  */
 export function keyExist(object: object, key: PropertyKey) {
 	return Object.hasOwn(object, key);
-}
-
-/**
- * Replace the HTML of the element, bit more readable than native js.
- * Might not be definitive
- * @param element The element whose innerHTML gonna be filled
- * @param text an html snipplet 
- */
-export function setHTML(element: HTMLElement, text: string) {
-	element.innerHTML = text;
 }

@@ -1,6 +1,6 @@
 var exports = {};
 import { htmlSnippets } from "./templates.js"
-import { goToURL, keyExist, setHTML, launchSinglePageApp, resetDisconnectTimer } from "./utils.js";
+import { goToURL, keyExist, launchSinglePageApp, resetDisconnectTimer } from "./utils.js";
 import { setEvents } from "./events.js";
 
 /**
@@ -100,7 +100,7 @@ function changeSnippet(elem: HTMLElement, template: string): boolean {
 		elem.innerText = `Snippet ${template} not Found in template.js`;
 		return false;
 	}
-	setHTML(elem, htmlSnippets[template]);
+	elem.innerHTML = htmlSnippets[template];
 	return true;
 }
 
@@ -131,6 +131,8 @@ function replaceElements(toReplace: {[key:string]:string}): void {
 				element.setAttribute("value", toReplace[key]);
 			} else if (element.hasAttribute("srcdoc")) { // for <iframe>
 				element.setAttribute("srcdoc", toReplace[key]);
+			} else if (element.tagName === "TEXTAREA") { // when <br> doesn't work
+				element.textContent = toReplace[key];
 			} else {
 				element.innerText = toReplace[key];
 			}

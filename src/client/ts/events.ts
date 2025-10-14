@@ -1,6 +1,6 @@
 
 
-import { goToURL, keyExist, setHTML } from "./utils.js";
+import { goToURL, keyExist } from "./utils.js";
 import { main } from "./app.js";
 
 /**
@@ -82,7 +82,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
                 headers: {"Content-Type": "application/x-www-form-urlencoded"},
                 body: new URLSearchParams({
                     username: formData.get('username') as string,
-                    password: formData.get('biography') as string,
+                    biography: formData.get('biography') as string,
                 }),
             });
 
@@ -184,6 +184,36 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
             event.preventDefault();
             goToURL("profile/" + textarea.value);
             textarea.value = "";
+        }
+    });
+}
+/**
+ * Used at the start of the app-launching, to keyboard shortcut
+ * - control K will select (if present) the username-search
+ * - control enter will select (if present) the chat-input
+ * - control P will search for /profile instead of printing the page
+ */
+export function setCtrlfEventUsername(): void {
+    window.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.code === 'KeyK') {
+            const elem = document.getElementById("username-search") as HTMLTextAreaElement;
+            if (elem) {
+                e.preventDefault();
+                elem.select();
+            }
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+            const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
+            if (elem) { // might have to add if not hidden later
+                e.preventDefault();
+                elem.select();
+            }
+        }
+
+        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyP') {
+            goToURL('profile');
+            e.preventDefault();
         }
     });
 }

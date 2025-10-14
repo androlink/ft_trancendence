@@ -3,6 +3,14 @@ import Database from "better-sqlite3";
 import { dbPath } from "./database.js";
 
 export async function apiRoutes(fastifyInstance) {
+    fastifyInstance.setNotFoundHandler ( (req, reply) => {
+        return reply.code(404).send({
+            template: "Error",
+            replace: {status: "Error 404", message: "are you lost by any chance ?"}, 
+            title: "404 Not Found",
+        });
+    });
+
     fastifyInstance.addHook('onRequest', async (req, reply) => {
         try {
             await req.jwtVerify();
@@ -15,14 +23,15 @@ export async function apiRoutes(fastifyInstance) {
         }
     });
 
-    fastifyInstance.setNotFoundHandler ( (req, reply) => {
-        return reply.code(404).send({
-            template: "Error",
-            replace: {status: "Error 404", message: "are you lost by any chance ?"}, 
-            title: "404 Not Found",
-        });
-    });
-
+    const needConnection = async (req, reply) => {
+        if (req.user.id === -1) {
+            return reply.send({
+                template: "Home",
+                title: "login",
+                inner: "Login",
+            });
+        }
+    };
     // login now only use the profile route due to consistency
     // and because it made no sense to have a login page when connected
     
@@ -52,25 +61,11 @@ export async function apiRoutes(fastifyInstance) {
         });
     });
 
-
-    const needConnection = async (req, reply) => {
-        try {
-            await req.jwtVerify();
-        } catch (err) {
-            return reply.send({
-                template: "Home",
-                title: "login",
-                inner: "Login",
-            });
-        }
-    };
-
     fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
         const db = new Database(dbPath);
         const row = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
         if (!row) {
-            // might happen if needConnection don't check the user exist 
-            // and the account changed its 
+            // might happen if someone got their account deleted between requests
             return reply.code(404).send({
                 template: "Home", title: "who ?", inner: "Error",
                 replace: {status: "Error 404", message: "You don't exist in the DB for some reason"},
