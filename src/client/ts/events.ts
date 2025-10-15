@@ -1,13 +1,13 @@
 
 
-import { goToURL, keyExist } from "./utils.js";
+import { goToURL, keyExist, resetDisconnectTimer } from "./utils.js";
 import { main } from "./app.js";
 
 /**
  * set all the events that the page need to work properly
  */
 export function setEvents(): void {
-    let elem: HTMLTextAreaElement | HTMLFormElement;
+    let elem: any;
     elem = document.getElementById("chat-input") as HTMLTextAreaElement;
     if (elem && !elem.hasAttribute("data-custom"))
         setEnterEventChat(elem);
@@ -20,7 +20,28 @@ export function setEvents(): void {
     elem = document.getElementById('profile-form') as HTMLFormElement;
 	if (elem && !elem.hasAttribute('data-custom'))
 		setSubmitEventProfile(elem);
+    elem = document.getElementById('go-to-profile') as HTMLElement;
+	if (elem && !elem.hasAttribute('data-custom'))
+		setClickEventProfile(elem);
+    elem = document.getElementById('change-password-form') as HTMLFormElement;
+	if (elem && !elem.hasAttribute('data-custom'))
+		    setSubmitEventPassword(elem);
 
+}
+
+/**
+ * it will try to write the error on the last child of the element if named
+ *  
+ * @param form the form element
+ * @param message the error that will be shown
+ */
+function writeErrorOrAlert(form: HTMLFormElement, message: string): void {
+    const child = form.lastElementChild;
+    if (child && child.getAttribute("name") === "error-handler") {
+        child.textContent = message;
+    } else {
+        alert(message)
+    }
 }
 
 /**
@@ -43,7 +64,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
             });
 
             if (!response.ok) {
-                alert(`Server responded with ${response.status}`);
+                writeErrorOrAlert(form, `Server responded with ${response.status}`);
                 return ;
             }
 
@@ -54,12 +75,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
             } else if (result.success) {
                 main();
             } else if (keyExist(result, "reason")) {
-                const child = form.lastElementChild;
-                if (child && child.getAttribute("name") === "error-handler") {
-                    child.textContent = result.reason;
-                } else {
-                    alert(result.reason)
-                }
+                writeErrorOrAlert(form, result.reason);
             }
         } catch (error) {
             alert('An error occurred');
@@ -87,7 +103,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
             });
 
             if (!response.ok) {
-                alert(`Server responded with ${response.status} ${response.statusText}`);
+                writeErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
                 return ;
             }
 
@@ -98,12 +114,55 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
             } else if (result.success) {
                 goToURL(`profile/${formData.get('username') as string}`);
             } else if (keyExist(result, "reason")) {
-                const child = form.lastElementChild;
-                if (child && child.getAttribute("name") === "error-handler") {
-                    child.textContent = result.reason;
-                } else {
-                    alert(result.reason)
-                }
+                writeErrorOrAlert(form, result.reason);
+            }
+        } catch (error) {
+            alert('An error occurred');
+        }
+    });
+}
+
+
+/**
+ * used by the Passwrd change form, the default event can't be used in SPA (redirect)
+ * @param form the said form element
+ */
+function setSubmitEventPassword(form: HTMLFormElement): void {
+    form.toggleAttribute("data-custom", true);
+    form.addEventListener('submit', async (event: SubmitEvent) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        try {
+            const newPassword = formData.get("password-1") as string;
+            if (newPassword !== formData.get("password-2") as string) {
+                writeErrorOrAlert(form, "the two passwords need to be the same");
+                return ;
+            }
+            const response = await fetch('/password', {
+                method: 'POST',
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: new URLSearchParams({
+                    password: newPassword, 
+                }),
+            });
+
+            if (!response.ok) {
+                writeErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+                return ;
+            }
+
+            const result: {success?: boolean, reason?:string} = await response.json();
+
+            if (!keyExist(result, "success")) {
+                alert('Wrong response format, not normal');
+            } else if (result.success) {
+                const elem = document.getElementById("username");
+                if (elem && elem.hasAttribute("value"))
+                    goToURL(`profile/${elem.getAttribute("value")}`);
+                else
+                    goToURL( );
+            } else if (keyExist(result, "reason")) {
+                writeErrorOrAlert(form, result.reason);
             }
         } catch (error) {
             alert('An error occurred');
@@ -112,7 +171,23 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
 }
 
 /**
+ * used by the button that goes to the public profile from /profile
+ * @param text the HTMLElement that's gonna get the event
+ */
+function setClickEventProfile(text: HTMLElement): void {
+    text.toggleAttribute("data-custom", true);
+    const elem = document.getElementById("username");
+    if (!elem || !elem.hasAttribute("value"))
+        return ;
+    const username: string = elem.getAttribute("value");
+    text.addEventListener("click", (event: PointerEvent) => 
+        goToURL(`profile/${username}`)
+    );
+}
+
+/**
  * used by the chat input, send message on enter
+ * OBVIOUSLY not definitive
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
@@ -120,7 +195,6 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-	        //const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
             if (textarea && textarea.value) {
                 sendMessage(textarea.value);
                 textarea.value = "";
@@ -146,22 +220,22 @@ export function sendMessage(message: string): boolean {
         throw new SyntaxError('expected 1 argument');
     }
     if (typeof message !== "string") {
-        throw new TypeError('argument must be a string, not ' +  typeof message);
+        throw new TypeError(`argument must be a string, not ${typeof message}`);
     }
     if (!message.length) {
-        throw new SyntaxError('argument must be a string WITH CHARS IN IT');
+        throw new SyntaxError(`argument must be a string WITH CHARS IN IT`);
     }
 
 	const chat = document.getElementById("chat-content");
 	if (!chat) {
-        console.error("message '" + message + "' not sent to chat because chat not found");
+        console.error(`message '${message}' not sent to the chat because the chat is not found`);
 		return false;
 	}
 
 	let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
 	// true if at the end of the chat
 
-	const para = document.createElement("p");
+	const para = document.createElement('p');
 	const node = document.createTextNode(message);
 	para.appendChild(node);
 	chat.appendChild(para);
@@ -180,13 +254,14 @@ window["sendMessage"] = sendMessage;
 function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
     textarea.toggleAttribute("data-custom", true);
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.key === "Enter" && textarea.value) {
+        if (event.key === 'Enter' && textarea.value) {
             event.preventDefault();
-            goToURL("profile/" + textarea.value);
+            goToURL(`profile/${textarea.value}`);
             textarea.value = "";
         }
     });
 }
+
 /**
  * Used at the start of the app-launching, to keyboard shortcut
  * - control K will select (if present) the username-search
@@ -214,6 +289,18 @@ export function setCtrlfEventUsername(): void {
         if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyP') {
             goToURL('profile');
             e.preventDefault();
+        }
+
+        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyE') {
+            if (window["isConnected"]) {
+                e.preventDefault();
+                fetch("/logout", {method: 'POST'}).then(
+                    res => {
+                        resetDisconnectTimer(res.headers.get("x-authenticated")); 
+                        main();
+                    }
+                ).catch(err => alert('Caught: ' + err));
+            }
         }
     });
 }

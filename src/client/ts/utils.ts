@@ -22,9 +22,11 @@ export function goToURL(nextURL: string = "", force: boolean = false): void {
         throw new TypeError(`second argument must be a string, not ${typeof force}`);
     }
 
+    if (!nextURL.startsWith('/'))
+        nextURL = `/${nextURL}`;
 	if (!force && location.pathname === nextURL)
 		return ;
-	history.pushState({page: ""}, "", `/${nextURL}`);
+	history.pushState({page: ""}, "", nextURL);
 	main();
 }
 window["goToURL"] = goToURL;

@@ -1,5 +1,7 @@
 
-const assetsPath = '/resources';
+const assetsPath = `/resources`;
+const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`
+const thenResetTimerAndMain = `.then(res => {resetDisconnectTimer(res.headers.get('x-authenticated')); main()})`
 
 // theorically should use to say "as const" at the end and not TemplateType,
 // to make the string readonly, but it would make the type of htmlSnippets un-readable
@@ -21,7 +23,7 @@ export const htmlSnippets:	{
 		`
 	<span class="grid grid-cols-3 mx-8 my-2">
 		<span class="flex justify-self-start">
-			<input id="username-search" type="search" spellcheck="false placeholder="username" class="text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
+			<input id="username-search" type="search" spellcheck="false" placeholder="username" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
 		</span>
 		<p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
 		<span class="justify-self-end flex gap-x-2">
@@ -29,7 +31,7 @@ export const htmlSnippets:	{
 				<img src="${assetsPath}/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer" draggable="false">
 				<span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
 			</span>
-			<img src="${assetsPath}/exit-icon.png" onclick="if (window.isConnected) fetch('/logout', {method: 'POST'}).then(res => {resetDisconnectTimer(res.headers.get('x-authenticated')); main()});" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
+			<img src="${assetsPath}/exit-icon.png" onclick="if (window.isConnected) fetch('/logout', {method: 'POST'})${thenResetTimerAndMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
 		</span>
 	</span>
 	<span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
@@ -39,11 +41,11 @@ export const htmlSnippets:	{
     	<div onclick="goToURL('profile')" name="profile">your profile</div>
 	</span>
 	<span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
-		<div id="inner" class="h-full w-3/4"></div>
-		<div class="h-full w-1/4 flex flex-col">
+		<div id="inner" class="h-full w-3/4 overflow-hidden"></div>
+		<div class="h-full w-1/4 flex flex-col overflow-hidden">
 			<div id="timer-disconnect" hidden="" class="mb-2 rounded border bg-orange-100 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
 				<p class="m-2 font-bold">You're gonna be disconnected in less than a minute</p>
-				<button class="bg-white rounded size-fit p-1" onclick="fetch('/api').then(res => resetDisconnectTimer(res.headers.get('x-authenticated')))">reconnect</button>
+				<button class="bg-white rounded size-fit p-1" onclick="fetch('/api')${thenResetTimerAndMain}${catchErrorAndAlert}">reconnect</button>
 			</div>
 			<div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
 				<p class="m-2 font-bold">You are not connected</p>
@@ -65,27 +67,41 @@ export const htmlSnippets:	{
 	`,
 	Profile1:
 		`
-	<form id="profile-form"class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-scroll">
-		<span class="flex justify-around place-items-center">
-			<input id="username" value="" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-			<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg" draggable="false">
-		</span>
-		<p class="text-white">biography:</p>
-		<textarea id="biography" class="whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word h-0 grow overflow-y-auto" name="biography"></textarea>
-		<button class="bg-white rounded size-fit p-1" type="submit">update</button>
-		<p name="error-handler" class="text-red-500 font-bold"></p>
-	</form>
+	<div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
+		<form id="profile-form" class="border-4 border-gray-900 rounded-2xl p-3 w-full grow flex flex-col overflow-y-scroll overflow-x-hidden">
+			<p id="go-to-profile" class="contrast-200 text-white size-fit -mt-4 -ml-4 px-2 py-1 rounded bg-cyan-900 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">public infos</p>
+			<span class="flex justify-around place-items-center">
+				<input id="username" value="" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+				<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg" draggable="false">
+			</span>
+			<p class="text-white -ml-2">biography:</p>
+			<textarea id="biography" class="resize w-1/4 max-w-full max-h-full whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
+			<button class="place-self-center bg-white rounded size-fit p-1 my-1 mt-auto hover:cursor-pointer" type="submit">update</button>
+			<p name="error-handler" class="text-red-500 font-bold"></p>
+		</form>
+		<form id="change-password-form" class="border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit flex flex-col overflow-hidden">
+			<p class="text-white size-fit -mt-4 -ml-4 px-2 py-1 rounded bg-amber-900">private infos</p>
+			<span class="flex gap-5 w-1/2">
+				<div class="flex gap-2 flex-col p-1">
+					<input placeholder="new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-1">
+					<input placeholder="same new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-2">
+				</div>
+				<button class="self-center bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">change password</button>
+			</span>
+			<p name="error-handler" class="text-red-500 font-bold">
+		</form>
+	</div>
 
 	`,
 	Profile2:
 		`
-	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col">
+	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll">
 		<span class="flex justify-around place-items-center">
 			<h1 class="text-white" id="username"></h1>
 			<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg" draggable="false">
 		</span>
-		<p class="text-white">biography:</p>
-		<p class="text-white wrap-break-word h-0 grow overflow-y-auto" id="biography"></p>
+		<p class="text-white -ml-2">biography:</p>
+		<p class="text-white wrap-break-word h-fit min-w-1/4 w-fit select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
 	</div>
 	`,
 	Pdf:

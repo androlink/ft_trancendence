@@ -71,6 +71,23 @@ export async function loginRoutes(fastifyInstance) {
         return {success: true, reason: ':D'};
     });
 
+    fastifyInstance.post('/password', { onRequest: identifyRequest, preHandler: needFormFobdy }, async (req, reply) => {
+        const data = req.body;
+        if (!Object.hasOwn(data, "password"))
+            return reply.code(401).send("query password missing");
+        const password = data["password"];
+        if (!password) // gonna need better password securities obviously
+            return {success: false, reason: "No password given"};
+        const db = new Database(dbPath);
+        const update = db.prepare('UPDATE users SET password = ? WHERE id = ?');
+        if (update.run(password, req.user.id).changes == 0) {
+            db.close();
+            return {success: false, reason: "Databse didn't find you"};
+        }
+        db.close();
+        return {success: true, reason: ':D'};
+    });
+
     fastifyInstance.post('/logout', async (req, reply) => {
         reply.clearCookie('account');
         return reply.header('x-authenticated', false).send("Goodbye");
