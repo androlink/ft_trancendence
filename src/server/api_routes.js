@@ -64,6 +64,7 @@ export async function apiRoutes(fastifyInstance) {
     fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
         const db = new Database(dbPath);
         const row = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+        db.close();
         if (!row) {
             // might happen if someone got their account deleted between requests
             return reply.code(404).send({
@@ -82,6 +83,7 @@ export async function apiRoutes(fastifyInstance) {
         const username = req.params.username;
         const db = new Database(dbPath);
         const row = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        db.close();
         if (!row)
             return reply.send({
                 template: "Home", title: username, inner: "Error",

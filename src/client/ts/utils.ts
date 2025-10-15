@@ -8,10 +8,12 @@ import { setCtrlfEventUsername } from "./events.js";
 
 /**
  * for moving page to page, used (not only) by html
+ * await main() to anticipate the page changes
  * @param nextURL the page we wanna go to
  * @param force go to the page even if already on it, default to false
+ * @returns true if main() is triggered, meaning the function was used
  */
-export function goToURL(nextURL: string = "", force: boolean = false): void {
+export async function goToURL(nextURL: string = "", force: boolean = false): Promise<boolean> {
     if (arguments.length > 2) {
         throw new SyntaxError('expected 0 to 2 argument');
     }
@@ -25,9 +27,10 @@ export function goToURL(nextURL: string = "", force: boolean = false): void {
     if (!nextURL.startsWith('/'))
         nextURL = `/${nextURL}`;
 	if (!force && location.pathname === nextURL)
-		return ;
+		return false;
 	history.pushState({page: ""}, "", nextURL);
-	main();
+	await main();
+    return true;
 }
 window["goToURL"] = goToURL;
 

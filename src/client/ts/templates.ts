@@ -3,7 +3,7 @@ const assetsPath = `/resources`;
 const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`
 const thenResetTimerAndMain = `.then(res => {resetDisconnectTimer(res.headers.get('x-authenticated')); main()})`
 
-// theorically should use to say "as const" at the end and not TemplateType,
+// theorically should use to say "as const" at the end and not :,
 // to make the string readonly, but it would make the type of htmlSnippets un-readable
 /**
  * all the HTML (and CSS) of the Single-Page-Application
@@ -18,6 +18,7 @@ export const htmlSnippets:	{
   readonly Blank: string;
   readonly Error: string;
   readonly Ouch: string;
+  readonly PopUp: string;
 } = {
 	Home:
 		`
@@ -72,10 +73,10 @@ export const htmlSnippets:	{
 			<p id="go-to-profile" class="contrast-200 text-white size-fit -mt-4 -ml-4 px-2 py-1 rounded bg-cyan-900 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">public infos</p>
 			<span class="flex justify-around place-items-center">
 				<input id="username" value="" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-				<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg" draggable="false">
+				<img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
 			</span>
 			<p class="text-white -ml-2">biography:</p>
-			<textarea id="biography" class="resize w-1/4 max-w-full max-h-full whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
+			<textarea id="biography" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
 			<button class="place-self-center bg-white rounded size-fit p-1 my-1 mt-auto hover:cursor-pointer" type="submit">update</button>
 			<p name="error-handler" class="text-red-500 font-bold"></p>
 		</form>
@@ -83,8 +84,8 @@ export const htmlSnippets:	{
 			<p class="text-white size-fit -mt-4 -ml-4 px-2 py-1 rounded bg-amber-900">private infos</p>
 			<span class="flex gap-5 w-1/2">
 				<div class="flex gap-2 flex-col p-1">
-					<input placeholder="new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-1">
-					<input placeholder="same new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-2">
+					<input placeholder="new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
+					<input placeholder="confirm password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-">
 				</div>
 				<button class="self-center bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">change password</button>
 			</span>
@@ -98,7 +99,7 @@ export const htmlSnippets:	{
 	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll">
 		<span class="flex justify-around place-items-center">
 			<h1 class="text-white" id="username"></h1>
-			<img class="size-40 rounded-full" src="https://st.depositphotos.com/1779253/5140/v/950/depositphotos_51405259-stock-illustration-male-avatar-profile-picture-use.jpg" draggable="false">
+			<img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
 		</span>
 		<p class="text-white -ml-2">biography:</p>
 		<p class="text-white wrap-break-word h-fit min-w-1/4 w-fit select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
@@ -111,14 +112,32 @@ export const htmlSnippets:	{
 	Login:
 		`
 	<div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col gap-y-1">
+	<span class="grid grid-cols-2 grid-rows-2 place-items-center size-full *:border-3 *:bg-gray-600 *:border-gray-500 *:p-2 *:rounded *:gap-1 *:flex *:flex-col *:relative">
 		<form id="login-form">
-			<label class="text-white rounded size-fit" for="username">username:</label>
-			<input class="text-white rounded bg-gray-500 size-fit" type="text" name="username"><br><br>
-			<label class="text-white rounded size-fit" for="password">password:</label>
-			<input class="text-white rounded bg-gray-500 size-fit" type="password" name="password"><br><br>
-			<button class="bg-white rounded size-fit p-1" type="submit">login</button>
-			<p name="error-handler" class="text-red-500 font-bold"></p>
+			<label class="text-white size-fit mt-1" for="username">username:</label>
+			<input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="text" name="username">
+			<label class="text-white size-fit" for="password">password:</label>
+			<input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="password" name="password">
+			<button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">login</button>
+			<p name="error-handler" class="text-red-500 font-bold mb-2"></p>
 		</form>
+		<form id="register-form">
+			<label class="text-white size-fit" for="username">username:</label>
+			<input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="text" name="username">
+			<label class="text-white size-fit" for="password">password:</label>
+			<input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password">
+			<label class="text-white size-fit" for="password">confirm password:</label>
+			<input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
+			<button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">register</button>
+			<p name="error-handler" class="text-red-500 font-bold mb-2"></p>
+		</form>
+		<div>
+			<p class="text-white size-fit">Google auth and stuff</p>
+		</div>
+		<div>
+			<p class="text-white size-fit">Welcome</p>
+		</div>
+	</span>
 	</div>
 	`,
 	Blank:
@@ -138,5 +157,21 @@ export const htmlSnippets:	{
 		`
 	<iframe id="container-iframe" class="size-full bg-gray-200" srcdoc="">
 	</iframe>
-	`
+	`,
+	PopUp:
+		`
+	<div class="absolute -translate-x-1/2 inset-x-1/2 w-1/2 h-fit top-2 bg-gray-300 m-auto rounded shadow-xl/50 *:text-black *:p-1 *:text-center">
+		<p>Hello. I've made some shortcuts, and found them really useful so...<br><br>
+		CTRL + P => goes to your profile editor<br>
+		CTRL + P at your profile editor => goes to your public profile<br>
+		CTRL + E => disconnect you<br>
+		CTRL + Enter => selects the Chat<br>
+		CTRL + K => selects the profile... reasearch... thing... at the top left<br>
+		? => shows this menu <br><br>
+		Shoutout to the default shortcuts<br>
+		alt + (left || right) arrow => navigate history<br>
+		tab && shift + tab => select elements</p>
+
+	</div>
+		`
 } as const;

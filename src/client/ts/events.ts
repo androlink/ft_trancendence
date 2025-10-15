@@ -1,6 +1,7 @@
 
 
 import { goToURL, keyExist, resetDisconnectTimer } from "./utils.js";
+import { htmlSnippets } from "./templates.js";
 import { main } from "./app.js";
 
 /**
@@ -17,6 +18,9 @@ export function setEvents(): void {
     elem = document.getElementById('login-form') as HTMLFormElement;
 	if (elem && !elem.hasAttribute('data-custom'))
 		setSubmitEventLogin(elem);
+    elem = document.getElementById('register-form') as HTMLFormElement;
+	if (elem && !elem.hasAttribute('data-custom'))
+		setSubmitEventRegister(elem);
     elem = document.getElementById('profile-form') as HTMLFormElement;
 	if (elem && !elem.hasAttribute('data-custom'))
 		setSubmitEventProfile(elem);
@@ -26,7 +30,6 @@ export function setEvents(): void {
     elem = document.getElementById('change-password-form') as HTMLFormElement;
 	if (elem && !elem.hasAttribute('data-custom'))
 		    setSubmitEventPassword(elem);
-
 }
 
 /**
@@ -54,6 +57,12 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
         event.preventDefault();
         const formData = new FormData(form);
         try {
+            const username = formData.get("username") as string;
+            const password = formData.get("password") as string;
+            if (!username || !password) {
+                writeErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
+                return ;
+            }
             const response = await fetch('/login', {
                 method: 'POST',
                 headers: {"Content-Type": "application/x-www-form-urlencoded"},
@@ -69,11 +78,59 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
             }
 
             const result: {success?: boolean, reason?:string} = await response.json();
-
             if (!keyExist(result, "success")) {
-                alert('Wrong response format, not normal');
+                writeErrorOrAlert(form, "Wrong response format, not normal");
             } else if (result.success) {
                 main();
+            } else if (keyExist(result, "reason")) {
+                writeErrorOrAlert(form, result.reason);
+            }
+        } catch (error) {
+            writeErrorOrAlert(form, error as string);
+        }
+    });
+}
+
+
+/**
+ * used by the Password change form, the default event can't be used in SPA (redirect)
+ * @param form the said form element
+ */
+function setSubmitEventRegister(form: HTMLFormElement): void {
+    form.toggleAttribute("data-custom", true);
+    form.addEventListener('submit', async (event: SubmitEvent) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        try {
+            const username = formData.get("username") as string;
+            const password = formData.get("password") as string;
+            if (!username || !password) {
+                writeErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
+                return ;
+            }
+            if (password !== formData.get("password-confirm") as string) {
+                writeErrorOrAlert(form, "the two passwords need to correspond");
+                return ;
+            }
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: new URLSearchParams({
+                    username: username,
+                    password: password,
+                }),
+            });
+
+            if (!response.ok) {
+                writeErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+                return ;
+            }
+
+            const result: {success?: boolean, reason?:string} = await response.json();
+            if (!keyExist(result, "success")) {
+                writeErrorOrAlert(form, "Wrong response format, not normal");
+            } else if (result.success) {
+                goToURL("/profile");
             } else if (keyExist(result, "reason")) {
                 writeErrorOrAlert(form, result.reason);
             }
@@ -93,7 +150,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
         event.preventDefault();
         const formData = new FormData(form);
         try {
-            const response = await fetch('/profile', {
+            const response = await fetch('/update', {
                 method: 'POST',
                 headers: {"Content-Type": "application/x-www-form-urlencoded"},
                 body: new URLSearchParams({
@@ -152,9 +209,8 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
             }
 
             const result: {success?: boolean, reason?:string} = await response.json();
-
             if (!keyExist(result, "success")) {
-                alert('Wrong response format, not normal');
+                writeErrorOrAlert(form, "Wrong response format, not normal");
             } else if (result.success) {
                 const elem = document.getElementById("username");
                 if (elem && elem.hasAttribute("value"))
@@ -234,7 +290,6 @@ export function sendMessage(message: string): boolean {
 
 	let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
 	// true if at the end of the chat
-
 	const para = document.createElement('p');
 	const node = document.createTextNode(message);
 	para.appendChild(node);
@@ -266,11 +321,11 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
  * Used at the start of the app-launching, to keyboard shortcut
  * - control K will select (if present) the username-search
  * - control enter will select (if present) the chat-input
- * - control P will search for /profile instead of printing the page
+ * - control P will search for /profile or /profile/username instead of printing the page
  */
 export function setCtrlfEventUsername(): void {
     window.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.code === 'KeyK') {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             const elem = document.getElementById("username-search") as HTMLTextAreaElement;
             if (elem) {
                 e.preventDefault();
@@ -278,7 +333,7 @@ export function setCtrlfEventUsername(): void {
             }
         }
 
-        if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
             if (elem) { // might have to add if not hidden later
                 e.preventDefault();
@@ -286,7 +341,7 @@ export function setCtrlfEventUsername(): void {
             }
         }
 
-        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyP') {
+        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'p') {
             e.preventDefault();
             const elem = document.getElementById("username");
             if (elem && elem.hasAttribute("value")) {
@@ -296,7 +351,7 @@ export function setCtrlfEventUsername(): void {
             goToURL('profile');
         }
 
-        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyE') {
+        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'e') {
             if (window["isConnected"]) {
                 e.preventDefault();
                 fetch("/logout", {method: 'POST'}).then(
@@ -307,5 +362,31 @@ export function setCtrlfEventUsername(): void {
                 ).catch(err => alert('Caught: ' + err));
             }
         }
-    });
+    })
+
+    const app = document.getElementById("app");
+    const help = document.createElement('div');
+    help.setHTMLUnsafe(htmlSnippets["PopUp"]);
+    let isPressed = false;
+    try {
+        if (app) {
+            window.addEventListener("keypress", (e) => {
+                if (e.key === '?' && !isPressed) {
+                    isPressed = true;
+                    console.log(htmlSnippets["PopUp"]);
+                    app.appendChild(help);
+                    console.log(help.className)
+                }
+            });
+            window.addEventListener("keyup", (e) => {
+                if (isPressed) {
+                    isPressed = false;
+                    if (app.contains(help))
+                        app.removeChild(help);
+                }
+            });
+        }
+    } catch (e) {
+        console.error(e)
+    }
 }
