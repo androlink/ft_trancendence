@@ -99,8 +99,9 @@ export async function loginRoutes(fastifyInstance) {
       const db = new Database(dbPath);
       const res = db.prepare('INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)').run(username, password);
       db.close();
-      if (res.changes === 0){
-        return reply.code(400).send({success: false, reason: `propably another account named ${username}. I haven't really checked`});
+      if (res.changes === 0) {
+        // the only error that makes sense now is account duplicates
+        return reply.code(409).send({success: false, reason: `${username} already exists`});
       }
       const token = fastifyInstance.jwt.sign({id: res.lastInsertRowid},  {expiresIn: '15m'});
       const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
