@@ -9,14 +9,15 @@ export function launchDB() {
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
-        bio TEXT NOT NULL,
+        bio TEXT NOT NULL DEFAULT 'Damn is that the default bio ?',
         password TEXT NOT NULL
     )
     `);
-    const insert = db.prepare('REPLACE INTO users (username, bio, password) VALUES (?, ?, ?)');
-    // insert.run('geymat', 'the guy coding this', 'pass');
-    // insert.run('geymat;\'\"--', 'it looks like we are sql injection safe. better-sqlite3 is GREAT', 'b');
-    // insert.run('a', 'an account just to say hello', 'a');
-    // insert.run('nimda', 'My password is \'admin\'', 'admin');
+    const insert = db.prepare('REPLACE INTO users (username, password) VALUES (?, ?)');
+    // insert.run('geymat', 'pass');
+    // insert.run('geymat;\'\"--', 'b');
+    // insert.run('a', 'a');
+    // insert.run('nimda', 'admin');
+    // insert.run('Lorem', 'ipsum');
     db.close();
 }

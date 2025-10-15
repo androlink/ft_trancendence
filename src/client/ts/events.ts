@@ -78,7 +78,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
                 writeErrorOrAlert(form, result.reason);
             }
         } catch (error) {
-            alert('An error occurred');
+            writeErrorOrAlert(form, error as string);
         }
     });
 }
@@ -117,7 +117,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
                 writeErrorOrAlert(form, result.reason);
             }
         } catch (error) {
-            alert('An error occurred');
+            writeErrorOrAlert(form, error as string);
         }
     });
 }
@@ -165,7 +165,7 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
                 writeErrorOrAlert(form, result.reason);
             }
         } catch (error) {
-            alert('An error occurred');
+            writeErrorOrAlert(form, error as string);
         }
     });
 }
@@ -287,8 +287,13 @@ export function setCtrlfEventUsername(): void {
         }
 
         if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyP') {
-            goToURL('profile');
             e.preventDefault();
+            const elem = document.getElementById("username");
+            if (elem && elem.hasAttribute("value")) {
+                goToURL(`profile/${elem.getAttribute("value")}`);
+                return ;
+            }
+            goToURL('profile');
         }
 
         if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.code === 'KeyE') {
