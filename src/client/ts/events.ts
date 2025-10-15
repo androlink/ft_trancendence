@@ -8,43 +8,43 @@ import { main } from "./app.js";
  * set all the events that the page need to work properly
  */
 export function setEvents(): void {
-    let elem: any;
-    elem = document.getElementById("chat-input") as HTMLTextAreaElement;
-    if (elem && !elem.hasAttribute("data-custom"))
-        setEnterEventChat(elem);
-    elem = document.getElementById("username-search") as HTMLTextAreaElement;
-    if (elem && !elem.hasAttribute("data-custom"))
-        setEnterEventUsername(elem);
-    elem = document.getElementById('login-form') as HTMLFormElement;
-	if (elem && !elem.hasAttribute('data-custom'))
-		setSubmitEventLogin(elem);
-    elem = document.getElementById('register-form') as HTMLFormElement;
-	if (elem && !elem.hasAttribute('data-custom'))
-		setSubmitEventRegister(elem);
-    elem = document.getElementById('profile-form') as HTMLFormElement;
-	if (elem && !elem.hasAttribute('data-custom'))
-		setSubmitEventProfile(elem);
-    elem = document.getElementById('go-to-profile') as HTMLElement;
-	if (elem && !elem.hasAttribute('data-custom'))
-		setClickEventProfile(elem);
-    elem = document.getElementById('change-password-form') as HTMLFormElement;
-	if (elem && !elem.hasAttribute('data-custom'))
-		    setSubmitEventPassword(elem);
+  let elem: any;
+  elem = document.getElementById("chat-input") as HTMLTextAreaElement;
+  if (elem && !elem.hasAttribute("data-custom"))
+    setEnterEventChat(elem);
+  elem = document.getElementById("username-search") as HTMLTextAreaElement;
+  if (elem && !elem.hasAttribute("data-custom"))
+    setEnterEventUsername(elem);
+  elem = document.getElementById('login-form') as HTMLFormElement;
+  if (elem && !elem.hasAttribute('data-custom'))
+    setSubmitEventLogin(elem);
+  elem = document.getElementById('register-form') as HTMLFormElement;
+  if (elem && !elem.hasAttribute('data-custom'))
+    setSubmitEventRegister(elem);
+  elem = document.getElementById('profile-form') as HTMLFormElement;
+  if (elem && !elem.hasAttribute('data-custom'))
+    setSubmitEventProfile(elem);
+  elem = document.getElementById('go-to-profile') as HTMLElement;
+  if (elem && !elem.hasAttribute('data-custom'))
+    setClickEventProfile(elem);
+  elem = document.getElementById('change-password-form') as HTMLFormElement;
+  if (elem && !elem.hasAttribute('data-custom'))
+      setSubmitEventPassword(elem);
 }
 
 /**
- * it will try to write the error on the last child of the element if named
- *  
+ * it will try to write the error on the last child of the element if named "error-handler.
+ * Else, alert()
  * @param form the form element
  * @param message the error that will be shown
  */
-function writeErrorOrAlert(form: HTMLFormElement, message: string): void {
-    const child = form.lastElementChild;
-    if (child && child.getAttribute("name") === "error-handler") {
-        child.textContent = message;
-    } else {
-        alert(message)
-    }
+function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
+  const child = form.lastElementChild;
+  if (child && child.getAttribute("name") === "error-handler") {
+    child.textContent = message;
+  } else {
+    alert(message)
+  }
 }
 
 /**
@@ -52,43 +52,38 @@ function writeErrorOrAlert(form: HTMLFormElement, message: string): void {
  * @param form the said form element
  */
 function setSubmitEventLogin(form: HTMLFormElement): void {
-    form.toggleAttribute("data-custom", true);
-    form.addEventListener('submit', async (event: SubmitEvent) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        try {
-            const username = formData.get("username") as string;
-            const password = formData.get("password") as string;
-            if (!username || !password) {
-                writeErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
-                return ;
-            }
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                body: new URLSearchParams({
-                    username: formData.get('username') as string, 
-                    password: formData.get('password') as string,
-                }),
-            });
+  form.toggleAttribute("data-custom", true);
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    let response: Response;
+    try {
+      const username = formData.get("username") as string;
+      const password = formData.get("password") as string;
+      if (!username || !password) {
+        displayErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
+        return ;
+      }
+      response = await fetch('/login', {
+        method: 'POST',
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({
+          username: username, 
+          password: password,
+        }),
+      });
 
-            if (!response.ok) {
-                writeErrorOrAlert(form, `Server responded with ${response.status}`);
-                return ;
-            }
-
-            const result: {success?: boolean, reason?:string} = await response.json();
-            if (!keyExist(result, "success")) {
-                writeErrorOrAlert(form, "Wrong response format, not normal");
-            } else if (result.success) {
-                main();
-            } else if (keyExist(result, "reason")) {
-                writeErrorOrAlert(form, result.reason);
-            }
-        } catch (error) {
-            writeErrorOrAlert(form, error as string);
-        }
-    });
+      const result: {success?: boolean, reason?:string} = await response.json();
+      if (!result.success) {
+        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+          `Server responded with ${response.status} ${response.statusText}`);
+        return ;
+      }
+      main();
+    } catch (error) {
+      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+    }
+  });
 }
 
 
@@ -97,47 +92,42 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventRegister(form: HTMLFormElement): void {
-    form.toggleAttribute("data-custom", true);
-    form.addEventListener('submit', async (event: SubmitEvent) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        try {
-            const username = formData.get("username") as string;
-            const password = formData.get("password") as string;
-            if (!username || !password) {
-                writeErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
-                return ;
-            }
-            if (password !== formData.get("password-confirm") as string) {
-                writeErrorOrAlert(form, "the two passwords need to correspond");
-                return ;
-            }
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                body: new URLSearchParams({
-                    username: username,
-                    password: password,
-                }),
-            });
-
-            if (!response.ok) {
-                writeErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
-                return ;
-            }
-
-            const result: {success?: boolean, reason?:string} = await response.json();
-            if (!keyExist(result, "success")) {
-                writeErrorOrAlert(form, "Wrong response format, not normal");
-            } else if (result.success) {
-                goToURL("/profile");
-            } else if (keyExist(result, "reason")) {
-                writeErrorOrAlert(form, result.reason);
-            }
-        } catch (error) {
-            writeErrorOrAlert(form, error as string);
-        }
-    });
+  form.toggleAttribute("data-custom", true);
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    let response: Response;
+    try {
+      const username = formData.get("username") as string;
+      const password = formData.get("password") as string;
+      if (!username || !password) {
+        displayErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
+        return ;
+      }
+      if (password !== formData.get("password-confirm") as string) {
+        displayErrorOrAlert(form, "the two passwords need to correspond");
+        return ;
+      }
+      response = await fetch('/register', {
+        method: 'POST',
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({
+          username: username,
+          password: password,
+        }),
+      });
+      
+      const result: {success?: boolean, reason?:string} = await response.json();
+      if (!result.success) {
+        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+          `Server responded with ${response.status} ${response.statusText}`);
+        return ;
+      }
+      main();
+    } catch (error) {
+      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+    }
+  });
 }
 
 /**
@@ -145,38 +135,32 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventProfile(form: HTMLFormElement): void {
-    form.toggleAttribute("data-custom", true);
-    form.addEventListener('submit', async (event: SubmitEvent) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        try {
-            const response = await fetch('/update', {
-                method: 'POST',
-                headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                body: new URLSearchParams({
-                    username: formData.get('username') as string,
-                    biography: formData.get('biography') as string,
-                }),
-            });
+  form.toggleAttribute("data-custom", true);
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    let response: Response;
+    try {
+      response = await fetch('/update', {
+        method: 'POST',
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({
+          username: formData.get('username') as string,
+          biography: formData.get('biography') as string,
+        }),
+      });
 
-            if (!response.ok) {
-                writeErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
-                return ;
-            }
-
-            const result: {success?: boolean, reason?:string} = await response.json();
-
-            if (!keyExist(result, "success")) {
-                alert('Wrong response format, not normal');
-            } else if (result.success) {
-                goToURL(`profile/${formData.get('username') as string}`);
-            } else if (keyExist(result, "reason")) {
-                writeErrorOrAlert(form, result.reason);
-            }
-        } catch (error) {
-            writeErrorOrAlert(form, error as string);
-        }
-    });
+      const result: {success?: boolean, reason?:string} = await response.json();
+      if (!result.success) {
+        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+          `Server responded with ${response.status} ${response.statusText}`);
+        return ;
+      }
+      goToURL(`profile/${formData.get('username') as string}`);
+    } catch (error) {
+      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+    }
+  });
 }
 
 
@@ -185,45 +169,45 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventPassword(form: HTMLFormElement): void {
-    form.toggleAttribute("data-custom", true);
-    form.addEventListener('submit', async (event: SubmitEvent) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        try {
-            const newPassword = formData.get("password-1") as string;
-            if (newPassword !== formData.get("password-2") as string) {
-                writeErrorOrAlert(form, "the two passwords need to be the same");
-                return ;
-            }
-            const response = await fetch('/password', {
-                method: 'POST',
-                headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                body: new URLSearchParams({
-                    password: newPassword, 
-                }),
-            });
+  form.toggleAttribute("data-custom", true);
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    let response: Response;
+    try {
+      const password = formData.get("password") as string;
+      if (password.length < 4) {
+        displayErrorOrAlert(form, "At very least 4 chars required");
+        return ;
+      }
+      if (password !== formData.get("password-confirm") as string) {
+        displayErrorOrAlert(form, "the two passwords need to be the same");
+        return ;
+      }
 
-            if (!response.ok) {
-                writeErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
-                return ;
-            }
+      response = await fetch('/password', {
+        method: 'POST',
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({
+          password: password, 
+        }),
+      });
 
-            const result: {success?: boolean, reason?:string} = await response.json();
-            if (!keyExist(result, "success")) {
-                writeErrorOrAlert(form, "Wrong response format, not normal");
-            } else if (result.success) {
-                const elem = document.getElementById("username");
-                if (elem && elem.hasAttribute("value"))
-                    goToURL(`profile/${elem.getAttribute("value")}`);
-                else
-                    goToURL( );
-            } else if (keyExist(result, "reason")) {
-                writeErrorOrAlert(form, result.reason);
-            }
-        } catch (error) {
-            writeErrorOrAlert(form, error as string);
-        }
-    });
+      const result: {success?: boolean, reason?:string} = await response.json();
+      if (!result.success) {
+        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+          `Server responded with ${response.status} ${response.statusText}`);
+        return ;
+      }
+      const elem = document.getElementById("username");
+      if (elem && elem.hasAttribute("value"))
+        goToURL(`profile/${elem.getAttribute("value")}`);
+      else
+        goToURL( );
+    } catch (error) {
+      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+    }
+  });
 }
 
 /**
@@ -231,14 +215,14 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
  * @param text the HTMLElement that's gonna get the event
  */
 function setClickEventProfile(text: HTMLElement): void {
-    text.toggleAttribute("data-custom", true);
-    const elem = document.getElementById("username");
-    if (!elem || !elem.hasAttribute("value"))
-        return ;
-    const username: string = elem.getAttribute("value");
-    text.addEventListener("click", (event: PointerEvent) => 
-        goToURL(`profile/${username}`)
-    );
+  text.toggleAttribute("data-custom", true);
+  const elem = document.getElementById("username");
+  if (!elem || !elem.hasAttribute("value"))
+    return ;
+  const username: string = elem.getAttribute("value");
+  text.addEventListener("click", (event: PointerEvent) => 
+    goToURL(`profile/${username}`)
+  );
 }
 
 /**
@@ -247,16 +231,16 @@ function setClickEventProfile(text: HTMLElement): void {
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
-    textarea.toggleAttribute("data-custom", true);
-    textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            if (textarea && textarea.value) {
-                sendMessage(textarea.value);
-                textarea.value = "";
-            }
-        }
-    });
+  textarea.toggleAttribute("data-custom", true);
+  textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (textarea && textarea.value) {
+        sendMessage(textarea.value);
+        textarea.value = "";
+      }
+    }
+  });
 }
 
 
@@ -272,32 +256,32 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
  * For instance to make a notif system.
  */
 export function sendMessage(message: string): boolean {
-    if (arguments.length !== 1) {
-        throw new SyntaxError('expected 1 argument');
-    }
-    if (typeof message !== "string") {
-        throw new TypeError(`argument must be a string, not ${typeof message}`);
-    }
-    if (!message.length) {
-        throw new SyntaxError(`argument must be a string WITH CHARS IN IT`);
-    }
+  if (arguments.length !== 1) {
+    throw new SyntaxError('expected 1 argument');
+  }
+  if (typeof message !== "string") {
+    throw new TypeError(`argument must be a string, not ${typeof message}`);
+  }
+  if (!message.length) {
+    throw new SyntaxError(`argument must be a string WITH CHARS IN IT`);
+  }
 
-	const chat = document.getElementById("chat-content");
-	if (!chat) {
-        console.error(`message '${message}' not sent to the chat because the chat is not found`);
-		return false;
-	}
+  const chat = document.getElementById("chat-content");
+  if (!chat) {
+    console.error(`message '${message}' not sent to the chat because the chat is not found`);
+    return false;
+  }
 
-	let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
-	// true if at the end of the chat
-	const para = document.createElement('p');
-	const node = document.createTextNode(message);
-	para.appendChild(node);
-	chat.appendChild(para);
-	if (scroll) {
-		chat.scrollTop = chat.scrollHeight;
-	}
-    return scroll;
+  let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
+  // true if at the end of the chat
+  const para = document.createElement('p');
+  const node = document.createTextNode(message);
+  para.appendChild(node);
+  chat.appendChild(para);
+  if (scroll) {
+    chat.scrollTop = chat.scrollHeight;
+  }
+  return scroll;
 }
 window["sendMessage"] = sendMessage;
 
@@ -307,14 +291,14 @@ window["sendMessage"] = sendMessage;
  * @param textarea the said username input
  */
 function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
-    textarea.toggleAttribute("data-custom", true);
-    textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.key === 'Enter' && textarea.value) {
-            event.preventDefault();
-            goToURL(`profile/${textarea.value}`);
-            textarea.value = "";
-        }
-    });
+  textarea.toggleAttribute("data-custom", true);
+  textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === 'Enter' && textarea.value) {
+      event.preventDefault();
+      goToURL(`profile/${textarea.value}`);
+      textarea.value = "";
+    }
+  });
 }
 
 /**
@@ -324,69 +308,67 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
  * - control P will search for /profile or /profile/username instead of printing the page
  */
 export function setCtrlfEventUsername(): void {
-    window.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            const elem = document.getElementById("username-search") as HTMLTextAreaElement;
-            if (elem) {
-                e.preventDefault();
-                elem.select();
-            }
-        }
-
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
-            if (elem) { // might have to add if not hidden later
-                e.preventDefault();
-                elem.select();
-            }
-        }
-
-        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'p') {
-            e.preventDefault();
-            const elem = document.getElementById("username");
-            if (elem && elem.hasAttribute("value")) {
-                goToURL(`profile/${elem.getAttribute("value")}`);
-                return ;
-            }
-            goToURL('profile');
-        }
-
-        if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'e') {
-            if (window["isConnected"]) {
-                e.preventDefault();
-                fetch("/logout", {method: 'POST'}).then(
-                    res => {
-                        resetDisconnectTimer(res.headers.get("x-authenticated")); 
-                        main();
-                    }
-                ).catch(err => alert('Caught: ' + err));
-            }
-        }
-    })
-
-    const app = document.getElementById("app");
-    const help = document.createElement('div');
-    help.setHTMLUnsafe(htmlSnippets["PopUp"]);
-    let isPressed = false;
-    try {
-        if (app) {
-            window.addEventListener("keypress", (e) => {
-                if (e.key === '?' && !isPressed) {
-                    isPressed = true;
-                    console.log(htmlSnippets["PopUp"]);
-                    app.appendChild(help);
-                    console.log(help.className)
-                }
-            });
-            window.addEventListener("keyup", (e) => {
-                if (isPressed) {
-                    isPressed = false;
-                    if (app.contains(help))
-                        app.removeChild(help);
-                }
-            });
-        }
-    } catch (e) {
-        console.error(e)
+  window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      const elem = document.getElementById("username-search") as HTMLTextAreaElement;
+      if (elem) {
+        e.preventDefault();
+        elem.select();
+      }
     }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
+      if (elem) { // might have to add if not hidden later
+        e.preventDefault();
+        elem.select();
+      }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'p') {
+      e.preventDefault();
+      const elem = document.getElementById("username");
+      if (elem && elem.hasAttribute("value")) {
+        goToURL(`profile/${elem.getAttribute("value")}`);
+        return ;
+      }
+      goToURL('profile');
+    }
+
+    if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'e') {
+      if (window["isConnected"]) {
+        e.preventDefault();
+        fetch("/logout", {method: 'POST'}).then(
+          res => {
+            resetDisconnectTimer(res.headers.get("x-authenticated")); 
+            main();
+          }
+        ).catch(err => alert('Caught: ' + err));
+      }
+    }
+  })
+
+  const app = document.getElementById("app");
+  const help = document.createElement('div');
+  help.setHTMLUnsafe(htmlSnippets["PopUp"]);
+  let isPressed = false;
+  try {
+    if (app) {
+      window.addEventListener("keypress", (e) => {
+        if (e.key === '?' && !isPressed) {
+          isPressed = true;
+          app.appendChild(help);
+        }
+      });
+      window.addEventListener("keyup", (e) => {
+        if (isPressed) {
+          isPressed = false;
+          if (app.contains(help))
+            app.removeChild(help);
+        }
+      });
+    }
+  } catch (e) {
+    console.error(e)
+  }
 }
