@@ -246,32 +246,27 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
 
 /**
  * to add a new message to the chat.
+ * Made it better than just taking one single string for debugging purpose (it sucks keep using console.log)
  *
  * NOT DEFINITIVE,
  * NEED TO ADD SOCKETS,
  * ONLY THERE (for now) TO TEST THE APPEARANCE
  *
- * @param message the message
+ * @param ...args anything that will be send to chat, separated by ", "
  * @returns true if the user has "seen" the message.
  * For instance to make a notif system.
  */
-export function sendMessage(message: string): boolean {
-  if (arguments.length !== 1) {
-    throw new SyntaxError('expected 1 argument');
+export function sendMessage(...args: any[]): boolean {
+  let message = args.join(", ");
+  if (!message){
+    console.error(`message not sent BECAUSE NOTHING TO SEND`);
+    return false
   }
-  if (typeof message !== "string") {
-    throw new TypeError(`argument must be a string, not ${typeof message}`);
-  }
-  if (!message.length) {
-    throw new SyntaxError(`argument must be a string WITH CHARS IN IT`);
-  }
-
   const chat = document.getElementById("chat-content");
   if (!chat) {
     console.error(`message '${message}' not sent to the chat because the chat is not found`);
     return false;
   }
-
   let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
   // true if at the end of the chat
   const para = document.createElement('p');
@@ -308,7 +303,7 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
  * - control P will search for /profile or /profile/username instead of printing the page
  */
 export function setCtrlfEventUsername(): void {
-  window.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       const elem = document.getElementById("username-search") as HTMLTextAreaElement;
       if (elem) {
@@ -351,20 +346,23 @@ export function setCtrlfEventUsername(): void {
   const app = document.getElementById("app");
   const help = document.createElement('div');
   help.setHTMLUnsafe(htmlSnippets["PopUp"]);
-  let isPressed = false;
+  let isPressed = null;
   try {
     if (app) {
-      window.addEventListener("keypress", (e) => {
-        if (e.key === '?' && !isPressed) {
-          isPressed = true;
+      document.addEventListener("keypress", (e) => {
+        e.stopPropagation();
+        if (e.key === '?' && !isPressed && document.activeElement === document.body) {
+          isPressed = e.code;
           app.appendChild(help);
+          
         }
       });
-      window.addEventListener("keyup", (e) => {
-        if (isPressed) {
-          isPressed = false;
-          if (app.contains(help))
+      document.addEventListener("keyup", (e) => {
+        if (e.code === isPressed) {
+          isPressed = null;
+          if (app.contains(help)) {
             app.removeChild(help);
+          }
         }
       });
     }

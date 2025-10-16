@@ -102,7 +102,7 @@ export const htmlSnippets:  {
       <img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
     </span>
     <p class="text-white -ml-2">biography:</p>
-    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
+    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
   </div>
   `,
   Pdf:
@@ -160,7 +160,7 @@ export const htmlSnippets:  {
   `,
   PopUp:
     `
-  <div class="absolute -translate-x-1/2 inset-x-1/2 w-1/2 h-fit top-2 bg-gray-300 m-auto rounded shadow-xl/50 *:text-black *:p-1 *:text-center">
+  <div class="backdrop-blur-xl absolute -translate-x-1/2 inset-x-1/2 w-1/2 h-fit top-2 bg-gray-300 m-auto rounded shadow-xl/50 *:text-black *:p-1 *:text-center">
     <p>Hello. I've made some shortcuts, and found them really useful so...<br><br>
     CTRL + P => goes to your profile editor<br>
     CTRL + P at your profile editor => goes to your public profile<br>

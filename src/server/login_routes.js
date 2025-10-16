@@ -15,7 +15,7 @@ export async function loginRoutes(fastifyInstance) {
   function checkBodyInput(requiredFields, presenceOnly = false) {
     let conditions = {
       username: {minLength: 3, maxLength: 20, alphanumeric_: true },
-      biography: {maxLength: 2000 },
+      biography: {maxLength: 3000 },
       password: {minLength: 4},
     }
     return async function (req, reply) {
@@ -119,9 +119,14 @@ export async function loginRoutes(fastifyInstance) {
       const username = req.body.username; 
       const bio = req.body.biography;
       const db = new Database(dbPath);
-      const res = db.prepare("UPDATE users SET username = ?, bio = ? WHERE id = ?").run(username, bio, req.user.id);
+      const row = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+      if (row && row.id != req.user.id) {
+        db.close();
+        return reply.code(409).send({success: 0, reason: `${username} is already taken... Jealous ?`});
+      }
+      const res = db.prepare("UPDATE or IGNORE users SET username = ?, bio = ? WHERE id = ?").run(username, bio, req.user.id);
       db.close();
-      return reply.send({success: res.changes !== 0, reason: res.changes !== 0 ? ":D" : "Databse didn't succeed"});
+      return reply.send({success: res.changes !== 0, reason: res.changes !== 0 ? ":D" : "The database doesn't feel like it"});
   });
 
   fastifyInstance.post("/password",
