@@ -1,6 +1,7 @@
 
 import Database from "better-sqlite3";
 import { dbPath } from "./database.js";
+import { sha256 } from "js-sha256"
 
 // response format for that page :
 // {
@@ -8,6 +9,8 @@ import { dbPath } from "./database.js";
 //   reason: string,
 // }
 // if you reuse code for other page, take it into consideration
+
+export let securityKey = `fdzaruiefkléd"=$ẑùmr;é".pùé!r%MRfzcé"?MFLT.2FP%RM2FK"à'^fk^pze;ù*~#─]ré!w)xp;éo)é row$wré"!o)$;ocx)"; $o; é")oé$`
 
 export async function loginRoutes(fastifyInstance) {
 
@@ -77,7 +80,7 @@ export async function loginRoutes(fastifyInstance) {
     },
     async (req, reply) => {
       const username = req.body.username;
-      const password = req.body.password; // add security soon and everything
+      const password = sha256(securityKey + req.body.password);
       const db = new Database(dbPath);
       const res = db.prepare('INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)').run(username, password);
       db.close();
@@ -99,7 +102,7 @@ export async function loginRoutes(fastifyInstance) {
     },
     async (req, reply) => {
       const username = req.body.username;
-      const password = req.body.password; // add security soon and everything
+      const password = sha256(securityKey + req.body.password);
       const db = new Database(dbPath);
       let row = db.prepare("SELECT * FROM users WHERE username = ? AND password = ?").get(username, password);
       if (!row) {
@@ -147,7 +150,7 @@ export async function loginRoutes(fastifyInstance) {
       preValidation: checkBodyInput(["password"]),
     },
     async (req, reply) => {
-      const password = req.body.password; // need to add security on the password obviously
+      const password = sha256(securityKey + req.body.password);
       const db = new Database(dbPath);
       const res = db.prepare("UPDATE users SET password = ? WHERE id = ?").run(password, req.user.id);
       db.close();

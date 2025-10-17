@@ -81,7 +81,7 @@ async function fetchApi(): Promise<ServerResponse> {
     return data;
   } catch (error) {
     alert(error instanceof Error ? error.message : String(error));
-    return null;
+    return {};
   }
 }
 
