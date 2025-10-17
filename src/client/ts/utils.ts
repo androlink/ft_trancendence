@@ -45,8 +45,7 @@ function setArrowButton() {
 //                 TIMER STUFF                  #
 //----------------------------------------------------------------------------#
 
-let disconnectTimer1: number;
-let disconnectTimer2: number;
+let reconnectTimer: number;
 window["isConnected"] = false;
 
 /**
@@ -54,7 +53,7 @@ window["isConnected"] = false;
  * @param auth the header X-authenticated after a fresh request
  * @returns true if the timer got 14 more minutes
  */
-export function resetDisconnectTimer(auth: string | null): boolean {
+export function resetReconnectTimer(auth: string | null): boolean {
   if (arguments.length !== 1) {
     throw new SyntaxError('expected 1 argument');
   }
@@ -70,9 +69,8 @@ export function resetDisconnectTimer(auth: string | null): boolean {
     const elem = document.getElementById(id);
     if (elem) elem.toggleAttribute("hidden", !state);
   };
-  clearTimeout(disconnectTimer1);
-  clearTimeout(disconnectTimer2);
-  setVisibility("timer-disconnect", false);
+  clearTimeout(reconnectTimer);
+  setVisibility("account-reconnected", false);
   if (auth !== 'true') {
     setVisibility("account-disconnected", true);
     window["isConnected"] = false;
@@ -80,21 +78,19 @@ export function resetDisconnectTimer(auth: string | null): boolean {
   }
   setVisibility("account-disconnected", false);
   window["isConnected"] = true;
-  disconnectTimer1 = setTimeout(
-    () => setVisibility("timer-disconnect", true),
-    14 * 60 * 1000
-  );
-  disconnectTimer2 = setTimeout(
+  reconnectTimer = setTimeout(
     () => {
-      setVisibility("timer-disconnect", false);
-      setVisibility("account-disconnected", true);
-      window["isConnected"] = false;
+      fetch('/api')
+        .then(res => {
+          if (resetReconnectTimer(res.headers.get('x-authenticated')))
+            setVisibility("account-reconnected", true);
+        })
+        .catch(err => alert('Caught: ' + err));
     },
-    15 * 60 * 1000
+    14 * 60 * 1000
   );
   return true;
 }
-window["resetDisconnectTimer"] = resetDisconnectTimer;
 
 //----------------------------------------------------------------------------#
 //                PURELY COMFORT                #

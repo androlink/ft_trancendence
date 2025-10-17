@@ -2,11 +2,20 @@
 import Database from "better-sqlite3";
 import { dbPath } from "./database.js";
 
+// response format for that page :
+// {
+//   template?: string,
+//   title?: string,
+//   replace?: {[key: string]: string},
+//   inner?: string,
+// }
+// if you reuse code for other page, take it into consideration
+
 export async function apiRoutes(fastifyInstance) {
   fastifyInstance.setNotFoundHandler ( (req, reply) => {
     return reply.code(404).send({
       template: "Error",
-      replace: {status: "Error 404", message: "are you lost by any chance ?"}, 
+      replace: {status: "404 Not Found", message: "are you lost by any chance ?"}, 
       title: "404 Not Found",
     });
   });
@@ -69,7 +78,7 @@ export async function apiRoutes(fastifyInstance) {
       // might happen if someone got their account deleted between requests
       return reply.code(404).send({
         template: "Home", title: "who ?", inner: "Error",
-        replace: {status: "Error 404", message: "You don't exist in the DB for some reason"},
+        replace: {status: "404 Not Found", message: "You don't exist in the DB for some reason"},
       });
     }
     return reply.send({
@@ -87,7 +96,7 @@ export async function apiRoutes(fastifyInstance) {
     if (!row)
       return reply.send({
         template: "Home", title: username, inner: "Error",
-        replace: {status: "Error 404", message: "That user doesn't exist"},
+        replace: {status: "404 Not Found", message: "That user doesn't exist"},
       });
     return reply.send({
       template: "Home",

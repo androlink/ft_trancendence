@@ -1,10 +1,11 @@
 
 const assetsPath = `/resources`;
+const thenMain = `.then(main)`
 const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`
-const thenResetTimerAndMain = `.then(res => {resetDisconnectTimer(res.headers.get('x-authenticated')); main()})`
 
 // theorically should use to say "as const" at the end and not :,
 // to make the string readonly, but it would make the type of htmlSnippets un-readable
+// Also i know the tabs and the \n after the ` are bad, the the browser trims
 /**
  * all the HTML (and CSS) of the Single-Page-Application
  */
@@ -24,7 +25,7 @@ export const htmlSnippets:  {
     `
   <span class="grid grid-cols-3 mx-8 my-2">
     <span class="flex justify-self-start">
-      <input id="username-search" type="search" spellcheck="false" placeholder="username" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
+      <input id="user-search" type="search" spellcheck="false" placeholder="username" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
     </span>
     <p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
     <span class="justify-self-end flex gap-x-2">
@@ -32,7 +33,7 @@ export const htmlSnippets:  {
         <img src="${assetsPath}/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer" draggable="false">
         <span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
       </span>
-      <img src="${assetsPath}/exit-icon.png" onclick="if (window.isConnected) fetch('/logout', {method: 'POST'})${thenResetTimerAndMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
+      <img src="${assetsPath}/exit-icon.png" onclick="if (window.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
@@ -44,9 +45,8 @@ export const htmlSnippets:  {
   <span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
     <div id="inner" class="h-full w-3/4 overflow-hidden"></div>
     <div class="h-full w-1/4 flex flex-col overflow-hidden">
-      <div id="timer-disconnect" hidden="" class="mb-2 rounded border bg-orange-100 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
-        <p class="m-2 font-bold">You're gonna be disconnected in less than a minute</p>
-        <button class="bg-white rounded size-fit p-1" onclick="fetch('/api')${thenResetTimerAndMain}${catchErrorAndAlert}">reconnect</button>
+      <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
+        <p class="m-2 font-bold">You got auto reconnected :D</p>
       </div>
       <div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">You are not connected</p>
@@ -69,8 +69,8 @@ export const htmlSnippets:  {
   Profile1:
     `
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
-    <form id="profile-form" class="border-4 border-gray-900 rounded-2xl p-3 w-full grow flex flex-col overflow-y-scroll overflow-x-hidden">
-      <p id="go-to-profile" class="contrast-200 text-white size-fit -mt-4 -ml-4 px-2 py-1 rounded bg-cyan-900 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">public infos</p>
+    <form id="profile-form" class="relative border-4 border-gray-900 rounded-2xl p-3 w-full grow flex flex-col overflow-y-scroll overflow-x-hidden">
+      <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">public infos</p>
       <span class="flex justify-around place-items-center">
         <input id="username" value="" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
         <img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
@@ -80,17 +80,25 @@ export const htmlSnippets:  {
       <button class="place-self-center bg-white rounded size-fit p-1 my-1 mt-auto hover:cursor-pointer" type="submit">update</button>
       <p name="error-handler" class="text-red-500 font-bold"></p>
     </form>
-    <form id="change-password-form" class="border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit flex flex-col overflow-hidden">
-      <p class="text-white size-fit -mt-4 -ml-4 px-2 py-1 rounded bg-amber-900">private infos</p>
-      <span class="flex gap-5 w-1/2">
-        <div class="flex gap-2 flex-col p-1">
-          <input placeholder="new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
-          <input placeholder="confirm password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
-        </div>
-        <button class="self-center bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">change password</button>
-      </span>
-      <p name="error-handler" class="text-red-500 font-bold">
-    </form>
+    <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden">
+      <p class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-amber-900">private infos</p>
+      <form id="change-password-form" class="mt-5">
+        <span class="flex gap-5 w-1/2">
+          <div class="flex gap-2 flex-col p-1">
+            <input placeholder="new password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
+            <input placeholder="confirm password" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
+          </div>
+          <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">change password</button>
+        </span>
+        <p name="error-handler" class="text-red-500 font-bold">
+      </form>
+      <form id="delete-account-form" class="mt-5 flex flex-col items-center">
+          <input placeholder="confirm username" title="a missclick-security" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+          <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">erase account</button>
+        </span>
+        <p name="error-handler" class="text-red-500 font-bold">
+      </form>
+    </span>
   </div>
 
   `,
@@ -160,18 +168,21 @@ export const htmlSnippets:  {
   `,
   PopUp:
     `
-  <div class="backdrop-blur-xl absolute -translate-x-1/2 inset-x-1/2 w-1/2 h-fit top-2 bg-gray-300 m-auto rounded shadow-xl/50 *:text-black *:p-1 *:text-center">
-    <p>Hello. I've made some shortcuts, and found them really useful so...<br><br>
-    CTRL + P => goes to your profile editor<br>
-    CTRL + P at your profile editor => goes to your public profile<br>
-    CTRL + E => disconnect you<br>
-    CTRL + Enter => selects the Chat<br>
-    CTRL + K => selects the profile... reasearch... thing... at the top left<br>
-    ? => shows this menu <br><br>
-    Shoutout to the default shortcuts<br>
-    alt + (left || right) arrow => navigate history<br>
-    tab && shift + tab => select elements</p>
-
+  <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50">
+    <p class="text-black p-1 text-center">
+      Hello. I've made some shortcuts, and found them really useful so...<br><br>
+      CTRL + P => goes to your profile editor<br>
+      CTRL + P at your profile editor => goes to your public profile<br>
+      CTRL + E => disconnect you<br>
+      CTRL + Enter => selects the Chat<br>
+      CTRL + K => selects the profile... reasearch... thing... at the top left<br>
+      ? => shows this menu <br><br>
+      Shoutout to the default shortcuts<br>
+      alt + (left || right) arrow => navigate history<br>
+      tab && shift + tab => select elements<br>
+      <br>
+      CTRL + E with user-search selected => disconnect you without page reset, debug only, that line will be removed soon
+    </p>
   </div>
     `
 } as const;

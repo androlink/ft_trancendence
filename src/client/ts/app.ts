@@ -1,6 +1,6 @@
 var exports = {};
 import { htmlSnippets } from "./templates.js"
-import { goToURL, keyExist, launchSinglePageApp, resetDisconnectTimer } from "./utils.js";
+import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
 import { setEvents } from "./events.js";
 
 /**
@@ -11,7 +11,6 @@ interface ServerResponse {
   title?: string,
   replace?: {[key: string]: string},
   inner?: string,
-  reload?: boolean,
   headers?: Headers,
 }
 
@@ -42,21 +41,19 @@ export async function main(): Promise<void> {
     changeSnippet(app, data['template']);
   }
   const inner = document.getElementById('inner');
-  if (inner) {
-    const parent = document.getElementById('inner-buttons');
-    if (parent){
-      toggleButtons(parent);
-    }
-    if (keyExist(data, 'inner') && data.inner != mainInner) {
-      mainInner = data.inner;
-      changeSnippet(inner, data['inner']);
-    }
+  if (inner && keyExist(data, 'inner') && data.inner != mainInner) {
+    mainInner = data.inner;
+    changeSnippet(inner, data['inner']);
+  }
+  const parent = document.getElementById('inner-buttons');
+  if (parent){
+    toggleButtons(parent);
   }
   if (keyExist(data, "replace")) {
     replaceElements(data.replace);
   }
   if (keyExist(data, 'headers')) {
-    resetDisconnectTimer(data.headers.get('x-authenticated'));
+    resetReconnectTimer(data.headers.get('x-authenticated'));
   }
   setEvents();
 }

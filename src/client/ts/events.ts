@@ -1,6 +1,6 @@
 
 
-import { goToURL, keyExist, resetDisconnectTimer } from "./utils.js";
+import { goToURL, keyExist, resetReconnectTimer } from "./utils.js";
 import { htmlSnippets } from "./templates.js";
 import { main } from "./app.js";
 
@@ -9,27 +9,23 @@ import { main } from "./app.js";
  */
 export function setEvents(): void {
   let elem: any;
-  elem = document.getElementById("chat-input") as HTMLTextAreaElement;
-  if (elem && !elem.hasAttribute("data-custom"))
-    setEnterEventChat(elem);
-  elem = document.getElementById("username-search") as HTMLTextAreaElement;
-  if (elem && !elem.hasAttribute("data-custom"))
-    setEnterEventUsername(elem);
-  elem = document.getElementById('login-form') as HTMLFormElement;
-  if (elem && !elem.hasAttribute('data-custom'))
-    setSubmitEventLogin(elem);
-  elem = document.getElementById('register-form') as HTMLFormElement;
-  if (elem && !elem.hasAttribute('data-custom'))
-    setSubmitEventRegister(elem);
-  elem = document.getElementById('profile-form') as HTMLFormElement;
-  if (elem && !elem.hasAttribute('data-custom'))
-    setSubmitEventProfile(elem);
-  elem = document.getElementById('go-to-profile') as HTMLElement;
-  if (elem && !elem.hasAttribute('data-custom'))
-    setClickEventProfile(elem);
-  elem = document.getElementById('change-password-form') as HTMLFormElement;
-  if (elem && !elem.hasAttribute('data-custom'))
-      setSubmitEventPassword(elem);
+  const events = {
+    "chat-input": setEnterEventChat,
+    "user-search": setEnterEventUsername,
+    "login-form": setSubmitEventLogin,
+    "register-form": setSubmitEventRegister,
+    "profile-form": setSubmitEventProfile,
+    "go-to-profile": setClickEventProfile,
+    "change-password-form": setSubmitEventPassword,
+    "delete-account-form": setSubmitEventDelete,
+  }
+  for (const id in events) {
+    const elem = document.getElementById(id);
+    if (elem && !elem.hasAttribute("data-custom")) {
+      events[id](elem);
+      elem.toggleAttribute("data-custom", true);
+    }
+  }
 }
 
 /**
@@ -52,19 +48,17 @@ function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
  * @param form the said form element
  */
 function setSubmitEventLogin(form: HTMLFormElement): void {
-  form.toggleAttribute("data-custom", true);
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
-    let response: Response;
-    try {
+        try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
       if (!username || !password) {
         displayErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
         return ;
       }
-      response = await fetch('/login', {
+      const response = await fetch('/login', {
         method: 'POST',
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: new URLSearchParams({
@@ -81,7 +75,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
       }
       main();
     } catch (error) {
-      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+      displayErrorOrAlert(form, String(error));
     }
   });
 }
@@ -92,12 +86,10 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventRegister(form: HTMLFormElement): void {
-  form.toggleAttribute("data-custom", true);
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
-    let response: Response;
-    try {
+        try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
       if (!username || !password) {
@@ -108,7 +100,7 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
         displayErrorOrAlert(form, "the two passwords need to correspond");
         return ;
       }
-      response = await fetch('/register', {
+      const response = await fetch('/register', {
         method: 'POST',
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: new URLSearchParams({
@@ -125,7 +117,7 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
       }
       main();
     } catch (error) {
-      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+      displayErrorOrAlert(form, String(error));
     }
   });
 }
@@ -135,14 +127,12 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventProfile(form: HTMLFormElement): void {
-  form.toggleAttribute("data-custom", true);
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
-    let response: Response;
     try {
-      response = await fetch('/update', {
-        method: 'POST',
+      const response = await fetch('/update', {
+        method: 'PUT',
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: new URLSearchParams({
           username: formData.get('username') as string,
@@ -158,7 +148,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
       }
       goToURL(`profile/${formData.get('username') as string}`);
     } catch (error) {
-      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+      displayErrorOrAlert(form, String(error));
     }
   });
 }
@@ -169,12 +159,10 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventPassword(form: HTMLFormElement): void {
-  form.toggleAttribute("data-custom", true);
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
-    let response: Response;
-    try {
+        try {
       const password = formData.get("password") as string;
       if (password.length < 4) {
         displayErrorOrAlert(form, "At very least 4 chars required");
@@ -185,8 +173,8 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
         return ;
       }
 
-      response = await fetch('/password', {
-        method: 'POST',
+      const response = await fetch('/password', {
+        method: 'PUT',
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: new URLSearchParams({
           password: password, 
@@ -205,21 +193,46 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
       else
         goToURL( );
     } catch (error) {
-      displayErrorOrAlert(form, `Server responded with ${response.status} ${response.statusText}`);
+      displayErrorOrAlert(form, String(error));
+    }
+  });
+}
+
+function setSubmitEventDelete(form: HTMLFormElement): void {
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    try {
+      const response = await fetch('/delete', {
+        method: 'DELETE',
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({
+          username: formData.get("username") as string, 
+        }),
+      });
+
+      const result: {success?: boolean, reason?:string} = await response.json();
+      if (!result.success) {
+        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+          `Server responded with ${response.status} ${response.statusText}`);
+        return ;
+      }
+      main();
+    } catch (error) {
+      displayErrorOrAlert(form, String(error));
     }
   });
 }
 
 /**
  * used by the button that goes to the public profile from /profile
- * @param text the HTMLElement that's gonna get the event
+ * @param textElem the HTMLElement that's gonna get the event
  */
 function setClickEventProfile(text: HTMLElement): void {
-  text.toggleAttribute("data-custom", true);
-  const elem = document.getElementById("username");
-  if (!elem || !elem.hasAttribute("value"))
+  const usernameElem = document.getElementById("username");
+  if (!usernameElem || !usernameElem.hasAttribute("value"))
     return ;
-  const username: string = elem.getAttribute("value");
+  const username: string = usernameElem.getAttribute("value");
   text.addEventListener("click", (event: PointerEvent) => 
     goToURL(`profile/${username}`)
   );
@@ -227,11 +240,9 @@ function setClickEventProfile(text: HTMLElement): void {
 
 /**
  * used by the chat input, send message on enter
- * OBVIOUSLY not definitive
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
-  textarea.toggleAttribute("data-custom", true);
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -298,14 +309,14 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
 
 /**
  * Used at the start of the app-launching, to keyboard shortcut
- * - control K will select (if present) the username-search
+ * - control K will select (if present) the user-search
  * - control enter will select (if present) the chat-input
  * - control P will search for /profile or /profile/username instead of printing the page
  */
 export function setCtrlfEventUsername(): void {
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      const elem = document.getElementById("username-search") as HTMLTextAreaElement;
+      const elem = document.getElementById("user-search") as HTMLTextAreaElement;
       if (elem) {
         e.preventDefault();
         elem.select();
@@ -330,13 +341,14 @@ export function setCtrlfEventUsername(): void {
       goToURL('profile');
     }
 
-    if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'e') {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
       if (window["isConnected"]) {
         e.preventDefault();
         fetch("/logout", {method: 'POST'}).then(
           res => {
-            resetDisconnectTimer(res.headers.get("x-authenticated")); 
-            main();
+            resetReconnectTimer(res.headers.get("x-authenticated")); 
+            if (document.activeElement.id !== "user-search") main();
+            else sendMessage("You found a debug option, won't force a reload if user-search is selected");
           }
         ).catch(err => alert('Caught: ' + err));
       }
@@ -344,29 +356,36 @@ export function setCtrlfEventUsername(): void {
   })
 
   const app = document.getElementById("app");
-  const help = document.createElement('div');
-  help.setHTMLUnsafe(htmlSnippets["PopUp"]);
+  const template = document.createElement('template');
+  template.innerHTML = htmlSnippets["PopUp"];
+  const help = template.content.firstElementChild;
   let isPressed = null;
-  try {
-    if (app) {
-      document.addEventListener("keypress", (e) => {
-        e.stopPropagation();
-        if (e.key === '?' && !isPressed && document.activeElement === document.body) {
-          isPressed = e.code;
-          app.appendChild(help);
-          
+  if (app && help) {
+    document.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+      // document active is set to body to not activate while using chat
+      if (e.key === '?' && !isPressed && document.activeElement === document.body) {
+        isPressed = e.code;
+        app.appendChild(help);
+        
+      }
+    });
+    document.addEventListener("blur", (e) => {
+      // it's for removing when leaving the page (changin website || changing app)
+      if (isPressed) {
+        isPressed = null;
+        if (app.contains(help)) {
+          app.removeChild(help);
         }
-      });
-      document.addEventListener("keyup", (e) => {
-        if (e.code === isPressed) {
-          isPressed = null;
-          if (app.contains(help)) {
-            app.removeChild(help);
-          }
+      }
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.code === isPressed) {
+        isPressed = null;
+        if (app.contains(help)) {
+          app.removeChild(help);
         }
-      });
-    }
-  } catch (e) {
-    console.error(e)
+      }
+    });
   }
 }

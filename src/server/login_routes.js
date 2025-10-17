@@ -2,14 +2,19 @@
 import Database from "better-sqlite3";
 import { dbPath } from "./database.js";
 
-
+// response format for that page :
+// {
+//   success: boolean,
+//   reason: string,
+// }
+// if you reuse code for other page, take it into consideration
 
 export async function loginRoutes(fastifyInstance) {
 
   /**
    * treat the element you want based on a collection of requirements decided arbitrary in the scope
-   * @param requiredFields ex : ["username", "biography, password]
-   * @param presenceOnly setting it as true will stop the checks at the presence in the body  
+   * @param requiredFields ex : ["username", "biography", "password"]
+   * @param presenceOnly setting it as true will stop the checks at the presence in the body
    * @returns a function used for a hook
    */
   function checkBodyInput(requiredFields, presenceOnly = false) {
@@ -20,12 +25,12 @@ export async function loginRoutes(fastifyInstance) {
     }
     return async function (req, reply) {
       for (const field of requiredFields) {
-        if (!Object.hasOwn(conditions, field))
-          return reply.code(500).send("That input is not in our conditions, no idea how to parse it");
         if (!Object.hasOwn(req.body, field))
           return reply.code(401).send({success: false, reason: `query ${field} missing`});
         if (presenceOnly) 
           continue ;
+        if (!Object.hasOwn(conditions, field)) // during development only. Should never happen anyway
+          return reply.code(500).send("That input is not in our conditions, no idea how to parse it. Our fault LOL");
         if (typeof req.body[field] !== "string")
           return reply.code(401).send({success: false, reason: `${field} must be a string`});
         if (conditions[field].minLength && req.body[field].length < conditions[field].minLength)
@@ -62,32 +67,9 @@ export async function loginRoutes(fastifyInstance) {
     try {
       await req.jwtVerify();
     } catch (err) {
-      return reply.code(401).send("You need to be connected");
+      return reply.code(401).send({success: false, reason: "You need to be connected for that action"});
     }
   };
-
-  fastifyInstance.post("/login",
-    {
-      onRequest: [needFormBody],
-      preValidation: checkBodyInput(["username", "password"], true),
-    },
-    async (req, reply) => {
-      const username = req.body.username;
-      const password = req.body.password; // add security soon and everything
-      const db = new Database(dbPath);
-      let row = db.prepare("SELECT * FROM users WHERE username = ? AND password = ?").get(username, password);
-      if (!row) {
-        row = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
-        db.close();
-        return reply.send({success: false, reason: row ? "wrong password" : `no account with username "${username}"`});
-      }
-      db.close();
-      const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
-      const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
-      return reply.header("x-authenticated", true)
-        .setCookie("account", token, cookiesOptions)
-        .send({success: true, reason: `welcome ${username}`});
-  });
 
   fastifyInstance.post("/register",
     {
@@ -110,7 +92,35 @@ export async function loginRoutes(fastifyInstance) {
         .send({success: true, reason: `welcome ${username}`});
   });
 
-  fastifyInstance.post("/update",
+  fastifyInstance.post("/login",
+    {
+      onRequest: [needFormBody],
+      preValidation: checkBodyInput(["username", "password"], true),
+    },
+    async (req, reply) => {
+      const username = req.body.username;
+      const password = req.body.password; // add security soon and everything
+      const db = new Database(dbPath);
+      let row = db.prepare("SELECT * FROM users WHERE username = ? AND password = ?").get(username, password);
+      if (!row) {
+        row = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
+        db.close();
+        return reply.code(401).send({success: false, reason: row ? "wrong password" : `no account with username "${username}"`});
+      }
+      db.close();
+      const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
+      const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
+      return reply.header("x-authenticated", true)
+        .setCookie("account", token, cookiesOptions)
+        .send({success: true, reason: `welcome ${username}`});
+  });
+
+  fastifyInstance.post("/logout", async (req, reply) => {
+    reply.clearCookie("account");
+    return reply.header("x-authenticated", false).send({success: true, reason: "We can't have you forever"});
+  });
+
+  fastifyInstance.put("/update",
     {
       onRequest: [identifyUser, needFormBody],
       preValidation: checkBodyInput(["username", "biography"]),
@@ -126,10 +136,12 @@ export async function loginRoutes(fastifyInstance) {
       }
       const res = db.prepare("UPDATE or IGNORE users SET username = ?, bio = ? WHERE id = ?").run(username, bio, req.user.id);
       db.close();
-      return reply.send({success: res.changes !== 0, reason: res.changes !== 0 ? ":D" : "The database doesn't feel like it"});
+      if (!res.changes) // might happen if username taken between two requests, or if the id is not linked to an account (aka user account deleted)
+        return reply.code(403).send({success: false, reason: "The database doesn't feel like it"});
+      return reply.send({success: true, reason: ":D"});
   });
 
-  fastifyInstance.post("/password",
+  fastifyInstance.put("/password",
     {
       onRequest: [identifyUser, needFormBody],
       preValidation: checkBodyInput(["password"]),
@@ -139,11 +151,32 @@ export async function loginRoutes(fastifyInstance) {
       const db = new Database(dbPath);
       const res = db.prepare("UPDATE users SET password = ? WHERE id = ?").run(password, req.user.id);
       db.close();
-      return reply.send({success: res.changes !== 0, reason: res.changes !== 0 ? ":D" : "Databse didn't succeed"});
+      if (!res.changes) 
+        return reply.code(403).send({success: false, reason: "The database doesn't feel like it"});
+      return reply.send({success: true, reason: ":D"});
   });
 
-  fastifyInstance.post("/logout", async (req, reply) => {
-    reply.clearCookie("account");
-    return reply.header("x-authenticated", false).send("Goodbye");
+
+  fastifyInstance.delete("/delete",
+    {
+      onRequest: [identifyUser, needFormBody],
+      preValidation: checkBodyInput(["username"], true),
+    },
+    async (req, reply) => {
+      const username = req.body.username;
+      const db = new Database(dbPath);
+      const res = db.prepare("DELETE FROM users WHERE id = ? AND username = ?").run(req.user.id, username);
+      if (!res.changes) {
+        // it should never return true expect for data race, but i don't know enough sql yet 
+        const row = db.prepare("SELECT * FROM users WHERE id = ? AND username = ?").get(req.user.id, username);
+        db.close();
+        if (row)
+          return reply.code(403).send({success: false, reason: "The database doesn't feel like it"});
+        return reply.code(401).send({success: false, reason: "Nope that's not your username"});
+      }
+      db.close();
+      reply.clearCookie("account");
+      // Not a 204 No content because 204 should not have a body and the front wants to have success
+      return reply.header("x-authenticated", false).send({success: true, reason: ":D"});
   });
 }
