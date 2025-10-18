@@ -10,7 +10,7 @@ RUN npm i @fastify/websocket
 RUN npm i @fastify/formbody
 RUN npm i @fastify/cookie
 RUN npm i better-sqlite3
-RUN npm i js-sha256
+RUN npm i bcrypt
 RUN npm install
 # when changing the installs above
 # you should consider emptying (or rm) node_modules volume

@@ -1,6 +1,5 @@
 
-import Database from "better-sqlite3";
-import { dbPath } from "./database.js";
+import db from "./database.js";
 
 // response format for that page :
 // {
@@ -40,6 +39,21 @@ export async function apiRoutes(fastifyInstance) {
         inner: "Login",
       });
     }
+    const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+    if (!row) {
+      // might happen naturally if jwt from a previous DB or account deleted
+      reply.clearCookie("account");
+      reply.header('x-authenticated', false);
+      return reply.send({
+        template: "Home",
+        title: "login",
+        inner: "Login",
+      });
+    }
+    req.user.username = row.username;
+    req.user.admin = row.admin;
+    req.user.password = row.password;
+    req.user.bio = row.bio;
   };
   // login now only use the profile route due to consistency
   // and because it made no sense to have a login page when connected
@@ -71,28 +85,16 @@ export async function apiRoutes(fastifyInstance) {
   });
 
   fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
-    const db = new Database(dbPath);
-    const row = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
-    db.close();
-    if (!row) {
-      // might happen if someone got their account deleted between requests
-      return reply.code(404).send({
-        template: "Home", title: "who ?", inner: "Error",
-        replace: {status: "404 Not Found", message: "You don't exist in the DB for some reason"},
-      });
-    }
     return reply.send({
       template: "Home",
-      replace: {username: row.username, biography: row.bio},
+      replace: {username: req.user.username, biography: req.user.bio},
       title: "You", inner: "Profile1",
     });
   });
 
   fastifyInstance.get('/profile/:username', (req, reply) => {
     const username = req.params.username;
-    const db = new Database(dbPath);
-    const row = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-    db.close();
+    const row = db.prepare('SELECT bio FROM users WHERE username = ?').get(username);
     if (!row)
       return reply.send({
         template: "Home", title: username, inner: "Error",

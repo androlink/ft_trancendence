@@ -6,7 +6,7 @@ import { loginRoutes } from './login_routes.js';
 import { launchDB } from './database.js';
 
 const fastify = fastifyConf();
-launchDB();
+await launchDB();
 
 fastify.setNotFoundHandler((req, reply) => {
   if (req.method === "GET") return reply.code(200).sendFile('/page.html');
