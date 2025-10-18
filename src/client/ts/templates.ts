@@ -20,6 +20,7 @@ export const htmlSnippets:  {
   readonly Error: string;
   readonly Ouch: string;
   readonly PopUp: string;
+  readonly ErrorMessageHandler: string;
 } = {
   Home:
     `
@@ -33,7 +34,7 @@ export const htmlSnippets:  {
         <img src="${assetsPath}/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer" draggable="false">
         <span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
       </span>
-      <img src="${assetsPath}/exit-icon.png" onclick="if (window.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
+      <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
@@ -78,7 +79,6 @@ export const htmlSnippets:  {
       <p class="text-white -ml-2">biography:</p>
       <textarea id="biography" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
       <button class="place-self-center bg-white rounded size-fit p-1 my-1 mt-auto hover:cursor-pointer" type="submit">update</button>
-      <p name="error-handler" class="text-red-500 font-bold"></p>
     </form>
     <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden">
       <p class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-amber-900">private infos</p>
@@ -90,13 +90,11 @@ export const htmlSnippets:  {
           </div>
           <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">change password</button>
         </span>
-        <p name="error-handler" class="text-red-500 font-bold">
       </form>
       <form id="delete-account-form" class="mt-5 flex flex-col items-center">
           <input placeholder="confirm username" title="a missclick-security" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
           <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">erase account</button>
         </span>
-        <p name="error-handler" class="text-red-500 font-bold">
       </form>
     </span>
   </div>
@@ -127,7 +125,6 @@ export const htmlSnippets:  {
       <label class="text-white size-fit" for="password">password:</label>
       <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="password" name="password">
       <button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">login</button>
-      <p name="error-handler" class="text-red-500 font-bold mb-2"></p>
     </form>
     <form id="register-form">
       <label class="text-white size-fit" for="username">username:</label>
@@ -137,7 +134,6 @@ export const htmlSnippets:  {
       <label class="text-white size-fit" for="password">confirm password:</label>
       <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
       <button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">register</button>
-      <p name="error-handler" class="text-red-500 font-bold mb-2"></p>
     </form>
     <div>
       <p class="text-white size-fit">Google auth and stuff</p>
@@ -184,5 +180,9 @@ export const htmlSnippets:  {
       CTRL + E with user-search selected => disconnect you without page reset, debug only, that line will be removed soon
     </p>
   </div>
+    `,
+  ErrorMessageHandler:
+    `
+  <p name="error-handler" class="text-red-500 font-bold mb-2"></p>
     `
 } as const;

@@ -32,13 +32,13 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
   await main();
   return true;
 }
-window["goToURL"] = goToURL;
+self["goToURL"] = goToURL;
 
 /** 
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  window.addEventListener('popstate', main);
+  self.addEventListener('popstate', main);
 };
 
 //----------------------------------------------------------------------------#
@@ -46,7 +46,7 @@ function setArrowButton() {
 //----------------------------------------------------------------------------#
 
 let reconnectTimer: number;
-window["isConnected"] = false;
+self["isConnected"] = false;
 
 /**
  * sets a timer to tell you when you're gonna be disconnected soon
@@ -73,11 +73,11 @@ export function resetReconnectTimer(auth: string | null): boolean {
   setVisibility("account-reconnected", false);
   if (auth !== 'true') {
     setVisibility("account-disconnected", true);
-    window["isConnected"] = false;
+    self["isConnected"] = false;
     return false;
   }
   setVisibility("account-disconnected", false);
-  window["isConnected"] = true;
+  self["isConnected"] = true;
   reconnectTimer = setTimeout(
     () => {
       fetch('/api')

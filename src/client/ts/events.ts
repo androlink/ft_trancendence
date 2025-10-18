@@ -35,11 +35,23 @@ export function setEvents(): void {
  * @param message the error that will be shown
  */
 function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
-  const child = form.lastElementChild;
-  if (child && child.getAttribute("name") === "error-handler") {
-    child.textContent = message;
-  } else {
-    alert(message)
+  try {
+    const child = form.lastElementChild;
+    if (child && child.getAttribute("name") === "error-handler") {
+      child.textContent = message;
+      return;
+    }
+    const template = document.createElement('template');
+    template.innerHTML = htmlSnippets["ErrorMessageHandler"];
+    const handler = template.content.firstElementChild as HTMLParagraphElement;
+    if (handler === null) {
+      alert(message);
+      return;
+    }
+    handler.innerText = message;
+    form.appendChild(handler);
+  } catch (error) {
+    alert(`${message}\nAlso: ${error}`);
   }
 }
 
@@ -67,7 +79,8 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
         }),
       });
 
-      const result: {success?: boolean, reason?:string} = await response.json();
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, reason?: string} = await response.json();
       if (!result.success) {
         displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
           `Server responded with ${response.status} ${response.statusText}`);
@@ -109,7 +122,8 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
         }),
       });
       
-      const result: {success?: boolean, reason?:string} = await response.json();
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, reason?: string} = await response.json();
       if (!result.success) {
         displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
           `Server responded with ${response.status} ${response.statusText}`);
@@ -140,7 +154,8 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
         }),
       });
 
-      const result: {success?: boolean, reason?:string} = await response.json();
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, reason?: string} = await response.json();
       if (!result.success) {
         displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
           `Server responded with ${response.status} ${response.statusText}`);
@@ -181,7 +196,8 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
         }),
       });
 
-      const result: {success?: boolean, reason?:string} = await response.json();
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, reason?: string} = await response.json();
       if (!result.success) {
         displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
           `Server responded with ${response.status} ${response.statusText}`);
@@ -211,7 +227,8 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
         }),
       });
 
-      const result: {success?: boolean, reason?:string} = await response.json();
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, reason?: string} = await response.json();
       if (!result.success) {
         displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
           `Server responded with ${response.status} ${response.statusText}`);
@@ -289,7 +306,7 @@ export function sendMessage(...args: any[]): boolean {
   }
   return scroll;
 }
-window["sendMessage"] = sendMessage;
+self["sendMessage"] = sendMessage;
 
 /**
  * Used by the username input at the top of the UI.
@@ -342,7 +359,7 @@ export function setCtrlfEventUsername(): void {
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-      if (window["isConnected"]) {
+      if (self["isConnected"]) {
         e.preventDefault();
         fetch("/logout", {method: 'POST'}).then(
           res => {

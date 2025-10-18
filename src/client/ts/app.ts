@@ -57,7 +57,7 @@ export async function main(): Promise<void> {
   }
   setEvents();
 }
-window["main"] = main;
+self["main"] = main;
 
 /**
  * Fetchs the api page corresponding to the current page
@@ -65,7 +65,7 @@ window["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`${window.location.origin}/api${window.location.pathname}`);
+    const response = await fetch(`${self.location.origin}/api${self.location.pathname}`);
     if (response.status >= 500 && response.status < 600
       || !(response.headers.has('content-type'))
       || !response.headers.get("content-type").startsWith("application/json")) {
