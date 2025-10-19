@@ -124,7 +124,11 @@ export async function apiRoutes(fastifyInstance) {
         replace: {status: "403 NUH UH", message: "You need to be admin"},
       });
     }
-    const data = fs.readFileSync(dbLogFile, { encoding: 'utf8', flag: 'r' });
-    return reply.send(data.replace(/(?:\r\n|\r|\n)/g, '<br>'));
+    const file = fs.readFileSync(dbLogFile, { encoding: 'utf8', flag: 'r' })
+      .replace(/(?:\r\n|\r|\n)/g, '<br>');
+    // will need to be replaced soon if we wanna be clean.
+    // Here it reads the whole file to send last 10Mo, waste of time if many Go long
+    return reply.type('text/html').send(`<!DOCTYPE html><html><head><title>db logs</title></head>
+      <body>${file.substring(file.length - 10 * 1024 * 1024)}</body></html>`);
   });
 }

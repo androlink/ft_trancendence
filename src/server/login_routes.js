@@ -76,11 +76,12 @@ export async function loginRoutes(fastifyInstance) {
       req.user.admin = row.admin;
       req.user.password = row.password;
       req.user.bio = row.bio;
+      const token = fastifyInstance.jwt.sign({id: req.user.id},  {expiresIn: '15m'});
       reply.setCookie('account', token, {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, });
       reply.header('x-authenticated', true);
     } catch (err) {
       reply.header('x-authenticated', false);
-      return reply.code(403).send({success: false, message: "You need to be connected for that action"});
+      return reply.code(403).send({success: false, message: err.message});
     }
   };
 
