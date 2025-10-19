@@ -2,7 +2,7 @@
 import fastifyConf from './config.js'
 
 import { apiRoutes } from './api_routes.js';
-import { loginRoutes } from './login_routes.js';
+import { loginRoutes } from './accounts_routes.js';
 import { launchDB } from './database.js';
 
 const fastify = fastifyConf();
