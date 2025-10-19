@@ -17,7 +17,7 @@ export async function loginRoutes(fastifyInstance) {
    */
   function checkBodyInput(requiredFields, presenceOnly = false) {
     let conditions = {
-      username: {minLength: 3, maxLength: 20, alphanumeric_: true },
+      username: {minLength: 3, maxLength: 12, alphanumeric_: true },
       biography: {maxLength: 3000 },
       password: {minLength: 4, maxByteLength: 42 },
     }
