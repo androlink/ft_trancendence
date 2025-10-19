@@ -47,6 +47,7 @@ services:
     image: server
     build:
       context: services/server/
+    env_file: "services/server/conf/secrets.env"
     networks:
       - trancendence
     volumes:

@@ -5,15 +5,13 @@ import fs from 'fs';
 export const dbPath = '/var/db/example.db';
 export const dbLogFile = '/var/db/log.txt';
 
-let securityKey = `diẑ6epù*pze12$*$af,zç_à87e*âpdz98°az%eç"éç'è"_bré-&à b" ée`;
-
 /**
  * hash a string, works up to 72 Bytes due to the algorithm used
  * @param {string} str 
  * @returns {Promise<string>}
  */
 export async function hashPassword(str) {
-  return await bcrypt.hash(str + securityKey, 12);
+  return await bcrypt.hash(str + process.env.PEPPER_KEY_PASSWORDS, 12);
 }
 
 /**
@@ -22,7 +20,7 @@ export async function hashPassword(str) {
  * @returns {Promise<boolean>}
  */
 export async function comparePassword(str, hashedPassword) {
-  return await bcrypt.compare(str + securityKey, hashedPassword)
+  return await bcrypt.compare(str + process.env.PEPPER_KEY_PASSWORDS, hashedPassword)
 }
 
 /**
@@ -39,7 +37,8 @@ export default new Database(dbPath,
  */
 import db from './database.js'
 export async function launchDB() {
-  const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get('users');
+  const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?")
+    .get('users');
   if (row)
     return ;
   
@@ -53,5 +52,6 @@ export async function launchDB() {
     admin INTEGER DEFAULT 0
   );
   `);
-  db.prepare("INSERT INTO users (username, password, admin) VALUES (?, ?, ?)").run("AllMighty", await hashPassword("placeholder"), 1);
+  db.prepare("INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)")
+    .run("AllMighty", await hashPassword(process.env.ADMIN_PASSWORD), "ADMIN", 1);
 }

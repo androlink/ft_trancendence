@@ -21,7 +21,7 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
     throw new TypeError(`first argument must be a string, not ${typeof nextURL}`);
   }
   if (typeof force !== 'boolean') {
-    throw new TypeError(`second argument must be a string, not ${typeof force}`);
+    throw new TypeError(`second argument must be a boolean, not ${typeof force}`);
   }
 
   if (!nextURL.startsWith('/'))

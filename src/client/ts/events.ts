@@ -80,9 +80,9 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
       });
 
       resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, reason?: string} = await response.json();
+      const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
@@ -123,9 +123,9 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
       });
       
       resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, reason?: string} = await response.json();
+      const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
@@ -155,9 +155,9 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
       });
 
       resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, reason?: string} = await response.json();
+      const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
@@ -197,9 +197,9 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
       });
 
       resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, reason?: string} = await response.json();
+      const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
@@ -228,9 +228,9 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
       });
 
       resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, reason?: string} = await response.json();
+      const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "reason") ? result.reason :
+        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }

@@ -1,5 +1,7 @@
 
 import db from "./database.js";
+import { dbLogFile } from "./database.js";
+import fs from 'fs';
 
 // response format for that page :
 // {
@@ -33,7 +35,7 @@ export async function apiRoutes(fastifyInstance) {
 
   const needConnection = async (req, reply) => {
     if (req.user.id === -1) {
-      return reply.send({
+      return reply.code(403).send({
         template: "Home",
         title: "login",
         inner: "Login",
@@ -113,5 +115,16 @@ export async function apiRoutes(fastifyInstance) {
       title: "Boooriiing",
       inner: "Blank",
     });
+  });
+
+  fastifyInstance.get("/db-logs", { onRequest: needConnection }, (req, reply) => {
+    if (!req.user.admin) {
+      return reply.code(403).send({
+        template: "Error", title: "403 Forbidden",
+        replace: {status: "403 NUH UH", message: "You need to be admin"},
+      });
+    }
+    const data = fs.readFileSync(dbLogFile, { encoding: 'utf8', flag: 'r' });
+    return reply.send(data.replace(/(?:\r\n|\r|\n)/g, '<br>'));
   });
 }

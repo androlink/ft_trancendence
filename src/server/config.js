@@ -3,6 +3,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyJWT from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
+import { dbLogFile } from './database.js';
 
 // if changed for better naming convention
 // need to be changed in page.html and template.ts too
@@ -24,9 +25,9 @@ export default function () {
     wildcard: false
   });
 
-  fastify.register(fastifyCookie);
-  // would be good to add a signature for the cookies.
-  // It's an easy security to add
+  fastify.register(fastifyCookie, {
+    secret: process.env.COOKIE_SECURITY_KEY,
+  });
 
   fastify.register(function (fastifyInstance) {
     fastifyInstance.get('/', (req, reply) =>
@@ -36,8 +37,7 @@ export default function () {
   }, { prefix: assetsPath });
 
   fastify.register(fastifyJWT, {
-    secret: "We should have a secret that's long so it's secure against bruteforce",
-    // need to be changed for something hidden
+    secret: process.env.JWT_SECURITY_KEY,
     cookie: {
       cookieName: 'account',
       signed: false,
