@@ -192,13 +192,17 @@ class PongPaddle implements ICollideObject
 		let p1: IPoint, p2: IPoint;
 		const pos = getMiddle(this.movePath, this.position);
 		const pathAngle = this.angle + getNormal(this.movePath) - Math.PI / 2;
+		const real_size = Math.hypot(
+			this.movePath.segment[1].x - this.movePath.segment[0].x,
+			this.movePath.segment[1].y - this.movePath.segment[0].y
+		) * this.size;
 
 		p1 = {
-			x: -Math.cos(pathAngle) * this.size / 2 + pos.x,
-			y: -Math.sin(pathAngle) * this.size / 2 + pos.y};
+			x: -Math.cos(pathAngle) * real_size / 2 + pos.x,
+			y: -Math.sin(pathAngle) * real_size / 2 + pos.y};
 		p2 = {
-			x: Math.cos(pathAngle) * this.size / 2 + pos.x,
-			y: Math.sin(pathAngle) * this.size / 2 + pos.y};
+			x: Math.cos(pathAngle) * real_size / 2 + pos.x,
+			y: Math.sin(pathAngle) * real_size / 2 + pos.y};
 		return [{segment: [p1, p2]}];
 	}
 	public move(input: CONTROL)
@@ -207,8 +211,10 @@ class PongPaddle implements ICollideObject
 			this.position -= this.speed;
 		if (input == CONTROL.RIGHT)
 			this.position += this.speed;
-		if (this.position < 0) this.position = 0;
-		if (this.position > 1) this.position = 1;
+		if (this.position < 0 + this.size / 2)
+			this.position = 0 + this.size / 2;
+		else if (this.position > 1 - this.size / 2)
+			this.position = 1 - this.size / 2;
 	}
 };
 
@@ -343,7 +349,7 @@ export class PongGameManager
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
 		this.canvas.style.width = "400px";
-		this.canvas.style.height = "400px";
+		this.canvas.style.height = "200px";
 		this.canvas.width = 100;
 		this.canvas.height = 50;
 	}
@@ -370,10 +376,10 @@ export class PongGameManager
 			{segment: [{x: 100, y: 50}, {x: 0, y: 50}],}
 		]);
 		this.teams = [];
-		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 10, 0.1);
+		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 0.5, 0.1);
 		var player = new KeyboardPlayer("w", "s");
 		this.teams.push({player: player, paddle: paddle})
-		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 10, 0.1);
+		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 0.5, 0.1);
 		var player = new KeyboardPlayer("l", "o");
 		this.teams.push({player: player, paddle: paddle})
 
