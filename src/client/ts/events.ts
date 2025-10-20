@@ -271,6 +271,22 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
   });
 }
 
+/**
+ * used by the chat input, send message on enter
+ * @param textarea the said chat input element
+ */
+function setonClickEventChat(textarea: HTMLTextAreaElement): void {
+  textarea.addEventListener("click", (event: KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (textarea && textarea.value) {
+        sendMessage(textarea.value);
+        textarea.value = "";
+      }
+    }
+  });
+}
+
 
 /**
  * to add a new message to the chat.

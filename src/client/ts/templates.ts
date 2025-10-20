@@ -25,20 +25,20 @@ export const htmlSnippets:  {
   Home:
     ` 
   <div class="size-full flex flex-col bg-[url(/resources/wall.jpg)] bg-no-repeat bg-center bg-size-[100%_100%] z-0">
-    <div class="relative h-fit">
+    <div class="relative h-fit w-full">
+      <div id="account-reconnected" hidden="" class="absolute z-10 top-2 right-20 rounded border bg-green-200 border-green-400 h-full flex justify-around flex-col items-center overflow-hidden">
+        <p class="m-2 font-bold">You got auto reconnected :D</p>
+      </div>
+      <div id="account-disconnected" hidden="" class="absolute z-10 top-2 right-8 rounded border bg-red-200 border-red-400 h-full flex justify-around flex-col items-center overflow-hidden">
+        <p class="mx-2 font-bold">You are not connected</p>
+        <button class="bg-white rounded size-fit p-1" onclick="goToURL('profile', true);">login page</button>
+      </div>
       <img class="absolute left-1/2 top-0 -translate-x-1/2 h-full aspect-auto select-none" draggable="false" src="${assetsPath}/transcendence-sign.png"/>
-      <span class="relative grid grid-cols-2 mx-8 my-2">
-        <span class="flex justify-self-start">
+      <span class="relative flex flex-row mx-8 my-2 justify-between">
+        <span class="flex">
           <input id="user-search" type="search" spellcheck="false" placeholder="username" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
         </span>
-        <span class="justify-self-end flex gap-x-2">
-          <span class="relative size-x-10">
-            <img src="${assetsPath}/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer" draggable="false">
-            <span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75">
-            </span>
-          </span>
-          <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
-        </span>
+        <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="select-none hover:animate-spin hover:invert-25 size-10 cursor-pointer" draggable="false">
       </span>
       <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
         <div onclick="goToURL( )" name="">pdf</div>
@@ -47,22 +47,15 @@ export const htmlSnippets:  {
         <div onclick="goToURL('profile')" name="profile">your profile</div>
       </span>
     </div>
-    <span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
+    <span class="flex-1 min-h-0 flex gap-2 mx-8 mb-8 mt-4 select-none">
       <div id="inner" class="h-full w-3/4 overflow-hidden">
       </div>
       <div class="h-full w-1/4 flex flex-col overflow-hidden">
-        <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
-          <p class="m-2 font-bold">You got auto reconnected :D</p>
-        </div>
-        <div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
-          <p class="m-2 font-bold">You are not connected</p>
-          <button class="bg-white rounded size-fit p-1" onclick="goToURL('profile', true);">login page</button>
-        </div>
         <div class="size-full bg-white flex flex-col">
           <div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
           <span class="flex justify-items-stretch">
             <textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
-            <img src="${assetsPath}/send-icon.png" onclick="sendMessage( )" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
+            <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
           </span>
         </div>
       </div>
@@ -108,17 +101,20 @@ export const htmlSnippets:  {
   `,
   Profile2:
     `
-  <div class="relative size-full overflow-y-scroll shadow-xl/100">
-    <img src="${assetsPath}/window.png" class="absolute inset-0 size-full z-10" draggable="false">
+  <div class="relative size-full overflow-hidden shadow-xl/100">
+    <img src="${assetsPath}/window.png" class="absolute inset-0 size-full z-40 pointer-events-none" draggable="false">
     <div class="bg-[url(/resources/garden.jpg)] bg-no-repeat bg-center bg-size-[100%_100%] size-full relative">
-      <div class="bg-[url(/resources/username-sign.png)] bg-no-repeat bg-size-[100%_100%] absolute bottom-0 left-1/2 -translate-x-1/2 bg-center h-1/3 aspect-3/4">
-        <h1 class="text-center pt-5 font-bold whitespace-nowrap" id="username"></h1>
+      <div class="pointer-events-none -skew-2 bg-[url(/resources/username-sign.png)] bg-no-repeat bg-size-[100%_100%] absolute bottom-0 left-1/2 -translate-x-1/2 bg-center min-h-1/3 aspect-3/4 flex flex-col z-30">
+        <div class="h-1/9"></div>
+        <p tabindex="-1" class="pointer-events-auto h-35/127 rounded-2xl w-29/30 mx-auto text-center size-full font-bold select-text whitespace-nowrap" id="username"></p>
       </div>
-      <div class="bg-[url(/resources/stickman.png)] bg-no-repeat bg-size-[100%_100%] absolute -bottom-14 left-1/3 -translate-x-1/2 bg-center h-2/3 aspect-3/4">
-        <img class="rounded-full size-38 ml-10" src="${assetsPath}/pfp.jpg" draggable="false">
+      <div class="pointer-events-none bg-[url(/resources/stickman.png)] bg-no-repeat bg-size-[100%_100%] absolute -bottom-1/8 left-1/3 -translate-x-1/2 bg-center h-6/7 aspect-3/4 flex flex-row z-10">
+        <div class="w-8/70"></div>
+        <img class="pointer-events-auto rounded-full h-2/5 aspect-auto" src="${assetsPath}/pfp.jpg" draggable="false">
       </div>
-      <div class="bg-[url(/resources/username-sign.png)] bg-no-repeat bg-size-[100%_100%]  absolute bottom-0 left-3/5 -translate-x-1/2 bg-center min-w-1/4 w-fit max-w-full aspect-3/4">
-        <h1 class="text-center pt-5 h-1/3 font-bold whitespace-nowrap overflow-y-auto z-20 px-4" id="biography"></h1>
+      <div class="pointer-events-none rotate-5 bg-[url(/resources/username-sign.png)] bg-no-repeat bg-size-[100%_100%] absolute bottom-0 left-3/5 -translate-x-1/2 bg-center w-fit max-w-1/3 min-h-1/2 max-h-3/4 aspect-3/4 flex flex-col z-20">
+        <div class="h-1/25"></div>
+        <p tabindex="-1" class="pointer-events-auto text-center h-35/127 rounded-2xl select-text mx-auto overflow-y-auto w-29/30 wrap-break-word" id="biography"></p>
       </div>
     </div>
   </div>
@@ -162,8 +158,8 @@ export const htmlSnippets:  {
   Error:
     `
   <div class="flex flex-col items-center size-1/2 m-40 place-self-center">
-    <h1 id=status class="text-white font-bold"></h1>
-    <h2 id=message class="text-white"></h2>
+    <h1 id=status class="text-black font-bold"></h1>
+    <h2 id=message class="text-black"></h2>
     <img src="${assetsPath}/error.png" alt="error" class="justify-self-start select-none h-full" draggable="false">
     <button onclick="goToURL( )" type="button" class="cursor-pointer data-checked:cursor-default select-none rounded hover:text-white hover:bg-gray-500 bg-gray-700 text-gray-300 px-1">home</button>
   </div>
