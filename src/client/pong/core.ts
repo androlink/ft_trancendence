@@ -201,45 +201,64 @@ class PongPaddle implements ICollideObject
 			y: Math.sin(pathAngle) * this.size / 2 + pos.y};
 		return [{segment: [p1, p2]}];
 	}
+	public move(input: CONTROL)
+	{
+		if (input == CONTROL.LEFT)
+			this.position -= this.speed;
+		if (input == CONTROL.RIGHT)
+			this.position += this.speed;
+		if (this.position < 0) this.position = 0;
+		if (this.position > 1) this.position = 1;
+	}
 };
+
+enum CONTROL {
+	NONE,
+	LEFT,
+	RIGHT,
+}
+
 
 interface IPongPlayer
 {
-	getInput() : "none" | "up" | "down";
+	getInput() : CONTROL;
 }
 
 class KeyboardPlayer implements IPongPlayer, EventListenerObject
 {
-	inputUp: string;
-	inputDown: string;
+	inputLeft: string;
+	inputRight: string;
 
-	inputUpState: boolean;
-	inputDownState: boolean;
+	inputLeftState: boolean = false;
+	inputRightState: boolean = false;
 
-	public constructor(inputUp: string, inputDown: string)
+	public constructor(inputLeft: string, inputRight: string)
 	{
 		document.addEventListener("keydown", this);
 		document.addEventListener("keyup", this);
+		this.inputLeft = inputLeft.toLowerCase();
+		this.inputRight = inputRight.toLowerCase();
 	}
 
 	private keyboardUp(ev: KeyboardEvent)
 	{
-		if (ev.key === this.inputUp)
-			this.inputUpState = true;
-		if (ev.key === this.inputDown)
-			this.inputDownState = true;
+		if (ev.key.toLowerCase() === this.inputLeft)
+			this.inputLeftState = false;
+		if (ev.key.toLowerCase() === this.inputRight)
+			this.inputRightState = false;
 	}
 
 	private keyboardDown(ev: KeyboardEvent)
 	{
-		if (ev.key === this.inputUp)
-			this.inputUpState = false;
-		if (ev.key === this.inputDown)
-			this.inputDownState = false;
+		if (ev.key.toLowerCase() === this.inputLeft)
+			this.inputLeftState = true;
+		if (ev.key.toLowerCase() === this.inputRight)
+			this.inputRightState = true;
 	}
 
 	public handleEvent(ev: KeyboardEvent)
 	{
+		console.debug(ev);
 		switch (ev.type)
 		{
 			case "keyup":
@@ -249,15 +268,16 @@ class KeyboardPlayer implements IPongPlayer, EventListenerObject
 				this.keyboardDown(ev);
 				break ;
 		}
+		console.debug(this);
 	}
 
-	public getInput(): "none" | "up" | "down"
+	public getInput(): CONTROL
 	{
-		if (this.inputUpState == true && this.inputDownState == false)
-			return "up";
-		if (this.inputUpState == false && this.inputDownState == true)
-			return "down";
-		return "none";
+		if (this.inputLeftState == true && this.inputRightState == false)
+			return CONTROL.LEFT;
+		if (this.inputLeftState == false && this.inputRightState == true)
+			return CONTROL.RIGHT;
+		return CONTROL.NONE;
 	}
 
 	public destructor()
@@ -308,8 +328,10 @@ export class PongGameManager
 {
 	board: PongBoard;
 	ball: PongBall[];
-	players: IPongPlayer[];
-	paddles: PongPaddle[];
+	teams: {
+		player: IPongPlayer;
+		paddle: PongPaddle;
+	}[];
 	randSeed: number;
 	random: Random;
 	canvas :HTMLCanvasElement;
@@ -320,8 +342,8 @@ export class PongGameManager
 	constructor()
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
-		this.canvas.style.width = "200px";
-		this.canvas.style.height = "100px";
+		this.canvas.style.width = "400px";
+		this.canvas.style.height = "400px";
 		this.canvas.width = 100;
 		this.canvas.height = 50;
 	}
@@ -345,13 +367,18 @@ export class PongGameManager
 		this.ball.push(new PongBall({x: 50, y: 25}, 5, 6));
 		this.board = new PongBoard([
 			{segment: [{x: 0, y: 0}, {x: 100, y: 0}]},
-			{segment: [{x: 0, y: 50}, {x: 100, y: 50}],}
+			{segment: [{x: 100, y: 50}, {x: 0, y: 50}],}
 		]);
-		this.players = [];
-		this.paddles = [];
-		this.paddles[0] = new PongPaddle({segment: [{x: 10, y: 5}, {x: 10, y: 45}]}, 20, 0.1);
-		this.paddles[1] = new PongPaddle({segment: [{x: 90, y: 45}, {x: 90, y: 5}]}, 10, 0.1);
-		this.players[0] = new KeyboardPlayer("w", "s");
+		this.teams = [];
+		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 10, 0.1);
+		var player = new KeyboardPlayer("w", "s");
+		this.teams.push({player: player, paddle: paddle})
+		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 10, 0.1);
+		var player = new KeyboardPlayer("l", "o");
+		this.teams.push({player: player, paddle: paddle})
+
+		//this.teams[1].paddle = new PongPaddle({segment: [{x: 90, y: 45}, {x: 90, y: 5}]}, 10, 0.1);
+	
 	}
 
 	public start()
@@ -364,7 +391,10 @@ export class PongGameManager
 
 	public update()
 	{
-		// todo
+		for (const team of this.teams)
+		{
+			team.paddle.move(team.player.getInput());
+		}
 		this.draw();
 	}
 
@@ -372,9 +402,10 @@ export class PongGameManager
 	{
 		this.canvas.getContext("2d").reset();
 		draw(this.canvas.getContext("2d"), this.board.getBounds());
-		for (const p of this.paddles)
+		for (const team of this.teams)
 		{
-			draw(this.canvas.getContext("2d"), p.getBounds());
+			draw(this.canvas.getContext("2d"), team.paddle.getBounds());
+			//draw(this.canvas.getContext("2d"), [team.paddle.movePath]);
 		}
 	}
 
