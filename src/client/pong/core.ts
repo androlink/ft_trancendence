@@ -9,6 +9,8 @@
 
 import {
 	draw,
+	Drawable,
+	drawSegment
 } from "./draw.js"
 
 import {
@@ -23,23 +25,25 @@ import {
 
 import {Random} from "./random.js"
 
-import {intersectSegments, ICollideObject, CollideEvent } from "./collision.js";
+import {intersectSegments, ICollideObject, CollideEvent, getClosestObject} from "./collision.js";
 
-class PongBall implements ICollideObject
+class PongBall implements ICollideObject, Drawable
 {
 	location: IPoint;
 	angle: number;
 	speed: number;
+	speed_increment: number;
 	size: number;
 	accuracy: number;
 
-	constructor(location: IPoint|null, size: number, accuracy: number|null)
+	constructor(location: IPoint, size: number, speed: number, speed_increment: number, angle: number, accuracy: number = 6)
 	{
-		this.location = location ??= {x: 0, y: 0};
-		this.angle = 0;
-		this.speed = 0;
+		this.location = location;
+		this.angle = angle;
+		this.speed = speed;
 		this.size = size;
-		this.accuracy = accuracy ??= 6;
+		this.accuracy = accuracy;
+		this.speed_increment = speed_increment;
 	}
 
 	public getCollidePoints(): IPoint[]
@@ -54,7 +58,7 @@ class PongBall implements ICollideObject
 			points.push({
 				x: (this.location.x + Math.cos(i * angle + (this.angle - Math.PI / 2)) * this.size),
 				y: (this.location.y + Math.sin(i * angle + (this.angle - Math.PI / 2)) * this.size)
-		});
+			});
 		}
 
 		return points
@@ -65,14 +69,31 @@ class PongBall implements ICollideObject
 	}
 
 	public getBounds(): ISegment[] {
-		return [];
+
+		const accu = this.accuracy * 2;
+		const angle = (Math.PI * 2 / accu);
+
+		let points: IPoint[] = [];
+		let segments: ISegment[] = [];
+		for (let i = 0; i < accu; i++)
+		{
+			points.push({
+				x: (this.location.x + Math.cos(i * angle + (this.angle - Math.PI / 2)) * this.size),
+				y: (this.location.y + Math.sin(i * angle + (this.angle - Math.PI / 2)) * this.size)
+			});
+		}
+		for (let i = 0; i < accu; i++)
+		{
+			segments.push({segment: [points[(i + 1) % points.length], points[i]]});
+		}
+		return segments;
 	}
 
 	public collide(other: ICollideObject, dist: number = this.speed): CollideEvent | null
 	{
 		let collision : CollideEvent[] = [];
 		let segments : ISegment[] = other.getBounds();
-		let deltaPos: IPoint = {
+		let deltaPos : IPoint = {
 			x: Math.cos(this.angle) * dist,
 			y: Math.sin(this.angle) * dist
 		};
@@ -86,8 +107,36 @@ class PongBall implements ICollideObject
 		})
 		collision = collision.sort((a, b) => {return (a.dist.ray - b.dist.ray)})
 		if (collision.length == 0)
-			return null
+			return null;
 		return collision[0];
+	}
+
+	public draw(ctx: CanvasRenderingContext2D)
+	{
+		this.getBounds().forEach((s) => {drawSegment(ctx, s, undefined, true)});
+	}
+
+	public update(objects: ICollideObject[])
+	{
+		if (this.speed < 0)
+		{
+			this.speed = -this.speed;
+			this.angle += Math.PI;
+		}
+		let remainder = this.speed;
+		let collide = getClosestObject(this, objects, remainder);
+		console.debug(collide);
+		if (collide == null)
+		{
+			this.location.x += Math.cos(this.angle) * remainder;
+			this.location.y += Math.sin(this.angle) * remainder;
+		} else {
+			console.debug((collide.object as Object).constructor.name);
+			if ((collide.object as Object).constructor.name == "PongBoard")
+				simpleBounce(this, collide.event);
+			if ((collide.object as Object).constructor.name == "PongPaddle")
+				paddleBounce(this, collide.event);
+		}
 	}
 
 	// public update(segments: ISegment[])
@@ -148,10 +197,13 @@ let simpleBounce = (ball: PongBall, ce: CollideEvent) =>
 		ball.angle = 2 * (getNormal(ce.segment) - Math.PI / 2) - ball.angle;
 }
 
-let paddleBounce = (ball: PongBall, ce: CollideEvent, player: IPongPlayer) =>
+let paddleBounce = (ball: PongBall, ce: CollideEvent) =>
 {
 	if (ce.segment)
+	{
 		ball.angle = getNormal(ce.segment) - (ce.dist.segment - 0.5) * 2;
+		ball.speed += ball.speed_increment;
+	}
 }
 
 /**************************************************************************************************/
@@ -162,7 +214,7 @@ let paddleBounce = (ball: PongBall, ce: CollideEvent, player: IPongPlayer) =>
 /*                                                                                                */
 /**************************************************************************************************/
 
-class PongPaddle implements ICollideObject
+class PongPaddle implements ICollideObject, Drawable
 {
 	angle : number = 0;
 	movePath : ISegment;
@@ -205,6 +257,7 @@ class PongPaddle implements ICollideObject
 			y: Math.sin(pathAngle) * real_size / 2 + pos.y};
 		return [{segment: [p1, p2]}];
 	}
+
 	public move(input: CONTROL)
 	{
 		if (input == CONTROL.LEFT)
@@ -215,6 +268,11 @@ class PongPaddle implements ICollideObject
 			this.position = 0 + this.size / 2;
 		else if (this.position > 1 - this.size / 2)
 			this.position = 1 - this.size / 2;
+	}
+
+	public draw(ctx: CanvasRenderingContext2D)
+	{
+		this.getBounds().forEach((s) => {drawSegment(ctx, s, "#0000FF", true)});
 	}
 };
 
@@ -264,7 +322,7 @@ class KeyboardPlayer implements IPongPlayer, EventListenerObject
 
 	public handleEvent(ev: KeyboardEvent)
 	{
-		console.debug(ev);
+		//console.debug(ev);
 		switch (ev.type)
 		{
 			case "keyup":
@@ -274,7 +332,7 @@ class KeyboardPlayer implements IPongPlayer, EventListenerObject
 				this.keyboardDown(ev);
 				break ;
 		}
-		console.debug(this);
+		//console.debug(this);
 	}
 
 	public getInput(): CONTROL
@@ -293,7 +351,8 @@ class KeyboardPlayer implements IPongPlayer, EventListenerObject
 	}
 }
 
-class PongBoard implements ICollideObject{
+class PongBoard implements ICollideObject, Drawable
+{
 	segmentsList: ISegment[] = [];
 
 	constructor(sides: ISegment[])
@@ -310,10 +369,14 @@ class PongBoard implements ICollideObject{
 		return false;
 	}
 
-	public collide(other: ICollideObject): CollideEvent | CollideEvent[] | null {
+	public collide(other: ICollideObject): CollideEvent | null {
 		return null;
 	}
 
+	public draw(ctx: CanvasRenderingContext2D)
+	{
+		this.getBounds().forEach((s) => {drawSegment(ctx, s, void 0, true)});
+	}
 }
 
 type PongSettingInfo = {
@@ -333,7 +396,7 @@ type PongSettingInfo = {
 export class PongGameManager
 {
 	board: PongBoard;
-	ball: PongBall[];
+	balls: PongBall[];
 	teams: {
 		player: IPongPlayer;
 		paddle: PongPaddle;
@@ -369,17 +432,17 @@ export class PongGameManager
 	{
 		this.randSeed = Math.random() * (2 ** 31);
 		this.random = new Random(this.randSeed);
-		this.ball = [];
-		this.ball.push(new PongBall({x: 50, y: 25}, 5, 6));
+		this.balls = [];
+		this.balls.push(new PongBall({x: 50, y: 25}, 2, 1, 0.1 , this.random.next() * Math.PI * 2));
 		this.board = new PongBoard([
 			{segment: [{x: 0, y: 0}, {x: 100, y: 0}]},
 			{segment: [{x: 100, y: 50}, {x: 0, y: 50}],}
 		]);
 		this.teams = [];
-		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 0.5, 0.1);
+		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 0.2, 0.05);
 		var player = new KeyboardPlayer("w", "s");
 		this.teams.push({player: player, paddle: paddle})
-		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 0.5, 0.1);
+		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 0.2, 0.05);
 		var player = new KeyboardPlayer("l", "o");
 		this.teams.push({player: player, paddle: paddle})
 
@@ -401,16 +464,26 @@ export class PongGameManager
 		{
 			team.paddle.move(team.player.getInput());
 		}
+		let objects: ICollideObject[] = [];
+		this.teams.forEach(team => {
+			objects.push(team.paddle);
+		});
+		objects.push(this.board);
+		this.balls.forEach(b => {b.update(objects)});
 		this.draw();
 	}
 
 	public draw()
 	{
+
+		const context = this.canvas.getContext("2d");
 		this.canvas.getContext("2d").reset();
-		draw(this.canvas.getContext("2d"), this.board.getBounds());
+		this.board.draw(context);
+		this.balls.forEach((b) => {b.draw(context)})
 		for (const team of this.teams)
 		{
-			draw(this.canvas.getContext("2d"), team.paddle.getBounds());
+			team.paddle.draw(context);
+			//draw(this.canvas.getContext("2d"), team.paddle.getBounds());
 			//draw(this.canvas.getContext("2d"), [team.paddle.movePath]);
 		}
 	}

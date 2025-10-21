@@ -1,6 +1,11 @@
 import {bsp, getMiddle, IPoint, ISegment, getNormal} from "./segment.js"
 
-export {draw}
+export {draw, drawSegment, Drawable}
+
+interface Drawable
+{
+	draw(ctx: CanvasRenderingContext2D);
+}
 
 function draw(ctx: CanvasRenderingContext2D, segments: ISegment[])
 {
@@ -9,7 +14,7 @@ function draw(ctx: CanvasRenderingContext2D, segments: ISegment[])
 	}
 }
 
-function drawSegment(ctx: CanvasRenderingContext2D, segment: ISegment, color: string | CanvasGradient | CanvasPattern, draw_nomal = false)
+function drawSegment(ctx: CanvasRenderingContext2D, segment: ISegment, color: string | CanvasGradient | CanvasPattern = "#000000", draw_normal = false)
 {
 	ctx.beginPath();
 	ctx.moveTo(segment.segment[0].x, segment.segment[0].y);
@@ -17,7 +22,7 @@ function drawSegment(ctx: CanvasRenderingContext2D, segment: ISegment, color: st
 	ctx.closePath();
 	ctx.strokeStyle = color;
 	ctx.stroke();
-	if (draw_nomal)
+	if (draw_normal)
 	{
 		let middle = getMiddle(segment);
 		let angle = getNormal(segment);

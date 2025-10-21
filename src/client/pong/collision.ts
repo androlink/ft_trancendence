@@ -1,7 +1,7 @@
 
 export {ICollideObject, CollideEvent}
 
-export {intersectSegments, getClosestSegment};
+export {intersectSegments, getClosestSegment, getClosestObject};
 
 import { IPoint, ISegment, Ray, bsp} from "./segment";
 
@@ -9,7 +9,7 @@ interface ICollideObject
 {
 	isDisable(): boolean;
 	getBounds(): ISegment[];
-	collide(other: ICollideObject, maxDist: number | void): CollideEvent | CollideEvent[] | null;
+	collide(other: ICollideObject, maxDist?: number | void): CollideEvent | null;
 }
 
 class CollideEvent {
@@ -65,14 +65,24 @@ function getClosestObject(object: ICollideObject, targets: ICollideObject[],
 	dist: number | void = undefined)
 	: null | {event: CollideEvent, object: ICollideObject}
 {
-	let closest = null;
+	let closest: {event: CollideEvent, object: ICollideObject} = null;
 
 	for (let t of targets)
 	{
-		object.collide(t, dist);
+		let tmp_collide = object.collide(t, dist);
+		if (tmp_collide == null)
+			continue ;
+		if (closest == null)
+		{
+			closest = {event: tmp_collide, object: t};
+		}
+		if (tmp_collide.dist.ray < closest.event.dist.ray)
+		{
+			closest = {event: tmp_collide, object: t};
+		}
 	}
 
-	return null;
+	return closest;
 }
 
 function intersectSegments(segments: ISegment[], ray: Ray)
