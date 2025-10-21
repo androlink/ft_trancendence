@@ -28,7 +28,7 @@ export const htmlSnippets_1:  {
   Home:
     ` 
   <div class="size-full flex flex-col bg-[url(/resources/wall.jpg)] bg-no-repeat bg-center bg-size-[100%_100%] z-0">
-    <div class="relative h-fit w-full">
+    <div class="relative h-1/12 w-full">
       <div id="account-reconnected" hidden="" class="absolute z-10 top-2 right-20 rounded border bg-green-200 border-green-400 h-full flex justify-around flex-col items-center overflow-hidden">
         <p class="m-2 font-bold">You got auto reconnected :D</p>
       </div>
@@ -37,13 +37,11 @@ export const htmlSnippets_1:  {
         <button class="bg-white rounded size-fit p-1" onclick="goToURL('profile', true);">login page</button>
       </div>
       <img class="absolute left-1/2 top-0 -translate-x-1/2 h-full aspect-auto select-none cursor-pointer z-20" onclick="changeDisplay()" draggable="false" src="${assetsPath}/transcendence-sign.png"/>
-      <span class="relative flex flex-row mx-8 my-2 justify-between">
-        <span class="flex">
-          <input id="user-search" type="search" spellcheck="false" placeholder="username" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
-        </span>
-        <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="select-none hover:animate-spin hover:invert-25 size-10 cursor-pointer" draggable="false">
+      <span class="relative h-1/2 flex flex-row mx-8 my-2 justify-between">
+        <input id="user-search" type="search" spellcheck="false" placeholder="username" class="aspect-5/1 placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
+        <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="h-full w-fit select-none hover:animate-spin hover:invert-25 size-10 cursor-pointer" draggable="false">
       </span>
-      <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
+      <span id="inner-buttons" class="overflow-hidden flex max-h-1/3 w-fit gap-x-2 mx-8 *:h-full *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
         <div onclick="goToURL( )" name="">pdf</div>
         <div onclick="goToURL('game')" name="game">game</div>    
         <div onclick="goToURL('blank')" name="blank">debug</div>
@@ -56,9 +54,9 @@ export const htmlSnippets_1:  {
       <div class="h-full w-1/4 flex flex-col overflow-hidden">
         <div class="size-full bg-white flex flex-col">
           <div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
-          <span class="flex justify-items-stretch">
-            <textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
-            <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
+          <span class="h-1/13 flex">
+            <textarea id="chat-input" class="px-1 flex-1 border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
+            <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 h-3/5 w-fit mr-1 cursor-pointer" draggable="false">
           </span>
         </div>
       </div>
@@ -117,7 +115,7 @@ export const htmlSnippets_1:  {
       </div>
       <div class="pointer-events-none rotate-5 bg-[url(/resources/username-sign.png)] bg-no-repeat bg-size-[100%_100%] absolute bottom-0 left-3/5 -translate-x-1/2 bg-center w-fit max-w-1/3 min-h-1/2 max-h-3/4 aspect-3/4 flex flex-col z-20">
         <div class="h-1/25"></div>
-        <p tabindex="-1" class="pointer-events-auto text-center h-35/127 rounded-2xl select-text mx-auto overflow-y-auto w-29/30 wrap-break-word" id="biography"></p>
+        <p tabindex="-1" class="pointer-events-auto text-center h-35/127 rounded-2xl select-text mx-auto overflow-y-scroll w-29/30 wrap-break-word" id="biography"></p>
       </div>
     </div>
   </div>
