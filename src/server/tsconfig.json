@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "rootDir": "./srcs",
+    "outDir": "js/",
+    "strict": false,
+    "skipLibCheck": true,
+  },
+    "watchOptions": {
+    "watchFile": "fixedpollinginterval"
+  },
+  "include": ["*.ts", "srcs/live_chat.ts", "srcs/api_routes.ts", "srcs/login_routes.ts", "srcs/server.ts"],
+  "exclude": ["js/*"]
+}
