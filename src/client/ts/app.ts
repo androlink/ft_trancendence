@@ -20,8 +20,9 @@ let mainInner: string | null = null;
  * The main function of the Single-Page-Application:
  *  - fetch the website infos
  *  - set the UI accordingly
+ * @param force if true change the app even if same as before
  */
-export async function main(): Promise<void> {
+export async function main(force = false): Promise<void> {
   const app = document.getElementById('app');
   if (!app) {
     console.error('We need an element (preferably a div) with id="app"');
@@ -35,13 +36,13 @@ export async function main(): Promise<void> {
   if (keyExist(data, 'title')) {
     document.title = data.title;
   }
-  if (keyExist(data, 'template') && data.template !== mainTemplate) {
+  if (keyExist(data, 'template') && (data.template !== mainTemplate || force)) {
     mainTemplate = data.template;
     mainInner = null;
     changeSnippet(app, data['template']);
   }
   const inner = document.getElementById('inner');
-  if (inner && keyExist(data, 'inner') && data.inner != mainInner) {
+  if (inner && keyExist(data, 'inner') && (data.inner != mainInner) || force) {
     mainInner = data.inner;
     changeSnippet(inner, data['inner']);
   }

@@ -386,6 +386,11 @@ export function setCtrlfEventUsername(): void {
         ).catch(err => alert('Caught: ' + err));
       }
     }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      self["changeDisplay"]();
+    }
   })
 
   const app = document.getElementById("app");

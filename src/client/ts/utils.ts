@@ -38,7 +38,7 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener('popstate', main);
+  self.addEventListener('popstate', () => main());
 };
 
 //----------------------------------------------------------------------------#
