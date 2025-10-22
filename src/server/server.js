@@ -1,44 +1,20 @@
-const fastify = require('fastify')({
-   routerOptions: {
-    ignoreTrailingSlash: true
-  }
-});
 
-fastify.register(require('@fastify/static'), {
-  root: '/var/www'
-})
+import fastifyConf from './config.js'
 
-fastify.get('/api/login', function (req, reply) {
-  return {template: "Login", title: "login"}
-})
+import { apiRoutes } from './api_routes.js';
+import { loginRoutes } from './accounts_routes.js';
+import { launchDB } from './database.js';
 
-fastify.get('/api/', function (req, reply) {
-  return {template: "Home", title: "ft_transcendence", inner: "Pdf"}
-})
-
-fastify.get('/api/game', function (req, reply) {
-  return {template: "Home", title: "Pong soon", inner: "Game"}
-})
-
-fastify.get('/api/video', function (req, reply) {
-  return {template: "Home", title: "Dana Terrace", inner: "Video"}
-})
-
-fastify.get('/api/blank', function (req, reply) {
-  return {template: "Home", title: "Boooriiing", inner: "Blank"}
-})
-
-fastify.get('/api/*', function (req, reply) {
-  reply.status(404)
-  return {template: "Error", replace: {status: "Error 404", message: "are you lost by any chance ?"}, title: "404 Not Found"}
-})
+const fastify = fastifyConf();
+await launchDB();
 
 fastify.setNotFoundHandler((req, reply) => {
-  reply.sendFile('page.html');
+  if (req.method === "GET") return reply.code(200).sendFile('/page.html');
+  return reply.code(405).send(`Method ${req.method} not implemented on this route`);
 });
-
-// note to whoever read : https://github.com/fastify/fastify-static
+fastify.register(apiRoutes, { prefix: '/api' });
+fastify.register(loginRoutes);
 
 fastify.listen({port: 3000,  host: '0.0.0.0'}, (err, address) => {
   if (err) throw err
-})
+});

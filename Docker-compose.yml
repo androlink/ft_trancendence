@@ -47,12 +47,14 @@ services:
     image: server
     build:
       context: services/server/
+    env_file: "services/server/conf/secrets.env"
     networks:
       - trancendence
     volumes:
       - src:/var/src
       - www:/var/www
       - node_modules:/var/src/server/node_modules
+      - database:/var/db/
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
       interval: 5s
@@ -93,6 +95,13 @@ volumes:
     driver: local
     driver_opts:
       device: ./data/www
+      o: bind
+      type: none
+  database:
+    name: database
+    driver: local
+    driver_opts:
+      device: ./data/db
       o: bind
       type: none
   node_modules:

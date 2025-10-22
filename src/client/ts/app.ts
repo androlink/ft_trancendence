@@ -1,130 +1,140 @@
-import { templates } from "./templates.js"
+var exports = {};
+import { htmlSnippets } from "./templates.js"
+import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
+import { setEvents } from "./events.js";
 
+/**
+ * the infos we consider important that we get from a fetch to the server
+ */
 interface ServerResponse {
-	template?: string,
-	title?: string,
-	replace?: {[key:string]:string},
-	inner?: string
-}
-
-function keyExist(dict:object, key:PropertyKey) : boolean {
-	return Object.hasOwn(dict, key);
-}
-
-async function fetchApi(): Promise<ServerResponse> {
-	const response = await fetch(window.location.origin
-				     + "/api" + window.location.pathname);
-	const data: ServerResponse = await response.json();
-	return data;
-}
-
-window.addEventListener('popstate', function(event) {
-	main();
-}, false);
-
-function setHTML(element: HTMLElement, text: string) : void {
-	element.innerHTML = text;
-}
-
-function replaceElements(toReplace: {[key:string]:string}) : void {
-	for (const key in toReplace) {
-		setHTML(document.getElementById(key), toReplace[key]);
-	}
-}
-
-function changeTemplate(app: HTMLElement, data: ServerResponse) : void
-{
-	if (keyExist(templates, data.template)) {
-		setHTML(app, templates[data.template]);
-		if (keyExist(data, "replace"))
-			replaceElements(data.replace);
-		const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
-		if (textarea)
-			setEnterEvent(textarea);
-	} else {
-		app.innerHTML = "Template " +
-			data.template + " not Found in template.js";
-	}
-}
-
-
-function changeInner(inner: HTMLElement, data: ServerResponse) : void {
-	setHTML(inner, templates[data.inner]);
-	const parent = document.getElementById("inner-buttons");
-	if (parent){
-		const elements = parent.children;
-		for (let i = 0; i < elements.length; i++) {
-			elements[i].toggleAttribute("data-checked", (elements[i].getAttribute("name") === data.inner));
-			// the 4 lines below are 'better written' because of the use of dataset.
-			// But I find the line above more readable
-
-			// if (elements[i].getAttribute("name") === data.inner)
-			// 	(elements[i] as HTMLElement).dataset.checked = "true";
-			// else
-			// 	delete (elements[i] as HTMLElement).dataset.checked;
-		}
-	}
-}
-
-function setEnterEvent(textarea: HTMLTextAreaElement): void {
-	textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-		if (event.key === "Enter" && !event.shiftKey) {
-			event.preventDefault();
-			sendMessage();
-		}
-	});
+  template?: string,
+  title?: string,
+  replace?: {[key: string]: string},
+  inner?: string,
+  headers?: Headers,
 }
 
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
-async function main() {
-	const data = await fetchApi();
-	const app = document.getElementById("app");
-	if (!app)
-		return;
-	if (keyExist(data, "title")) {
-		document.title = data.title;
-	}
-	if (keyExist(data, "template") && data.template !== mainTemplate) {
-		mainTemplate = data.template;
-		mainInner = null;
-		changeTemplate(app, data);
-	}
-	const inner = document.getElementById("inner");
-	if (inner && keyExist(data, "inner") && keyExist(templates, data.inner) && data.inner != mainInner){
-		mainInner = data.inner;
-		changeInner(inner, data);
-	}
+/**
+ * The main function of the Single-Page-Application:
+ *  - fetch the website infos
+ *  - set the UI accordingly
+ */
+export async function main(): Promise<void> {
+  const app = document.getElementById('app');
+  if (!app) {
+    console.error('We need an element (preferably a div) with id="app"');
+    return;
+  }
+
+  const data = await fetchApi();
+  if (!data) {
+    return;
+  }
+  if (keyExist(data, 'title')) {
+    document.title = data.title;
+  }
+  if (keyExist(data, 'template') && data.template !== mainTemplate) {
+    mainTemplate = data.template;
+    mainInner = null;
+    changeSnippet(app, data['template']);
+  }
+  const inner = document.getElementById('inner');
+  if (inner && keyExist(data, 'inner') && data.inner != mainInner) {
+    mainInner = data.inner;
+    changeSnippet(inner, data['inner']);
+  }
+  const parent = document.getElementById('inner-buttons');
+  if (parent){
+    toggleButtons(parent);
+  }
+  if (keyExist(data, "replace")) {
+    replaceElements(data.replace);
+  }
+  if (keyExist(data, 'headers')) {
+    resetReconnectTimer(data.headers.get('x-authenticated'));
+  }
+  setEvents();
+}
+self["main"] = main;
+
+/**
+ * Fetchs the api page corresponding to the current page
+ * @returns a ServerResponse for main (or null on critical error)
+ */
+async function fetchApi(): Promise<ServerResponse> {
+  try {
+    const response = await fetch(`${self.location.origin}/api${self.location.pathname}`);
+    if (response.status >= 500 && response.status < 600
+      || !(response.headers.has('content-type'))
+      || !response.headers.get("content-type").startsWith("application/json")) {
+      return {template: "Home",
+        replace: {"container-iframe": await response.text()},
+        title: `${response.status} ${response.statusText}`,
+        inner: "Ouch",
+        headers: response.headers,
+      };
+    }
+    const data = await response.json() as ServerResponse;
+    data.headers = response.headers;
+    return data;
+  } catch (error) {
+    alert(error instanceof Error ? error.message : String(error));
+    return {};
+  }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-	main().catch(err => console.error(err))});
-
-
-// for moving page to page, used by html
-export function goToURL(NextURL:string | void) {
-	history.pushState( {page: "not used"}, "depracated", NextURL ? NextURL : "/");
-	main();
+/**
+ * used to set the innerHTML of elem by an html snippet 
+ * @param elem the element that will be changed
+ * @param template a key for the object htmlSnippets
+ * @returns true if template found in htmlSnippets
+ */
+function changeSnippet(elem: HTMLElement, template: string): boolean {
+  if (!keyExist(htmlSnippets, template)) {
+    elem.innerHTML = "";
+    elem.innerText = `Snippet ${template} not Found in template.js`;
+    return false;
+  }
+  elem.innerHTML = htmlSnippets[template];
+  return true;
 }
-(window as any).goToURL = goToURL;
 
-// to add something to the chat
-// NOT DEFINITIVE
-// NEED TO ADD sockets
-// ONLY THERE (for now) TO TEST THE APPEARANCE
-export function sendMessage() {
-	const chat = document.getElementById("chat-content");
-	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	if (chat && textarea && textarea.value) {
-		let scroll = false;
-		if (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1) {
-			scroll = true;
-		}
-		chat.innerHTML += "<p>" + textarea.value + "</p>";
-		textarea.value = "";
-		if (scroll) {
-			chat.scrollTop = chat.scrollHeight;
-		}
-	}
+/**
+ * toggle the attribute data-checked of the button,
+ * true when button name is the same as location.pathname
+ * @param parent The buttons' parent
+ */
+function toggleButtons(parent: HTMLElement) {
+  const elements = parent.children;
+  for (let i = 0; i < elements.length; i++) {
+    const name = elements[i].getAttribute("name");
+    elements[i].toggleAttribute("data-checked",
+      name !== null && (`/${name}` === location.pathname));
+  }
 }
-(window as any).sendMessage = sendMessage;
+
+/**
+ * tries finding HTML elements and change (stop when one worked) either 
+ * their attribute value, srcdoc or their innertext 
+ * @param toReplace toReplace[key] = val — 'key' are the id of the elements selected, 'val' are the new values
+ */
+function replaceElements(toReplace: {[key:string]:string}): void {
+  for (const key in toReplace) {
+    let element = document.getElementById(key);
+    if (element) {
+      if (element.hasAttribute("value")) { // for <input>
+        element.setAttribute("value", toReplace[key]);
+      } else if (element.hasAttribute("srcdoc")) { // for <iframe>
+        element.setAttribute("srcdoc", toReplace[key]);
+      } else if (element.tagName === "TEXTAREA") { // when <br> doesn't work
+        element.textContent = toReplace[key];
+      } else {
+        element.innerText = toReplace[key];
+      }
+    }
+  }
+}
+
+launchSinglePageApp();
