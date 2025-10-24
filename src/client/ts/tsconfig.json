@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "/var/www",
+    "target": "es2024",
+    "lib": ["esnext", "dom"]
+  },
+    "watchOptions": {
+    "watchFile": "fixedpollinginterval"
+  },
+    "include": ["*.ts"]
+}

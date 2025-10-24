@@ -47,11 +47,14 @@ services:
     image: server
     build:
       context: services/server/
+    env_file: "services/server/conf/secrets.env"
     networks:
       - trancendence
     volumes:
-      - srcs:/var/
-      - node_modules:/var/server/node_modules
+      - src:/var/src
+      - www:/var/www
+      - node_modules:/var/src/server/node_modules
+      - database:/var/db/
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
       interval: 5s
@@ -68,7 +71,8 @@ services:
     build:
       context: services/client/
     volumes:
-      - srcs:/var/
+      - src:/var/src
+      - www:/var/www
     restart: "always"
 
 volumes:
@@ -79,11 +83,25 @@ volumes:
       device: ./data/certificate
       o: bind
       type: none
-  srcs:
+  src:
     name: src
     driver: local
     driver_opts:
       device: ./src/
+      o: bind
+      type: none
+  www:
+    name: www
+    driver: local
+    driver_opts:
+      device: ./data/www
+      o: bind
+      type: none
+  database:
+    name: database
+    driver: local
+    driver_opts:
+      device: ./data/db
       o: bind
       type: none
   node_modules:
