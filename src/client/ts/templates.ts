@@ -12,6 +12,7 @@ const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`
 export const htmlSnippets:  {
   readonly Home: string;
   readonly Game: string;
+  readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
   readonly Pdf: string;
@@ -181,6 +182,13 @@ export const htmlSnippets:  {
     </p>
   </div>
     `,
+  Pong: `
+  	<div>
+  		<script  type="module" src="/build/pong/main.js" defer></script>
+		<button onclick="newGame()">test</button>
+		<canvas id="canvas"></canvas>
+	</div>
+  `,
   ErrorMessageHandler:
     `
   <p name="error-handler" class="text-red-500 font-bold mb-2"></p>
