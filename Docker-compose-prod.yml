@@ -53,13 +53,16 @@ services:
     volumes:
       - src:/var/src
       - www:/var/www
-      - node_modules:/var/src/server/node_modules
+      - node_modules_client:/var/src/server/node_modules
       - database:/var/db/
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
+    depends_on:
+      client:
+        condition: service_completed_successfully
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -70,10 +73,9 @@ services:
     image: client 
     build:
       context: services/client/
+      target: prod
     volumes:
-      - src:/var/src
       - www:/var/www
-    restart: "always"
 
 volumes:
   certificate:
@@ -105,6 +107,7 @@ volumes:
       o: bind
       type: none
   node_modules:
+  node_modules_client:
 
 
 networks:

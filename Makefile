@@ -1,5 +1,5 @@
 DOCKER_COMPOSE = docker compose
-DOCKER_TARGET = Docker-compose.yml
+DOCKER_TARGET = Docker-compose-dev.yml
 
 .PHONY: all
 all: start
@@ -37,3 +37,8 @@ rm: stop
 .PHONY: prune
 prune: stop
 	docker system prune --all --force
+
+.PHONY: prune_full
+prune_full: stop
+	rm -rf data
+	docker system prune --all --force --volumes 
