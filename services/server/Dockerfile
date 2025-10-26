@@ -1,5 +1,5 @@
 FROM node:20-alpine AS base
-RUN apk add curl bash
+RUN apk add curl
 WORKDIR /var/project
 COPY conf/package.json .
 RUN npm install

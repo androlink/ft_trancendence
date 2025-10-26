@@ -99,7 +99,6 @@ volumes:
       device: ./data/db
       o: bind
       type: none
-  node_modules:
 
 networks:
   trancendence:
