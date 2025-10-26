@@ -1,6 +1,8 @@
 var exports = {};
 import { templates } from "./templates.js"
 
+import {setupChat} from "./chat.js"
+
 interface ServerResponse {
 	template?: string,
 	title?: string,
@@ -148,12 +150,6 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
 }
 
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
-	textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-		if (event.key === "Enter" && !event.shiftKey) {
-			event.preventDefault();
-			sendMessage();
-		}
-	});
 }
 
 let mainTemplate: string | null = null;
@@ -179,6 +175,8 @@ async function main() {
 	}
 	if (keyExist(data, "replace"))
 		replaceElements(data.replace);
+
+	setupChat();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -192,38 +190,3 @@ export function goToURL(NextURL:string | void) {
 	main();
 }
 (window as any).goToURL = goToURL;
-
-
-//CHAT ========================================================================
-
-
-
-
-
-//============================================================================
-
-// to add something to the chat
-// NOT DEFINITIVE
-// NEED TO ADD sockets
-// ONLY THERE (for now) TO TEST THE APPEARANCE
-export function sendMessage() {
-	const chat = document.getElementById("chat-content");
-	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	if (!chat || !textarea || !textarea.value) {
-		return;
-	}
-	const textthing = textarea.value;
-
-	let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
-	// true if at the end of the chat
-
-	const para = document.createElement("p");
-	const node = document.createTextNode(textarea.value);
-	para.appendChild(node);
-	chat.appendChild(para);
-	textarea.value = "";
-	if (scroll) {
-		chat.scrollTop = chat.scrollHeight;
-	}
-}
-(window as any).sendMessage = sendMessage;

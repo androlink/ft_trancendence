@@ -1,8 +1,5 @@
 {
   "type": "commonjs",
-  "scripts": {
-    "watch": "tsc -w & nodemon -w js/ js/server.js"
-  },
   "dependencies": {
     "@fastify/formbody": "^8.0.2",
     "@fastify/jwt": "^10.0.0",

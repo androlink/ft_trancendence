@@ -1,13 +1,13 @@
 import {FastifyInstance} from "fastify";
 import "@fastify/websocket";
 
+
 export default function liveChat(fastify: FastifyInstance){
-    fastify.get('/api/chat', { websocket: true }, (ws: WebSocket) => {
-        ws.addEventListener('message', () => {
-            ws.send("'feur' from server");
+    fastify.get('/api/chat', { websocket: true }, (socket) => {
+        socket.on('message', (event) => {
+            const text = typeof event === "string" ? event : event.toString("utf8");
+            console.log("msg : " + text);
+            socket.send(text);
         })
-        ws.send("quoi");
-        console.log("websocket created");
-        // websockets.push(ws);
     });
 }

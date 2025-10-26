@@ -13,7 +13,7 @@ build:
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) build
 
 .PHONY: start
-start: stop build
+start: build
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
 
 .PHONY: restart

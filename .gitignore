@@ -4,3 +4,5 @@ node_modules/
 secrets/
 data
 .*.swp
+*.lock
+js/
