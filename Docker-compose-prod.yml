@@ -47,13 +47,12 @@ services:
     image: server
     build:
       context: services/server/
+      target: prod
     env_file: "services/server/conf/secrets.env"
     networks:
       - trancendence
     volumes:
-      - src:/var/src
       - www:/var/www
-      - node_modules:/var/src/server/node_modules
       - database:/var/db/
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
@@ -71,6 +70,8 @@ services:
     build:
       context: services/client/
       target: prod
+      args:
+        - NPM_I_ARGS=--production
     volumes:
       - www:/var/www
 
@@ -80,13 +81,6 @@ volumes:
     driver: local
     driver_opts:
       device: ./data/certificate
-      o: bind
-      type: none
-  src:
-    name: src
-    driver: local
-    driver_opts:
-      device: ./src/
       o: bind
       type: none
   www:

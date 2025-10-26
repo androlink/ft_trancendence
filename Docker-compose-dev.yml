@@ -15,14 +15,6 @@ services:
       - trancendence
     volumes:
       - certificate:/var/ssl_cert/
-    healthcheck:
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    depends_on:
-      server:
-        condition: service_healthy
-        restart: true
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -47,19 +39,14 @@ services:
     image: server
     build:
       context: services/server/
+      target: dev
     env_file: "services/server/conf/secrets.env"
     networks:
       - trancendence
     volumes:
-      - src:/var/src
+      - src_server:/var/project/src
       - www:/var/www
-      - node_modules:/var/src/server/node_modules
       - database:/var/db/
-    healthcheck:
-      test: ["CMD", "curl", "http://server:3000/"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -72,7 +59,7 @@ services:
       context: services/client/
       target: dev
     volumes:
-      - src_client:/var/app/src
+      - src_client:/var/project/src
       - www:/var/www
     restart: "always"
 
@@ -84,11 +71,11 @@ volumes:
       device: ./data/certificate
       o: bind
       type: none
-  src:
-    name: src
+  src_server:
+    name: src_server
     driver: local
     driver_opts:
-      device: ./src/
+      device: ./services/server/src
       o: bind
       type: none
   src_client:
@@ -112,7 +99,6 @@ volumes:
       device: ./data/db
       o: bind
       type: none
-  node_modules:
 
 networks:
   trancendence:
