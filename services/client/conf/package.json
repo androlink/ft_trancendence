@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "build:statics": "cp src/static/* /var/www",
-    "dev": "npm run build:statics && npx concurrently --kill-others \"npm run watch:css\" \"npm run watch:ts\"",
+    "dev": "npm run build:statics ; npx concurrently --kill-others \"npm run watch:ts\" \"npm run watch:css\"",
     "watch:ts": "npx tsc --watch -p src/ts",
     "watch:css": "npx @tailwindcss/cli -i src/css/input.css -o /var/www/styles.css --watch=always",
-    "prod": "npm run build:statics && npm run build:css && npm run build:ts",
+    "prod": "npm run build:statics ; npm run build:ts ; npm run build:css",
     "build:ts": "npx tsc -p src/ts",
     "build:css": "npx @tailwindcss/cli -i src/css/input.css -o /var/www/styles.css"
   },
@@ -14,6 +14,7 @@
     "tailwindcss": "^4.1.16",
     "@tailwindcss/cli": "^4.1.16",
     "typescript": "^5.6.3",
-    "@types/node": "^22.7.4"
+    "@types/node": "^22.7.4",
+    "undici-types": "^7.16.0"
   }
 }

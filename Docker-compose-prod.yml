@@ -53,16 +53,13 @@ services:
     volumes:
       - src:/var/src
       - www:/var/www
-      - node_modules_client:/var/src/server/node_modules
+      - node_modules:/var/src/server/node_modules
       - database:/var/db/
     healthcheck:
       test: ["CMD", "curl", "http://server:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
-    depends_on:
-      client:
-        condition: service_completed_successfully
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -93,6 +90,8 @@ volumes:
       o: bind
       type: none
   www:
+    # still need to be a volume in prod 
+    # (for instance if we keep pfp in it)
     name: www
     driver: local
     driver_opts:
@@ -107,8 +106,6 @@ volumes:
       o: bind
       type: none
   node_modules:
-  node_modules_client:
-
 
 networks:
   trancendence:

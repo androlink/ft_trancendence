@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk update
+RUN apk update -v
 RUN apk add openssl
 
 WORKDIR /

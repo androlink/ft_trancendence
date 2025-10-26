@@ -4,7 +4,6 @@ DOCKER_TARGET = Docker-compose-dev.yml
 .PHONY: all
 all: start
 
-
 .PHONY: build
 build:
 	./script/setup.sh
@@ -42,3 +41,7 @@ prune: stop
 prune_full: stop
 	rm -rf data
 	docker system prune --all --force --volumes 
+
+.PHONY: prod
+prod: prune
+	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"
