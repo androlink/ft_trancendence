@@ -1,12 +1,11 @@
-FROM node:current-slim AS base
+FROM node:20-alpine AS base
+RUN apk add curl
 WORKDIR /var/project
-ARG NPM_I_ARGS=
 COPY conf/package.json .
-RUN npm install $NPM_I_ARGS
+RUN npm install
+EXPOSE 3000
 
 FROM base AS dev
-RUN apt update
-RUN apt install watchman -y
 CMD ["npm", "run", "dev"]
 
 FROM base AS prod

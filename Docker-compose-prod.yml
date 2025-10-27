@@ -1,0 +1,106 @@
+
+services:
+
+  #----------------------------------------------------------------------------#
+  #                                    NGINX                                   #
+  #----------------------------------------------------------------------------#
+  nginx:
+    container_name: nginx
+    image: nginx
+    build:
+      context: services/nginx/
+    ports:
+      - 443:443
+    networks:
+      - trancendence
+    volumes:
+      - certificate:/var/ssl_cert/
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      server:
+        condition: service_started
+        restart: true
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                    CERTIFICATE                             #
+  #----------------------------------------------------------------------------#
+  certificate:
+    container_name: certificate
+    image: certificate
+    build:
+      context: services/certificate/
+    volumes:
+      - certificate:/var/ssl_cert/
+    networks:
+      - trancendence
+    restart: "no"
+
+  #----------------------------------------------------------------------------#
+  #                                    SERVER                                  #
+  #----------------------------------------------------------------------------#
+  server:
+    container_name: server
+    image: server
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "http://server:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                    CLIENT                                  #
+  #----------------------------------------------------------------------------#
+  client:
+    container_name: client
+    image: client 
+    build:
+      context: services/client/
+      target: prod
+      args:
+        - NPM_I_ARGS=--production
+    volumes:
+      - www:/var/www
+
+volumes:
+  certificate:
+    name: certificate
+    driver: local
+    driver_opts:
+      device: ./data/certificate
+      o: bind
+      type: none
+  www:
+    # still need to be a volume in prod 
+    # (for instance if we keep pfp in it)
+    name: www
+    driver: local
+    driver_opts:
+      device: ./data/www
+      o: bind
+      type: none
+  database:
+    name: database
+    driver: local
+    driver_opts:
+      device: ./data/db
+      o: bind
+      type: none
+
+networks:
+  trancendence:
+    name: trancendence
+    driver: bridge

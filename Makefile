@@ -1,11 +1,10 @@
 DOCKER_COMPOSE = docker compose
-DOCKER_TARGET = Docker-compose.yml
+DOCKER_TARGET = Docker-compose-dev.yml
 
 export COMPOSE_BAKE=true
 
 .PHONY: all
 all: start
-
 
 .PHONY: build
 build:
@@ -39,3 +38,12 @@ rm: stop
 .PHONY: prune
 prune: stop
 	docker system prune --all --force
+
+.PHONY: prune_full
+prune_full: stop
+	rm -rf data
+	docker system prune --all --force --volumes 
+
+.PHONY: prod
+prod: prune
+	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"

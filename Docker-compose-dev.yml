@@ -15,14 +15,6 @@ services:
       - trancendence
     volumes:
       - certificate:/var/ssl_cert/
-    healthcheck:
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    depends_on:
-      server:
-        condition: service_started
-        restart: true
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -46,18 +38,15 @@ services:
     container_name: server
     image: server
     build:
-      context: src/server/
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
     networks:
       - trancendence
     volumes:
+      - src_server:/var/project/src
       - www:/var/www
-      - server-srcs:/var/src/server/srcs
-      - server-node_modules:/var/src/server/node_modules
-    # healthcheck:
-    #   test: ["CMD", "curl", "http://server:3000/"]
-    #   interval: 5s
-    #   timeout: 5s
-    #   retries: 10
+      - database:/var/db/
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -68,8 +57,9 @@ services:
     image: client 
     build:
       context: services/client/
+      target: dev
     volumes:
-      - client:/var/src/client
+      - src_client:/var/project/src
       - www:/var/www
     restart: "always"
 
@@ -81,11 +71,18 @@ volumes:
       device: ./data/certificate
       o: bind
       type: none
-  client:
-    name: client
+  src_server:
+    name: src_server
     driver: local
     driver_opts:
-      device: ./src/client
+      device: ./services/server/src
+      o: bind
+      type: none
+  src_client:
+    name: src_client
+    driver: local
+    driver_opts:
+      device: ./services/client/src
       o: bind
       type: none
   www:
@@ -95,21 +92,13 @@ volumes:
       device: ./data/www
       o: bind
       type: none
-  server-node_modules:
-    name: server-node_modules
+  database:
+    name: database
     driver: local
     driver_opts:
-      device: ./src/server/node_modules
+      device: ./data/db
       o: bind
       type: none
-  server-srcs:
-    name: server-srcs
-    driver: local
-    driver_opts:
-      device: ./src/server/srcs/
-      o: bind
-      type: none
-
 
 networks:
   trancendence:
