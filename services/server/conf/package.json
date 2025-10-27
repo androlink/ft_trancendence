@@ -2,8 +2,8 @@
   "name": "server",
   "private": true,
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "prod": "node src/server.js"
+    "dev": "nodemon --watch \"src/**\" --exec tsx src/server.ts",
+    "prod": "tsx src/server.ts"
   },
   "type": "module",
   "dependencies": {

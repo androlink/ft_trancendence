@@ -1,6 +1,6 @@
 
-import db from "./database.js";
-import { dbLogFile } from "./database.js";
+import db from "./database";
+import { dbLogFile } from "./database";
 import fs from 'fs';
 
 // response format for that page :

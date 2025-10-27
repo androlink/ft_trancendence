@@ -1,5 +1,5 @@
 
-import db, { hashPassword, comparePassword } from "./database.js";
+import db, { hashPassword, comparePassword } from "./database";
 // response format for that page :
 // {
 //   success: boolean,

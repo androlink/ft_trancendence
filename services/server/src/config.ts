@@ -3,10 +3,10 @@ import fastifyStatic from '@fastify/static';
 import fastifyJWT from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
-import { dbLogFile } from './database.js';
+import { dbLogFile } from './database';
 
 // if changed for better naming convention
-// need to be changed in page.html and template.ts too
+// need to be changed in page.html and template too
 export const assetsPath = '/resources';
 
 export default function () {

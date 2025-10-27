@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "/var/www",
+    "target": "es2024",
+    "noEmit": true,
+    "module": "esnext",
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "strict": false,
+    "skipLibCheck": true,
+    "lib": ["esnext", "dom"]
+  },
+    "watchOptions": {
+    "watchFile": "fixedpollinginterval"
+  },
+    "include": ["*.ts"]
+}
+
