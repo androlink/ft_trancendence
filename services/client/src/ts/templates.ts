@@ -178,11 +178,11 @@ const htmlSnippetsTemplate:  {
 export let htmlSnippets = {} as typeof htmlSnippetsTemplate;
 
 // @ts-ignore
-import en from './language/en.json' with { type: 'json' };
+import en from './languages/en.json' with { type: 'json' };
 // @ts-ignore
-import fr from './language/fr.json' with { type: 'json' };
+import fr from './languages/fr.json' with { type: 'json' };
 // @ts-ignore
-import es from './language/es.json' with { type: 'json' };
+import es from './languages/es.json' with { type: 'json' };
 
 setLanguage();
 
