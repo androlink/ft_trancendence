@@ -142,7 +142,7 @@ export async function loginRoutes(fastifyInstance) {
       preValidation: checkBodyInput(["username", "biography"]),
     },
     async (req, reply) => {
-      const username = req.body.username; 
+      const username = req.body.username;
       const bio = req.body.biography;
       const row = db.prepare('SELECT id FROM users WHERE username = ? -- update route').get(username);
       if (row && row.id != req.user.id) {
@@ -183,6 +183,6 @@ export async function loginRoutes(fastifyInstance) {
         return reply.code(401).send({success: false, message: MSG.DB_REFUSED()});
       reply.clearCookie("account");
       // Not a 204 No content because 204 should not have a body and the front wants to have success
-      return reply.header("x-authenticated", false).send({success: true, message: "Goodbye :D"});
+      return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
   });
 }

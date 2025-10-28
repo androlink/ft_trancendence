@@ -4,10 +4,10 @@ import es from "./languages/es.js"
 
 
 /**
- * creates a string according to the translations in the files in /language
+ * creates strings according to the translations in the files in /language
  * @param {string} NAME name of the translation
  * @param  {...string} args substring to set inside the translatins
- * @returns the string created or an error message string
+ * @returns an object containing the strings created or error message string
  */
 export function search_languages_packs(NAME, ...args){
   return {
