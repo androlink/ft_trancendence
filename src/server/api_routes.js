@@ -86,6 +86,14 @@ export async function apiRoutes(fastifyInstance) {
     });
   });
 
+  fastifyInstance.get('/pong', (req, reply) => {
+    return reply.send({
+      template: "Home",
+      title: "actually the real Pong",
+      inner: "Pong",
+    });
+  });
+
   fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
     return reply.send({
       template: "Home",

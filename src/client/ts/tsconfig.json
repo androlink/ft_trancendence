@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
-    "outDir": "/var/www",
     "target": "es2024",
-    "lib": ["esnext", "dom"]
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": ["esnext", "dom"],
+    "resolveJsonModule": true,
+    "outDir": "/var/www",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-    "watchOptions": {
+  "watchOptions": {
     "watchFile": "fixedpollinginterval"
   },
-    "include": ["*.ts"]
+  "include": ["**/*.ts"]
 }

@@ -98,6 +98,17 @@ function changeSnippet(elem: HTMLElement, template: string): boolean {
     return false;
   }
   elem.innerHTML = htmlSnippets[template];
+  const scripts = elem.querySelectorAll('script');
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
+    if (newScript.textContent) {
+      newScript.textContent = oldScript.textContent;
+    }
+    [...oldScript.attributes].forEach(attr => {
+      newScript.setAttribute(attr.name, attr.value);
+    });
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
   return true;
 }
 

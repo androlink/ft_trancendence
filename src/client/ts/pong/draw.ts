@@ -4,10 +4,10 @@ export {draw, drawSegment, Drawable}
 
 interface Drawable
 {
-	draw(ctx: CanvasRenderingContext2D);
+	draw(ctx: CanvasRenderingContext2D) : void;
 }
 
-function draw(ctx: CanvasRenderingContext2D, segments: ISegment[])
+function draw(ctx: CanvasRenderingContext2D, segments: ISegment[]) : void
 {
 	for (const s of segments) {
 		drawSegment(ctx, s, "#000000", true)

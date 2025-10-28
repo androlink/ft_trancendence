@@ -43,6 +43,7 @@ export const htmlSnippets:  {
     <div onclick="goToURL('game')" name="game">game</div>    
     <div onclick="goToURL('blank')" name="blank">debug</div>
     <div onclick="goToURL('profile')" name="profile">your profile</div>
+    <div onclick="goToURL('pong')" name="pong">real pong</div>
   </span>
   <span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
     <div id="inner" class="h-full w-3/4 overflow-hidden"></div>
@@ -183,8 +184,8 @@ export const htmlSnippets:  {
   </div>
     `,
   Pong: `
-  	<div>
-  		<script  type="module" src="/build/pong/main.js" defer></script>
+  <div>
+  		<script  type="module" src="${assetsPath}/pong/main.js"></script>
 		<button onclick="newGame()">test</button>
 		<canvas id="canvas"></canvas>
 	</div>

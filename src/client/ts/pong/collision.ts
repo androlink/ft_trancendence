@@ -65,7 +65,7 @@ function getClosestObject(object: ICollideObject, targets: ICollideObject[],
 	dist: number | void = undefined)
 	: null | {event: CollideEvent, object: ICollideObject}
 {
-	let closest: {event: CollideEvent, object: ICollideObject} = null;
+	let closest: {event: CollideEvent, object: ICollideObject} | null= null;
 
 	for (let t of targets)
 	{

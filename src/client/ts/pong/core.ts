@@ -236,9 +236,9 @@ class PongPaddle implements ICollideObject, Drawable
 		return false;
 	}
 
-	public collide(): CollideEvent
+	public collide(): CollideEvent| null
 	{
-		return
+		return null;
 	}
 
 	public getBounds(): ISegment[]
@@ -397,16 +397,16 @@ type PongSettingInfo = {
 
 export class PongGameManager
 {
-	board: PongBoard;
-	balls: PongBall[];
+	board: PongBoard | null = null;
+	balls: PongBall[] | null = null;
 	teams: {
 		player: IPongPlayer;
 		paddle: PongPaddle;
-	}[];
-	randSeed: number;
-	random: Random;
-	canvas :HTMLCanvasElement;
-	setting: PongSettingInfo;
+	}[] | null = null;
+	randSeed: number | null = null;
+	random: Random | null = null;
+	canvas :HTMLCanvasElement | null = null;
+	setting: PongSettingInfo | null = null;
 
 	private _intervalID: number | null = null;
 
@@ -462,6 +462,8 @@ export class PongGameManager
 
 	public update()
 	{
+		if (this.teams == null || this.board == null || this.balls == null)
+			return ;	
 		for (const team of this.teams)
 		{
 			team.paddle.move(team.player.getInput());
@@ -477,9 +479,15 @@ export class PongGameManager
 
 	public draw()
 	{
-
+		if (this.canvas == null
+			|| this.teams == null
+			|| this.board == null
+			|| this.balls == null)
+			return ;
 		const context = this.canvas.getContext("2d");
-		this.canvas.getContext("2d").reset();
+		if (context == null)
+			return ;
+		context?.reset();
 		this.board.draw(context);
 		this.balls.forEach((b) => {b.draw(context)})
 		for (const team of this.teams)

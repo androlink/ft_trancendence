@@ -55,4 +55,4 @@ class Random
 };
 
 //set for public use
-window["Random"] = Random;
+self["Random"] = Random;

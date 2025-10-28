@@ -2,7 +2,7 @@ import { PongGameManager } from "./core.js";
 
 var pong_game : PongGameManager | null = null;
 
-function newGame()
+function newGame() : void
 {
 	if (pong_game)
 		pong_game.stop();
@@ -12,4 +12,4 @@ function newGame()
 	console.debug(pong_game);
 }
 
-window["newGame"] = newGame
+self["newGame"] = newGame
