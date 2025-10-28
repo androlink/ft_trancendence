@@ -1,9 +1,10 @@
 
 import { main } from "./app.js"
-import { setCtrlfEventUsername } from "./events.js";
+import { setCtrlEventUsername } from "./events.js";
+import { setLanguage } from "./templates.js";
 
 //----------------------------------------------------------------------------#
-//                 HISTORY STUFF                #
+//                                HISTORY STUFF                               #
 //----------------------------------------------------------------------------#
 
 /**
@@ -38,11 +39,11 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener('popstate', main);
+  self.addEventListener('popstate', () => main());
 };
 
 //----------------------------------------------------------------------------#
-//                 TIMER STUFF                  #
+//                                  TIMER STUFF                               #
 //----------------------------------------------------------------------------#
 
 let reconnectTimer: ReturnType<typeof setTimeout>;
@@ -85,7 +86,7 @@ export function resetReconnectTimer(auth: string | null): boolean {
           if (resetReconnectTimer(res.headers.get('x-authenticated')))
             setVisibility("account-reconnected", true);
         })
-        .catch(err => alert('Caught: ' + err));
+        .catch(() => {}); // if it failed don't bother
     },
     14 * 60 * 1000
   );
@@ -93,7 +94,7 @@ export function resetReconnectTimer(auth: string | null): boolean {
 }
 
 //----------------------------------------------------------------------------#
-//                PURELY COMFORT                #
+//                               PURELY COMFORT                               #
 //----------------------------------------------------------------------------#
 
 /**
@@ -109,15 +110,14 @@ export function launchSinglePageApp() {
   document.addEventListener("DOMContentLoaded", () => {
     setArrowButton();
     main().catch(err => console.error(err));
-    setCtrlfEventUsername();
+    setCtrlEventUsername();
   });
   
 }
 
-
 /**
  * Check if object has the key to prevent crash,
- * easier to use than native js
+ * easier to read than native js
  * @param object
  * @param key 
  * @returns Object.hasOwn(object, key);
