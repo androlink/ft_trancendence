@@ -43,7 +43,10 @@ prune: stop
 prune_full: stop
 	rm -rf data
 	docker system prune --all --force --volumes 
-
+.PHONY: repair_vscode
+repair_vscode:
+	@docker exec server cp -r node_modules src
+	@docker exec client cp -r node_modules src
 .PHONY: prod
 prod: prune
 	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"

@@ -2,6 +2,7 @@ var exports = {};
 import { htmlSnippets } from "./templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
 import { setEvents } from "./events.js";
+import { InitConnectionChat } from "./chat.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -55,6 +56,7 @@ export async function main(): Promise<void> {
   if (keyExist(data, 'headers')) {
     resetReconnectTimer(data.headers.get('x-authenticated'));
   }
+  InitConnectionChat();
   setEvents();
 }
 self["main"] = main;

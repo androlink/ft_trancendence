@@ -1,45 +1,45 @@
+import { sendMessage } from "./events";
+
 // WEBSOCKET
-let ws : WebSocket | null;
+let ws: WebSocket | null;
 
-export function setupChat(){
-	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	const chat = document.getElementById("chat-content");
+interface WSmessage {
+    type: string,
+    id: string,
+    content: string
+};
 
-    if (!chat || !textarea)
+export function InitConnectionChat() {
+    const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+    const chat = document.getElementById("chat-content");
+
+    if (!chat || !textarea)
         return alert("chat broken");
 
     if (!ws || ws.readyState != WebSocket.OPEN)
         ws = new WebSocket("/api/chat");
     if (!ws)
-        return ;
+        return;
 
-    ws.onclose = () =>{
+    ws.onclose = () => {
         alert("connection close");
     }
-    
+
     ws.addEventListener('message', (event) => {
-        const receivemsg =  event.data;
-        const scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
-        // true if at the end of the chat
-        const para = document.createElement("p");
-        const node = document.createTextNode(receivemsg);
-        para.appendChild(node);
-        chat.appendChild(para);
-        if (scroll) {
-            chat.scrollTop = chat.scrollHeight;
-        };
+        const receivemsg: WSmessage = JSON.parse(event.toString());
+        sendMessage(event.data);
     });
-    
-	textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+
+    textarea.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-			sendMessage();
-		}
-	});
-    (window as any).sendMessage = sendMessage;
+            sendChatMessage();
+        }
+    });
+    (window as any).sendChatMessage = sendChatMessage;
 }
 
-function waitForSocketConnection(socket, send: Function){
+function waitForSocketConnection(socket, send: Function) {
     setTimeout(
         function () {
             if (socket.readyState === 1) {
@@ -50,20 +50,24 @@ function waitForSocketConnection(socket, send: Function){
             }
         }, 5);
 }
-function sendOrQueue(message: string){
+function sendOrQueue(message: string) {
     if (ws.readyState === WebSocket.OPEN)
         ws.send(message);
     else
-        waitForSocketConnection(ws, () => {ws.send(message);})
+        waitForSocketConnection(ws, () => { ws.send(message); })
 }
 
-function sendMessage() {
-	const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	if (!textarea || !textarea.value) {
-		return;
-	}
-    const message_content = textarea.value;
+function sendChatMessage() {
+    const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+    if (!textarea || !textarea.value) {
+        return;
+    }
+
     textarea.value = "";
-    
-    sendOrQueue(message_content);
+    const msg: WSmessage =  {
+        id: "1",
+        type: "message",
+        content: textarea.value
+    };
+    sendOrQueue(JSON.stringify(msg));
 }
