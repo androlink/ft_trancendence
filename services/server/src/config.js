@@ -7,7 +7,7 @@ import { dbLogFile } from './database.js';
 
 // if changed for better naming convention
 // need to be changed in page.html and template.ts too
-const assetsPath = '/resources';
+export const assetsPath = '/resources';
 
 export default function () {
   const fastify = fastifyModule({
@@ -21,20 +21,15 @@ export default function () {
 
   fastify.register(fastifyStatic, {
     root: '/var/www',
-    prefix: assetsPath,
-    wildcard: false
+    prefix: assetsPath
   });
+  
+  fastify.get(`/${assetsPath}`, (req, reply) =>
+    reply.send("Hello user, that's where we keep our static files\n"));
 
   fastify.register(fastifyCookie, {
     secret: process.env.COOKIE_SECURITY_KEY,
   });
-
-  fastify.register(function (fastifyInstance) {
-    fastifyInstance.get('/', (req, reply) =>
-      reply.send("Hello user, that's where we keep our static files"));
-    fastifyInstance.setNotFoundHandler((req, reply) =>
-      reply.code(404).send('Not Found'));
-  }, { prefix: assetsPath });
 
   fastify.register(fastifyJWT, {
     secret: process.env.JWT_SECURITY_KEY,

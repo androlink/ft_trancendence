@@ -45,7 +45,7 @@ function setArrowButton() {
 //                 TIMER STUFF                  #
 //----------------------------------------------------------------------------#
 
-let reconnectTimer: number;
+let reconnectTimer: ReturnType<typeof setTimeout>;
 self["isConnected"] = false;
 
 /**

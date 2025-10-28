@@ -1,0 +1,106 @@
+
+services:
+
+  #----------------------------------------------------------------------------#
+  #                                    NGINX                                   #
+  #----------------------------------------------------------------------------#
+  nginx:
+    container_name: nginx
+    image: nginx
+    build:
+      context: services/nginx/
+    ports:
+      - 443:443
+    networks:
+      - trancendence
+    volumes:
+      - certificate:/var/ssl_cert/
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                    CERTIFICATE                             #
+  #----------------------------------------------------------------------------#
+  certificate:
+    container_name: certificate
+    image: certificate
+    build:
+      context: services/certificate/
+    volumes:
+      - certificate:/var/ssl_cert/
+    networks:
+      - trancendence
+    restart: "no"
+
+  #----------------------------------------------------------------------------#
+  #                                    SERVER                                  #
+  #----------------------------------------------------------------------------#
+  server:
+    container_name: server
+    image: server
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                    CLIENT                                  #
+  #----------------------------------------------------------------------------#
+  client:
+    container_name: client
+    image: client 
+    build:
+      context: services/client/
+      target: dev
+    volumes:
+      - src_client:/var/project/src
+      - www:/var/www
+    restart: "always"
+
+volumes:
+  certificate:
+    name: certificate
+    driver: local
+    driver_opts:
+      device: ./data/certificate
+      o: bind
+      type: none
+  src_server:
+    name: src_server
+    driver: local
+    driver_opts:
+      device: ./services/server/src
+      o: bind
+      type: none
+  src_client:
+    name: src_client
+    driver: local
+    driver_opts:
+      device: ./services/client/src
+      o: bind
+      type: none
+  www:
+    name: www
+    driver: local
+    driver_opts:
+      device: ./data/www
+      o: bind
+      type: none
+  database:
+    name: database
+    driver: local
+    driver_opts:
+      device: ./data/db
+      o: bind
+      type: none
+
+networks:
+  trancendence:
+    name: trancendence
+    driver: bridge
