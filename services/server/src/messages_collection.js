@@ -1,120 +1,50 @@
+import en from "./languages/en.js"
+import fr from "./languages/fr.js"
+import es from "./languages/es.js"
+
+
+/**
+ * creates a string according to the translations in the files in /language
+ * @param {string} NAME name of the translation
+ * @param  {...string} args substring to set inside the translatins
+ * @returns the string created or an error message string
+ */
+export function search_languages_packs(NAME, ...args){
+  return {
+    en: Object.hasOwn(en, NAME) ? en[NAME](...args) : `Translation ${NAME} not found`,
+    fr: Object.hasOwn(fr, NAME) ? fr[NAME](...args) : `Traduction ${NAME} non trouvée`,
+    es: Object.hasOwn(es, NAME) ? es[NAME](...args) : `Traducción ${NAME} no encontrada`,
+  }
+}
+
 /**
  * a collections of functions that return their text in different languages
+ * the point of using the export default if to have a list of know message names for the code editor
+ * 
+ * « MSG.NAME(arg1, arg2, ...)» is equivalent to « search_languages_packs(NAME, arg1, arg2, ...) »
 */
 export default {
-  USERNAME_TAKEN: (username) => ({
-    en: `"${username}" is already taken`,
-    fr: `"${username}" est deja pris`,
-    es: `"${username}" ya está tomado`,
-  }),
-  DB_REFUSED_MSG: () => ({
-    en: "The db said no",
-    fr: "La base de données refuse",
-    es: "la base de datos se negó",
-  }),
-  REFUSED_ADMIN: () => ({
-    en: "Noo Stop You're admin",
-    fr: "STP t'es admin arrête",
-    es: "¡Detente! Eres un administrador",
-  }),
-  NOT_RECOGNIZED: () => ({
-    en: "The glorious backend said you are not connected, sorry",
-    fr: "Le glorieux serveur a dit que vous etes pas connecté, tant pis",
-    es: "El glorioso servidor dijo que no estás conectado, que lástima",
-  }),
-  USERNAME_NOT_FOUND: (username) => ({
-    en: `no account with username "${username}"`,
-    fr: `pas de compte avec le pseudo "${username}"`,
-    es: `No hay cuenta con el apodo "${username}"`,
-  }),
-  WELCOME_USERNAME: (username = "") => ({
-    en: `welcome ${username}`,
-    fr: `bienvenue ${username}`,
-    es: `Bienvenido ${username}`,
-  }),
-  NOT_IN_DB: () => ({
-    en: "You are not present in the db, got disconnected",
-    fr: "Tu n'est pas présent dans la base de donnée, pouf déconnection :D",
-    es: "No estás presente en la base de datos, te desconectó",
-  }),
-  GOODBYE: () => ({
-    en: "We can't have you forever",
-    fr: "Il faut savoir dire au revoir très cher",
-    es: "Fue un placer",
-  }),
-  EXPECTED_FORMBODY: (method, url) => ({
-    en: `Expected 'application/x-www-form-urlencoded' Content-Type for ${method} on ${url}.`,
-    fr: `Content-Type 'application/x-www-form-urlencoded' attendu pour ${method} sur ${url}.`,
-    es: `Se esperaba el Content-Type 'application/x-www-form-urlencoded' para ${method} en ${url}.`,
-  }),
-  EXPECTED_CONTENT_TYPE: (method) => ({
-    en: `Content-Type not found in a ${method} request.`,
-    fr: `Content-Type non trouvé pour une requète ${method}`,
-    es: `No se encontró Content-Type en una ${method} solicitud`,
-  }),
-  ALPHANUMERIC_: (field) => ({
-    en: `${field} can have only letters, digits and underscores`,
-    fr: `le champ ${field} doit peut seulement avoir des lettres, chiffres et tirets du bas`,
-    es: `El campo ${field} must solo puede tener letras, números y guiones bajos`,
-  }),
-  MAX_BYTE_LENGTH: (field, byteLength) => ({
-    en: `${field} must be at most ${byteLength} bytes long`, 
-    fr: `le champ ${field} doit faire maximum ${byteLength} octets`,
-    es: `el campo ${field} debe tener un máximo de ${byteLength} octetos`,
-  }),
-  MAX_STR_LENGTH: (field, length) => ({
-    en: `${field} must be at most ${length} chars long`,
-    fr: `le champ ${field} doit faire maximum ${length} caractères`,
-    es: `El campo ${field} debe tener un máximo de ${length} caracteres`,
-  }),
-  MIN_STR_LENGTH: (field, length) => ({
-    en: `${field} must be at least ${length} chars long`, 
-    fr: `le champ '${field}' doit faire au moins ${length} caractères`,
-    es: `El campo '${field}' debe tener al menos ${length} caracteres`,
-  }),
-  MUST_BE_STR: (field) => ({
-    en: `${field} must be a string`,
-    fr: `le champ '${field}' doit etre une chaine de caractères`,
-    es: `El campo '${field}' debe ser una cadena`,
-  }),
-  WRONG_PASSWORD: () => ({
-    en: "wrong password",
-    fr: "mauvais mot de passe",
-    es: "mala contraseña",
-  }),
-  WRONG_USERNAME: () => ({
-    en: "That's not your username",
-    fr: "C'est pas ton pseudo",
-    es: "No es tu apodo",
-  }),
-  LOST: () => ({
-    en: "are you lost by any chance ?",
-    fr: "Tu t'es perdu ?",
-    es: "¿Estás perdido por alguna razón?",
-  }),
-  LOGIN: () => ({
-    en: "login",
-    fr: "connexion",
-    es: "conexión",
-  }),
-  YOU: () => ({
-    en: "You",
-    fr: "Toi",
-    es: "Tù",
-  }),
-  PONG_SOON: () => ({
-    en: "Pong soon",
-    fr: "Pong bentôt",
-    es: "Pong pronto",
-  }),
-  BORING: () => ({
-    en: "Boriiing",
-    fr: "On s'ennuie...",
-    es: "aburrido",
-  }),
-  NEED_ADMIN: () => ({
-    en: "You need to be admin",
-    fr: "tu dois etre admin",
-    es: "Debes ser administrador",
-  }),
+  USERNAME_TAKEN: (username) => search_languages_packs("USERNAME_TAKEN", username),
+  DB_REFUSED_MSG: () => search_languages_packs("DB_REFUSED_MSG"),
+  REFUSED_ADMIN: () => search_languages_packs("REFUSED_ADMIN"),
+  NOT_RECOGNIZED: () => search_languages_packs("NOT_RECOGNIZED"),
+  USERNAME_NOT_FOUND: (username) => search_languages_packs("USERNAME_NOT_FOUND", username),
+  WELCOME_USERNAME: (username = "") => search_languages_packs("WELCOME_USERNAME", username),
+  NOT_IN_DB: () => search_languages_packs("NOT_IN_DB"),
+  GOODBYE: () => search_languages_packs("GOODBYE"),
+  EXPECTED_FORMBODY: (method, url) => search_languages_packs("EXPECTED_FORMBODY", method, url),
+  EXPECTED_CONTENT_TYPE: (method) => search_languages_packs("EXPECTED_CONTENT_TYPE", method),
+  ALPHANUMERIC_: (field) => search_languages_packs("ALPHANUMERIC_", field),
+  MAX_BYTE_LENGTH: (field, byteLength) => search_languages_packs("MAX_BYTE_LENGTH", field, byteLength),
+  MAX_STR_LENGTH: (field, length) => search_languages_packs("MAX_STR_LENGTH", field, length),
+  MIN_STR_LENGTH: (field, length) => search_languages_packs("MIN_STR_LENGTH", field, length),
+  MUST_BE_STR: (field) => search_languages_packs("MUST_BE_STR", field),
+  WRONG_PASSWORD: () => search_languages_packs("WRONG_PASSWORD"),
+  WRONG_USERNAME: () => search_languages_packs("WRONG_USERNAME"),
+  LOST: () => search_languages_packs("LOST"),
+  LOGIN: () => search_languages_packs("LOGIN"),
+  YOU: () => search_languages_packs("YOU"),
+  PONG_SOON: () => search_languages_packs("PONG_SOON"),
+  BORING: () => search_languages_packs("BORING"),
+  NEED_ADMIN: () => search_languages_packs("NEED_ADMIN"),
 };
