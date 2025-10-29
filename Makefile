@@ -37,11 +37,6 @@ rm: stop
 prune: stop
 	docker system prune --all --force
 
-.PHONY: prune_full
-prune_full: stop
-	rm -rf data
-	docker system prune --all --force --volumes 
-
 .PHONY: prod
 prod: prune
 	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"

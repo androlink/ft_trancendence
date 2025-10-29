@@ -1,7 +1,7 @@
 
 
 import { goToURL, keyExist, resetReconnectTimer } from "./utils.js";
-import { htmlSnippets } from "./templates.js";
+import { htmlSnippets, setLanguage, selectLanguage, findLanguage } from "./templates.js";
 import { main } from "./app.js";
 
 /**
@@ -18,6 +18,7 @@ export function setEvents(): void {
     "go-to-profile": setClickEventProfile,
     "change-password-form": setSubmitEventPassword,
     "delete-account-form": setSubmitEventDelete,
+    "language-selector": setChangeEventLanguageSelector,
   }
   for (const id in events) {
     const elem = document.getElementById(id);
@@ -66,10 +67,6 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
         try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
-      if (!username || !password) {
-        displayErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
-        return ;
-      }
       const response = await fetch('/login', {
         method: 'POST',
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
@@ -82,8 +79,8 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
-          `Server responded with ${response.status} ${response.statusText}`);
+        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
       main();
@@ -105,12 +102,8 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
         try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
-      if (!username || !password) {
-        displayErrorOrAlert(form, `${username ? "Password" : "Username"} field is empty`);
-        return ;
-      }
       if (password !== formData.get("password-confirm") as string) {
-        displayErrorOrAlert(form, "the two passwords need to correspond");
+        displayErrorOrAlert(form, findLanguage("passwords don't match"));
         return ;
       }
       const response = await fetch('/register', {
@@ -125,8 +118,8 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
-          `Server responded with ${response.status} ${response.statusText}`);
+        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
       main();
@@ -157,8 +150,8 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
-          `Server responded with ${response.status} ${response.statusText}`);
+        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
       goToURL(`profile/${formData.get('username') as string}`);
@@ -179,12 +172,8 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
     const formData = new FormData(form);
         try {
       const password = formData.get("password") as string;
-      if (password.length < 4) {
-        displayErrorOrAlert(form, "At very least 4 chars required");
-        return ;
-      }
       if (password !== formData.get("password-confirm") as string) {
-        displayErrorOrAlert(form, "the two passwords need to be the same");
+        displayErrorOrAlert(form, findLanguage("passwords don't match"));
         return ;
       }
 
@@ -199,8 +188,8 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
-          `Server responded with ${response.status} ${response.statusText}`);
+        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
       const elem = document.getElementById("username");
@@ -230,8 +219,8 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? result.message :
-          `Server responded with ${response.status} ${response.statusText}`);
+        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
       main();
@@ -275,6 +264,8 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
 /**
  * to add a new message to the chat.
  * Made it better than just taking one single string for debugging purpose (it sucks keep using console.log)
+ * 
+ * sent to the console, so no translation done
  *
  * NOT DEFINITIVE,
  * NEED TO ADD SOCKETS,
@@ -318,9 +309,20 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === 'Enter' && textarea.value) {
       event.preventDefault();
-      goToURL(`profile/${textarea.value}`);
+      goToURL(`profile/${textarea.value}`, true);
       textarea.value = "";
     }
+  });
+}
+
+function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
+  let lang = localStorage.getItem('language');
+  if (lang === null) lang = 'en';
+  select.querySelector(`[value="${lang}"]`)?.toggleAttribute("selected", true);
+  select.addEventListener("change", (e) => {
+    localStorage.setItem("language", select.value);
+    setLanguage();
+    main(true, false);
   });
 }
 
@@ -329,8 +331,9 @@ function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
  * - control K will select (if present) the user-search
  * - control enter will select (if present) the chat-input
  * - control P will search for /profile or /profile/username instead of printing the page
+ * ...
  */
-export function setCtrlfEventUsername(): void {
+export function setCtrlEventUsername(): void {
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       const elem = document.getElementById("user-search") as HTMLTextAreaElement;
