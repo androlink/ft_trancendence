@@ -2,7 +2,6 @@ var exports = {};
 import { htmlSnippets } from "./templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
 import { setEvents } from "./events.js";
-import { InitConnectionChat } from "./chat.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server

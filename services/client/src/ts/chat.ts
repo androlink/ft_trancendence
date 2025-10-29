@@ -1,25 +1,30 @@
 import { sendMessage } from "./events.js";
 
+
 // WEBSOCKET
 let ws: WebSocket | null;
 
 interface WSmessage {
     type: string,
     id: string,
-    content: string
+    content?: string
 };
 
-
+function WSconnect()
+{
+    if (!ws || ws.readyState != WebSocket.OPEN)
+        ws = new WebSocket("/api/chat");
+}
 // setup connection chat
 export function InitConnectionChat() {
     const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
     const chat = document.getElementById("chat-content");
+    let lastPong;
 
     if (!chat || !textarea)
         return alert("chat broken");
 
-    if (!ws || ws.readyState != WebSocket.OPEN)
-        ws = new WebSocket("/api/chat");
+    WSconnect()
     if (!ws)
         return;
 
@@ -40,10 +45,26 @@ export function InitConnectionChat() {
                 const msgformat = "David: " + receivemsg.content;
                 sendMessage(msgformat);
             }
+            if (receivemsg.type === "pong"){
+                console.log("pong");
+                lastPong = Date.now();
+            }
         } catch (err) {
             alert("error : "+ err);
         }
     });
+
+    //ping pong
+    setInterval(() => {
+        const ping: WSmessage = { id: "666", type: "ping"}
+        ws.send(JSON.stringify(ping));
+    }, 15000);
+    setInterval(() => {
+        if (Date.now() - lastPong > 30000){
+            console.log("chat connection lost");
+            WSconnect();
+        }
+    }, 5000);
 
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Enter" && !event.shiftKey) {
@@ -85,6 +106,5 @@ function sendChatMessage() {
         content: textarea.value
     };
     textarea.value = "";
-    console.log(msg.content);
     sendOrQueue(JSON.stringify(msg));
 }

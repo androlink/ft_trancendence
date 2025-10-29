@@ -56,6 +56,14 @@ function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
   }
 }
 
+function needConnection(form: HTMLFormElement): boolean{
+  if (localStorage.getItem("token") === null) {
+    displayErrorOrAlert(form, "You are not connected");
+    return false;
+  }
+  return true;
+}
+
 /**
  * used by the login form, the default event can't be used in SPA (redirect)
  * @param form the said form element
@@ -150,6 +158,8 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
 function setSubmitEventProfile(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
+    if (needConnection(form) === false)
+      return;
     const formData = new FormData(form);
     try {
       const response = await fetch('/update', {
@@ -186,6 +196,8 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
 function setSubmitEventPassword(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
+    if (needConnection(form) === false)
+      return;
     const formData = new FormData(form);
         try {
       const password = formData.get("password") as string;
@@ -230,6 +242,8 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
 function setSubmitEventDelete(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
+    if (needConnection(form) === false)
+      return;
     const formData = new FormData(form);
     try {
       const response = await fetch('/delete', {
