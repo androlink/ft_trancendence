@@ -57,7 +57,7 @@ export const htmlSnippets:  {
         <div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
         <form id="chat-form" class="flex justify-items-stretch">
           <textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
-          <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
+          <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
         </form>
       </div>
     </div>

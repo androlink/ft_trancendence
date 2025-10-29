@@ -1,4 +1,4 @@
-import { sendMessage } from "./events";
+import { sendMessage } from "./events.js";
 
 // WEBSOCKET
 let ws: WebSocket | null;
@@ -9,6 +9,8 @@ interface WSmessage {
     content: string
 };
 
+
+// setup connection chat
 export function InitConnectionChat() {
     const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
     const chat = document.getElementById("chat-content");
@@ -25,9 +27,22 @@ export function InitConnectionChat() {
         alert("connection close");
     }
 
+    //receive msg from back and show on chat
     ws.addEventListener('message', (event) => {
-        const receivemsg: WSmessage = JSON.parse(event.toString());
-        sendMessage(event.data);
+        try {
+            const receivemsg: WSmessage = JSON.parse(event.data);
+            // check type
+            if (receivemsg.type === "message")
+            {
+                //check Id to set username
+                const username = "";
+                //construct message to show on the chat
+                const msgformat = "David: " + receivemsg.content;
+                sendMessage(msgformat);
+            }
+        } catch (err) {
+            alert("error : "+ err);
+        }
     });
 
     textarea.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -38,6 +53,7 @@ export function InitConnectionChat() {
     });
     (window as any).sendChatMessage = sendChatMessage;
 }
+
 
 function waitForSocketConnection(socket, send: Function) {
     setTimeout(
@@ -50,6 +66,7 @@ function waitForSocketConnection(socket, send: Function) {
             }
         }, 5);
 }
+
 function sendOrQueue(message: string) {
     if (ws.readyState === WebSocket.OPEN)
         ws.send(message);
@@ -62,12 +79,12 @@ function sendChatMessage() {
     if (!textarea || !textarea.value) {
         return;
     }
-
-    textarea.value = "";
     const msg: WSmessage =  {
         id: "1",
         type: "message",
         content: textarea.value
     };
+    textarea.value = "";
+    console.log(msg.content);
     sendOrQueue(JSON.stringify(msg));
 }

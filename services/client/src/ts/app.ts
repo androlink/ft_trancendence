@@ -56,7 +56,6 @@ export async function main(): Promise<void> {
   if (keyExist(data, 'headers')) {
     resetReconnectTimer(data.headers.get('x-authenticated'));
   }
-  InitConnectionChat();
   setEvents();
 }
 self["main"] = main;

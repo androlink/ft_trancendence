@@ -6,9 +6,14 @@ interface WSmessage {
     content: string
 };
 
-
+const connectedClients = new Set();
 
 export default function liveChat(fastify: FastifyInstance){
+
+    fastify.websocketServer.on("connection", (client) => {
+        connectedClients.add(client);
+    });
+
     fastify.get('/api/chat', { websocket: true }, (connection, req) => {
         connection.on("message", (event) => {
             try{
@@ -16,7 +21,10 @@ export default function liveChat(fastify: FastifyInstance){
                 if (msg.type === "message")
                 {
                     console.log("msg : " + msg.content);
-                    connection.send(msg.content);
+                    
+                    connectedClients.forEach((client: WebSocket) =>{
+                        client.send(JSON.stringify(msg));
+                    });
                 }
                 if (msg.type === "ping")
                 {

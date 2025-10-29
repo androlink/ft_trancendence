@@ -3,6 +3,7 @@
 import { goToURL, keyExist, resetReconnectTimer } from "./utils.js";
 import { htmlSnippets } from "./templates.js";
 import { main } from "./app.js";
+import { InitConnectionChat } from "./chat.js";
 
 /**
  * set all the events that the page need to work properly
@@ -260,6 +261,7 @@ function setClickEventProfile(text: HTMLElement): void {
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+  InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
