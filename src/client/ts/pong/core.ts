@@ -8,6 +8,12 @@
 /**************************************************************************************************/
 
 import {
+	IPongPlayer,
+	CONTROL,
+	KeyboardPlayer
+} from "./player.js";
+
+import {
 	draw,
 	Drawable,
 	drawSegment
@@ -116,7 +122,7 @@ class PongBall implements ICollideObject, Drawable
 		this.getBounds().forEach((s) => {drawSegment(ctx, s, undefined, true)});
 	}
 
-	public update(objects: ICollideObject[])
+	public update(objects: ICollideObject[], effect: Map<string, Function>): void
 	{
 		if (this.speed < 0)
 		{
@@ -125,17 +131,18 @@ class PongBall implements ICollideObject, Drawable
 		}
 		let remainder = this.speed;
 		let collide = getClosestObject(this, objects, remainder);
-		console.debug(collide);
 		if (collide == null)
 		{
 			this.location.x += Math.cos(this.angle) * remainder;
 			this.location.y += Math.sin(this.angle) * remainder;
 		} else {
-			console.debug((collide.object as Object).constructor.name);
-			if ((collide.object as Object).constructor.name == "PongBoard")
-				simpleBounce(this, collide.event);
-			if ((collide.object as Object).constructor.name == "PongPaddle")
-				paddleBounce(this, collide.event);
+			let call = effect.get((collide.object as Object).constructor.name)
+			if (call)
+				call(this, collide)
+			// if ((collide.object as Object).constructor.name == "PongBoard")
+			// 	simpleBounce(this, collide.event);
+			// if ((collide.object as Object).constructor.name == "PongPaddle")
+			// 	paddleBounce(this, collide.event);
 		}
 	}
 
@@ -191,19 +198,19 @@ class PongBall implements ICollideObject, Drawable
 	// }
 }
 
-let simpleBounce = (ball: PongBall, ce: CollideEvent) =>
+let simpleBounce = (ball: PongBall, ce: {event: CollideEvent;object: ICollideObject;}) =>
 {
-	if (ce.segment)
+	if (ce.event.segment)
 	{
-		ball.angle = 2 * (getNormal(ce.segment) - Math.PI / 2) - ball.angle;
+		ball.angle = 2 * (getNormal(ce.event.segment) - Math.PI / 2) - ball.angle;
 	}
 }
 
-let paddleBounce = (ball: PongBall, ce: CollideEvent) =>
+let paddleBounce = (ball: PongBall, ce: {event: CollideEvent;object: ICollideObject;}) =>
 {
-	if (ce.segment)
+	if (ce.event.segment)
 	{
-		ball.angle = getNormal(ce.segment) - (ce.dist.segment - 0.5) * 2;
+		ball.angle = getNormal(ce.event.segment) - (ce.event.dist.segment - 0.5) * 2;
 		ball.speed += ball.speed_increment;
 	}
 }
@@ -278,14 +285,15 @@ class PongPaddle implements ICollideObject, Drawable
 	}
 };
 
-enum CONTROL {
-	NONE,
-	LEFT,
-	RIGHT,
-}
-
 class PlayerBase implements ICollideObject, Drawable
 {
+	segmentsList: ISegment[] = [];
+
+	constructor(sides: ISegment[])
+	{
+		this.segmentsList = sides;
+	}
+
 	public isDisable(): boolean
 	{
 		return false
@@ -293,7 +301,7 @@ class PlayerBase implements ICollideObject, Drawable
 
 	public getBounds(): ISegment[]
 	{
-		return []
+		return this.segmentsList;
 	}
 
 	public collide(other: ICollideObject, maxDist?: number | void): CollideEvent | null
@@ -301,79 +309,9 @@ class PlayerBase implements ICollideObject, Drawable
 		return null
 	}
 
-	public draw()
+	public draw(ctx: CanvasRenderingContext2D)
 	{
-
-	}
-
-}
-
-
-interface IPongPlayer
-{
-	getInput() : CONTROL;
-}
-
-class KeyboardPlayer implements IPongPlayer, EventListenerObject
-{
-	inputLeft: string;
-	inputRight: string;
-
-	inputLeftState: boolean = false;
-	inputRightState: boolean = false;
-
-	public constructor(inputLeft: string, inputRight: string)
-	{
-		document.addEventListener("keydown", this);
-		document.addEventListener("keyup", this);
-		this.inputLeft = inputLeft.toLowerCase();
-		this.inputRight = inputRight.toLowerCase();
-	}
-
-	private keyboardUp(ev: KeyboardEvent)
-	{
-		if (ev.key.toLowerCase() === this.inputLeft)
-			this.inputLeftState = false;
-		if (ev.key.toLowerCase() === this.inputRight)
-			this.inputRightState = false;
-	}
-
-	private keyboardDown(ev: KeyboardEvent)
-	{
-		if (ev.key.toLowerCase() === this.inputLeft)
-			this.inputLeftState = true;
-		if (ev.key.toLowerCase() === this.inputRight)
-			this.inputRightState = true;
-	}
-
-	public handleEvent(ev: KeyboardEvent)
-	{
-		//console.debug(ev);
-		switch (ev.type)
-		{
-			case "keyup":
-				this.keyboardUp(ev);
-				break ;
-			case "keydown":
-				this.keyboardDown(ev);
-				break ;
-		}
-		//console.debug(this);
-	}
-
-	public getInput(): CONTROL
-	{
-		if (this.inputLeftState == true && this.inputRightState == false)
-			return CONTROL.LEFT;
-		if (this.inputLeftState == false && this.inputRightState == true)
-			return CONTROL.RIGHT;
-		return CONTROL.NONE;
-	}
-
-	public destructor()
-	{
-		document.removeEventListener("keydown", this);
-		document.removeEventListener("keyup", this);
+		this.getBounds().forEach((s) => {drawSegment(ctx, s, "#0000FF", true)});
 	}
 }
 
@@ -426,11 +364,15 @@ export class PongGameManager
 	teams: {
 		player: IPongPlayer;
 		paddle: PongPaddle;
+		score: number;
+		base: PlayerBase;
 	}[] | null = null;
 	randSeed: number | null = null;
 	random: Random | null = null;
 	canvas :HTMLCanvasElement | null = null;
 	setting: PongSettingInfo | null = null;
+
+	effect: Map<string, Function> = null;
 
 	private _intervalID: number | null = null;
 
@@ -457,7 +399,9 @@ export class PongGameManager
 		this.randSeed = Math.random() * (2 ** 31);
 		this.random = new Random(this.randSeed);
 		this.balls = [];
-		this.balls.push(new PongBall({x: 50, y: 25}, 2, 1, 0.1 , this.random.next() * Math.PI * 2));
+		for (let i =0; i < 10; i++)
+			this.balls.push(new PongBall({x: 50, y: 25}, 2.5, 1, 0.1 , this.random.next() * Math.PI * 2));
+
 		this.board = new PongBoard([
 			{segment: [{x: 0, y: 0}, {x: 100, y: 0}]},
 			{segment: [{x: 100, y: 50}, {x: 0, y: 50}],}
@@ -465,13 +409,50 @@ export class PongGameManager
 		this.teams = [];
 		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 0.2, 0.05);
 		var player = new KeyboardPlayer("w", "s");
-		this.teams.push({player: player, paddle: paddle})
+		var base = new PlayerBase([
+			{segment: [{x: 100, y: 0}, {x: 100, y: 50}]}
+		]);
+		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
 		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 0.2, 0.05);
 		var player = new KeyboardPlayer("l", "o");
-		this.teams.push({player: player, paddle: paddle})
-
+		var base = new PlayerBase([
+			{segment: [{x: 0, y: 50}, {x: 0, y: 0}]}
+		]);
+		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
+		this.effect = new Map<string, Function>();
+		this.effect.set("PongBoard", simpleBounce);
+		this.effect.set("PongPaddle", this.pongPaddle_callBack);
+		this.effect.set("PlayerBase", this.playerBase_callBack);
 		//this.teams[1].paddle = new PongPaddle({segment: [{x: 90, y: 45}, {x: 90, y: 5}]}, 10, 0.1);
 	
+	}
+
+	private pongPaddle_callBack = (ball: PongBall, ce: {
+    		event: CollideEvent;
+    		object: ICollideObject;
+		}
+	) => {
+		console.log("collide with a paddle");
+		for (const team of this.teams)
+		{
+			if (team.paddle == ce.object)
+				console.log();
+		}
+		paddleBounce(ball, ce);
+	}
+
+	private playerBase_callBack = (ball: PongBall, ce: {
+    		event: CollideEvent;
+    		object: ICollideObject;
+		}
+	) => {
+		console.log("collide with a base");
+		for (const team of this.teams)
+		{
+			if (team.paddle == ce.object)
+				console.log();
+		}
+		simpleBounce(ball, ce);
 	}
 
 	public start()
@@ -493,9 +474,10 @@ export class PongGameManager
 		let objects: ICollideObject[] = [];
 		this.teams.forEach(team => {
 			objects.push(team.paddle);
+			objects.push(team.base);
 		});
 		objects.push(this.board);
-		this.balls.forEach(b => {b.update(objects)});
+		this.balls.forEach(b => {b.update(objects, this.effect)});
 		this.draw();
 	}
 
@@ -510,11 +492,15 @@ export class PongGameManager
 		if (context == null)
 			return ;
 		context?.reset();
+		context.fillStyle = "#FFFFFF";
+		context?.rect(0, 0, 100, 50);
+		context.fill();
 		this.board.draw(context);
 		this.balls.forEach((b) => {b.draw(context)})
 		for (const team of this.teams)
 		{
 			team.paddle.draw(context);
+			team.base.draw(context);
 			//draw(this.canvas.getContext("2d"), team.paddle.getBounds());
 			//draw(this.canvas.getContext("2d"), [team.paddle.movePath]);
 		}

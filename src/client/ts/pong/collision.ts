@@ -10,6 +10,7 @@ interface ICollideObject
 	isDisable(): boolean;
 	getBounds(): ISegment[];
 	collide(other: ICollideObject, maxDist?: number | void): CollideEvent | null;
+	onCollide?(): void;
 }
 
 class CollideEvent {
