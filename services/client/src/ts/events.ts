@@ -73,7 +73,10 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
       }
       const response = await fetch('/login', {
         method: 'POST',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: username, 
           password: password,
@@ -116,7 +119,10 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
       }
       const response = await fetch('/register', {
         method: 'POST',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: username,
           password: password,
@@ -148,7 +154,10 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
     try {
       const response = await fetch('/update', {
         method: 'PUT',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: formData.get('username') as string,
           biography: formData.get('biography') as string,
@@ -191,7 +200,10 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
 
       const response = await fetch('/password', {
         method: 'PUT',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           password: password, 
         }),
@@ -222,7 +234,10 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
     try {
       const response = await fetch('/delete', {
         method: 'DELETE',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: formData.get("username") as string, 
         }),
@@ -361,7 +376,7 @@ export function setCtrlfEventUsername(): void {
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-      if (self["isConnected"]) {
+      if (localStorage.getItem("token")) {
         e.preventDefault();
         fetch("/logout", {method: 'POST'}).then(
           res => {

@@ -1,7 +1,5 @@
 
 const assetsPath = `/resources`;
-const thenMain = `.then(main)`
-const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`
 
 // theorically should use to say "as const" at the end and not :,
 // to make the string readonly, but it would make the type of htmlSnippets un-readable
@@ -34,7 +32,7 @@ export const htmlSnippets:  {
         <img src="${assetsPath}/notification-icon.png" class="select-none invert-50 hover:invert-75 size-10 cursor-pointer" draggable="false">
         <span class="absolute top-0 right-0 inline-flex size-2 animate-ping rounded-full bg-sky-400 opacity-75"></span>
       </span>
-      <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
+      <img src="${assetsPath}/exit-icon.png" onclick="accountLogOut()" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">

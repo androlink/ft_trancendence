@@ -25,8 +25,7 @@ export async function apiRoutes(fastifyInstance) {
     try {
       await req.jwtVerify();
       const token = fastifyInstance.jwt.sign({id: req.user.id},  {expiresIn: '15m'});
-      reply.setCookie('account', token, {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, });
-      reply.header('x-authenticated', true);
+      reply.header('x-authenticated', token);
     } catch (err) {
       req.user = {id: -1};
       reply.header('x-authenticated', false);
@@ -44,7 +43,6 @@ export async function apiRoutes(fastifyInstance) {
     const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
     if (!row) {
       // might happen naturally if jwt from a previous DB or account deleted
-      reply.clearCookie("account");
       reply.header('x-authenticated', false);
       return reply.send({
         template: "Home",
