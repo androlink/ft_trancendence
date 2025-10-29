@@ -184,10 +184,10 @@ export const htmlSnippets:  {
   </div>
     `,
   Pong: `
-  <div>
+  <div class="size-full flex flex-col">
   		<script  type="module" src="${assetsPath}/pong/main.js"></script>
-		<button onclick="newGame()">test</button>
-		<canvas id="canvas"></canvas>
+		<button class="bg-gray-600 text-red-500 border place-self-start border-gray-400 px-1 rounded" onclick="newGame()">test</button>
+		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:

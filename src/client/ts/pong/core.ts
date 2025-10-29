@@ -284,6 +284,30 @@ enum CONTROL {
 	RIGHT,
 }
 
+class PlayerBase implements ICollideObject, Drawable
+{
+	public isDisable(): boolean
+	{
+		return false
+	}
+
+	public getBounds(): ISegment[]
+	{
+		return []
+	}
+
+	public collide(other: ICollideObject, maxDist?: number | void): CollideEvent | null
+	{
+		return null
+	}
+
+	public draw()
+	{
+
+	}
+
+}
+
 
 interface IPongPlayer
 {
@@ -413,10 +437,8 @@ export class PongGameManager
 	constructor()
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
-		this.canvas.style.width = "400px";
-		this.canvas.style.height = "200px";
 		this.canvas.width = 100;
-		this.canvas.height = 50;
+		this.canvas.height = 100;
 	}
 
 	// static CreateGameManager(setting: PongSettingInfo): PongGameManager
