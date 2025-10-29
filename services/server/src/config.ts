@@ -27,16 +27,8 @@ export default function () {
   fastify.get(`/${assetsPath}`, (req, reply) =>
     reply.send("Hello user, that's where we keep our static files\n"));
 
-  fastify.register(fastifyCookie, {
-    secret: process.env.COOKIE_SECURITY_KEY,
-  });
-
   fastify.register(fastifyJWT, {
     secret: process.env.JWT_SECURITY_KEY,
-    cookie: {
-      cookieName: 'account',
-      signed: false,
-    }
   });
 
   return fastify;

@@ -1,4 +1,4 @@
-import { sendMessage } from "./events";
+import { sendMessage } from "./events.js";
 
 // WEBSOCKET
 let ws: WebSocket | null;

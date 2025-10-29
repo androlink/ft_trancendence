@@ -68,7 +68,6 @@ export async function loginRoutes(fastifyInstance) {
       await req.jwtVerify();
       const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
       if (!row) {
-        reply.clearCookie("account");
         reply.header('x-authenticated', false);
         return reply.code(401).send({success: false, message: "You are not present in the db, got disconnected"});
       }
@@ -77,8 +76,7 @@ export async function loginRoutes(fastifyInstance) {
       req.user.password = row.password;
       req.user.bio = row.bio;
       const token = fastifyInstance.jwt.sign({id: req.user.id},  {expiresIn: '15m'});
-      reply.setCookie('account', token, {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, });
-      reply.header('x-authenticated', true);
+      reply.header('x-authenticated', token);
     } catch (err) {
       reply.header('x-authenticated', false);
       return reply.code(403).send({success: false, message: err.message});
@@ -98,9 +96,7 @@ export async function loginRoutes(fastifyInstance) {
         return reply.code(409).send({success: false, message: `${username} already exists `});
       }
       const token = fastifyInstance.jwt.sign({id: res.lastInsertRowid},  {expiresIn: '15m'});
-      const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
-      return reply.header("x-authenticated", true)
-        .setCookie("account", token, cookiesOptions)
+      return reply.header("x-authenticated", token)
         .send({success: true, message: `welcome ${username}`});
   });
 
@@ -119,14 +115,11 @@ export async function loginRoutes(fastifyInstance) {
       if (!await comparePassword(password, row.password))
         return reply.code(401).send({success: false, message: "wrong password"});
       const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
-      const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
-      return reply.header("x-authenticated", true)
-        .setCookie("account", token, cookiesOptions)
+      return reply.header("x-authenticated", token)
         .send({success: true, message: `welcome ${username}`});
   });
 
   fastifyInstance.post("/logout", async (req, reply) => {
-    reply.clearCookie("account");
     return reply.header("x-authenticated", false).send({success: true, message: "We can't have you forever"});
   });
 
@@ -175,7 +168,6 @@ export async function loginRoutes(fastifyInstance) {
       const res = db.prepare("DELETE FROM users WHERE id = ?").run(req.user.id);
       if (!res.changes) // should not happen
         return reply.code(401).send({success: false, message: "DB refused, sorry"});
-      reply.clearCookie("account");
       // Not a 204 No content because 204 should not have a body and the front wants to have success
       return reply.header("x-authenticated", false).send({success: true, message: "Goodbye :D"});
   });
