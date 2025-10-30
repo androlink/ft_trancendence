@@ -1,5 +1,7 @@
-export {CONTROL, KeyboardPlayer, IPongPlayer}
+export {CONTROL, KeyboardPlayer, IPongPlayer, RandomPlayer}
 
+import { KeyboardInput } from "./keyboard.js";
+import { Random } from "./random.js";
 
 enum CONTROL {
 	NONE,
@@ -12,65 +14,42 @@ interface IPongPlayer
 	getInput() : CONTROL;
 }
 
-class KeyboardPlayer implements IPongPlayer, EventListenerObject
+class KeyboardPlayer implements IPongPlayer
 {
 	inputLeft: string;
 	inputRight: string;
 
-	inputLeftState: boolean = false;
-	inputRightState: boolean = false;
-
 	public constructor(inputLeft: string, inputRight: string)
 	{
-		document.addEventListener("keydown", this);
-		document.addEventListener("keyup", this);
 		this.inputLeft = inputLeft.toLowerCase();
 		this.inputRight = inputRight.toLowerCase();
 	}
 
-	private keyboardUp(ev: KeyboardEvent)
+	public getInput(): CONTROL
 	{
-		if (ev.key.toLowerCase() === this.inputLeft)
-			this.inputLeftState = false;
-		if (ev.key.toLowerCase() === this.inputRight)
-			this.inputRightState = false;
+		if (KeyboardInput.input.keyIsDown(this.inputLeft)
+			&& KeyboardInput.input.keyIsUp(this.inputRight))
+			return CONTROL.LEFT;
+		if (KeyboardInput.input.keyIsDown(this.inputRight)
+			&& KeyboardInput.input.keyIsUp(this.inputLeft))
+			return CONTROL.RIGHT;
+		return CONTROL.NONE;
 	}
+}
 
-	private keyboardDown(ev: KeyboardEvent)
-	{
-		if (ev.key.toLowerCase() === this.inputLeft)
-			this.inputLeftState = true;
-		if (ev.key.toLowerCase() === this.inputRight)
-			this.inputRightState = true;
-	}
 
-	public handleEvent(ev: KeyboardEvent)
+class RandomPlayer implements IPongPlayer
+{
+	random: Random;
+
+	public constructor(random: Random)
 	{
-		//console.debug(ev);
-		switch (ev.type)
-		{
-			case "keyup":
-				this.keyboardUp(ev);
-				break ;
-			case "keydown":
-				this.keyboardDown(ev);
-				break ;
-		}
-		//console.debug(this);
+		this.random = random;
 	}
 
 	public getInput(): CONTROL
 	{
-		if (this.inputLeftState == true && this.inputRightState == false)
-			return CONTROL.LEFT;
-		if (this.inputLeftState == false && this.inputRightState == true)
-			return CONTROL.RIGHT;
-		return CONTROL.NONE;
+		return this.random.next() * 10 > 5 ? CONTROL.LEFT : CONTROL.RIGHT
 	}
 
-	public destructor()
-	{
-		document.removeEventListener("keydown", this);
-		document.removeEventListener("keyup", this);
-	}
 }

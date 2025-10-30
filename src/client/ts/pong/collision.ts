@@ -1,9 +1,9 @@
 
 export {ICollideObject, CollideEvent}
 
-export {intersectSegments, getClosestSegment, getClosestObject};
+export {intersectSegments, getClosestSegment, getClosestObject, intersect};
 
-import { IPoint, ISegment, Ray, bsp} from "./segment";
+import { IPoint, ISegment, Ray, bsp} from "./segment.js";
 
 interface ICollideObject
 {
@@ -33,7 +33,7 @@ class CollideEvent {
  * @param ray 
  * @returns CollideEvent if collide else null
  */
-function intersect(segment: ISegment, ray : ISegment) : CollideEvent | null{
+function intersect(segment: ISegment, ray : ISegment, limit: number = 1) : CollideEvent | null{
 	const [A, B] = segment.segment;
 	const [C, D] = ray.segment;
 
@@ -44,7 +44,7 @@ function intersect(segment: ISegment, ray : ISegment) : CollideEvent | null{
 
 	const r = ((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) / denominator;
 	
-	if (r < 0 || r > 1) return null;
+	if (r < 0 || r > limit) return null;
 	
 	const s = ((A.x - C.x) * (D.y - C.y) - (D.x - C.x) * (A.y - C.y)) / denominator;
 

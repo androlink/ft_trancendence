@@ -1,19 +1,21 @@
 import { PongGameManager } from "./core.js"; 
 
 var pong_game : PongGameManager | null = null;
-
+var intervalId: number | null = null;
 function newGame() : void
 {
-	pong_game?.stop();
+	clearGame();
 	pong_game = new PongGameManager();
 	pong_game.generate();
-	pong_game.start();
-	console.debug(pong_game);
+	pong_game.unpause();
+	pong_game.startRound();
+	intervalId = setInterval(() => {pong_game.loop()}, 1000 / 30);
 }
 
 function clearGame()
 {
-	pong_game?.stop();
+	if (intervalId)
+		clearInterval(intervalId);
 }
 
 self["newGame"] = newGame

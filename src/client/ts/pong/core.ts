@@ -10,7 +10,8 @@
 import {
 	IPongPlayer,
 	CONTROL,
-	KeyboardPlayer
+	KeyboardPlayer,
+	RandomPlayer
 } from "./player.js";
 
 import {
@@ -31,7 +32,7 @@ import {
 
 import {Random} from "./random.js"
 
-import {intersectSegments, ICollideObject, CollideEvent, getClosestObject} from "./collision.js";
+import {intersectSegments, ICollideObject, CollideEvent, getClosestObject, intersect} from "./collision.js";
 
 class PongBall implements ICollideObject, Drawable
 {
@@ -41,6 +42,7 @@ class PongBall implements ICollideObject, Drawable
 	speed_increment: number;
 	size: number;
 	accuracy: number;
+	last_player: number;
 
 	constructor(location: IPoint, size: number, speed: number, speed_increment: number, angle: number, accuracy: number = 6)
 	{
@@ -136,6 +138,8 @@ class PongBall implements ICollideObject, Drawable
 			this.location.x += Math.cos(this.angle) * remainder;
 			this.location.y += Math.sin(this.angle) * remainder;
 		} else {
+			this.location.x += Math.cos(this.angle) * collide.event.dist.ray;
+			this.location.y += Math.sin(this.angle) * collide.event.dist.ray;
 			let call = effect.get((collide.object as Object).constructor.name)
 			if (call)
 				call(this, collide)
@@ -374,13 +378,13 @@ export class PongGameManager
 
 	effect: Map<string, Function> = null;
 
-	private _intervalID: number | null = null;
+	paused: boolean = true;
 
 	constructor()
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
 		this.canvas.width = 100;
-		this.canvas.height = 100;
+		this.canvas.height = 50;
 	}
 
 	// static CreateGameManager(setting: PongSettingInfo): PongGameManager
@@ -398,9 +402,6 @@ export class PongGameManager
 	{
 		this.randSeed = Math.random() * (2 ** 31);
 		this.random = new Random(this.randSeed);
-		this.balls = [];
-		for (let i =0; i < 10; i++)
-			this.balls.push(new PongBall({x: 50, y: 25}, 2.5, 1, 0.1 , this.random.next() * Math.PI * 2));
 
 		this.board = new PongBoard([
 			{segment: [{x: 0, y: 0}, {x: 100, y: 0}]},
@@ -408,17 +409,20 @@ export class PongGameManager
 		]);
 		this.teams = [];
 		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 0.2, 0.05);
-		var player = new KeyboardPlayer("w", "s");
+		// var player = new KeyboardPlayer("w", "s") as IPongPlayer;
+		var player = new RandomPlayer(new Random(1001)) as IPongPlayer;
 		var base = new PlayerBase([
 			{segment: [{x: 100, y: 0}, {x: 100, y: 50}]}
 		]);
 		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
 		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 0.2, 0.05);
-		var player = new KeyboardPlayer("l", "o");
+		// var player = new KeyboardPlayer("l", "o");
+		var player = new RandomPlayer(new Random(1000)) as IPongPlayer;
 		var base = new PlayerBase([
 			{segment: [{x: 0, y: 50}, {x: 0, y: 0}]}
 		]);
 		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
+
 		this.effect = new Map<string, Function>();
 		this.effect.set("PongBoard", simpleBounce);
 		this.effect.set("PongPaddle", this.pongPaddle_callBack);
@@ -433,11 +437,7 @@ export class PongGameManager
 		}
 	) => {
 		console.log("collide with a paddle");
-		for (const team of this.teams)
-		{
-			if (team.paddle == ce.object)
-				console.log();
-		}
+		ball.last_player = this.teams.findIndex((t) => {return t.paddle == ce.object});
 		paddleBounce(ball, ce);
 	}
 
@@ -447,20 +447,60 @@ export class PongGameManager
 		}
 	) => {
 		console.log("collide with a base");
-		for (const team of this.teams)
-		{
-			if (team.paddle == ce.object)
-				console.log();
-		}
-		simpleBounce(ball, ce);
+		if (ball.last_player != undefined && ball.last_player != null)
+			this.teams[ball.last_player].score++;
+		this.startRound();
 	}
 
-	public start()
+	public startRound()
 	{
-		this.stop();
-		this._intervalID = setInterval((manager: PongGameManager) => {
-			manager.update()
-		}, 1000 / 30, this);
+		let angle = 0;
+		const start = {x: 50, y: 25};
+
+		this.balls = [];
+
+		do
+		{
+			angle = this.random.next() * Math.PI * 2;
+			let base_check = false
+			for (const t of this.teams)
+			{
+				if (intersect(t.paddle.movePath,
+					{segment: [start, {x: start.x + Math.cos(angle), y: start.y + Math.sin(angle)}]}, Infinity) != null)
+					base_check = true;
+			}
+			if (base_check)
+				break ;
+			console.debug("nop");
+		} while (1);
+		this.balls.push(new PongBall(start, 2.5, 1, 0.1 , angle));
+	}
+
+	public pause()
+	{
+		this.paused = true;
+	}
+
+	public unpause()
+	{
+		this.paused = false;
+	}
+
+	public togglePause()
+	{
+		this.paused = !this.paused;
+	}
+
+	public loop()
+	{
+		if (this.paused)
+		{
+		}
+		else
+		{
+			this.update();
+		}
+		this.draw();
 	}
 
 	public update()
@@ -477,8 +517,9 @@ export class PongGameManager
 			objects.push(team.base);
 		});
 		objects.push(this.board);
-		this.balls.forEach(b => {b.update(objects, this.effect)});
-		this.draw();
+		this.balls.forEach(b => {
+			b.update(objects, this.effect)
+		});
 	}
 
 	public draw()
@@ -491,10 +532,19 @@ export class PongGameManager
 		const context = this.canvas.getContext("2d");
 		if (context == null)
 			return ;
-		context?.reset();
+		context.reset();
 		context.fillStyle = "#FFFFFF";
-		context?.rect(0, 0, 100, 50);
+		context.rect(0, 0, 100, 50);
 		context.fill();
+		let score_text = "|";
+		for(const t of this.teams)
+		{
+			score_text += t.score + "|";
+		}
+		context.textAlign = "center";
+		context.font = "14px monospace";
+		context.fillStyle = "black";
+		context.fillText(score_text, this.canvas.width / 2, this.canvas.height / 2);
 		this.board.draw(context);
 		this.balls.forEach((b) => {b.draw(context)})
 		for (const team of this.teams)
@@ -504,14 +554,6 @@ export class PongGameManager
 			//draw(this.canvas.getContext("2d"), team.paddle.getBounds());
 			//draw(this.canvas.getContext("2d"), [team.paddle.movePath]);
 		}
-	}
 
-	public stop()
-	{
-		if (this._intervalID != null)
-		{
-			clearInterval(this._intervalID);
-			this._intervalID = null
-		}
 	}
 }
