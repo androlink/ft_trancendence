@@ -1,15 +1,16 @@
 
+import { assetsPath } from "./config.js";
 import db, { hashPassword, comparePassword } from "./database.js";
 import MSG from "./messages_collection.js";
+import fs from 'fs'
+import { pipeline } from "stream/promises";
+import { fileTypeFromBuffer } from 'file-type';
+
 
 // response format for that page :
 // {
 //   success: boolean,
-//   message: {
-//     en: string,
-//     fr: string,
-//     es: string,
-//   },
+//   message: {[key:string]:string | {[language:string]:string}}
 // }
 // setting message as a plain string will set have all the language display the same
 // if you reuse code for other page, take it into consideration
@@ -151,6 +152,37 @@ export async function loginRoutes(fastifyInstance) {
       const res = db.prepare("UPDATE or IGNORE users SET username = ?, bio = ? WHERE id = ? -- update route").run(username, bio, req.user.id);
       if (!res.changes) // might happen if username taken between two requests
         return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
+      return reply.send({success: true, message: ":D"});
+  });
+
+  fastifyInstance.put("/pfp",
+    {
+      onRequest: [identifyUser],
+    },
+    async (req, reply) => {
+      const data = await req.file();
+      if (!data || !data.filename) {
+        return reply.code(400).send({ success: false, message: MSG.NO_FILE() });
+      }
+      const buffer = await data.toBuffer();
+      const detectedType = await fileTypeFromBuffer(buffer);
+      if (!detectedType || !['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(detectedType.mime)) {
+        return reply.code(400).send({ success: false, message: MSG.NOT_IMG() });
+      }
+      const filename = `${req.user.id}.${detectedType.ext}`;
+      try {
+        await fs.promises.writeFile(`/var/www/pfp/${filename}`, buffer);
+      } catch (error) {
+        return reply.code(500).send({ success: false, message: 'Failed to save file: ' + error });
+      }
+      const row = db.prepare('SELECT pfp FROM users WHERE id = ? -- pfp route').get(req.user.id);
+      const res = db.prepare("UPDATE or IGNORE users SET pfp = ? WHERE id = ? -- pfp route").run(filename, req.user.id);
+      if (!res.changes) // should really not happen
+        return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
+      if (row.pfp !== "default.jpg" && row.pfp !== filename) {
+        // if unlink fails, it's sad, but won't bother with an error
+        fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
+      }
       return reply.send({success: true, message: ":D"});
   });
 

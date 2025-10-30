@@ -48,10 +48,11 @@ export async function launchDB() {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     bio TEXT NOT NULL DEFAULT 'Damn is that the default bio ?',
+    pfp TEXT NOT NULL DEFAULT 'default.jpg',
     password TEXT NOT NULL,
     admin INTEGER DEFAULT 0
   );
   `);
-  db.prepare("INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)")
+  const res = db.prepare("INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)")
     .run("AllMighty", await hashPassword(process.env.ADMIN_PASSWORD), "ADMIN", 1);
 }

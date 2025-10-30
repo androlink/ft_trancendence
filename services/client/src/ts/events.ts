@@ -12,9 +12,11 @@ export function setEvents(): void {
   const events = {
     "chat-input": setEnterEventChat,
     "user-search": setEnterEventUsername,
+    "pfp-form": setSubmitEventPfp,
     "login-form": setSubmitEventLogin,
     "register-form": setSubmitEventRegister,
     "profile-form": setSubmitEventProfile,
+    "pfp-input": setChangeEventPfpInput,
     "go-to-profile": setClickEventProfile,
     "change-password-form": setSubmitEventPassword,
     "delete-account-form": setSubmitEventDelete,
@@ -28,6 +30,7 @@ export function setEvents(): void {
     }
   }
 }
+
 
 /**
  * it will try to write the error on the last child of the element if named "error-handler.
@@ -60,6 +63,30 @@ function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
  * used by the login form, the default event can't be used in SPA (redirect)
  * @param form the said form element
  */
+function setSubmitEventPfp(form: HTMLFormElement): void {
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    try {
+      const response = await fetch('/pfp', {
+        method: 'PUT',
+        body: formData,
+      });
+
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, message?: string} = await response.json();
+      if (!result.success) {
+        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
+        return ;
+      }
+      main(true);
+    } catch (error) {
+      displayErrorOrAlert(form, String(error));
+    }
+  });
+}
+
 function setSubmitEventLogin(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
@@ -89,7 +116,6 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
     }
   });
 }
-
 
 /**
  * used by the Password change form, the default event can't be used in SPA (redirect)
@@ -323,6 +349,26 @@ function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
     localStorage.setItem("language", select.value);
     setLanguage();
     main(true, false);
+  });
+}
+
+function setChangeEventPfpInput(input: HTMLInputElement) {
+  input.addEventListener("change", (e) => {
+    const file = input.files[0];
+    if (!file) return;
+    
+    // Check MIME type
+    if (!file.type.startsWith('image/')) {
+      input.value = '';
+      document.getElementById("pfp-preview-div").toggleAttribute('hidden', true);
+      const form = document.getElementById("pfp-form") as HTMLFormElement;
+      if (form) displayErrorOrAlert(form, findLanguage("need image"));
+      return;
+    }
+    const img = window.URL.createObjectURL(input.files[0]);
+    const preview = document.getElementById("pfp-preview") as HTMLImageElement;
+    if (preview && img) preview.src = img;
+    document.getElementById("pfp-preview-div")?.removeAttribute('hidden')
   });
 }
 

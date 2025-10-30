@@ -139,6 +139,8 @@ function replaceElements(toReplace: {[key:string]:string | {[language:string]:st
         element.setAttribute("value", selectLanguage(toReplace[key]));
       } else if (element.hasAttribute("srcdoc")) { // for <iframe>
         element.setAttribute("srcdoc", selectLanguage(toReplace[key]));
+      } else if (element.hasAttribute("src")) { // for <iframe>
+        element.setAttribute("src", selectLanguage(toReplace[key]));
       } else if (element.tagName === "TEXTAREA") { // when <br> doesn't work
         element.textContent = selectLanguage(toReplace[key]);
       } else {

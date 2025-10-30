@@ -68,17 +68,28 @@ const htmlSnippetsTemplate:  {
   Profile1:
     `
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
-    <form id="profile-form" class="relative border-4 border-gray-900 rounded-2xl p-3 w-full grow flex flex-col overflow-y-scroll overflow-x-hidden">
+    <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
-      <span class="flex justify-around place-items-center">
-        <input title="username" id="username" value="" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-        <img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
-      </span>
-      <p class="text-white -ml-2">[[biography]]:</p>
-      <textarea title="biography" id="biography" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
-      <button class="place-self-center bg-white rounded size-fit p-1 my-1 mt-auto hover:cursor-pointer" type="submit">[[update]]</button>
-    </form>
-    <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden">
+      <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
+        <img id="profile-picture" class="pointer-events-auto size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
+        <div id="pfp-preview-div" hidden class="relative">
+          <p class="absolute">Preview</p>
+          <img id="pfp-preview" class="rounded-full size-40" />
+        </div>
+        <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
+        <label for="pfp-input" class="pointer-events-auto cursor-pointer bg-white rounded border border-gray-600 size-fit px-1" >[[upload image]]</label>
+        <button class="pointer-events-auto place-self-center bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
+      </form>
+      <form id="profile-form" class="p-3 flex flex-col justify-around size-full overflow-scroll">
+        <input title="username" id="username" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <div class="my-auto">
+          <p class="text-white -ml-2">[[biography]]:</p>
+          <textarea title="biography" id="biography" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
+        </div>
+        <button class="ml-[20%] bg-white rounded size-fit p-1 my-1 cursor-pointer" type="submit">[[update]]</button>
+      </form>
+    </div>
+    <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden flex-none">
       <p class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-amber-900">[[private infos]]</p>
       <form id="change-password-form" class="mt-5">
         <span class="flex gap-5 w-1/2">
@@ -90,9 +101,8 @@ const htmlSnippetsTemplate:  {
         </span>
       </form>
       <form id="delete-account-form" class="mt-5 flex flex-col items-center">
-          <input placeholder="[[confirm username]]" title="username" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-          <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
-        </span>
+        <input placeholder="[[confirm username]]" title="username" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
       </form>
     </span>
   </div>
@@ -103,7 +113,7 @@ const htmlSnippetsTemplate:  {
   <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll">
     <span class="flex justify-around place-items-center">
       <h1 class="text-white" id="username"></h1>
-      <img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
+      <img id="profile-picture" class="size-50 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
     </span>
     <p class="text-white -ml-2">[[biography]]:</p>
     <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
@@ -168,7 +178,7 @@ const htmlSnippetsTemplate:  {
     `,
   ErrorMessageHandler:
     `
-  <p name="error-handler" class="text-red-500 font-bold mb-2"></p>
+  <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `
 } as const;
 

@@ -3,6 +3,7 @@ import db from "./database.js";
 import { dbLogFile } from "./database.js";
 import fs from 'fs';
 import MSG from './messages_collection.js'
+import { assetsPath } from "./config.js";
 
 // response format for that page :
 // {
@@ -17,7 +18,7 @@ export async function apiRoutes(fastifyInstance) {
   fastifyInstance.setNotFoundHandler ( (req, reply) => {
     return reply.code(404).send({
       template: "Error",
-      replace: {status: "404 Not Found", message: MSG.LOST()}, 
+      replace: {status: "404 Not Found", message: MSG.ERR_404()}, 
       title: "404 Not Found",
     });
   });
@@ -57,6 +58,7 @@ export async function apiRoutes(fastifyInstance) {
     req.user.admin = row.admin;
     req.user.password = row.password;
     req.user.bio = row.bio;
+    req.user.pfp = row.pfp;
   };
 
   fastifyInstance.get('/', (req, reply) => {
@@ -78,7 +80,9 @@ export async function apiRoutes(fastifyInstance) {
   fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
     return reply.send({
       template: "Home",
-      replace: {username: req.user.username, biography: req.user.bio},
+      replace: {username: req.user.username, biography: req.user.bio,
+        "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`
+      },
       title: MSG.YOU(),
       inner: "Profile1",
     });
@@ -86,7 +90,7 @@ export async function apiRoutes(fastifyInstance) {
 
   fastifyInstance.get('/profile/:username', (req, reply) => {
     const username = req.params.username;
-    const row = db.prepare('SELECT bio FROM users WHERE username = ? -- profile/:username route').get(username);
+    const row = db.prepare('SELECT bio, pfp FROM users WHERE username = ? -- profile/:username route').get(username);
     if (!row)
       return reply.send({
         template: "Home", title: username, inner: "Error",
@@ -95,7 +99,9 @@ export async function apiRoutes(fastifyInstance) {
       });
     return reply.send({
       template: "Home",
-      replace: {username: username, biography: row.bio},
+      replace: {username: username, biography: row.bio,
+        "profile-picture": `${assetsPath}/pfp/${row.pfp}`
+      },
       title: username, inner: "Profile2",
     });
   });
@@ -112,7 +118,7 @@ export async function apiRoutes(fastifyInstance) {
     if (!req.user.admin) {
       return reply.code(403).send({
         template: "Error", title: "403 Forbidden",
-        replace: {status: "403 NUH UH", message: MSG.NEED_ADMIN},
+        replace: {status: "403 NUH UH", message: MSG.NEED_ADMIN()},
       });
     }
     const file = fs.readFileSync(dbLogFile, { encoding: 'utf8', flag: 'r' })
