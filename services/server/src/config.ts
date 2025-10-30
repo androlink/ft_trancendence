@@ -4,6 +4,7 @@ import fastifyJWT from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
 import { dbLogFile } from './database';
+import fastifyWebSocket from "@fastify/websocket";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -17,6 +18,7 @@ export default function () {
     }
   });
 
+  fastify.register(fastifyWebSocket);
   fastify.register(fastifyFormbody);
 
   fastify.register(fastifyStatic, {
