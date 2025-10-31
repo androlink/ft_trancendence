@@ -75,7 +75,7 @@ const htmlSnippetsTemplate:  {
       <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
         <img id="profile-picture" class="pointer-events-auto size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
         <div id="pfp-preview-div" hidden class="relative">
-          <p class="absolute">[[preview]]</p>
+          <p class="bg-gray-400 border px-1 top-2 rounded absolute">[[preview]]</p>
           <img id="pfp-preview" class="rounded-full size-40" />
         </div>
         <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
