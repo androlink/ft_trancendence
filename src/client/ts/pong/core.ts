@@ -455,7 +455,7 @@ export class PongGameManager
 	public startRound()
 	{
 		let angle = 0;
-		const start = {x: 50, y: 25};
+		const start = {x: 100, y: 50};
 
 		this.balls = [];
 
