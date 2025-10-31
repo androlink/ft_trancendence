@@ -1,10 +1,17 @@
 
 import db, { hashPassword, comparePassword } from "./database.js";
+import MSG from "./messages_collection.js";
+
 // response format for that page :
 // {
 //   success: boolean,
-//   message: string,
+//   message: {
+//     en: string,
+//     fr: string,
+//     es: string,
+//   },
 // }
+// setting message as a plain string will set have all the language display the same
 // if you reuse code for other page, take it into consideration
 
 export async function loginRoutes(fastifyInstance) {
@@ -30,15 +37,15 @@ export async function loginRoutes(fastifyInstance) {
         if (!Object.hasOwn(conditions, field)) // during development only. Should never happen anyway
           return reply.code(500).send("That input is not in our conditions, no idea how to parse it. Our fault LOL");
         if (typeof req.body[field] !== "string")
-          return reply.code(401).send({success: false, message: `${field} must be a string`});
+          return reply.code(401).send({success: false, message: MSG.MUST_BE_STR(field)});
         if (conditions[field].minLength && req.body[field].length < conditions[field].minLength)
-          return reply.code(401).send({success: false, message: `${field} must be at least ${conditions[field].minLength} chars long`});
+          return reply.code(401).send({success: false, message: MSG.MIN_STR_LENGTH(field, conditions[field].minLength)});
         if (conditions[field].maxLength && req.body[field].length > conditions[field].maxLength)
-          return reply.code(401).send({success: false, message: `${field} must be at most ${conditions[field].maxLength} chars long`});
+          return reply.code(401).send({success: false, message: MSG.MAX_STR_LENGTH(field, conditions[field].maxLength)});
         if (conditions[field].maxByteLength && Buffer.byteLength(req.body[field]) > conditions[field].maxByteLength)
-          return reply.code(401).send({success: false, message: `${field} must be at most ${conditions[field].maxLength} bytes long`});
+          return reply.code(401).send({success: false, message: MSG.MAX_BYTE_LENGTH(field, conditions[field].maxByteLength)});
         if (conditions[field].alphanumeric_ && !req.body[field].match("^[a-zA-Z0-9_]*$"))
-          return reply.code(401).send({success: false, message: `${field} can have only letters, digits and underscores`});
+          return reply.code(401).send({success: false, message: MSG.ALPHANUMERIC_(field)});
       }
     };
   }
@@ -48,11 +55,10 @@ export async function loginRoutes(fastifyInstance) {
    */
   async function needFormBody(req, reply) {
     if (!("content-type" in req.headers)) {
-      return reply.code(415).send({success: false, message: `Content-Type not found in a ${req.method} request`});
+      return reply.code(415).send({success: false, message: MSG.EXPECTED_CONTENT_TYPE(req.method)});
     }
     if (!req.headers["content-type"].startsWith("application/x-www-form-urlencoded")){
-      return reply.code(415).send({success: false, message: 
-        `Expected 'application/x-www-form-urlencoded' Content-Type for ${req.method} on ${req.url}.`});
+      return reply.code(415).send({success: false, message: MSG.EXPECTED_FORMBODY(req.method, req.url)});
     }
   };
 
@@ -66,11 +72,11 @@ export async function loginRoutes(fastifyInstance) {
   async function identifyUser(req, reply) {
     try {
       await req.jwtVerify();
-      const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.id);
+      const row = db.prepare("SELECT * FROM users WHERE id = ? -- identifyUser from accounts_routes.js").get(req.user.id);
       if (!row) {
         reply.clearCookie("account");
         reply.header('x-authenticated', false);
-        return reply.code(401).send({success: false, message: "You are not present in the db, got disconnected"});
+        return reply.code(401).send({success: false, message: MSG.NOT_IN_DB()});
       }
       req.user.username = row.username;
       req.user.admin = row.admin;
@@ -81,7 +87,7 @@ export async function loginRoutes(fastifyInstance) {
       reply.header('x-authenticated', true);
     } catch (err) {
       reply.header('x-authenticated', false);
-      return reply.code(403).send({success: false, message: err.message});
+      return reply.code(403).send({success: false, message: MSG.NOT_RECOGNIZED()});
     }
   };
 
@@ -92,16 +98,16 @@ export async function loginRoutes(fastifyInstance) {
     async (req, reply) => {
       const username = req.body.username;
       const password = await hashPassword(req.body.password);
-      const res = db.prepare('INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)').run(username, password);
+      const res = db.prepare('INSERT OR IGNORE INTO users (username, password) VALUES (?, ?) -- register route').run(username, password);
       if (res.changes === 0) {
         // the only error that makes sense now is account duplicates
-        return reply.code(409).send({success: false, message: `${username} already exists `});
+        return reply.code(409).send({success: false, message: MSG.USERNAME_TAKEN(username)});
       }
       const token = fastifyInstance.jwt.sign({id: res.lastInsertRowid},  {expiresIn: '15m'});
       const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
       return reply.header("x-authenticated", true)
         .setCookie("account", token, cookiesOptions)
-        .send({success: true, message: `welcome ${username}`});
+        .send({success: true, message: MSG.WELCOME_USERNAME(username)});
   });
 
   fastifyInstance.post("/login",
@@ -112,22 +118,22 @@ export async function loginRoutes(fastifyInstance) {
     async (req, reply) => {
       const username = req.body.username;
       const password = req.body.password;
-      let row = db.prepare("SELECT id, password FROM users WHERE username = ?").get(username);
+      let row = db.prepare("SELECT id, password FROM users WHERE username = ? -- login route").get(username);
       if (!row) {
-        return reply.code(401).send({success: false, message: `no account with username "${username}"`});
+        return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(username)});
       }
       if (!await comparePassword(password, row.password))
-        return reply.code(401).send({success: false, message: "wrong password"});
+        return reply.code(401).send({success: false, message: MSG.WRONG_PASSWORD()});
       const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
       const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
       return reply.header("x-authenticated", true)
         .setCookie("account", token, cookiesOptions)
-        .send({success: true, message: `welcome ${username}`});
+        .send({success: true, message: MSG.WELCOME_USERNAME(username)});
   });
 
   fastifyInstance.post("/logout", async (req, reply) => {
     reply.clearCookie("account");
-    return reply.header("x-authenticated", false).send({success: true, message: "We can't have you forever"});
+    return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
   });
 
   fastifyInstance.put("/update",
@@ -136,15 +142,15 @@ export async function loginRoutes(fastifyInstance) {
       preValidation: checkBodyInput(["username", "biography"]),
     },
     async (req, reply) => {
-      const username = req.body.username; 
+      const username = req.body.username;
       const bio = req.body.biography;
-      const row = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
+      const row = db.prepare('SELECT id FROM users WHERE username = ? -- update route').get(username);
       if (row && row.id != req.user.id) {
-          return reply.code(409).send({success: 0, message: `${username} is already taken... Jealous ?`});
+        return reply.code(409).send({success: 0, message: MSG.USERNAME_TAKEN(username)});
       }
-      const res = db.prepare("UPDATE or IGNORE users SET username = ?, bio = ? WHERE id = ?").run(username, bio, req.user.id);
-      if (!res.changes) // might happen if username taken between two requests, or if the id is not linked to an account (aka user account deleted)
-        return reply.code(403).send({success: false, message: "The database doesn't feel like it"});
+      const res = db.prepare("UPDATE or IGNORE users SET username = ?, bio = ? WHERE id = ? -- update route").run(username, bio, req.user.id);
+      if (!res.changes) // might happen if username taken between two requests
+        return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
       return reply.send({success: true, message: ":D"});
   });
 
@@ -155,9 +161,9 @@ export async function loginRoutes(fastifyInstance) {
     },
     async (req, reply) => {
       const password = await hashPassword(req.body.password);
-      const res = db.prepare("UPDATE users SET password = ? WHERE id = ?").run(password, req.user.id);
+      const res = db.prepare("UPDATE users SET password = ? WHERE id = ? -- password route").run(password, req.user.id);
       if (!res.changes) 
-        return reply.code(403).send({success: false, message: "The database doesn't feel like it"});
+        return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
       return reply.send({success: true, message: ":D"});
   });
 
@@ -169,14 +175,14 @@ export async function loginRoutes(fastifyInstance) {
     },
     async (req, reply) => {
       if (req.user.admin)
-        return reply.code(403).send({success: false, message: "No! Stop!! You're admin"});
+        return reply.code(403).send({success: false, message: MSG.REFUSED_ADMIN()});
       if (req.body.username != req.user.username)
-        return reply.code(401).send({success: false, message: "Nope that's not your username"});
-      const res = db.prepare("DELETE FROM users WHERE id = ?").run(req.user.id);
+        return reply.code(401).send({success: false, message: MSG.WRONG_USERNAME()});
+      const res = db.prepare("DELETE FROM users WHERE id = ? -- delete route").run(req.user.id);
       if (!res.changes) // should not happen
-        return reply.code(401).send({success: false, message: "DB refused, sorry"});
+        return reply.code(401).send({success: false, message: MSG.DB_REFUSED()});
       reply.clearCookie("account");
       // Not a 204 No content because 204 should not have a body and the front wants to have success
-      return reply.header("x-authenticated", false).send({success: true, message: "Goodbye :D"});
+      return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
   });
 }
