@@ -40,7 +40,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL( )" name="">pdf</div>
     <div onclick="goToURL('game')" name="game">[[game]]</div>    
     <div onclick="goToURL('blank')" name="blank">debug</div>
-    <div onclick="goToURL('pong')" name="pong">[[real pong]]</div>
+    <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
   </span>
   <span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
