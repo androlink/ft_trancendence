@@ -199,7 +199,7 @@ export async function loginRoutes(fastifyInstance) {
       return reply.send({success: true, message: ":D"});
   });
 
-
+  
   fastifyInstance.delete("/delete",
     {
       onRequest: [identifyUser, needFormBody],

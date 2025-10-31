@@ -23,6 +23,7 @@
   "passwords don't match": "Les mots de passent ne correspondent pas",
   "upload image": "mettre une image",
   "need image": "on a dit \"image\"",
+  "preview": "prevision",
   "pop up": "Bonjour. J'ai créé des raccourcis et je les ai trouvés très utiles, alors…<br><br>Ctrl + P => Accès à l'éditeur de profil<br>Ctrl + P dans l'éditeur de profil => Accès à votre profil public<br>Ctrl + E => Déconnexion<br>Ctrl + Entrée => Sélection du chat<br>Ctrl + K => Sélection de la recherche de profil en haut à gauche<br>? => Affichage de ce menu<br><br>Un grand merci aux raccourcis par défaut<br>Alt + flèche (gauche || droite) => Navigation dans l'historique<br>Tab & Maj + Tab => Sélection des éléments<br><br>Ctrl + E avec recherche utilisateur sélectionnée => Déconnexion sans réinitialisation de la page, débogage uniquement, cette ligne sera bientôt supprimée"
 }
 

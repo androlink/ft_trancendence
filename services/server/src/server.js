@@ -6,6 +6,7 @@ import { loginRoutes } from './accounts_routes.js';
 import { launchDB } from './database.js';
 import { assetsPath } from './config.js';
 import { errorRoutes } from './error_routes.js';
+import { miscRoutes } from './misc_routes';
 
 const fastify = fastifyConf();
 await launchDB();
@@ -17,7 +18,8 @@ fastify.setNotFoundHandler((req, reply) => {
 });
 fastify.register(apiRoutes, { prefix: '/api' });
 fastify.register(loginRoutes);
-fastify.register(errorRoutes, {prefix: '/error'})
+fastify.register(errorRoutes, {prefix: '/error'});
+fastify.register(miscRoutes, {prefix: '/misc'});
 
 fastify.listen({port: 3000,  host: '0.0.0.0'}, (err, address) => {
   if (err) throw err

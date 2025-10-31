@@ -1,5 +1,5 @@
 
-const assetsPath = `/resources`;
+export const assetsPath = `/resources`;
 const thenMain = `.then(main)`;
 const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
 
@@ -22,10 +22,12 @@ const htmlSnippetsTemplate:  {
   Home:
     `
   <span class="grid grid-cols-3 mx-8 my-2">
-    <span class="flex justify-self-start">
+    <div class="relative justify-self-start">
       <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
-    </span>
-    <p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
+      <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
+      </div>
+    </div>
+    <p class=" text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -73,12 +75,12 @@ const htmlSnippetsTemplate:  {
       <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
         <img id="profile-picture" class="pointer-events-auto size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
         <div id="pfp-preview-div" hidden class="relative">
-          <p class="absolute">Preview</p>
+          <p class="absolute">[[preview]]</p>
           <img id="pfp-preview" class="rounded-full size-40" />
         </div>
         <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
         <label for="pfp-input" class="pointer-events-auto cursor-pointer bg-white rounded border border-gray-600 size-fit px-1" >[[upload image]]</label>
-        <button class="pointer-events-auto place-self-center bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
+        <button title="[[will cause a reload]]"  class="pointer-events-auto bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
       </form>
       <form id="profile-form" class="p-3 flex flex-col justify-around size-full overflow-scroll">
         <input title="username" id="username" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
@@ -172,8 +174,7 @@ const htmlSnippetsTemplate:  {
   `,
   PopUp:
     `
-  <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50">
-    <p class="text-black p-1 text-center">[[pop up]]</p>
+  <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
   </div>
     `,
   ErrorMessageHandler:

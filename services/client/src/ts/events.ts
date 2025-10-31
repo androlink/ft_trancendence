@@ -1,7 +1,7 @@
 
 
 import { goToURL, keyExist, resetReconnectTimer } from "./utils.js";
-import { htmlSnippets, setLanguage, selectLanguage, findLanguage } from "./templates.js";
+import { htmlSnippets, setLanguage, selectLanguage, findLanguage, assetsPath } from "./templates.js";
 import { main } from "./app.js";
 
 /**
@@ -11,7 +11,7 @@ export function setEvents(): void {
   let elem: any;
   const events = {
     "chat-input": setEnterEventChat,
-    "user-search": setEnterEventUsername,
+    "user-search": setMultipleEventUsername,
     "pfp-form": setSubmitEventPfp,
     "login-form": setSubmitEventLogin,
     "register-form": setSubmitEventRegister,
@@ -330,14 +330,42 @@ self["sendMessage"] = sendMessage;
  * Preferably NOT DEFINITIVE (annoying to use)
  * @param textarea the said username input
  */
-function setEnterEventUsername(textarea: HTMLTextAreaElement): void {
+function setMultipleEventUsername(textarea: HTMLInputElement): void {
+  function clearSibling() {
+    const div = textarea.nextElementSibling as HTMLDivElement;
+    if (div) div.innerHTML = "";
+    return div;
+  }
   textarea.toggleAttribute("data-custom", true);
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === 'Enter' && textarea.value) {
       event.preventDefault();
       goToURL(`profile/${textarea.value}`, true);
       textarea.value = "";
+      clearSibling();
     }
+  });
+  textarea.addEventListener("input", async (e) => {
+    textarea.value = Array.from(textarea.value.matchAll(/[0-9a-zA-Z_:]/g), (m) => m[0]).join("");
+    try {
+      const res = await fetch("/misc/users?start=" + textarea.value);
+      const json = await res.json();
+      const div = clearSibling();
+      if (!div) return;
+      for (let user of json) {
+        div.innerHTML +=
+          `<span class="flex flex-row *:my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400">
+            <img class="size-5 rounded-full" src="${assetsPath}/pfp/${user.pfp}"/>
+            <p class="cursor-pointer" onclick="goToURL('/profile/${user.username}', true)">${user.username}</p>
+          <span>
+          `;
+      }
+    }
+    catch (err) {};
+  });
+  textarea.addEventListener("blur", async () => {
+    await new Promise(r => setTimeout(r, 100));
+    clearSibling();
   });
 }
 
@@ -431,6 +459,7 @@ export function setCtrlEventUsername(): void {
       e.stopPropagation();
       // document active is set to body to not activate while using chat
       if (e.key === '?' && !isPressed && document.activeElement === document.body) {
+        help.innerHTML = "<p>" + findLanguage("pop up") + "</p>";
         isPressed = e.code;
         app.appendChild(help);
         
