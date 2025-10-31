@@ -383,8 +383,8 @@ export class PongGameManager
 	constructor()
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
-		this.canvas.width = 100;
-		this.canvas.height = 50;
+		this.canvas.width = 200;
+		this.canvas.height = 100;
 	}
 
 	// static CreateGameManager(setting: PongSettingInfo): PongGameManager
@@ -404,22 +404,22 @@ export class PongGameManager
 		this.random = new Random(this.randSeed);
 
 		this.board = new PongBoard([
-			{segment: [{x: 0, y: 0}, {x: 100, y: 0}]},
-			{segment: [{x: 100, y: 50}, {x: 0, y: 50}],}
+			{segment: [{x: 0, y: 0}, {x: 200, y: 0}]},
+			{segment: [{x: 200, y: 100}, {x: 0, y: 100}],}
 		]);
 		this.teams = [];
-		var paddle = new PongPaddle({segment: [{x: 10, y: 45}, {x: 10, y: 5}]}, 0.2, 0.05);
+		var paddle = new PongPaddle({segment: [{x: 20, y: 90}, {x: 20, y: 10}]}, 0.4, 0.05);
 		// var player = new KeyboardPlayer("w", "s") as IPongPlayer;
 		var player = new RandomPlayer(new Random(1001)) as IPongPlayer;
 		var base = new PlayerBase([
-			{segment: [{x: 100, y: 0}, {x: 100, y: 50}]}
+			{segment: [{x: 200, y: 0}, {x: 200, y: 100}]}
 		]);
 		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
-		var paddle = new PongPaddle({segment: [{x: 90, y: 5}, {x: 90, y: 45}]}, 0.2, 0.05);
+		var paddle = new PongPaddle({segment: [{x: 180, y: 10}, {x: 180, y: 90}]}, 0.4, 0.05);
 		// var player = new KeyboardPlayer("l", "o");
 		var player = new RandomPlayer(new Random(1000)) as IPongPlayer;
 		var base = new PlayerBase([
-			{segment: [{x: 0, y: 50}, {x: 0, y: 0}]}
+			{segment: [{x: 0, y: 100}, {x: 0, y: 0}]}
 		]);
 		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
 
@@ -473,7 +473,7 @@ export class PongGameManager
 				break ;
 			console.debug("nop");
 		} while (1);
-		this.balls.push(new PongBall(start, 2.5, 1, 0.1 , angle));
+		this.balls.push(new PongBall(start, 5, 1, 0.05 , angle, 7));
 	}
 
 	public pause()
@@ -500,7 +500,8 @@ export class PongGameManager
 		{
 			this.update();
 		}
-		this.draw();
+		requestAnimationFrame(async () => {this.draw()});
+		// this.draw();
 	}
 
 	public update()
@@ -534,7 +535,7 @@ export class PongGameManager
 			return ;
 		context.reset();
 		context.fillStyle = "#FFFFFF";
-		context.rect(0, 0, 100, 50);
+		context.rect(0, 0, context.canvas.width, context.canvas.height);
 		context.fill();
 		let score_text = "|";
 		for(const t of this.teams)
