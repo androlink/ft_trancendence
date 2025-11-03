@@ -74,6 +74,12 @@ export async function launchDB() {
     UNIQUE (friend_one, friend_two)
   );
   CREATE INDEX idx_friends ON friends (friend_one, friend_two);
+  CREATE TABLE history_game (
+    game INTEGER PRIMARY KEY AUTOINCREMENT,
+    time DATETIME NOT NULL DEFAULT(DATETIME('now')),
+    winner INTEGER NOT NULL,
+    loser INTEGER NOT NULL
+  );
   `);
   const res = db.prepare("INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)")
     .run("AllMighty", await hashPassword(process.env.ADMIN_PASSWORD), "ADMIN", 1);

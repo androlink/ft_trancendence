@@ -288,12 +288,11 @@ function setClickEventBlockRequest(text: HTMLElement): void {
       if (!result.success) {
         sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
       }
     } catch (error) {
       sendMessage(String(error));
     }
-    main();
+    main(true);
   });
 }
 
@@ -313,12 +312,11 @@ function setClickEventFriendRequest(text: HTMLElement): void {
       if (!result.success) {
         sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
       }
     } catch (error) {
       sendMessage(String(error));
     }
-    main();
+    main(true);
   });
 }
 

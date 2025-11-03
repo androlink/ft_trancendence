@@ -128,6 +128,23 @@ const htmlSnippetsTemplate:  {
     </span>
     <p class="text-white -ml-2">[[biography]]:</p>
     <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography-p2"></p>
+    <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
+      <caption class="caption-bottom">[[remote counter]]</caption>
+      <thead>
+        <tr>
+          <th class="border border-gray-300" scope="col">[[wins]]</th>
+          <th class="border border-gray-300" scope="col">[[loses]]</th>
+          <th class="border border-gray-300" scope="col">[[w/l ratio]]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="border border-gray-300 text-center" id="wins"></td>
+          <td class="border border-gray-300 text-center" id="loses"></td>
+          <td class="border border-gray-300 text-center" id="ratio"></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   `,
   Pdf:

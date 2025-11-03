@@ -233,6 +233,9 @@ export async function loginRoutes(fastifyInstance) {
       if (!row)
         return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
       const toggleBlock = db.transaction((requester, requested) => {
+        // if you already blocked the other person, do nothing
+        if (db.prepare('SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ?').get(requester, requested))
+          return ;
         // if the other person already requested you, accept it
         if (db.prepare('DELETE FROM friend_requests WHERE requested = ? AND requester = ? RETURNING 1').get(requester, requested)) {
           db.prepare('INSERT INTO friends (friend_one, friend_two) VALUES (?, ?)').run(requester, requested);
@@ -240,7 +243,7 @@ export async function loginRoutes(fastifyInstance) {
         }
         // if it's your friend, remove it
         if (db.prepare('DELETE FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_two = ? AND friend_one = ?) RETURNING 1').get(requester, requested, requester, requested))
-          return;
+          return ;
         // if it's you already had a request, remove it
         if (db.prepare('DELETE FROM friend_requests WHERE requester = ? AND requested = ? RETURNING 1').get(requester, requested))
           return ;

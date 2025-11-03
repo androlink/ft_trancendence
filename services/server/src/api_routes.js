@@ -90,7 +90,7 @@ export async function apiRoutes(fastifyInstance) {
 
   fastifyInstance.get('/profile/:username', (req, reply) => {
     const username = req.params.username;
-    const row_searched = db.prepare('SELECT bio, pfp, username, id FROM users WHERE lower(username) = lower(?) -- profile/:username route').get(username);
+    const row_searched = db.prepare('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS loses FROM users u WHERE lower(username) = lower(?) -- profile/:username route').get(username);
     if (!row_searched)
       return reply.send({
         template: "Home", title: username, inner: "Error",
@@ -119,6 +119,8 @@ export async function apiRoutes(fastifyInstance) {
       replace: {"username-p2": row_searched.username, "biography-p2": row_searched.bio,
         "profile-picture": `${assetsPath}/pfp/${row_searched.pfp}`,
         "friend request": friend, "blocking request": block,
+        wins: String(row_searched.wins), loses: String(row_searched.loses),
+        ratio: String(row_searched.wins / row_searched.loses),
       },
       title: row_searched.username, inner: "Profile2",
     });
