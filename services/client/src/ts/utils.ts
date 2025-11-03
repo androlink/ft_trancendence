@@ -1,6 +1,7 @@
 
 import { main } from "./app.js"
 import { setCtrlfEventUsername } from "./events.js";
+import { sendStatusMessage } from "./chat.js";
 //----------------------------------------------------------------------------#
 //                 HISTORY STUFF                #
 //----------------------------------------------------------------------------#
@@ -130,6 +131,7 @@ export function accountLogOut() {
   fetch("/logout", {method: 'POST'}).then(
     res => {
       resetReconnectTimer(res.headers.get("x-authenticated"));
+      sendStatusMessage();
       main();
     }
   ).catch(err => alert('Caught: ' + err));

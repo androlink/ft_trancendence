@@ -41,6 +41,7 @@ export function InitConnectionChat() {
 
   ws.onclose = () => {
     alert("connection close");
+    ws = null;
   }
 
   //receive msg from back and show on chat
@@ -115,6 +116,21 @@ function sendChatMessage() {
   const msg: WSmessage =  {
     id: localStorage.getItem("token"),
     type: "message",
+    content: textarea.value
+  };
+  textarea.value = "";
+  sendOrQueue(JSON.stringify(msg));
+}
+
+export function sendStatusMessage()
+{
+  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+  if (!textarea || !textarea.value) {
+    return;
+  }
+  const msg: WSmessage =  {
+    id: localStorage.getItem("token"),
+    type: "connection",
     content: textarea.value
   };
   textarea.value = "";

@@ -7,7 +7,9 @@ import { launchDB } from './database';
 import { assetsPath } from './config';
 import liveChat from './live_chat';
 
-const fastify = fastifyConf();
+export default fastifyConf();
+import  fastify from "./server"
+
 await launchDB();
 
 fastify.setNotFoundHandler((req, reply) => {

@@ -4,6 +4,7 @@ import { goToURL, keyExist, resetReconnectTimer } from "./utils.js";
 import { htmlSnippets } from "./templates.js";
 import { main } from "./app.js";
 import { InitConnectionChat } from "./chat.js";
+import { sendStatusMessage} from "./chat.js";
 
 /**
  * set all the events that the page need to work properly
@@ -98,6 +99,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
+      sendStatusMessage();
       main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
@@ -144,6 +146,7 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
+      sendStatusMessage();
       main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
@@ -264,6 +267,7 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
           `Server responded with ${response.status} ${response.statusText}`);
         return ;
       }
+      sendStatusMessage();
       main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
