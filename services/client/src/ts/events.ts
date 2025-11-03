@@ -15,6 +15,8 @@ export function setEvents(): void {
     "pfp-form": setSubmitEventPfp,
     "login-form": setSubmitEventLogin,
     "register-form": setSubmitEventRegister,
+    "blocking request" : setClickEventBlockRequest,
+    "friend request" : setClickEventFriendRequest,
     "profile-form": setSubmitEventProfile,
     "pfp-input": setChangeEventPfpInput,
     "go-to-profile": setClickEventProfile,
@@ -218,7 +220,7 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
-      const elem = document.getElementById("username");
+      const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value"))
         goToURL(`profile/${elem.getAttribute("value")}`);
       else
@@ -258,16 +260,66 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
 
 /**
  * used by the button that goes to the public profile from /profile
- * @param textElem the HTMLElement that's gonna get the event
+ * @param text the HTMLElement that's gonna get the event
  */
 function setClickEventProfile(text: HTMLElement): void {
-  const usernameElem = document.getElementById("username");
+  const usernameElem = document.getElementById("username-p1");
   if (!usernameElem || !usernameElem.hasAttribute("value"))
     return ;
   const username: string = usernameElem.getAttribute("value");
   text.addEventListener("click", (event: PointerEvent) => 
     goToURL(`profile/${username}`)
   );
+}
+
+function setClickEventBlockRequest(text: HTMLElement): void {
+  if (text.innerText === "NOT CONNECTED" || text.innerText === "IT IS YOU") {
+    text.innerText = findLanguage(text.innerText.toLowerCase());
+    return ;
+  }
+  const usernameElem = document.getElementById("username-p2");
+  if (!usernameElem || !usernameElem.innerText)
+    return ;
+  text.addEventListener("click", async (event: PointerEvent) => {
+    try {
+      const response = await fetch(`/block?user=${usernameElem.innerText}`, {method: 'post'});
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, message?: string} = await response.json();
+      if (!result.success) {
+        sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
+        return ;
+      }
+    } catch (error) {
+      sendMessage(String(error));
+    }
+    main();
+  });
+}
+
+function setClickEventFriendRequest(text: HTMLElement): void {
+  if (text.innerText === "NOT CONNECTED" || text.innerText === "IT IS YOU" || text.innerText === "THEY ARE BLOCKED") {
+    text.innerText = findLanguage(text.innerText.toLowerCase());
+    return ;
+  }
+  const usernameElem = document.getElementById("username-p2");
+  if (!usernameElem || !usernameElem.innerText)
+    return ;
+  text.addEventListener("click", async (event: PointerEvent) => {
+    try {
+      const response = await fetch(`/friend?user=${usernameElem.innerText}`, {method: 'post'});
+      resetReconnectTimer(response.headers.get('x-authenticated'));
+      const result: {success?: boolean, message?: string} = await response.json();
+      if (!result.success) {
+        sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
+        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
+        return ;
+      }
+    } catch (error) {
+      sendMessage(String(error));
+    }
+    main();
+  });
 }
 
 /**
@@ -285,7 +337,6 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
     }
   });
 }
-
 
 /**
  * to add a new message to the chat.
@@ -334,14 +385,21 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
   function clearSibling() {
     const div = textarea.nextElementSibling as HTMLDivElement;
     if (div) div.innerHTML = "";
+    first = null;
     return div;
   }
+  let first: string | null = null;
   textarea.toggleAttribute("data-custom", true);
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === 'Enter' && textarea.value) {
       event.preventDefault();
       goToURL(`profile/${textarea.value}`, true);
       textarea.value = "";
+      clearSibling();
+    }
+    if (event.key === 'Tab' && first !== null) {
+      event.preventDefault();
+      textarea.value = first;
       clearSibling();
     }
   });
@@ -352,11 +410,12 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
       const json = await res.json();
       const div = clearSibling();
       if (!div) return;
+      if (json[0]) first = json[0].username;
       for (let user of json) {
         div.innerHTML +=
-          `<span class="flex flex-row *:my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400">
+          `<span onclick="goToURL('/profile/${user.username}', true)" class="flex flex-row cursor-pointer *:my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400">
             <img class="size-5 rounded-full" src="${assetsPath}/pfp/${user.pfp}"/>
-            <p class="cursor-pointer" onclick="goToURL('/profile/${user.username}', true)">${user.username}</p>
+            <p>${user.username}</p>
           <span>
           `;
       }
@@ -427,7 +486,7 @@ export function setCtrlEventUsername(): void {
 
     if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'p') {
       e.preventDefault();
-      const elem = document.getElementById("username");
+      const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value")) {
         goToURL(`profile/${elem.getAttribute("value")}`);
         return ;

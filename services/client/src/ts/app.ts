@@ -41,6 +41,8 @@ export async function main(force = false, requests = true): Promise<void> {
     let {headers, ...rest} = data;
     last = rest;
   }
+
+  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
   if (keyExist(data, 'title')) {
     document.title = selectLanguage(data.title);
   }
@@ -66,6 +68,7 @@ export async function main(force = false, requests = true): Promise<void> {
   } else if (!self['isConnected']) {
     resetReconnectTimer('false');
   }
+  if (force && chatInnerHTML) document.getElementById("chat-content")?.insertAdjacentHTML('beforeend', chatInnerHTML);
   setEvents();
 }
 self["main"] = main;

@@ -80,7 +80,7 @@ export async function apiRoutes(fastifyInstance) {
   fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {
     return reply.send({
       template: "Home",
-      replace: {username: req.user.username, biography: req.user.bio,
+      replace: {"username-p1": req.user.username, "biography-p1": req.user.bio,
         "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`
       },
       title: MSG.YOU(),
@@ -90,19 +90,37 @@ export async function apiRoutes(fastifyInstance) {
 
   fastifyInstance.get('/profile/:username', (req, reply) => {
     const username = req.params.username;
-    const row = db.prepare('SELECT bio, pfp FROM users WHERE username = ? -- profile/:username route').get(username);
-    if (!row)
+    const row_searched = db.prepare('SELECT bio, pfp, username, id FROM users WHERE lower(username) = lower(?) -- profile/:username route').get(username);
+    if (!row_searched)
       return reply.send({
         template: "Home", title: username, inner: "Error",
-        replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username), 
-      },
+        replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username)},
       });
+    let friend = MSG.REQUEST_FRIEND();
+    let block = MSG.BLOCK();
+    if (req.user.id === -1) {
+      friend = "NOT CONNECTED";
+      block = "NOT CONNECTED";
+    } else if (req.user.id === row_searched.id) {
+      friend = "IT IS YOU";
+      block = "IT IS YOU";
+    } else if (db.prepare("SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ? -- profile/:usename route").get(req.user.id, row_searched.id)) {
+      friend = "THEY ARE BLOCKED";
+      block = MSG.UN_BLOCK();
+    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requester = ? AND requested = ? -- profile/:usename route").get(req.user.id, row_searched.id)) {
+      friend = MSG.UN_FRIEND_REQUEST();
+    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requested = ? AND requester = ? -- profile/:usename route").get(req.user.id, row_searched.id)) {
+      friend = MSG.ACCEPT_FRIEND();
+    } else if (db.prepare("SELECT 1 FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_one = ? AND friend_two = ?) -- profile/:usename route").get(req.user.id, row_searched.id, row_searched.id, req.user.id)) {
+      friend = MSG.UN_FRIEND();
+    }
     return reply.send({
       template: "Home",
-      replace: {username: username, biography: row.bio,
-        "profile-picture": `${assetsPath}/pfp/${row.pfp}`
+      replace: {"username-p2": row_searched.username, "biography-p2": row_searched.bio,
+        "profile-picture": `${assetsPath}/pfp/${row_searched.pfp}`,
+        "friend request": friend, "blocking request": block,
       },
-      title: username, inner: "Profile2",
+      title: row_searched.username, inner: "Profile2",
     });
   });
 

@@ -119,7 +119,7 @@ export async function loginRoutes(fastifyInstance) {
     async (req, reply) => {
       const username = req.body.username;
       const password = req.body.password;
-      let row = db.prepare("SELECT id, password FROM users WHERE username = ? -- login route").get(username);
+      let row = db.prepare("SELECT id, password FROM users WHERE lower(username) = lower(?) -- login route").get(username);
       if (!row) {
         return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(username)});
       }
@@ -199,7 +199,60 @@ export async function loginRoutes(fastifyInstance) {
       return reply.send({success: true, message: ":D"});
   });
 
-  
+  fastifyInstance.post("/block",
+    {
+      onRequest: [identifyUser],
+    },
+    async (req, reply) => {
+      let who = req.query.user;
+      if (!who) return reply.send({success: false, message: "You need to tell who in the query as example /block?user=AllMighty"});
+      if (req.user.username === who) return reply.send({success: false, message: MSG.THAT_IS_YOU()});
+      let row = db.prepare("SELECT id FROM users WHERE username = ? -- block route ").get(who);
+      if (!row)
+        return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
+      const toggleBlock = db.transaction((blockerId, blockedId) => {
+        if (db.prepare('DELETE FROM user_blocks WHERE blocker_id = ? AND blocked_id = ? RETURNING 1').get(blockerId, blockedId))
+          return ;
+        db.prepare('DELETE FROM friend_requests WHERE requester = ? AND requested = ?').run(blockerId, blockedId);
+        db.prepare('DELETE FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_two = ? AND friend_one = ?)').run(blockerId, blockedId, blockerId, blockedId);
+        db.prepare('INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (?, ?)').run(blockerId, blockedId);
+      });
+      const result = toggleBlock(req.user.id, row.id);
+      return reply.send({success: true, message: String(result)});
+  });
+
+  fastifyInstance.post("/friend",
+    {
+      onRequest: [identifyUser],
+    },
+    async (req, reply) => {
+      let who = req.query.user;
+      if (!who) return reply.send({success: false, message: "You need to tell who in the query as example /friend?user=AllMighty"});
+      if (req.user.username === who) return reply.send({success: false, message: MSG.THAT_IS_YOU()});
+      let row = db.prepare("SELECT id FROM users WHERE username = ? -- friend route ").get(who);
+      if (!row)
+        return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
+      const toggleBlock = db.transaction((requester, requested) => {
+        // if the other person already requested you, accept it
+        if (db.prepare('DELETE FROM friend_requests WHERE requested = ? AND requester = ? RETURNING 1').get(requester, requested)) {
+          db.prepare('INSERT INTO friends (friend_one, friend_two) VALUES (?, ?)').run(requester, requested);
+          return ;
+        }
+        // if it's your friend, remove it
+        if (db.prepare('DELETE FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_two = ? AND friend_one = ?) RETURNING 1').get(requester, requested, requester, requested))
+          return;
+        // if it's you already had a request, remove it
+        if (db.prepare('DELETE FROM friend_requests WHERE requester = ? AND requested = ? RETURNING 1').get(requester, requested))
+          return ;
+        // friend request :D
+        db.prepare('INSERT INTO friend_requests (requester, requested) VALUES (?, ?)')
+          .run(requester, requested);
+      });
+      toggleBlock(req.user.id, row.id);
+      return reply.send({success: true, message: "Done"});
+  });
+
+
   fastifyInstance.delete("/delete",
     {
       onRequest: [identifyUser, needFormBody],
@@ -210,10 +263,11 @@ export async function loginRoutes(fastifyInstance) {
         return reply.code(403).send({success: false, message: MSG.REFUSED_ADMIN()});
       if (req.body.username != req.user.username)
         return reply.code(401).send({success: false, message: MSG.WRONG_USERNAME()});
-      const res = db.prepare("DELETE FROM users WHERE id = ? -- delete route").run(req.user.id);
-      if (!res.changes) // should not happen
+      const row = db.prepare("DELETE FROM users WHERE id = ? RETURNING pfp -- delete route").get(req.user.id);
+      if (!row) // should not happen
         return reply.code(401).send({success: false, message: MSG.DB_REFUSED()});
       reply.clearCookie("account");
+      if (row.pfp != "default.jpg") fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
       // Not a 204 No content because 204 should not have a body and the front wants to have success
       return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
   });

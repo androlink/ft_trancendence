@@ -43,9 +43,9 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('blank')" name="blank">debug</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
   </span>
-  <span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
-    <div id="inner" class="h-full w-3/4 overflow-hidden"></div>
-    <div class="h-full w-1/4 flex flex-col overflow-hidden">
+  <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
+    <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
+    <div class="h-full flex flex-col overflow-hidden">
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[auto reconnected]]</p>
       </div>
@@ -83,10 +83,10 @@ const htmlSnippetsTemplate:  {
         <button title="[[will cause a reload]]"  class="pointer-events-auto bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
       </form>
       <form id="profile-form" class="p-3 flex flex-col justify-around size-full overflow-scroll">
-        <input title="username" id="username" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <input title="username" id="username-p1" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
         <div class="my-auto">
           <p class="text-white -ml-2">[[biography]]:</p>
-          <textarea title="biography" id="biography" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
+          <textarea title="biography" id="biography-p1" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
         </div>
         <button class="ml-[20%] bg-white rounded size-fit p-1 my-1 cursor-pointer" type="submit">[[update]]</button>
       </form>
@@ -114,11 +114,20 @@ const htmlSnippetsTemplate:  {
     `
   <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll">
     <span class="flex justify-around place-items-center">
-      <h1 class="text-white" id="username"></h1>
-      <img id="profile-picture" class="size-50 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
+      <style>
+        .dropdown:hover .dropdown-content {display: flex;}
+      </style>
+      <div class="dropdown relative border px-1 rounded">
+        <h1 class="text-white" id="username-p2"></h1>
+        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit cursor-pointer *:px-1 bg-white *:hover:bg-gray-400">
+          <a id="friend request">friend request</a>
+          <a id="blocking request">block !</a>
+        </div>
+      </div>
+      <img id="profile-picture" class="size-50 rounded-full" src="${assetsPath}/default-avatar.jpg">
     </span>
     <p class="text-white -ml-2">[[biography]]:</p>
-    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
+    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography-p2"></p>
   </div>
   `,
   Pdf:

@@ -6,7 +6,7 @@ import { loginRoutes } from './accounts_routes.js';
 import { launchDB } from './database.js';
 import { assetsPath } from './config.js';
 import { errorRoutes } from './error_routes.js';
-import { miscRoutes } from './misc_routes';
+import { miscRoutes } from './misc_routes.js';
 
 const fastify = fastifyConf();
 await launchDB();
