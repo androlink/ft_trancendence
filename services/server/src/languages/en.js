@@ -30,7 +30,7 @@ export default {
   BLOCK: () => "block ?",
   UN_BLOCK: () => "unblock ?",
   NO_FILE: () => "No file received",
-  NOT_IMG: () => "That's not an image (png, jpg, jpeg, webp, gif)",
+  NOT_IMG: () => "That's not an image (png, apng, jpg, jpeg, webp, gif)",
   ERR_400: () => "Bad Request",
   ERR_404: () => "are you lost by any chance ?",
   ERR_413: () => "Payload too large",

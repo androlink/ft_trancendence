@@ -30,7 +30,7 @@ export default {
   BLOCK: () => "¿bloquear usuario?",
   UN_BLOCK: () => "¿desbloquear al usuario?",
   NO_FILE: () => "No se recibió ningún archivo",
-  NOT_IMG: () => "Eso no es una imagen (png, jpg, jpeg, webp, gif)",
+  NOT_IMG: () => "Eso no es una imagen (png, apng, jpg, jpeg, webp, gif)",
   ERR_400: () => "solicitud incorrecta",
   ERR_404: () => "¿Estás perdido por alguna razón?",
   ERR_413: () => "carga útil demasiado grande",

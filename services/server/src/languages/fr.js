@@ -30,7 +30,7 @@ export default {
   BLOCK: () => "bloquer ?",
   UN_BLOCK: () => "débloquer ?",
   NO_FILE: () => "Pas de fichiers reçus",
-  NOT_IMG: () => "Ce n'est pas une image (png, jpg, jpeg, webp, gif)",
+  NOT_IMG: () => "Ce n'est pas une image (png, apng, jpg, jpeg, webp, gif)",
   ERR_400: () => "Requête mal formée",
   ERR_404: () => "Tu t'es perdu ?",
   ERR_413: () => "C'est trop lourd, envoie moins",

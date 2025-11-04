@@ -150,7 +150,7 @@ export async function loginRoutes(fastifyInstance) {
         return reply.code(409).send({success: 0, message: MSG.USERNAME_TAKEN(username)});
       }
       const res = db.prepare("UPDATE or IGNORE users SET username = ?, bio = ? WHERE id = ? -- update route").run(username, bio, req.user.id);
-      if (!res.changes) // might happen if username taken between two requests
+      if (!res.changes) // might happen if username taken between the two sql requests above (can be fixed with a transaction);
         return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
       return reply.send({success: true, message: ":D"});
   });
@@ -166,7 +166,7 @@ export async function loginRoutes(fastifyInstance) {
       }
       const buffer = await data.toBuffer();
       const detectedType = await fileTypeFromBuffer(buffer);
-      if (!detectedType || !['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(detectedType.mime)) {
+      if (!detectedType || !['image/png', 'image/apng', 'image/jpeg', 'image/gif', 'image/webp'].includes(detectedType.mime)) {
         return reply.code(400).send({ success: false, message: MSG.NOT_IMG() });
       }
       const filename = `${req.user.id}.${detectedType.ext}`;
@@ -227,11 +227,11 @@ export async function loginRoutes(fastifyInstance) {
     },
     async (req, reply) => {
       let who = req.query.user;
+      // line below doesn't need translation, the front should never see it
       if (!who) return reply.send({success: false, message: "You need to tell who in the query as example /friend?user=AllMighty"});
       if (req.user.username === who) return reply.send({success: false, message: MSG.THAT_IS_YOU()});
       let row = db.prepare("SELECT id FROM users WHERE username = ? -- friend route ").get(who);
-      if (!row)
-        return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
+      if (!row) return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
       const toggleBlock = db.transaction((requester, requested) => {
         // if you already blocked the other person, do nothing
         if (db.prepare('SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ?').get(requester, requested))
