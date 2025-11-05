@@ -29,7 +29,8 @@ interface IPoint
 
 interface ISegment
 {
-	segment: [IPoint, IPoint];
+	p0: IPoint,
+	p1: IPoint
 }
 
 type Ray = ISegment
@@ -52,12 +53,12 @@ function mean_angle(angles: number[])
 
 function getNormal(segment: ISegment): number
 {
-	return Math.atan2(segment.segment[1].y - segment.segment[0].y, segment.segment[1].x - segment.segment[0].x) + Math.PI * .5;
+	return Math.atan2(segment.p1.y - segment.p0.y, segment.p1.x - segment.p0.x) + Math.PI * .5;
 }
 
 function bsp(segment: ISegment, p: IPoint): number{
-	const a = segment.segment[0];
-	const b = segment.segment[1];
+	const a = segment.p0;
+	const b = segment.p1;
 	const c = p;
 	return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x);
 }
@@ -65,7 +66,7 @@ function bsp(segment: ISegment, p: IPoint): number{
 function getMiddle(segment: ISegment, adv: number = .5): IPoint
 {
 	return {
-		x: (segment.segment[0].x - segment.segment[1].x) * adv + segment.segment[1].x,
-		y: (segment.segment[0].y - segment.segment[1].y) * adv + segment.segment[1].y
+		x: (segment.p0.x - segment.p1.x) * adv + segment.p1.x,
+		y: (segment.p0.y - segment.p1.y) * adv + segment.p1.y
 	}
 }

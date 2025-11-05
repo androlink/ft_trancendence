@@ -34,8 +34,8 @@ class CollideEvent {
  * @returns CollideEvent if collide else null
  */
 function intersect(segment: ISegment, ray : ISegment, limit: number = 1) : CollideEvent | null{
-	const [A, B] = segment.segment;
-	const [C, D] = ray.segment;
+	const [A, B] = [segment.p0, segment.p1];
+	const [C, D] = [ray.p0, ray.p1];
 
 	const denominator = (D.x - C.x) * (B.y - A.y) - (B.x - A.x) * (D.y - C.y);
 

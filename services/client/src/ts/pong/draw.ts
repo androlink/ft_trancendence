@@ -17,8 +17,8 @@ function draw(ctx: CanvasRenderingContext2D, segments: ISegment[]) : void
 function drawSegment(ctx: CanvasRenderingContext2D, segment: ISegment, color: string | CanvasGradient | CanvasPattern = "#000000", draw_normal = false)
 {
 	ctx.beginPath();
-	ctx.moveTo(segment.segment[0].x, segment.segment[0].y);
-	ctx.lineTo(segment.segment[1].x, segment.segment[1].y);
+	ctx.moveTo(segment.p0.x, segment.p0.y);
+	ctx.lineTo(segment.p1.x, segment.p1.y);
 	ctx.closePath();
 	ctx.strokeStyle = color;
 	ctx.stroke();
@@ -26,6 +26,6 @@ function drawSegment(ctx: CanvasRenderingContext2D, segment: ISegment, color: st
 	{
 		let middle = getMiddle(segment);
 		let angle = getNormal(segment);
-		drawSegment(ctx, {segment: [middle, {x: middle.x + Math.cos(angle) * 5, y: middle.y  + Math.sin(angle) * 5}]}, "#FF0000");
+		drawSegment(ctx, {p0: middle, p1: {x: middle.x + Math.cos(angle) * 5, y: middle.y  + Math.sin(angle) * 5}}, "#FF0000");
 	}
 }

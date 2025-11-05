@@ -33,8 +33,9 @@ import {
 import {Random} from "./random.js"
 
 import {intersectSegments, ICollideObject, CollideEvent, getClosestObject, intersect} from "./collision.js";
+import { PongGameManagerDTO } from "./dto.js";
 
-class PongBall implements ICollideObject, Drawable
+export class PongBall implements ICollideObject, Drawable
 {
 	location: IPoint;
 	angle: number;
@@ -92,7 +93,7 @@ class PongBall implements ICollideObject, Drawable
 		}
 		for (let i = 0; i < accu; i++)
 		{
-			segments.push({segment: [points[(i + 1) % points.length], points[i]]});
+			segments.push({p0: points[(i + 1) % points.length], p1: points[i]});
 		}
 		return segments;
 	}
@@ -108,9 +109,9 @@ class PongBall implements ICollideObject, Drawable
 
 		let collidePoints = this.getCollidePoints();
 		collidePoints.forEach((point) => {
-			let usableSegment = segments.filter((s) => {return bsp(s, this.location) > 0});
+			let usableSegment = segments.filter((s) => {return bsp(s, point) >= 0});
 			let targetPoint = {x: point.x + deltaPos.x, y: point.y + deltaPos.y};
-			let events = intersectSegments(usableSegment, {segment: [this.location, targetPoint]});
+			let events = intersectSegments(usableSegment, {p0: this.location, p1: targetPoint});
 			collision.push(...events);
 		})
 		collision = collision.sort((a, b) => {return (a.dist.ray - b.dist.ray)})
@@ -254,21 +255,21 @@ class PongPaddle implements ICollideObject, Drawable
 
 	public getBounds(): ISegment[]
 	{
-		let p1: IPoint, p2: IPoint;
+		let p0: IPoint, p1: IPoint;
 		const pos = getMiddle(this.movePath, this.position);
 		const pathAngle = this.angle + getNormal(this.movePath) - Math.PI / 2;
 		const real_size = Math.hypot(
-			this.movePath.segment[1].x - this.movePath.segment[0].x,
-			this.movePath.segment[1].y - this.movePath.segment[0].y
+			this.movePath.p1.x - this.movePath.p0.x,
+			this.movePath.p1.y - this.movePath.p0.y
 		) * this.size;
 
-		p1 = {
+		p0 = {
 			x: -Math.cos(pathAngle) * real_size / 2 + pos.x,
 			y: -Math.sin(pathAngle) * real_size / 2 + pos.y};
-		p2 = {
+		p1 = {
 			x: Math.cos(pathAngle) * real_size / 2 + pos.x,
 			y: Math.sin(pathAngle) * real_size / 2 + pos.y};
-		return [{segment: [p1, p2]}];
+		return [{p0: p0, p1: p1}];
 	}
 
 	public move(input: CONTROL)
@@ -319,7 +320,7 @@ class PlayerBase implements ICollideObject, Drawable
 	}
 }
 
-class PongBoard implements ICollideObject, Drawable
+export class PongBoard implements ICollideObject, Drawable
 {
 	segmentsList: ISegment[] = [];
 
@@ -347,12 +348,6 @@ class PongBoard implements ICollideObject, Drawable
 	}
 }
 
-type PongSettingInfo = {
-	board: {
-		sides: ISegment[]
-	}
-}
-
 /**************************************************************************************************/
 /*                                                                               Pong             */
 /*                                                                                                */
@@ -360,6 +355,8 @@ type PongSettingInfo = {
 /*                                                                                                */
 /*                                                                                                */
 /**************************************************************************************************/
+
+
 
 export class PongGameManager
 {
@@ -371,65 +368,66 @@ export class PongGameManager
 		score: number;
 		base: PlayerBase;
 	}[] | null = null;
-	randSeed: number | null = null;
+
+	
 	random: Random | null = null;
-	canvas :HTMLCanvasElement | null = null;
-	setting: PongSettingInfo | null = null;
-
 	effect: Map<string, Function> = null;
+	
+	state: "pause" | "wait" | "end" | "run" = "pause";
+	canvas :HTMLCanvasElement | null = null;
+	setting :PongGameManagerDTO;
 
-	paused: boolean = true;
-
-	constructor()
+	constructor(setting: PongGameManagerDTO)
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
 		this.canvas.width = 200;
 		this.canvas.height = 100;
-	}
-
-	// static CreateGameManager(setting: PongSettingInfo): PongGameManager
-	// {
-	// 	let manager = new PongGameManager();
-	// 	if (Object.hasOwn(manager, "board"))
-	// 	{
-	// 		manager.board = new PongBoard(manager.board);
-	// 	}
-	// 	return manager;
-	// }
-
-	// 100:50
-	public generate()
-	{
-		this.randSeed = Math.random() * (2 ** 31);
-		this.random = new Random(this.randSeed);
-
-		this.board = new PongBoard([
-			{segment: [{x: 0, y: 0}, {x: 200, y: 0}]},
-			{segment: [{x: 200, y: 100}, {x: 0, y: 100}],}
-		]);
-		this.teams = [];
-		var paddle = new PongPaddle({segment: [{x: 20, y: 90}, {x: 20, y: 10}]}, 0.4, 0.05);
-		// var player = new KeyboardPlayer("w", "s") as IPongPlayer;
-		var player = new RandomPlayer(new Random(1001)) as IPongPlayer;
-		var base = new PlayerBase([
-			{segment: [{x: 200, y: 0}, {x: 200, y: 100}]}
-		]);
-		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
-		var paddle = new PongPaddle({segment: [{x: 180, y: 10}, {x: 180, y: 90}]}, 0.4, 0.05);
-		// var player = new KeyboardPlayer("l", "o");
-		var player = new RandomPlayer(new Random(1000)) as IPongPlayer;
-		var base = new PlayerBase([
-			{segment: [{x: 0, y: 100}, {x: 0, y: 0}]}
-		]);
-		this.teams.push({player: player, paddle: paddle, base: base, score: 0})
-
+		
+		// setup effect
 		this.effect = new Map<string, Function>();
 		this.effect.set("PongBoard", simpleBounce);
 		this.effect.set("PongPaddle", this.pongPaddle_callBack);
 		this.effect.set("PlayerBase", this.playerBase_callBack);
-		//this.teams[1].paddle = new PongPaddle({segment: [{x: 90, y: 45}, {x: 90, y: 5}]}, 10, 0.1);
-	
+
+		//generate setting
+		this.setting = setting;
+		this.random = new Random(this.setting.seed);
+		this.board = new PongBoard(this.setting.board.segments);
+		this.teams = [] //this.setting.teams.map(team => {return {...team.toObject(), score: 0}});
 	}
+
+	
+
+	// public generate()
+	// {
+	// 	this.randSeed = Math.random() * (2 ** 31);
+	// 	this.random = new Random(this.randSeed);
+
+	// 	this.board = new PongBoard([
+	// 		{p0: {x: 0, y: 0},p1: {x: 200, y: 0}},
+	// 		{p0: {x: 200, y: 100},p1: {x: 0, y: 100},}
+	// 	]);
+	// 	this.teams = [];
+	// 	var paddle = new PongPaddle({p0: {x: 20, y: 90},p1: {x: 20, y: 10}}, 0.4, 0.05);
+	// 	// var player = new KeyboardPlayer("w", "s") as IPongPlayer;
+	// 	var player = new RandomPlayer(new Random(1001)) as IPongPlayer;
+	// 	var base = new PlayerBase([
+	// 		{p0: {x: 200, y: 0},p1: {x: 200, y: 100}}
+	// 	]);
+	// 	this.teams.push({player: player, paddle: paddle, base: base, score: 0})
+	// 	var paddle = new PongPaddle({p0: {x: 180, y: 10},p1: {x: 180, y: 90}}, 0.4, 0.05);
+	// 	// var player = new KeyboardPlayer("l", "o");
+	// 	var player = new RandomPlayer(new Random(1000)) as IPongPlayer;
+	// 	var base = new PlayerBase([
+	// 		{p0: {x: 0, y: 100},p1: {x: 0, y: 0}}
+	// 	]);
+	// 	this.teams.push({player: player, paddle: paddle, base: base, score: 0})
+
+	// 	this.effect = new Map<string, Function>();
+	// 	this.effect.set("PongBoard", simpleBounce);
+	// 	this.effect.set("PongPaddle", this.pongPaddle_callBack);
+	// 	this.effect.set("PlayerBase", this.playerBase_callBack);
+	// }
 
 	private pongPaddle_callBack = (ball: PongBall, ce: {
     		event: CollideEvent;
@@ -454,46 +452,37 @@ export class PongGameManager
 
 	public startRound()
 	{
-		let angle = 0;
-		const start = {x: 100, y: 50};
 
 		this.balls = [];
 
-		do
+		for (const ballSetting of this.setting.balls)
 		{
-			angle = this.random.next() * Math.PI * 2;
-			let base_check = false
-			for (const t of this.teams)
+			let {start, speedIncrement, speed, size} = ballSetting;
+			let angle = this.random.next() * (Math.PI * 2);
+			if (this.teams.length > 0)
 			{
-				if (intersect(t.paddle.movePath,
-					{segment: [start, {x: start.x + Math.cos(angle), y: start.y + Math.sin(angle)}]}, Infinity) != null)
-					base_check = true;
+				do
+				{
+					angle = this.random.next() * (Math.PI * 2);
+					let base_check = false
+					for (const t of this.teams)
+					{
+						if (intersect(t.paddle.movePath,
+							{p0: start, p1: {x: start.x + Math.cos(angle), y: start.y + Math.sin(angle)}}, Infinity) != null)
+							base_check = true;
+					}
+					if (base_check)
+						break ;
+					console.debug("nop");
+				} while (1);
 			}
-			if (base_check)
-				break ;
-			console.debug("nop");
-		} while (1);
-		this.balls.push(new PongBall(start, 5, 1, 0.05 , angle, 7));
-	}
-
-	public pause()
-	{
-		this.paused = true;
-	}
-
-	public unpause()
-	{
-		this.paused = false;
-	}
-
-	public togglePause()
-	{
-		this.paused = !this.paused;
+			this.balls.push(new PongBall(start, size, speed, speedIncrement , angle, 7));
+		}
 	}
 
 	public loop()
 	{
-		if (this.paused)
+		if (this.state === "pause")
 		{
 		}
 		else
@@ -525,11 +514,11 @@ export class PongGameManager
 
 	public draw()
 	{
-		if (this.canvas == null
-			|| this.teams == null
-			|| this.board == null
-			|| this.balls == null)
-			return ;
+		// if (this.canvas == null
+		// 	|| this.teams == null
+		// 	|| this.board == null
+		// 	|| this.balls == null)
+		// 	return ;
 		const context = this.canvas.getContext("2d");
 		if (context == null)
 			return ;
@@ -543,7 +532,7 @@ export class PongGameManager
 			score_text += t.score + "|";
 		}
 		context.textAlign = "center";
-		context.font = "14px monospace";
+		context.font = "20px monospace";
 		context.fillStyle = "black";
 		context.fillText(score_text, this.canvas.width / 2, this.canvas.height / 2);
 		this.board.draw(context);

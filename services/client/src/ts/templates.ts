@@ -172,7 +172,15 @@ const htmlSnippetsTemplate:  {
   <div class="size-full flex flex-col">
   		<script  type="module" src="${assetsPath}/pong/main.js"></script>
 		<button class="bg-gray-600 text-red-500 border place-self-start border-gray-400 px-1 rounded" onclick="newGame()">test</button>
-		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
+		<canvas class="border border-white aspect-auto" style="image-rendering: pixelated" id="canvas"></canvas>
+		<div>
+		<button class="bg-gray-300 text-gray-800 border place-self-start border-gray-400 px-1 rounded" type="" id="runConfig">[[run config]]</button>
+		<button class="bg-gray-300 text-gray-800 border place-self-start border-gray-400 px-1 rounded" type="" id="loadConfig">[[load config]]</button>
+		<button class="bg-gray-300 text-gray-800 border place-self-start border-gray-400 px-1 rounded" type="" id="saveConfig">[[save config]]</button>
+		<input class="bg-gray-300 text-gray-800 border place-self-start border-gray-400 px-1 rounded" id="configName" type=text>
+		<p class="bg-gray-300 text-red-800 border place-self-start border-gray-400 px-1 rounded" id="configResult"></p>
+		</div>
+		<textarea class="border border-white bg-cyan-900 size-full" id="pong_editor"></textarea>
 	</div>
   `,
   ErrorMessageHandler:
