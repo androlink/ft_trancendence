@@ -1,7 +1,6 @@
 
 import db from "./database.js";
 
-
 // response format for that page :
 // whatever you need.
 // The failure would be an empty response, meaning it won't be treated as an error

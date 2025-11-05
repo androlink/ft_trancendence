@@ -1,8 +1,8 @@
 
 
-import { goToURL, keyExist, resetReconnectTimer } from "./utils.js";
+import { goToURL, keyExist, resetReconnectTimer } from "../utils.js";
 import { htmlSnippets, setLanguage, selectLanguage, findLanguage, assetsPath } from "./templates.js";
-import { main } from "./app.js";
+import { main } from "../app.js";
 
 /**
  * set all the events that the page need to work properly
@@ -436,6 +436,10 @@ function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
     main(true, false);
   });
 }
+
+function loadGameHistory(tr: HTMLTableSectionElement){
+}
+
 
 function setChangeEventPfpInput(input: HTMLInputElement) {
   input.addEventListener("change", (e) => {

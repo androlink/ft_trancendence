@@ -21,15 +21,15 @@ import { assetsPath } from "./config.js";
 // It's mainly used by Nginx when it fails to treat the request
 
 export async function errorRoutes(fastifyInstance) {
-  fastifyInstance.all('/404', (req, reply) => {
-    return reply.code(404).send({
-      template: "Error",
-      replace: {status: "404 Not Found", message: MSG.ERR_404()}, 
-      title: "404 Not Found",
-      success: false,
-      message: MSG.ERR_404(),
-    });
-  });
+  // fastifyInstance.all('/404', (req, reply) => {
+  //   return reply.code(404).send({
+  //     template: "Error",
+  //     replace: {status: "404 Not Found", message: MSG.ERR_404()}, 
+  //     title: "404 Not Found",
+  //     success: false,
+  //     message: MSG.ERR_404(),
+  //   });
+  // });
   
   fastifyInstance.all('/413', (req, reply) => {
     return reply.code(413).send({

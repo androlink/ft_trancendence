@@ -112,7 +112,8 @@ const htmlSnippetsTemplate:  {
   `,
   Profile2:
     `
-  <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll">
+  <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll relative">
+    <img src="${assetsPath}/arrow-refresh.png" class="absolute size-10 right-3 cursor-pointer hover:animate-spin" onclick="main(true)"/>
     <span class="flex justify-around place-items-center">
       <style>
         .dropdown:hover .dropdown-content {display: flex;}
@@ -131,18 +132,41 @@ const htmlSnippetsTemplate:  {
     <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
       <caption class="caption-bottom">[[remote counter]]</caption>
       <thead>
-        <tr>
+        <tr class="*:border *:border-gray-300 *:text-center">
           <th class="border border-gray-300" scope="col">[[wins]]</th>
           <th class="border border-gray-300" scope="col">[[loses]]</th>
           <th class="border border-gray-300" scope="col">[[w/l ratio]]</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="border border-gray-300 text-center" id="wins"></td>
-          <td class="border border-gray-300 text-center" id="loses"></td>
-          <td class="border border-gray-300 text-center" id="ratio"></td>
+        <tr class="*:border *:border-gray-300 *:text-center">
+          <td id="wins"></td>
+          <td id="loses"></td>
+          <td id="ratio"></td>
         </tr>
+      </tbody>
+    </table>
+    <script> {
+      const tr = document.getElementById("history-tbody");
+      tr.innerHTML = "";
+      fetch(\`/misc/history?user=\$\{location.pathname.substring(location.pathname.lastIndexOf('/') + 1)\}\`)
+        .then(res => res.json())
+        .then(json => {
+        if (!json.length) tr.innerHTML += \`<tr class="*:border *:border-gray-300 *:text-center"><td>Nope</td><td>Nope</td><td>Never played</td></tr>\`;
+        for (let game of json) tr.innerHTML += \`<tr class="*:border *:border-gray-300 *:text-center"><td>\${game.winner}</td><td>\${game.loser}</td><td>\${game.time}</td></tr>\`;})
+        .catch((err) => console.error(err));
+      document.currentScript?.remove();
+    } </script>
+    <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
+      <caption class="caption-bottom">[[remote counter]]</caption>
+      <thead>
+        <tr class="*:border *:border-gray-300 *:text-center">
+          <th scope="col">WINNER</th>
+          <th scope="col">LOSER</th>
+          <th scope="col">DATE</th>
+        </tr>
+      </thead>
+      <tbody id="history-tbody">
       </tbody>
     </table>
   </div>
@@ -215,11 +239,11 @@ const htmlSnippetsTemplate:  {
 export let htmlSnippets = {} as typeof htmlSnippetsTemplate;
 
 // @ts-ignore
-import en from './languages/en.json' with { type: 'json' };
+import en from '../languages/en.json' with { type: 'json' };
 // @ts-ignore
-import fr from './languages/fr.json' with { type: 'json' };
+import fr from '../languages/fr.json' with { type: 'json' };
 // @ts-ignore
-import es from './languages/es.json' with { type: 'json' };
+import es from '../languages/es.json' with { type: 'json' };
 
 setLanguage();
 

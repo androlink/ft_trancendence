@@ -1,7 +1,7 @@
 var exports = {};
-import { htmlSnippets, selectLanguage } from "./templates.js"
+import { htmlSnippets, selectLanguage } from "./html/templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
-import { setEvents } from "./events.js";
+import { setEvents } from "./html/events.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -79,7 +79,7 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`${self.location.origin}/api${self.location.pathname}`);
+    const response = await fetch(`/api${location.pathname}`);
     if (response.status >= 500 && response.status < 600
       || !(response.headers.has('content-type'))
       || !response.headers.get("content-type").startsWith("application/json")) {
@@ -112,6 +112,13 @@ function changeSnippet(elem: HTMLElement, template: string): boolean {
     return false;
   }
   elem.innerHTML = htmlSnippets[template];
+  const scripts = elem.querySelectorAll('script');
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
+    newScript.textContent = oldScript.textContent;
+    [...oldScript.attributes].forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
   return true;
 }
 

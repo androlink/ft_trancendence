@@ -169,7 +169,7 @@ export async function loginRoutes(fastifyInstance) {
       if (!detectedType || !['image/png', 'image/apng', 'image/jpeg', 'image/gif', 'image/webp'].includes(detectedType.mime)) {
         return reply.code(400).send({ success: false, message: MSG.NOT_IMG() });
       }
-      const filename = `${req.user.id}.${detectedType.ext}`;
+      const filename = `${req.user.id}${String(Math.random()).substring(2)}.${detectedType.ext}`;
       try {
         await fs.promises.writeFile(`/var/www/pfp/${filename}`, buffer);
       } catch (error) {

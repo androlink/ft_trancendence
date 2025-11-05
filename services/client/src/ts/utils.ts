@@ -1,7 +1,6 @@
 
 import { main } from "./app.js"
-import { setCtrlEventUsername } from "./events.js";
-import { setLanguage } from "./templates.js";
+import { setCtrlEventUsername } from "./html/events.js";
 
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
