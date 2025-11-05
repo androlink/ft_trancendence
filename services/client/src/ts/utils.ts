@@ -29,7 +29,7 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
   if (!force && location.pathname === nextURL)
     return false;
   history.pushState({page: ""}, "", nextURL);
-  await main();
+  await main(true);
   return true;
 }
 self["goToURL"] = goToURL;

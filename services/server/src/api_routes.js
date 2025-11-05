@@ -120,7 +120,7 @@ export async function apiRoutes(fastifyInstance) {
         "profile-picture": `${assetsPath}/pfp/${row_searched.pfp}`,
         "friend request": friend, "blocking request": block,
         wins: String(row_searched.wins), loses: String(row_searched.loses),
-        ratio: String(row_searched.wins / row_searched.loses),
+        ratio: String((row_searched.wins / row_searched.loses).toFixed(2)),
       },
       title: row_searched.username, inner: "Profile2",
     });

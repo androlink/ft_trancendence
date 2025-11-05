@@ -207,7 +207,7 @@ export async function loginRoutes(fastifyInstance) {
       let who = req.query.user;
       if (!who) return reply.send({success: false, message: "You need to tell who in the query as example /block?user=AllMighty"});
       if (req.user.username === who) return reply.send({success: false, message: MSG.THAT_IS_YOU()});
-      let row = db.prepare("SELECT id FROM users WHERE username = ? -- block route ").get(who);
+      let row = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?) -- block route ").get(who);
       if (!row)
         return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
       const toggleBlock = db.transaction((blockerId, blockedId) => {
@@ -230,7 +230,7 @@ export async function loginRoutes(fastifyInstance) {
       // line below doesn't need translation, the front should never see it
       if (!who) return reply.send({success: false, message: "You need to tell who in the query as example /friend?user=AllMighty"});
       if (req.user.username === who) return reply.send({success: false, message: MSG.THAT_IS_YOU()});
-      let row = db.prepare("SELECT id FROM users WHERE username = ? -- friend route ").get(who);
+      let row = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?) -- friend route ").get(who);
       if (!row) return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(who)});
       const toggleBlock = db.transaction((requester, requested) => {
         // if you already blocked the other person, do nothing

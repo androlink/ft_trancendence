@@ -277,12 +277,12 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     text.innerText = findLanguage(text.innerText.toLowerCase());
     return ;
   }
-  const usernameElem = document.getElementById("username-p2");
-  if (!usernameElem || !usernameElem.innerText)
+  let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+  if (!username)
     return ;
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/block?user=${usernameElem.innerText}`, {method: 'post'});
+      const response = await fetch(`/block?user=${username}`, {method: 'post'});
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
@@ -301,12 +301,12 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     text.innerText = findLanguage(text.innerText.toLowerCase());
     return ;
   }
-  const usernameElem = document.getElementById("username-p2");
-  if (!usernameElem || !usernameElem.innerText)
+  let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+  if (!username)
     return ;
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/friend?user=${usernameElem.innerText}`, {method: 'post'});
+      const response = await fetch(`/friend?user=${username}`, {method: 'post'});
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
@@ -437,10 +437,6 @@ function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
   });
 }
 
-function loadGameHistory(tr: HTMLTableSectionElement){
-}
-
-
 function setChangeEventPfpInput(input: HTMLInputElement) {
   input.addEventListener("change", (e) => {
     const file = input.files[0];
@@ -460,6 +456,29 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
     document.getElementById("pfp-preview-div")?.removeAttribute('hidden')
   });
 }
+
+function loadGameHistory() {
+  const tr = document.getElementById("history-tbody");
+  let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+  if (!tr || !username)
+    return ;
+  tr.innerHTML = "";
+  fetch(`/misc/history?user=${username}`)
+    .then(res => res.json())
+    .then(json => {
+    if (!json.length) tr.innerHTML += `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td>${findLanguage("never played")}</td></tr>`;
+    for (let game of json)
+      tr.innerHTML += `
+        <tr class="*:border *:border-gray-300 *:text-center">
+          <td ${game.winner !== null ? `${game.winner !== username ? `class="cursor-pointer" onclick="goToURL('/profile/${game.winner}')` : ""}">${game.winner}`: `class="text-red-400">${findLanguage("deleted")}`}</td>
+          <td ${game.loser !== null ? `${game.loser !== username ? `class="cursor-pointer" onclick="goToURL('/profile/${game.loser}')`: ""}">${game.loser}`: `class="text-red-400">${findLanguage("deleted")}`}</td>
+          <td>${game.time}</td>
+        </tr>
+        `;
+    })
+    .catch((err) => console.error(err));
+}
+self["loadGameHistory"] = loadGameHistory;
 
 /**
  * Used at the start of the app-launching, to keyboard shortcut

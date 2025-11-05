@@ -146,24 +146,17 @@ const htmlSnippetsTemplate:  {
         </tr>
       </tbody>
     </table>
-    <script> {
-      const tr = document.getElementById("history-tbody");
-      tr.innerHTML = "";
-      fetch(\`/misc/history?user=\$\{location.pathname.substring(location.pathname.lastIndexOf('/') + 1)\}\`)
-        .then(res => res.json())
-        .then(json => {
-        if (!json.length) tr.innerHTML += \`<tr class="*:border *:border-gray-300 *:text-center"><td>Nope</td><td>Nope</td><td>Never played</td></tr>\`;
-        for (let game of json) tr.innerHTML += \`<tr class="*:border *:border-gray-300 *:text-center"><td>\${game.winner}</td><td>\${game.loser}</td><td>\${game.time}</td></tr>\`;})
-        .catch((err) => console.error(err));
+    <script>
+      loadGameHistory();
       document.currentScript?.remove();
-    } </script>
-    <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
+    </script>
+    <table class="overflow-y-scroll w-1/2 h-full table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
       <caption class="caption-bottom">[[remote counter]]</caption>
       <thead>
         <tr class="*:border *:border-gray-300 *:text-center">
-          <th scope="col">WINNER</th>
-          <th scope="col">LOSER</th>
-          <th scope="col">DATE</th>
+          <th scope="col">[[winner]]</th>
+          <th scope="col">[[loser]]</th>
+          <th scope="col">[[date]]</th>
         </tr>
       </thead>
       <tbody id="history-tbody">

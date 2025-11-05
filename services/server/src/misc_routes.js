@@ -10,14 +10,14 @@ import db from "./database.js";
 
 
 export async function miscRoutes(fastifyInstance) {
-  fastifyInstance.setNotFoundHandler ( (req, reply) => {
+  fastifyInstance.setNotFoundHandler((req, reply) => {
     return reply.code(404).send("all the /misc request are for the frontend tools, like the user research thing at the top. You should not be able to read this");
   });
 
   fastifyInstance.get('/users', (req, reply) => {
     let start = req.query.start;
     if (!start) start = "";
-    let arr = db.prepare("SELECT username, pfp FROM users WHERE username LIKE ? -- users search route ").all(start + '%');
+    let arr = db.prepare("SELECT username, pfp FROM users WHERE lower(username) LIKE lower(?) -- users search route ").all(start + '%');
     arr = arr.sort((a, b) => (a.username > b.username) * 2 - 1);
     return reply.send(arr.slice(0, 20));
   });
@@ -25,9 +25,17 @@ export async function miscRoutes(fastifyInstance) {
   fastifyInstance.get('/history', (req, reply) => {
     let user = req.query.user;
     if (!user) return reply.send([]);
-    const row = db.prepare("SELECT id FROM users WHERE username = ?").get(user);
-    let arr = db.prepare("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = ? OR loser = ? -- history search route ").all(user, user);
-    arr = arr.sort((a, b) => (a.time > b.time) * 2 - 1);
+    const row = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?)").get(user);
+    let arr = db.prepare("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = ? OR loser = ? -- history search route ").all(row.id, row.id);
+    arr = arr.sort((a, b) => (a.time < b.time) * 2 - 1);
     return reply.send(arr.slice(0, 100));
+  });
+
+  fastifyInstance.post('/win', (req, reply) => {
+    let winner_id = parseInt(req.query.winner);
+    let loser_id = parseInt(req.query.loser);
+    if (winner_id != winner_id || loser_id != loser_id || loser_id === winner_id) return reply.send("failed");
+    db.prepare("INSERT INTO history_game (winner, loser) VALUES (?, ?) -- win route route ").run(winner_id, loser_id);
+    return reply.send("success");
   });
 }
