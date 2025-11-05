@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "/var/www",
-    "target": "es2024",
+    "target": "esnext",
     "noEmit": true,
     "module": "esnext",
     "allowImportingTsExtensions": true,

@@ -1,6 +1,7 @@
 import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import db from "./database"
+import { send } from "process";
 
 /**
  * Interface Message
@@ -20,7 +21,7 @@ interface WSmessage {
 class wsClient{
   _socket: any;
   _username: string;
-  _id: any;
+  _id: any | null;
   
   constructor(client, username, id)
   {
@@ -34,7 +35,7 @@ class wsClient{
     this._id = id;
   }
 
-  set setUsername(username: string)
+  set setUsername(username: any)
   {
     this._username = username;
   }
@@ -52,7 +53,10 @@ const connectedClients = new Map();
 
 function Message(msg: WSmessage, connection: any)
 {
-  console.log("id : " + msg.id + "\nmsg : " + msg.content);
+  let newMsg : WSmessage | null;
+  let  client : wsClient;
+
+
   if (msg.content != null)
   {
     let sender = -1;
@@ -68,21 +72,36 @@ function Message(msg: WSmessage, connection: any)
       }));
       return;
     }
-    const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender);
-    if (!row) {
-        connection.send(JSON.stringify({
-        id: 'server',
-        type: "message",
-        content: "sac a merde t'existe po"
-        }));
-        return;
-    }
-    msg.id = row.username;
-    console.log("id : " + msg.id + "\nmsg : " + msg.content);
 
-    connectedClients.forEach((client: wsClient) =>{
-      client._socket.send(JSON.stringify(msg));
-    });
+    for ( let clients of  connectedClients) {
+      console.log(clients[1].getid , " and ", sender);
+      if (clients[1].getid === sender)
+      {
+        client = clients[1];
+        break;
+      }
+    }
+    if (!client){
+      connection.send(JSON.stringify({id: 'server', type: "message", content: "sac a merde t'existe po"}));
+      return;
+    }
+    newMsg = { id: client._username, type: "message", content: msg.content};
+
+    if (!msg.target || msg.target === "all")
+    {
+      connectedClients.forEach((clients:wsClient) =>{
+        client._socket.send(JSON.stringify(newMsg));
+      });
+    }
+    else
+    {
+      for ( let clients of  connectedClients) {
+        if (clients[1].getUsername === msg.target)
+        {
+          break;
+        }
+      }  
+    }
   }
   else
     console.error("error : no message content");
@@ -101,17 +120,44 @@ function ConnectionUser(msg: WSmessage, connection: any){
   
   let sender = -1;
   try {
-      const client: wsClient = connectedClients.get(connection);
-      // @ts-ignore
-      sender = fastify.jwt.decode(msg.id).id
-      client.setId = sender;
-      const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender);
-      if (!row)
+      let client: wsClient;
+      for ( let clients of  connectedClients) {
+        if (clients[0] === connection)
+        {
+          client = clients[0];
+          break;
+        }
+      } 
+
+      try
       {
-        console.error("client don't exist in the database");
-        return;
+        // @ts-ignore
+        sender = fastify.jwt.decode(msg.id).id;
       }
-      client._username = row.username;
+      catch {sender = null;} 
+      client.setId(sender);
+      if (client._id === null)
+      {
+        const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender);
+        if (!row)
+        {
+          console.error("client don't exist in the database");
+          return;
+        }
+        for (let clients of connectedClients)
+        {
+          if (clients[1]._socket != connection && clients[1]._username === row.username)
+            connectedClients.delete(clients[1]._socket);
+        }
+        client._username = row.username;
+      }
+      else
+        client.setUsername("unknown");
+      console.log("Websocket info updated");
+      console.log("=============================",
+                "\nclient username : ", client.getUsername(),
+                  "\nclient id : ", client.getid(),
+                "\n=============================");
   }
   catch (err){
       console.error("Error : ", err);

@@ -124,15 +124,10 @@ function sendChatMessage() {
 
 export function sendStatusMessage()
 {
-  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-  if (!textarea || !textarea.value) {
-    return;
-  }
   const msg: WSmessage =  {
     id: localStorage.getItem("token"),
     type: "connection",
-    content: textarea.value
   };
-  textarea.value = "";
+  console.log("Websocket status changed...")
   sendOrQueue(JSON.stringify(msg));
 }
