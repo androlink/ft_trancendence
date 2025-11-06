@@ -9,6 +9,7 @@ const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
 const htmlSnippetsTemplate:  {
   readonly Home: string;
   readonly Game: string;
+  readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
   readonly Pdf: string;
@@ -41,6 +42,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL( )" name="">pdf</div>
     <div onclick="goToURL('game')" name="game">[[game]]</div>    
     <div onclick="goToURL('blank')" name="blank">debug</div>
+    <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
   </span>
   <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
@@ -220,6 +222,13 @@ const htmlSnippetsTemplate:  {
   <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
   </div>
     `,
+  Pong: `
+  <div class="size-full flex flex-col">
+  		<script  type="module" src="${assetsPath}/pong/main.js"></script>
+		<button class="bg-gray-600 text-red-500 border place-self-start border-gray-400 px-1 rounded" onclick="newGame()">test</button>
+		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
+	</div>
+  `,
   ErrorMessageHandler:
     `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
