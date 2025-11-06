@@ -17,8 +17,12 @@ interface WSmessage {
   content?: string | null
 };
 
-
-//Class clients
+/**
+ * Class client
+ * @param _socket 'Websocket of client'
+ * @param _username username of client (null if is not connected)
+ * @param _id id of client (null if is not connected)
+ */
 class wsClient{
   _socket: any;
   _username: string | null;
@@ -41,7 +45,14 @@ class wsClient{
     this._username = username;
   }
 }
+/**
+ * List of Clients
+ * @class wsClient
+ */
 const connectedClients = new Map();
+
+
+const listOfMsg = new Set();
 
 
 function Message(msg: WSmessage, connection: any)
@@ -95,6 +106,10 @@ function Message(msg: WSmessage, connection: any)
       for ( let clients of  connectedClients) {
         if (clients[1].getUsername === msg.target)
         {
+          // do a fontion who stock the msg to listOfMsg and 
+          // send a 'ping' to the target and wait for the respond
+          // when it repond send the msg to the target
+          // else if he doesn't repond in 1 minute delete the msg and send a error to the author
           break;
         }
       }  
