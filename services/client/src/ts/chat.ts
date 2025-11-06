@@ -24,7 +24,11 @@ interface WSmessage {
 function WSconnect()
 {
   if (!ws || ws.readyState != WebSocket.OPEN)
+  {
     ws = new WebSocket("/api/chat");
+    sendStatusMessage();
+  }
+  
 }
 // setup connection chat
 export function InitConnectionChat() {
@@ -41,7 +45,7 @@ export function InitConnectionChat() {
 
   ws.onclose = () => {
     alert("connection close");
-    ws = null;
+    WSconnect();
   }
 
   //receive msg from back and show on chat

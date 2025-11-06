@@ -18,10 +18,11 @@ interface WSmessage {
 };
 
 
+//Class clients
 class wsClient{
   _socket: any;
-  _username: string;
-  _id: any | null;
+  _username: string | null;
+  _id: number | null;
   
   constructor(client, username, id)
   {
@@ -39,14 +40,6 @@ class wsClient{
   {
     this._username = username;
   }
-
-  get getid(){
-    return this._id;
-  }
-
-  get getUsername(){
-    return this._username;
-  }
 }
 const connectedClients = new Map();
 
@@ -54,11 +47,12 @@ const connectedClients = new Map();
 function Message(msg: WSmessage, connection: any)
 {
   let newMsg : WSmessage | null;
-  let  client : wsClient;
+  let  client : wsClient | null;
 
 
   if (msg.content != null)
   {
+    // get id of the sender
     let sender = -1;
     try {
       // @ts-ignore
@@ -73,11 +67,12 @@ function Message(msg: WSmessage, connection: any)
       return;
     }
 
-    for ( let clients of  connectedClients) {
-      console.log(clients[1].getid , " and ", sender);
-      if (clients[1].getid === sender)
+    // check if the sender is on the list
+    for ( let cl of  connectedClients) {
+      console.log(cl[1]._id , " and ", sender);
+      if (cl[1]._id === sender)
       {
-        client = clients[1];
+        client = cl[1];
         break;
       }
     }
@@ -85,12 +80,14 @@ function Message(msg: WSmessage, connection: any)
       connection.send(JSON.stringify({id: 'server', type: "message", content: "sac a merde t'existe po"}));
       return;
     }
+    
+
     newMsg = { id: client._username, type: "message", content: msg.content};
 
     if (!msg.target || msg.target === "all")
     {
-      connectedClients.forEach((clients:wsClient) =>{
-        client._socket.send(JSON.stringify(newMsg));
+      connectedClients.forEach((cl:wsClient) =>{
+        cl._socket.send(JSON.stringify(newMsg));
       });
     }
     else
@@ -107,6 +104,7 @@ function Message(msg: WSmessage, connection: any)
     console.error("error : no message content");
 }
 
+// PING MESSAGE
 function PingUser(connection:any)
 {
   const response: WSmessage = {
@@ -116,27 +114,28 @@ function PingUser(connection:any)
   connection.send(JSON.stringify(response))
 }
 
-function ConnectionUser(msg: WSmessage, connection: any){
+function ConnectionUser(msg: WSmessage, socket: any){
   
-  let sender = -1;
+  let sender = null;
   try {
       let client: wsClient;
-      for ( let clients of  connectedClients) {
-        if (clients[0] === connection)
-        {
-          client = clients[0];
-          break;
-        }
-      } 
 
+      // check the wich client is with the websocket 
+      client = connectedClients.get(socket);
+      if (!client === null){
+        console.log("client don't exist");
+        return;
+      } 
       try
       {
+        //update id
         // @ts-ignore
         sender = fastify.jwt.decode(msg.id).id;
+        client.setId = sender;
       }
       catch {sender = null;} 
-      client.setId(sender);
-      if (client._id === null)
+
+      if (client._id !== null)
       {
         const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender);
         if (!row)
@@ -144,19 +143,27 @@ function ConnectionUser(msg: WSmessage, connection: any){
           console.error("client don't exist in the database");
           return;
         }
-        for (let clients of connectedClients)
+
+        // delete old connections
+        for (let [sock, cl] of connectedClients)
         {
-          if (clients[1]._socket != connection && clients[1]._username === row.username)
-            connectedClients.delete(clients[1]._socket);
+          if (sock != socket &&  cl.id != null && cl.id === sender)
+          {
+            console.log(cl._username, "got deleted");
+            connectedClients.delete(sock);
+          }
         }
+        // update username
         client._username = row.username;
       }
       else
-        client.setUsername("unknown");
+        client._username = null;
+
       console.log("Websocket info updated");
       console.log("=============================",
-                "\nclient username : ", client.getUsername(),
-                  "\nclient id : ", client.getid(),
+                "\nclient username : ", client._username,
+                  "\nclient id : ", client._id,
+                  "\n list size : ", connectedClients.size,
                 "\n=============================");
   }
   catch (err){
@@ -167,8 +174,20 @@ function ConnectionUser(msg: WSmessage, connection: any){
 export default function liveChat(fastify: FastifyInstance){
 
   fastify.websocketServer.on("connection", (client) => {
-    const newClient = new wsClient(client, "unknown", -1);
-    connectedClients.set(client, newClient);
+    let testClient : wsClient | null = connectedClients.get(client);
+    if (!testClient)
+    {
+      const newClient = new wsClient(client, null, null);
+      connectedClients.set(client, newClient);
+    }
+  });
+  fastify.websocketServer.on("close", (client) => {
+      let deleteClient: wsClient | null = connectedClients.get(client);
+      if (deleteClient)
+      {
+        console.log("client ", deleteClient._username, "got deleted");
+        connectedClients.delete(client);
+      }
   });
 
   fastify.get('/api/chat', { websocket: true }, (connection, req) => {
