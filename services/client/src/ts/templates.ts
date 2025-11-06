@@ -180,7 +180,7 @@ const htmlSnippetsTemplate:  {
 		<input class="bg-gray-300 text-gray-800 border place-self-start border-gray-400 px-1 rounded" id="configName" type=text>
 		<p class="bg-gray-300 text-red-800 border place-self-start border-gray-400 px-1 rounded" id="configResult"></p>
 		</div>
-		<textarea class="border border-white bg-cyan-900 size-full" id="pong_editor"></textarea>
+		<textarea class="border border-white bg-cyan-900 size-full text-white font-mono" id="pong_editor"></textarea>
 	</div>
   `,
   ErrorMessageHandler:

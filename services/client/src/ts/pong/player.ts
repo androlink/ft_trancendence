@@ -9,6 +9,21 @@ enum CONTROL {
 	RIGHT,
 }
 
+type playerType = "random" | "keyboard"
+
+export function playerFactory(type: playerType, option: any):IPongPlayer
+{
+	console.debug("new player: ", type, "from", option)
+	switch (type)
+	{
+		case "keyboard":
+			return (new KeyboardPlayer(option));
+		case "random":
+			return (new RandomPlayer(option));
+	}
+	return undefined;
+}
+
 interface IPongPlayer
 {
 	getInput() : CONTROL;
@@ -19,10 +34,10 @@ class KeyboardPlayer implements IPongPlayer
 	inputLeft: string;
 	inputRight: string;
 
-	public constructor(inputLeft: string, inputRight: string)
+	public constructor({left, right})
 	{
-		this.inputLeft = inputLeft.toLowerCase();
-		this.inputRight = inputRight.toLowerCase();
+		this.inputLeft = left.toLowerCase();
+		this.inputRight = right.toLowerCase();
 	}
 
 	public getInput(): CONTROL
@@ -42,9 +57,10 @@ class RandomPlayer implements IPongPlayer
 {
 	random: Random;
 
-	public constructor(random: Random)
+	public constructor(seed: number)
 	{
-		this.random = random;
+
+		this.random = new Random(seed);
 	}
 
 	public getInput(): CONTROL

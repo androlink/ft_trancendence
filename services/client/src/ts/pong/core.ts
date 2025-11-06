@@ -11,7 +11,8 @@ import {
 	IPongPlayer,
 	CONTROL,
 	KeyboardPlayer,
-	RandomPlayer
+	RandomPlayer,
+	playerFactory
 } from "./player.js";
 
 import {
@@ -33,7 +34,7 @@ import {
 import {Random} from "./random.js"
 
 import {intersectSegments, ICollideObject, CollideEvent, getClosestObject, intersect} from "./collision.js";
-import { PongGameManagerDTO } from "./dto.js";
+import { PongBaseDTO, PongGameManagerDTO } from "./dto.js";
 
 export class PongBall implements ICollideObject, Drawable
 {
@@ -109,7 +110,7 @@ export class PongBall implements ICollideObject, Drawable
 
 		let collidePoints = this.getCollidePoints();
 		collidePoints.forEach((point) => {
-			let usableSegment = segments.filter((s) => {return bsp(s, point) >= 0});
+			let usableSegment = segments.filter((s) => {return bsp(s, this.location) > 0});
 			let targetPoint = {x: point.x + deltaPos.x, y: point.y + deltaPos.y};
 			let events = intersectSegments(usableSegment, {p0: this.location, p1: targetPoint});
 			collision.push(...events);
@@ -236,11 +237,12 @@ class PongPaddle implements ICollideObject, Drawable
 	size: number;
 	speed: number;
 
-	public constructor(movePath: ISegment, size: number, speed: number)
+	public constructor({movePath, size, speed, angle = 0})
 	{
 		this.movePath = movePath;
 		this.size = size;
 		this.speed = speed;
+		this.angle = angle;
 	}
 
 	public isDisable(): boolean
@@ -357,17 +359,28 @@ export class PongBoard implements ICollideObject, Drawable
 /**************************************************************************************************/
 
 
+class PongTeam
+{
+	player: IPongPlayer;
+	paddle: PongPaddle;
+	score: number;
+	base: PlayerBase;
+
+	constructor({player, paddle, score, base})
+	{
+		this.base = new PlayerBase((base as PongBaseDTO).segments);
+		this.paddle = new PongPaddle(paddle);
+		this.player = playerFactory(player.type, player.option);
+		this.score = score;
+	}
+}
+
 
 export class PongGameManager
 {
 	board: PongBoard | null = null;
 	balls: PongBall[] | null = null;
-	teams: {
-		player: IPongPlayer;
-		paddle: PongPaddle;
-		score: number;
-		base: PlayerBase;
-	}[] | null = null;
+	teams: PongTeam[] | null = null;
 
 	
 	random: Random | null = null;
@@ -393,7 +406,7 @@ export class PongGameManager
 		this.setting = setting;
 		this.random = new Random(this.setting.seed);
 		this.board = new PongBoard(this.setting.board.segments);
-		this.teams = [] //this.setting.teams.map(team => {return {...team.toObject(), score: 0}});
+		this.teams = this.setting.teams.map(team => {return new PongTeam({...team.toObject(), score: 0})});
 	}
 
 	
@@ -457,7 +470,7 @@ export class PongGameManager
 
 		for (const ballSetting of this.setting.balls)
 		{
-			let {start, speedIncrement, speed, size} = ballSetting;
+			let {start, speedIncrement, speed, size} = {...ballSetting, start: {...ballSetting.start}};
 			let angle = this.random.next() * (Math.PI * 2);
 			if (this.teams.length > 0)
 			{
