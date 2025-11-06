@@ -1,6 +1,6 @@
 
-import db from "./database.js";
-import { dbLogFile } from "./database.js";
+import db from "./database";
+import { dbLogFile } from "./database";
 import fs from 'fs';
 import MSG from './messages_collection.js'
 import { assetsPath } from "./config.js";
@@ -27,8 +27,7 @@ export async function apiRoutes(fastifyInstance) {
     try {
       await req.jwtVerify();
       const token = fastifyInstance.jwt.sign({id: req.user.id},  {expiresIn: '15m'});
-      reply.setCookie('account', token, {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, });
-      reply.header('x-authenticated', true);
+      reply.header('x-authenticated', token);
     } catch (err) {
       req.user = {id: -1};
       reply.header('x-authenticated', false);
@@ -46,7 +45,6 @@ export async function apiRoutes(fastifyInstance) {
     const row = db.prepare("SELECT * FROM users WHERE id = ? -- needConnection from api_routes.js").get(req.user.id);
     if (!row) {
       // might happen naturally if jwt from a previous DB or account deleted
-      reply.clearCookie("account");
       reply.header('x-authenticated', false);
       return reply.send({
         template: "Home",
@@ -104,8 +102,8 @@ export async function apiRoutes(fastifyInstance) {
         template: "Home", title: username, inner: "Error",
         replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username)},
       });
-    let friend = MSG.REQUEST_FRIEND();
-    let block = MSG.BLOCK();
+    let friend: string | {en: any;fr: any;es: any} = MSG.REQUEST_FRIEND();
+    let block: string | {en: any;fr: any;es: any} = MSG.BLOCK();
     if (req.user.id === -1) {
       friend = "NOT CONNECTED";
       block = "NOT CONNECTED";

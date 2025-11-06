@@ -1,6 +1,6 @@
 
-import db, { hashPassword, comparePassword } from "./database.js";
-import MSG from "./messages_collection.js";
+import db, { hashPassword, comparePassword } from "./database";
+import MSG from "./messages_collection";
 import fs from 'fs'
 import { fileTypeFromBuffer } from 'file-type';
 
@@ -76,7 +76,6 @@ export async function loginRoutes(fastifyInstance) {
         await req.jwtVerify();
         const row = statement1.get({id: req.user.id});
         if (!row) {
-          reply.clearCookie("account");
           reply.header('x-authenticated', false);
           return reply.code(404).send({success: false, message: MSG.NOT_IN_DB()});
         }
@@ -85,14 +84,14 @@ export async function loginRoutes(fastifyInstance) {
         req.user.password = row.password;
         req.user.bio = row.bio;
         const token = fastifyInstance.jwt.sign({id: req.user.id},  {expiresIn: '15m'});
-        reply.setCookie('account', token, {path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 15 * 60, });
-        reply.header('x-authenticated', true);
+        reply.header('x-authenticated', token);
       } catch (err) {
         reply.header('x-authenticated', false);
         return reply.code(401).send({success: false, message: MSG.NOT_RECOGNIZED()});
       }
     };
   }
+
   {
     const statement1 = db.prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
     fastifyInstance.post("/register",
@@ -106,12 +105,11 @@ export async function loginRoutes(fastifyInstance) {
           const res = statement1.run({username, password});
           if (res.changes === 0) {
             // not normal
-            return reply.code(403).send({success: false, message: MSG.DB_REFUSED(username)});
+            return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
           }
           const token = fastifyInstance.jwt.sign({id: res.lastInsertRowid},  {expiresIn: '15m'});
           const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
-          return reply.header("x-authenticated", true)
-            .setCookie("account", token, cookiesOptions)
+          return reply.header("x-authenticated", token)
             .send({success: true, message: MSG.WELCOME_USERNAME(username)});
         }
         catch (err) {
@@ -140,14 +138,12 @@ export async function loginRoutes(fastifyInstance) {
         }
         const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
         const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
-        return reply.header("x-authenticated", true)
-          .setCookie("account", token, cookiesOptions)
+        return reply.header("x-authenticated", token)
           .send({success: true, message: MSG.WELCOME_USERNAME(username)});
     });
   }
   
   fastifyInstance.post("/logout", async (req, reply) => {
-    reply.clearCookie("account");
     return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
   });
 
@@ -357,7 +353,6 @@ export async function loginRoutes(fastifyInstance) {
         if (row.pfp != "default.jpg") {
           fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
         }
-        reply.clearCookie("account");
         // Not a 204 No content because 204 should not have a body and the front wants to have success
         return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
     });

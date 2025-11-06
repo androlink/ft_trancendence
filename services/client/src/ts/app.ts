@@ -79,7 +79,11 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`/api${location.pathname}`);
+    const response = await fetch(`/api${self.location.pathname}`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
+    });
     if (response.status >= 500 && response.status < 600
       || !(response.headers.has('content-type'))
       || !response.headers.get("content-type").startsWith("application/json")) {

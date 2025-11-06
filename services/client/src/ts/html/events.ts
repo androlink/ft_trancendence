@@ -1,8 +1,9 @@
 
 
 import { goToURL, keyExist, resetReconnectTimer } from "../utils.js";
-import { htmlSnippets, setLanguage, selectLanguage, findLanguage, assetsPath } from "./templates.js";
+import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
 import { main } from "../app.js";
+import { InitConnectionChat, sendStatusMessage} from "../chat.js";
 
 /**
  * set all the events that the page need to work properly
@@ -61,6 +62,14 @@ function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
   }
 }
 
+function needConnection(form: HTMLFormElement): boolean{
+  if (localStorage.getItem("token") === null) {
+    displayErrorOrAlert(form, "You are not connected");
+    return false;
+  }
+  return true;
+}
+
 /**
  * used by the login form, the default event can't be used in SPA (redirect)
  * @param form the said form element
@@ -71,6 +80,9 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
     const formData = new FormData(form);
     try {
       const response = await fetch('/pfp', {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         method: 'PUT',
         body: formData,
       });
@@ -98,7 +110,10 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
       const password = formData.get("password") as string;
       const response = await fetch('/login', {
         method: 'POST',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: username, 
           password: password,
@@ -112,6 +127,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
+      sendStatusMessage();
       main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
@@ -136,7 +152,10 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
       }
       const response = await fetch('/register', {
         method: 'POST',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: username,
           password: password,
@@ -150,6 +169,7 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
+      sendStatusMessage();
       main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
@@ -164,11 +184,16 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
 function setSubmitEventProfile(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
+    if (needConnection(form) === false)
+      return;
     const formData = new FormData(form);
     try {
       const response = await fetch('/update', {
         method: 'PUT',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: formData.get('username') as string,
           biography: formData.get('biography') as string,
@@ -197,6 +222,8 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
 function setSubmitEventPassword(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
+    if (needConnection(form) === false)
+      return;
     const formData = new FormData(form);
         try {
       const password = formData.get("password") as string;
@@ -207,7 +234,10 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
 
       const response = await fetch('/password', {
         method: 'PUT',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           password: password, 
         }),
@@ -234,11 +264,16 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
 function setSubmitEventDelete(form: HTMLFormElement): void {
   form.addEventListener('submit', async (event: SubmitEvent) => {
     event.preventDefault();
+    if (needConnection(form) === false)
+      return;
     const formData = new FormData(form);
     try {
       const response = await fetch('/delete', {
         method: 'DELETE',
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: new URLSearchParams({
           username: formData.get("username") as string, 
         }),
@@ -251,6 +286,7 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
+      sendStatusMessage();
       main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
@@ -282,7 +318,12 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     return ;
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/block?user=${username}`, {method: 'post'});
+      const response = await fetch(`/block?user=${username}`,{
+        method: 'post',
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+    });
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
@@ -306,7 +347,12 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     return ;
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/friend?user=${username}`, {method: 'post'});
+      const response = await fetch(`/friend?user=${username}`, {
+        method: 'post',
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+      });
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
@@ -325,6 +371,7 @@ function setClickEventFriendRequest(text: HTMLElement): void {
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+  InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -516,7 +563,7 @@ export function setCtrlEventUsername(): void {
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-      if (self["isConnected"]) {
+      if (localStorage.getItem("token")) {
         e.preventDefault();
         fetch("/logout", {method: 'POST'}).then(
           res => {

@@ -1,7 +1,7 @@
 
 export default {
   USERNAME_TAKEN: (username) => `"${username}" is already taken`,
-  DB_REFUSED_MSG: () => "The db said no",
+  DB_REFUSED: () => "The db said no",
   REFUSED_ADMIN: () => "Noo Stop You're admin",
   NOT_RECOGNIZED: () => "The glorious backend said you are not connected, sorry",
   USERNAME_NOT_FOUND: (username) => `no account with username "${username.length > 20 ? username.substring(0, 20) + '...' : username}"`,

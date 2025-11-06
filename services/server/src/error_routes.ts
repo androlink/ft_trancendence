@@ -1,9 +1,6 @@
 
-import db from "./database.js";
-import { dbLogFile } from "./database.js";
-import fs from 'fs';
+
 import MSG from './messages_collection.js'
-import { assetsPath } from "./config.js";
 
 // response format for that page :
 // {

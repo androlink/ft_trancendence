@@ -18,7 +18,7 @@ export async function miscRoutes(fastifyInstance) {
     let start = req.query.start;
     if (!start) start = "";
     let arr = db.prepare("SELECT username, pfp FROM users WHERE lower(username) LIKE lower(?) -- users search route ").all(start + '%');
-    arr = arr.sort((a, b) => (a.username > b.username) * 2 - 1);
+    arr = arr.sort((a, b) => a.username > b.username ? 1 : -1);
     return reply.send(arr.slice(0, 20));
   });
 
@@ -27,7 +27,7 @@ export async function miscRoutes(fastifyInstance) {
     if (!user) return reply.send([]);
     const row = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?)").get(user);
     let arr = db.prepare("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = ? OR loser = ? -- history search route ").all(row.id, row.id);
-    arr = arr.sort((a, b) => (a.time < b.time) * 2 - 1);
+    arr = arr.sort((a, b) => a.time > b.time ? 1 : -1);
     return reply.send(arr.slice(0, 100));
   });
 

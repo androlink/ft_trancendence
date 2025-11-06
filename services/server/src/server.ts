@@ -1,14 +1,17 @@
 
-import fastifyConf from './config.js'
+import fastifyConf from './config'
 
-import { apiRoutes } from './api_routes.js';
-import { loginRoutes } from './accounts_routes.js';
-import { launchDB } from './database.js';
-import { assetsPath } from './config.js';
-import { errorRoutes } from './error_routes.js';
-import { miscRoutes } from './misc_routes.js';
+import { apiRoutes } from './api_routes';
+import { loginRoutes } from './accounts_routes';
+import { launchDB } from './database';
+import { assetsPath } from './config';
+import liveChat from './live_chat';
+import { errorRoutes } from './error_routes';
+import { miscRoutes } from './misc_routes';
 
-const fastify = fastifyConf();
+export default fastifyConf();
+import  fastify from "./server"
+
 await launchDB();
 
 fastify.setNotFoundHandler((req, reply) => {
@@ -20,6 +23,7 @@ fastify.register(apiRoutes, { prefix: '/api' });
 fastify.register(loginRoutes);
 fastify.register(errorRoutes, {prefix: '/error'});
 fastify.register(miscRoutes, {prefix: '/misc'});
+fastify.register(liveChat);
 
 fastify.listen({port: 3000,  host: '0.0.0.0'}, (err, address) => {
   if (err) throw err

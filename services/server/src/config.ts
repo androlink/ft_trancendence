@@ -4,12 +4,13 @@ import fastifyJWT from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart'
-import { dbLogFile } from './database.js';
+import fastifyWebSocket from "@fastify/websocket";
+import { dbLogFile } from './database';
 
 
 
 // if changed for better naming convention
-// need to be changed in page.html and template.ts too
+// need to be changed in page.html and template too
 export const assetsPath = '/resources';
 
 export default function () {
@@ -23,6 +24,7 @@ export default function () {
 
   fastify.register(fastifyMultipart);
 
+  fastify.register(fastifyWebSocket);
   fastify.register(fastifyFormbody);
 
   fastify.register(fastifyStatic, {
@@ -35,16 +37,8 @@ export default function () {
   fastify.get(`/favicon.ico`, (req, reply) =>
     reply.sendFile("favicon.ico"));
 
-  fastify.register(fastifyCookie, {
-    secret: process.env.COOKIE_SECURITY_KEY,
-  });
-
   fastify.register(fastifyJWT, {
     secret: process.env.JWT_SECURITY_KEY,
-    cookie: {
-      cookieName: 'account',
-      signed: false,
-    }
   });
 
   return fastify;

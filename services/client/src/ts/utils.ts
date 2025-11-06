@@ -1,7 +1,7 @@
 
 import { main } from "./app.js"
 import { setCtrlEventUsername } from "./html/events.js";
-
+import { sendStatusMessage } from "./chat.js";
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
 //----------------------------------------------------------------------------#
@@ -46,8 +46,6 @@ function setArrowButton() {
 //----------------------------------------------------------------------------#
 
 let reconnectTimer: ReturnType<typeof setTimeout>;
-self["isConnected"] = false;
-
 /**
  * sets a timer to tell you when you're gonna be disconnected soon
  * @param auth the header X-authenticated after a fresh request
@@ -71,21 +69,22 @@ export function resetReconnectTimer(auth: string | null): boolean {
   };
   clearTimeout(reconnectTimer);
   setVisibility("account-reconnected", false);
-  if (auth !== 'true') {
+  if (auth === 'false') {
+    localStorage.removeItem("token");
     setVisibility("account-disconnected", true);
-    self["isConnected"] = false;
     return false;
   }
+  localStorage.setItem("token", auth);
   setVisibility("account-disconnected", false);
-  self["isConnected"] = true;
   reconnectTimer = setTimeout(
     () => {
-      fetch('/api')
-        .then(res => {
-          if (resetReconnectTimer(res.headers.get('x-authenticated')))
-            setVisibility("account-reconnected", true);
-        })
-        .catch(() => {}); // if it failed don't bother
+      fetch('/api',
+        {headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`}}
+      ).then(res => {
+        if (resetReconnectTimer(res.headers.get('x-authenticated')))
+          setVisibility("account-reconnected", true);
+      })
+      .catch(() => {}); //if it fails don't bother
     },
     14 * 60 * 1000
   );
@@ -124,3 +123,17 @@ export function launchSinglePageApp() {
 export function keyExist(object: object, key: PropertyKey) {
   return Object.hasOwn(object, key);
 }
+
+export function accountLogOut() {
+  const token = localStorage.getItem("token");
+  if (token === null)
+    return;
+  fetch("/logout", {method: 'POST'}).then(
+    res => {
+      resetReconnectTimer(res.headers.get("x-authenticated"));
+      sendStatusMessage();
+      main();
+    }
+  ).catch(err => alert('Caught: ' + err));
+}
+self["accountLogOut"] = accountLogOut;

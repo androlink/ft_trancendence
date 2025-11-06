@@ -25,7 +25,7 @@ export function search_languages_packs(NAME, ...args){
 */
 export default {
   USERNAME_TAKEN: (username) => search_languages_packs("USERNAME_TAKEN", username),
-  DB_REFUSED_MSG: () => search_languages_packs("DB_REFUSED_MSG"),
+  DB_REFUSED: () => search_languages_packs("DB_REFUSED"),
   REFUSED_ADMIN: () => search_languages_packs("REFUSED_ADMIN"),
   NOT_RECOGNIZED: () => search_languages_packs("NOT_RECOGNIZED"),
   USERNAME_NOT_FOUND: (username) => search_languages_packs("USERNAME_NOT_FOUND", username),

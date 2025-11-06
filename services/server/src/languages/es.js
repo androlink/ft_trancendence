@@ -1,7 +1,7 @@
 
 export default {
   USERNAME_TAKEN: (username) => `"${username}" ya está tomado`,
-  DB_REFUSED_MSG: () => "la base de datos se negó",
+  DB_REFUSED: () => "la base de datos se negó",
   REFUSED_ADMIN: () => "¡Detente! Eres un administrador",
   NOT_RECOGNIZED: () => "El glorioso servidor dijo que no estás conectado, que lástima",
   USERNAME_NOT_FOUND: (username) => `No hay cuenta con el apodo "${username.length > 20 ? username.substring(0, 20) + '...' : username}"`,
