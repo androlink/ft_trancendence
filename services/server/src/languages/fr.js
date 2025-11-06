@@ -6,7 +6,7 @@ export default {
   NOT_RECOGNIZED: () =>"Le glorieux serveur a dit que vous etes pas connecté, déso",
   USERNAME_NOT_FOUND: (username) => `pas de compte avec le pseudo "${username.length > 20 ? username.substring(0, 20) + '...' : username}"`,
   WELCOME_USERNAME: (username = "") => `bienvenue ${username}`,
-  NOT_IN_DB: () => "Tu n'es pas présent dans la base de donnée, pouf déconnexion :D",
+NOT_IN_DB: () => "Tu n'es pas présent dans la base de donnée, pouf déconnexion :D",
   GOODBYE: () => "Il faut savoir dire au revoir très cher",
   EXPECTED_FORMBODY: (method, url) => `Content-Type 'application/x-www-form-urlencoded' attendu pour ${method} sur ${url}.`,
   EXPECTED_CONTENT_TYPE: (method) => `Content-Type non trouvé pour une requète ${method}`,
@@ -33,5 +33,6 @@ export default {
   NOT_IMG: () => "Ce n'est pas une image (png, apng, jpg, jpeg, webp, gif)",
   ERR_400: () => "Requête mal formée",
   ERR_404: () => "Tu t'es perdu ?",
+  ERR_409: () => "409 conflit",
   ERR_413: () => "C'est trop lourd, envoie moins",
 }

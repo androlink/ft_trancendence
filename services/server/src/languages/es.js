@@ -33,5 +33,6 @@ export default {
   NOT_IMG: () => "Eso no es una imagen (png, apng, jpg, jpeg, webp, gif)",
   ERR_400: () => "solicitud incorrecta",
   ERR_404: () => "¿Estás perdido por alguna razón?",
+  ERR_409: () => "409 conflicto",
   ERR_413: () => "carga útil demasiado grande",
 }

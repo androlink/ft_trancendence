@@ -57,5 +57,6 @@ export default {
   NOT_IMG: () => search_languages_packs("NOT_IMG"),
   ERR_400: () => search_languages_packs("ERR_400"),
   ERR_404: () => search_languages_packs("ERR_404"),
+  ERR_409: () => search_languages_packs("ERR_409"),
   ERR_413: () => search_languages_packs("ERR_413"),
 };
