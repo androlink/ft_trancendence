@@ -65,7 +65,7 @@ export async function main(force = false, requests = true): Promise<void> {
   }
   if (keyExist(data, 'headers')) {
     resetReconnectTimer(data.headers.get('x-authenticated'));
-  } else if (!self['isConnected']) {
+  } else if (!localStorage.getItem("token")) {
     resetReconnectTimer('false');
   }
   if (force && chatInnerHTML) document.getElementById("chat-content")?.insertAdjacentHTML('beforeend', chatInnerHTML);

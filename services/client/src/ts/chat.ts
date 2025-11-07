@@ -62,7 +62,7 @@ export function InitConnectionChat() {
         sendMessage(msgformat);
       }
       if (receivemsg.type === "pong"){
-        console.log("pong");
+        sendMessage("pong");
         lastPong = Date.now();
       }
     } catch (err) {
@@ -78,7 +78,7 @@ export function InitConnectionChat() {
   }, 15000);
   setInterval(() => {
     if (Date.now() - lastPong > 30000){
-      console.log("chat connection lost");
+      sendMessage("chat connection lost");
       WSconnect();
     }
   }, 5000);
@@ -97,7 +97,7 @@ function waitForSocketConnection(socket, send: Function) {
   setTimeout(
     function () {
       if (socket.readyState === 1) {
-        console.log("Connection is made");
+        sendMessage("Connection is made");
         send();
       } else {
         waitForSocketConnection(socket, send);
@@ -132,6 +132,6 @@ export function sendStatusMessage()
     id: localStorage.getItem("token"),
     type: "connection",
   };
-  console.log("Websocket status changed...")
+  sendMessage("Websocket status changed...")
   sendOrQueue(JSON.stringify(msg));
 }

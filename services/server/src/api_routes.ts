@@ -4,8 +4,8 @@ import { dbLogFile } from "./database";
 import fs from 'fs';
 import MSG from './messages_collection.js'
 import { assetsPath } from "./config.js";
-import { FastifyInstance } from "fastify"
-import { UserRow } from "./interfaces.js";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
+import { Id, TranslatedString, UserRow } from "./types.js";
 
 // response format for that page :
 // {
@@ -36,30 +36,35 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     }
   });
 
-  const needConnection = async (req, reply) => {
-    if (req.user.id === -1) {
-      return reply.code(403).send({
-        template: "Home",
-        title: MSG.LOGIN(),
-        inner: "Login",
-      });
-    }
-    const row = db.prepare("SELECT * FROM users WHERE id = ? -- needConnection from api_routes.js").get(req.user.id) as UserRow;
-    if (!row) {
-      // might happen naturally if jwt from a previous DB or account deleted
-      reply.header('x-authenticated', false);
-      return reply.send({
-        template: "Home",
-        title: MSG.LOGIN(),
-        inner: "Login",
-      });
-    }
-    req.user.username = row.username;
-    req.user.admin = row.admin;
-    req.user.password = row.password;
-    req.user.bio = row.bio;
-    req.user.pfp = row.pfp;
-  };
+  let needConnection: (req: FastifyRequest, reply: FastifyReply) => Promise<void>
+  {
+    /** get the full row corresponding to the id */
+    const statement1 = db.prepare<{id: Id}, UserRow>("SELECT * FROM users WHERE id = :id");
+    needConnection = async (req: FastifyRequest, reply: FastifyReply) => {
+      if (req.user.id === -1) {
+        return void reply.code(403).send({
+          template: "Home",
+          title: MSG.LOGIN(),
+          inner: "Login",
+        });
+      }
+      const row = statement1.get({id: req.user.id});
+      if (!row) {
+        // might happen naturally if jwt from a previous DB or account deleted
+        reply.header('x-authenticated', false);
+        return void reply.send({
+          template: "Home",
+          title: MSG.LOGIN(),
+          inner: "Login",
+        });
+      }
+      req.user.username = row.username;
+      req.user.admin = row.admin;
+      req.user.password = row.password;
+      req.user.bio = row.bio;
+      req.user.pfp = row.pfp;
+    };
+  }
 
   fastifyInstance.get('/', (req, reply) => {
     return reply.send({
@@ -96,43 +101,65 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     });
   });
 
-  fastifyInstance.get<{Params: {username: string}}>('/profile/:username', (req, reply) => {
-    const username = req.params.username;
-    const row = db.prepare('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS loses FROM users u WHERE lower(username) = lower(?) -- profile/:username route').get(username) as UserRow;
-    if (!row)
+  {
+    /** get all the infos for the user searched */
+    const statement1 = db.prepare<{username: string}, {bio: string, pfp: string, id: Id, username: string, wins: number, losses: number}>('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS losses FROM users u WHERE lower(username) = lower(:username)');
+    /** see if they are blocked */
+    const statement2 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("SELECT 1 FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId");
+    /** see if there is already a friend request sent */
+    const statement3 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("SELECT 1 FROM friend_requests WHERE requester = :requesterId AND requested = :targetId");
+    /** see if there is sent the other way around */
+    const statement4 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("SELECT 1 FROM friend_requests WHERE requested = :requesterId AND requester = :targetId");
+    /** see if they are friend already */
+    const statement5 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("SELECT 1 FROM friends WHERE (friend_one = :requesterId AND friend_two = :targetId) OR (friend_one = :targetId AND friend_two = :requesterId)");
+    /** transaction to do all the sql at once from the db view */
+    const selectSituation = db.transaction(
+      (requesterId: Id, targetId: Id): {friend: TranslatedString, block: TranslatedString} =>
+      {
+        const params = {requesterId, targetId};
+        if (requesterId === -1) {
+          return {friend: "NOT CONNECTED", block: "NOT CONNECTED"}
+        }
+        if (requesterId === targetId) {
+          return {friend: "IT IS YOU", block: "IT IS YOU"}
+        }
+        if (statement2.get(params)) {
+          return {friend: "THEY ARE BLOCKED", block: MSG.UN_BLOCK()}
+        }
+        if (statement3.get(params)) {
+          return {friend: MSG.UN_FRIEND_REQUEST(), block: MSG.BLOCK()}
+        }
+        if (statement4.get(params)) {
+          return {friend: MSG.ACCEPT_FRIEND(), block: MSG.BLOCK()}
+        }
+        if (statement5.get(params)) {
+          return {friend: MSG.UN_FRIEND(), block: MSG.BLOCK()}
+        }
+        return {friend:  MSG.REQUEST_FRIEND(), block: MSG.BLOCK()};
+      }
+    );
+    fastifyInstance.get<{Params: {username: string}}>('/profile/:username', (req, reply) => {
+      const username = req.params.username;
+      const row = statement1.get({username});
+      if (!row) {
+        return reply.send({
+          template: "Home", title: username, inner: "Error",
+          replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username)},
+        });
+      }
+      let {friend, block} = selectSituation(req.user.id, row.id);
       return reply.send({
-        template: "Home", title: username, inner: "Error",
-        replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username)},
+        template: "Home",
+        replace: {"username-p2": row.username, "biography-p2": row.bio,
+          "profile-picture": `${assetsPath}/pfp/${row.pfp}`,
+          "friend request": friend, "blocking request": block,
+          wins: String(row.wins), loses: String(row.losses),
+          ratio: String((row.wins / row.losses).toFixed(2)),
+        },
+        title: row.username, inner: "Profile2",
       });
-    let friend: string | {en: any;fr: any;es: any} = MSG.REQUEST_FRIEND();
-    let block: string | {en: any;fr: any;es: any} = MSG.BLOCK();
-    if (req.user.id === -1) {
-      friend = "NOT CONNECTED";
-      block = "NOT CONNECTED";
-    } else if (req.user.id === row.id) {
-      friend = "IT IS YOU";
-      block = "IT IS YOU";
-    } else if (db.prepare("SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ? -- profile/:usename route").get(req.user.id, row.id)) {
-      friend = "THEY ARE BLOCKED";
-      block = MSG.UN_BLOCK();
-    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requester = ? AND requested = ? -- profile/:usename route").get(req.user.id, row.id)) {
-      friend = MSG.UN_FRIEND_REQUEST();
-    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requested = ? AND requester = ? -- profile/:usename route").get(req.user.id, row.id)) {
-      friend = MSG.ACCEPT_FRIEND();
-    } else if (db.prepare("SELECT 1 FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_one = ? AND friend_two = ?) -- profile/:usename route").get(req.user.id, row.id, row.id, req.user.id)) {
-      friend = MSG.UN_FRIEND();
-    }
-    return reply.send({
-      template: "Home",
-      replace: {"username-p2": row.username, "biography-p2": row.bio,
-        "profile-picture": `${assetsPath}/pfp/${row.pfp}`,
-        "friend request": friend, "blocking request": block,
-        wins: String(row.wins), loses: String(row.loses),
-        ratio: String((row.wins / row.loses).toFixed(2)),
-      },
-      title: row.username, inner: "Profile2",
     });
-  });
+  }
 
   fastifyInstance.get('/blank', (req, reply) => {
     return reply.send({

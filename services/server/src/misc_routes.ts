@@ -1,7 +1,7 @@
 
 import db from "./database.js";
 import {FastifyInstance} from "fastify"
-import { GameRow, UserRow } from "./interfaces.js";
+import { Id } from "./types"
 
 // response format for that page :
 // whatever you need.
@@ -26,8 +26,8 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.get<{Querystring: {user: string}}>('/history', (req, reply) => {
     let user = req.query.user;
     if (!user) return reply.send([]);
-    const row = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?)").get(user) as UserRow;
-    let arr = db.prepare("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = ? OR loser = ? -- history search route ").all(row.id, row.id) as GameRow[];
+    const row = db.prepare<[string], {id: Id}>("SELECT id FROM users WHERE lower(username) = lower(?)").get(user);
+    let arr = db.prepare<[Id, Id], {time: string, winner: string, loser: string}>("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = ? OR loser = ? -- history search route ").all(row.id, row.id);
     arr = arr.sort((a, b) => a.time > b.time ? 1 : -1);
     return reply.send(arr.slice(0, 100));
   });

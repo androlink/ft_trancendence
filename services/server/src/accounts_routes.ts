@@ -3,8 +3,8 @@ import db, { hashPassword, comparePassword } from "./database";
 import MSG from "./messages_collection";
 import fs from 'fs'
 import { fileTypeFromBuffer } from 'file-type';
-import { FastifyInstance } from 'fastify'
-import { UserRow } from "./interfaces";
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import { Id, UserRow } from "./types";
 
 
 // response format for that page :
@@ -29,7 +29,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       biography: {maxLength: 3000 },
       password: {minLength: 4, maxByteLength: 42 },
     }
-    return async function (req, reply) {
+    return async function (req:FastifyRequest<{Body: Object}>, reply: FastifyReply) {
       for (const field of requiredFields) {
         if (!Object.hasOwn(req.body, field))
           return reply.code(401).send({success: false, message: `query ${field} missing`});
@@ -52,7 +52,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   /**
    * Send back an error 415 if there is no header about Content-Type x-www-form-urlencoded
    */
-  async function needFormBody(req, reply) {
+  async function needFormBody(req: FastifyRequest, reply: FastifyReply) {
     if (!("content-type" in req.headers)) {
       return reply.code(415).send({success: false, message: MSG.EXPECTED_CONTENT_TYPE(req.method)});
     }
@@ -60,21 +60,21 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       return reply.code(415).send({success: false, message: MSG.EXPECTED_FORMBODY(req.method, req.url)});
     }
   };
+
   /**
    * identify who is the user based on JWT.
    * Uses cookies, meaning can be set as soon as onRequestHook,
    * should be used early to access account.
    * 
    * WARNING: it will send 401 Unauthorized and stop treating request on error.
- */
-
-  let identifyUser;
+  */
+  let identifyUser: (req: FastifyRequest, reply: FastifyReply) => Promise<never>;
   {
-    const statement1 = db.prepare("SELECT * FROM users WHERE id = :id");
-    identifyUser = async (req, reply) => {
+    const statement1 = db.prepare<{id: Id}, UserRow>("SELECT * FROM users WHERE id = :id");
+    identifyUser = async (req: FastifyRequest, reply: FastifyReply) => {
       try {
         await req.jwtVerify();
-        const row= statement1.get({id: req.user.id}) as UserRow;
+        const row = statement1.get({id: req.user.id});
         if (!row) {
           reply.header('x-authenticated', false);
           return reply.code(404).send({success: false, message: MSG.NOT_IN_DB()});
@@ -93,7 +93,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    const statement1 = db.prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
+    const statement1 = db.prepare<{username: string, password: string}, void>('INSERT INTO users (username, password) VALUES (:username, :password)');
     fastifyInstance.post<{Body: {username: string, password: string}}>("/register",
       {
         preValidation: checkBodyInput(["username", "password"]),
@@ -120,7 +120,8 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    const statement1 = db.prepare("SELECT id, password FROM users WHERE lower(username) = lower(:username)");
+    /** gets the id and the password from the username searched */
+    const statement1 = db.prepare<{username: string}, {id: Id, password: string}>("SELECT id, password FROM users WHERE lower(username) = lower(:username)");
     fastifyInstance.post<{Body: {username: string, password: string}}>("/login",
       {
         onRequest: [needFormBody],
@@ -129,7 +130,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       async (req, reply) => {
         const username = req.body.username;
         const password = req.body.password;
-        let row = statement1.get({username}) as UserRow;
+        let row = statement1.get({username});
         if (!row) {
           return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(username)});
         }
@@ -143,18 +144,19 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
     });
   }
   
-  fastifyInstance.post("/logout", async (req, reply) => {
+  fastifyInstance.post("/logout", (req, reply) => {
     return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
   });
 
   {
-    const statement1 = db.prepare("UPDATE users SET username = :username, bio = :bio WHERE id = :id");
+    /** update the username and the bio of the user */
+    const statement1 = db.prepare<{username: string, bio: string, id: Id}, undefined>("UPDATE users SET username = :username, bio = :bio WHERE id = :id");
     fastifyInstance.put<{Body: {username: string, biography: string}, User: {id: number}}>("/update",
       {
         onRequest: [identifyUser, needFormBody],
         preValidation: checkBodyInput(["username", "biography"]),
       },
-      async (req, reply) => {
+      (req, reply) => {
         const username = req.body.username;
         const bio = req.body.biography;
         try {
@@ -173,8 +175,10 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    const statement1 = db.prepare('SELECT pfp FROM users WHERE id = :id');
-    const statement2 = db.prepare("UPDATE users SET pfp = :pfp WHERE id = :id");
+    /** gets the old pfp of the user */
+    const statement1 = db.prepare<{id: Id}, {pfp: string}>("SELECT pfp FROM users WHERE id = :id");
+    /** insert the new pfp of the user */
+    const statement2 = db.prepare<{pfp: string, id: Id}, undefined>("UPDATE users SET pfp = :pfp WHERE id = :id");
     fastifyInstance.put("/pfp",
       {
         onRequest: [identifyUser],
@@ -210,7 +214,8 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    const statement1 = db.prepare("UPDATE users SET password = :password WHERE id = :id");
+    /** change the password of the user */
+    const statement1 = db.prepare<{password: string, id: Id}, undefined>("UPDATE users SET password = :password WHERE id = :id");
     fastifyInstance.put<{Body: {password: string}}>("/password",
       {
         onRequest: [identifyUser, needFormBody],
@@ -226,17 +231,17 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    // find who is getting blocked
-    const statement1 = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?)");
-    // try to unblock them
-    const statement2 = db.prepare("DELETE FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId RETURNING 1");
-    // if unblocking failed, then we block them instead
-    const statement3 = db.prepare("DELETE FROM friend_requests WHERE requester = :requesterId AND requested = :targetId");
-    // So we remove any potential friendship
-    const statement4 = db.prepare("DELETE FROM friends WHERE (friend_one = :requesterId AND friend_two = :targetId) OR (friend_two = :requesterId AND friend_one = :targetId)");
-    // And we remove any potential friend request from the person who blocked 
-    const statement5 = db.prepare("INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (:requesterId, :targetId)");
-    // Transactions avoid race conditions
+    /** find who is getting blocked */
+    const statement1 = db.prepare<{target: string}, {id: Id}>("SELECT id FROM users WHERE lower(username) = lower(:target)");
+    /** try to unblock them */
+    const statement2 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("DELETE FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId RETURNING 1");
+    /** if unblocking failed, then we block them instead */
+    const statement3 = db.prepare<{requesterId: Id, targetId: Id}, undefined>("DELETE FROM friend_requests WHERE requester = :requesterId AND requested = :targetId");
+    /** So we remove any potential friendship */
+    const statement4 = db.prepare<{requesterId: Id, targetId: Id}, undefined>("DELETE FROM friends WHERE (friend_one = :requesterId AND friend_two = :targetId) OR (friend_two = :requesterId AND friend_one = :targetId)");
+    /** And we remove any potential friend request from the person who blocked */
+    const statement5 = db.prepare<{requesterId: Id, targetId: Id}, undefined>("INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (:requesterId, :targetId)");
+    /** Transactions avoid race conditions */
     const toggleBlock = db.transaction((requesterId, targetId) => {
       const params = {requesterId, targetId};
       if (statement2.get(params)) {
@@ -252,7 +257,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       {
         onRequest: [identifyUser],
       },
-      async (req, reply) => {
+      (req, reply) => {
         let target = req.query.user;
         // line below doesn't need translation, the front should never see it
         if (!target) {
@@ -261,7 +266,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         if (req.user.username === target) {
           return reply.send({success: false, message: MSG.THAT_IS_YOU()});
         }
-        let row = statement1.get(target) as UserRow;
+        let row = statement1.get({target});
         if (!row) {
           return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(target)});
         }
@@ -275,19 +280,21 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    const statement1 = db.prepare("SELECT id FROM users WHERE lower(username) = lower(?)");
-    // if the other person is blocked
-    const statement2 = db.prepare('SELECT 1 FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId');
-    // if the other person already requested you, accept it
-    const statement3 = db.prepare('DELETE FROM friend_requests WHERE requester = :targetId AND requested = :requesterId RETURNING 1');
-    const statement4 = db.prepare('INSERT INTO friends (friend_one, friend_two) VALUES (:requesterId, :targetId)');
-    // if it's your friend, remove it
-    const statement5 = db.prepare('DELETE FROM friends WHERE (friend_one = :requesterId AND friend_two = :targetId) OR (friend_two = :requesterId AND friend_one = :targetId) RETURNING 1');
-    // if it's you already had a request, remove it
-    const statement6 = db.prepare('DELETE FROM friend_requests WHERE requester = :requesterId AND requested = :targetId RETURNING 1');
-    // New friend request
-    const statement7 = db.prepare('INSERT INTO friend_requests (requester, requested) VALUES (:requesterId, :targetId)');
-    // Transactions avoid race conditions
+    /** get the id of the target */
+    const statement1 = db.prepare<{username: string}, {id: Id}>("SELECT id FROM users WHERE lower(username) = lower(:username)");
+    /** if the other person is blocked */
+    const statement2 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>('SELECT 1 FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId');
+    /** if the other person already requested you, remove it */
+    const statement3 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>('DELETE FROM friend_requests WHERE requester = :targetId AND requested = :requesterId RETURNING 1');
+    /** then make them friends */
+    const statement4 = db.prepare<{requesterId: Id, targetId: Id}, undefined>('INSERT INTO friends (friend_one, friend_two) VALUES (:requesterId, :targetId)');
+    /** if it's your friend, remove it */
+    const statement5 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>('DELETE FROM friends WHERE (friend_one = :requesterId AND friend_two = :targetId) OR (friend_two = :requesterId AND friend_one = :targetId) RETURNING 1');
+    /** if it's you already had a request, remove it */
+    const statement6 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>('DELETE FROM friend_requests WHERE requester = :requesterId AND requested = :targetId RETURNING 1');
+    /** New friend request */
+    const statement7 = db.prepare<{requesterId: Id, targetId: Id}, undefined>('INSERT INTO friend_requests (requester, requested) VALUES (:requesterId, :targetId)');
+    /** Transactions avoid race conditions */
     const toggleFriend = db.transaction((requesterId, targetId) => {
       const params = {requesterId, targetId};
       if (statement2.get(params)) {
@@ -310,14 +317,14 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       {
         onRequest: [identifyUser],
       },
-      async (req, reply) => {
+      (req, reply) => {
         let target = req.query.user;
         // line below doesn't need translation, the front should never see it
         if (!target)
           return reply.code(401).send({success: false, message: "You need to tell the target in the query as example /friend?user=AllMighty"});
         if (req.user.username === target)
           return reply.code(403).send({success: false, message: MSG.THAT_IS_YOU()});
-        let row = statement1.get(target) as UserRow;
+        let row = statement1.get({username: target});
         if (!row)
           return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(target)});
         try {
@@ -330,13 +337,14 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
   }
 
   {
-    const statement1 = db.prepare("DELETE FROM users WHERE id = :id RETURNING pfp");
+    /** delete the user */
+    const statement1 = db.prepare<{id: Id}, {pfp: string}>("DELETE FROM users WHERE id = :id RETURNING pfp");
     fastifyInstance.delete<{Body: {username: string}}>("/delete",
       {
         onRequest: [identifyUser, needFormBody],
         preValidation: checkBodyInput(["username"], true),
       },
-      async (req, reply) => {
+      (req, reply) => {
         if (req.user.admin) {
           return reply.code(403).send({success: false, message: MSG.REFUSED_ADMIN()});
         }

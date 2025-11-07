@@ -1,7 +1,8 @@
 
 import { main } from "./app.js"
-import { setCtrlEventUsername } from "./html/events.js";
+import { sendMessage, setCtrlEventUsername } from "./html/events.js";
 import { sendStatusMessage } from "./chat.js";
+import { selectLanguage } from "./html/templates.js";
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
 //----------------------------------------------------------------------------#
@@ -63,10 +64,9 @@ export function resetReconnectTimer(auth: string | null): boolean {
     return false;
   }
 
-  let setVisibility = (id: string, state: boolean) => {
-    const elem = document.getElementById(id);
-    if (elem) elem.toggleAttribute("hidden", !state);
-  };
+  const setVisibility = (id: string, state: boolean): boolean | undefined => 
+    document.getElementById(id)?.toggleAttribute("hidden", !state);
+
   clearTimeout(reconnectTimer);
   setVisibility("account-reconnected", false);
   if (auth === 'false') {
@@ -99,7 +99,7 @@ export function resetReconnectTimer(auth: string | null): boolean {
  * launch the SPA at the end of loading
  * and set history control
  */
-export function launchSinglePageApp() {
+export function launchSinglePageApp(): void {
   console.log("Hello dear user.\n" +
     "Just so you know, this website rely heavily on javascript running in the front, " +
     "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
@@ -110,30 +110,35 @@ export function launchSinglePageApp() {
     main().catch(err => console.error(err));
     setCtrlEventUsername();
   });
-  
 }
 
 /**
  * Check if object has the key to prevent crash,
  * easier to read than native js
- * @param object
- * @param key 
  * @returns Object.hasOwn(object, key);
  */
-export function keyExist(object: object, key: PropertyKey) {
+export function keyExist(object: object, key: PropertyKey): boolean {
   return Object.hasOwn(object, key);
 }
 
-export function accountLogOut() {
+/**
+ * delog the front app
+ */
+export async function accountLogOut(): Promise<void> {
   const token = localStorage.getItem("token");
   if (token === null)
     return;
-  fetch("/logout", {method: 'POST'}).then(
-    res => {
-      resetReconnectTimer(res.headers.get("x-authenticated"));
+  try {
+    const res = await fetch("/logout", {method: 'POST'});
+    const json = await res.json();
+    if (json.success)
+    if (res.headers.get("x-authenticated") === 'false'){
       sendStatusMessage();
       main();
+      return;
     }
-  ).catch(err => alert('Caught: ' + err));
+  } catch(err) {
+    alert('Caught: ' + err)
+  };
 }
 self["accountLogOut"] = accountLogOut;

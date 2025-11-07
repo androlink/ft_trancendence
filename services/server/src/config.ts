@@ -4,7 +4,7 @@ import fastifyJWT from '@fastify/jwt';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart'
 import fastifyWebSocket from "@fastify/websocket";
-import { JwtUserPayload } from './interfaces';
+import { JwtUserPayload } from './types';
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {

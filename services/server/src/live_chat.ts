@@ -2,6 +2,7 @@ import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import db from "./database"
 import { send } from "process";
+import { UserRow } from "./types";
 
 /**
  * Interface Message
@@ -137,7 +138,7 @@ function ConnectionUser(msg: WSmessage, socket: any){
 
       if (client._id !== null)
       {
-        const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender);
+        const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender) as UserRow;
         if (!row)
         {
           console.error("client don't exist in the database");

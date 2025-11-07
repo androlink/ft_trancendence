@@ -1,0 +1,19 @@
+{
+  "editor.tokenColorCustomizations": {
+    "[Darcula - Black Edition]": {
+      "comments": "#5e8eb9",
+      "textMateRules": [
+        {
+          "scope": [
+            "entity.name.type",
+            "support.type.primitive"
+          ],
+          "settings": {
+            "foreground": "#ff7700"
+          }
+        }
+      ]
+    }
+  }
+  
+}
