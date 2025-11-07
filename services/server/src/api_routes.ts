@@ -4,6 +4,8 @@ import { dbLogFile } from "./database";
 import fs from 'fs';
 import MSG from './messages_collection.js'
 import { assetsPath } from "./config.js";
+import { FastifyInstance } from "fastify"
+import { UserRow } from "./interfaces.js";
 
 // response format for that page :
 // {
@@ -14,7 +16,7 @@ import { assetsPath } from "./config.js";
 // }
 // if you reuse code for other page, take it into consideration
 
-export async function apiRoutes(fastifyInstance) {
+export async function apiRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.setNotFoundHandler ( (req, reply) => {
     return reply.code(404).send({
       template: "Error",
@@ -42,7 +44,7 @@ export async function apiRoutes(fastifyInstance) {
         inner: "Login",
       });
     }
-    const row = db.prepare("SELECT * FROM users WHERE id = ? -- needConnection from api_routes.js").get(req.user.id);
+    const row = db.prepare("SELECT * FROM users WHERE id = ? -- needConnection from api_routes.js").get(req.user.id) as UserRow;
     if (!row) {
       // might happen naturally if jwt from a previous DB or account deleted
       reply.header('x-authenticated', false);
@@ -94,10 +96,10 @@ export async function apiRoutes(fastifyInstance) {
     });
   });
 
-  fastifyInstance.get('/profile/:username', (req, reply) => {
+  fastifyInstance.get<{Params: {username: string}}>('/profile/:username', (req, reply) => {
     const username = req.params.username;
-    const row_searched = db.prepare('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS loses FROM users u WHERE lower(username) = lower(?) -- profile/:username route').get(username);
-    if (!row_searched)
+    const row = db.prepare('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS loses FROM users u WHERE lower(username) = lower(?) -- profile/:username route').get(username) as UserRow;
+    if (!row)
       return reply.send({
         template: "Home", title: username, inner: "Error",
         replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username)},
@@ -107,28 +109,28 @@ export async function apiRoutes(fastifyInstance) {
     if (req.user.id === -1) {
       friend = "NOT CONNECTED";
       block = "NOT CONNECTED";
-    } else if (req.user.id === row_searched.id) {
+    } else if (req.user.id === row.id) {
       friend = "IT IS YOU";
       block = "IT IS YOU";
-    } else if (db.prepare("SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ? -- profile/:usename route").get(req.user.id, row_searched.id)) {
+    } else if (db.prepare("SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ? -- profile/:usename route").get(req.user.id, row.id)) {
       friend = "THEY ARE BLOCKED";
       block = MSG.UN_BLOCK();
-    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requester = ? AND requested = ? -- profile/:usename route").get(req.user.id, row_searched.id)) {
+    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requester = ? AND requested = ? -- profile/:usename route").get(req.user.id, row.id)) {
       friend = MSG.UN_FRIEND_REQUEST();
-    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requested = ? AND requester = ? -- profile/:usename route").get(req.user.id, row_searched.id)) {
+    } else if (db.prepare("SELECT 1 FROM friend_requests WHERE requested = ? AND requester = ? -- profile/:usename route").get(req.user.id, row.id)) {
       friend = MSG.ACCEPT_FRIEND();
-    } else if (db.prepare("SELECT 1 FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_one = ? AND friend_two = ?) -- profile/:usename route").get(req.user.id, row_searched.id, row_searched.id, req.user.id)) {
+    } else if (db.prepare("SELECT 1 FROM friends WHERE (friend_one = ? AND friend_two = ?) OR (friend_one = ? AND friend_two = ?) -- profile/:usename route").get(req.user.id, row.id, row.id, req.user.id)) {
       friend = MSG.UN_FRIEND();
     }
     return reply.send({
       template: "Home",
-      replace: {"username-p2": row_searched.username, "biography-p2": row_searched.bio,
-        "profile-picture": `${assetsPath}/pfp/${row_searched.pfp}`,
+      replace: {"username-p2": row.username, "biography-p2": row.bio,
+        "profile-picture": `${assetsPath}/pfp/${row.pfp}`,
         "friend request": friend, "blocking request": block,
-        wins: String(row_searched.wins), loses: String(row_searched.loses),
-        ratio: String((row_searched.wins / row_searched.loses).toFixed(2)),
+        wins: String(row.wins), loses: String(row.loses),
+        ratio: String((row.wins / row.loses).toFixed(2)),
       },
-      title: row_searched.username, inner: "Profile2",
+      title: row.username, inner: "Profile2",
     });
   });
 

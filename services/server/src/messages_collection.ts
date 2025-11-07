@@ -1,7 +1,6 @@
-import en from "./languages/en.js"
-import fr from "./languages/fr.js"
-import es from "./languages/es.js"
-
+import en from "./languages/en"
+import fr from "./languages/fr"
+import es from "./languages/es"
 
 /**
  * creates strings according to the translations in the files in /language
@@ -9,7 +8,7 @@ import es from "./languages/es.js"
  * @param  {...string} args substring to set inside the translatins
  * @returns an object containing the strings created or error message string
  */
-export function search_languages_packs(NAME, ...args){
+export function search_languages_packs(NAME: string, ...args: any[]){
   return {
     en: Object.hasOwn(en, NAME) ? en[NAME](...args) : `Translation ${NAME} not found`,
     fr: Object.hasOwn(fr, NAME) ? fr[NAME](...args) : `Traduction ${NAME} non trouvée`,
@@ -24,21 +23,21 @@ export function search_languages_packs(NAME, ...args){
  * « MSG.NAME(arg1, arg2, ...)» is equivalent to « search_languages_packs(NAME, arg1, arg2, ...) »
 */
 export default {
-  USERNAME_TAKEN: (username) => search_languages_packs("USERNAME_TAKEN", username),
+  USERNAME_TAKEN: (username: string) => search_languages_packs("USERNAME_TAKEN", username),
   DB_REFUSED: () => search_languages_packs("DB_REFUSED"),
   REFUSED_ADMIN: () => search_languages_packs("REFUSED_ADMIN"),
   NOT_RECOGNIZED: () => search_languages_packs("NOT_RECOGNIZED"),
-  USERNAME_NOT_FOUND: (username) => search_languages_packs("USERNAME_NOT_FOUND", username),
+  USERNAME_NOT_FOUND: (username: string) => search_languages_packs("USERNAME_NOT_FOUND", username),
   WELCOME_USERNAME: (username = "") => search_languages_packs("WELCOME_USERNAME", username),
   NOT_IN_DB: () => search_languages_packs("NOT_IN_DB"),
   GOODBYE: () => search_languages_packs("GOODBYE"),
-  EXPECTED_FORMBODY: (method, url) => search_languages_packs("EXPECTED_FORMBODY", method, url),
-  EXPECTED_CONTENT_TYPE: (method) => search_languages_packs("EXPECTED_CONTENT_TYPE", method),
-  ALPHANUMERIC_: (field) => search_languages_packs("ALPHANUMERIC_", field),
-  MAX_BYTE_LENGTH: (field, byteLength) => search_languages_packs("MAX_BYTE_LENGTH", field, byteLength),
-  MAX_STR_LENGTH: (field, length) => search_languages_packs("MAX_STR_LENGTH", field, length),
-  MIN_STR_LENGTH: (field, length) => search_languages_packs("MIN_STR_LENGTH", field, length),
-  MUST_BE_STR: (field) => search_languages_packs("MUST_BE_STR", field),
+  EXPECTED_FORMBODY: (method: string, url: string) => search_languages_packs("EXPECTED_FORMBODY", method, url),
+  EXPECTED_CONTENT_TYPE: (method: string) => search_languages_packs("EXPECTED_CONTENT_TYPE", method),
+  ALPHANUMERIC_: (field: string) => search_languages_packs("ALPHANUMERIC_", field),
+  MAX_BYTE_LENGTH: (field: string, byteLength: number) => search_languages_packs("MAX_BYTE_LENGTH", field, byteLength),
+  MAX_STR_LENGTH: (field: string, length: number) => search_languages_packs("MAX_STR_LENGTH", field, length),
+  MIN_STR_LENGTH: (field: string, length: number) => search_languages_packs("MIN_STR_LENGTH", field, length),
+  MUST_BE_STR: (field: string) => search_languages_packs("MUST_BE_STR", field),
   WRONG_PASSWORD: () => search_languages_packs("WRONG_PASSWORD"),
   WRONG_USERNAME: () => search_languages_packs("WRONG_USERNAME"),
   LOGIN: () => search_languages_packs("LOGIN"),

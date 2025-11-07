@@ -7,19 +7,15 @@ export const dbLogFile = '/var/db/log.txt';
 
 /**
  * hash a string, works up to 72 Bytes due to the algorithm used
- * @param {string} str 
- * @returns {Promise<string>}
  */
-export async function hashPassword(str) {
+export async function hashPassword(str: string): Promise<string> {
   return await bcrypt.hash(str + process.env.PEPPER_KEY_PASSWORDS, 12);
 }
 
 /**
  * compare a string to a password set with hashPassword (if the pepper hasn't changed)
- * @param {string} str 
- * @returns {Promise<boolean>}
  */
-export async function comparePassword(str, hashedPassword) {
+export async function comparePassword(str: string, hashedPassword: string): Promise<boolean> {
   return await bcrypt.compare(str + process.env.PEPPER_KEY_PASSWORDS, hashedPassword)
 }
 

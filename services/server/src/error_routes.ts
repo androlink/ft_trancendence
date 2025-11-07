@@ -1,5 +1,5 @@
 
-
+import { FastifyInstance } from 'fastify'
 import MSG from './messages_collection.js'
 
 // response format for that page :
@@ -17,16 +17,7 @@ import MSG from './messages_collection.js'
 //
 // It's mainly used by Nginx when it fails to treat the request
 
-export async function errorRoutes(fastifyInstance) {
-  // fastifyInstance.all('/404', (req, reply) => {
-  //   return reply.code(404).send({
-  //     template: "Error",
-  //     replace: {status: "404 Not Found", message: MSG.ERR_404()}, 
-  //     title: "404 Not Found",
-  //     success: false,
-  //     message: MSG.ERR_404(),
-  //   });
-  // });
+export async function errorRoutes(fastifyInstance: FastifyInstance) {
   
   fastifyInstance.all('/413', (req, reply) => {
     return reply.code(413).send({

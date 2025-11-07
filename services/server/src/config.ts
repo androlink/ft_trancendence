@@ -1,16 +1,20 @@
 import fastifyModule from 'fastify';
 import fastifyStatic from '@fastify/static';
 import fastifyJWT from '@fastify/jwt';
-import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart'
 import fastifyWebSocket from "@fastify/websocket";
-import { dbLogFile } from './database';
+import { JwtUserPayload } from './interfaces';
 
-
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: JwtUserPayload   // payload type used when signing
+    user: JwtUserPayload      // request.user type after verify
+  }
+}
 
 // if changed for better naming convention
-// need to be changed in page.html and template too
+// need to be changed in page.html and template.ts too
 export const assetsPath = '/resources';
 
 export default function () {
@@ -40,6 +44,7 @@ export default function () {
   fastify.register(fastifyJWT, {
     secret: process.env.JWT_SECURITY_KEY,
   });
+  
 
   return fastify;
 }

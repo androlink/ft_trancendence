@@ -3,6 +3,8 @@ import db, { hashPassword, comparePassword } from "./database";
 import MSG from "./messages_collection";
 import fs from 'fs'
 import { fileTypeFromBuffer } from 'file-type';
+import { FastifyInstance } from 'fastify'
+import { UserRow } from "./interfaces";
 
 
 // response format for that page :
@@ -13,7 +15,7 @@ import { fileTypeFromBuffer } from 'file-type';
 // setting message as a plain string will set have all the language display the same
 // if you reuse code for other page, take it into consideration
 
-export async function loginRoutes(fastifyInstance) {
+export async function loginRoutes(fastifyInstance: FastifyInstance) {
 
   /**
    * treat the element you want based on a collection of requirements decided arbitrary in the scope
@@ -21,7 +23,7 @@ export async function loginRoutes(fastifyInstance) {
    * @param presenceOnly setting it as true will stop the checks at the presence in the body
    * @returns a function used for a hook
    */
-  function checkBodyInput(requiredFields, presenceOnly = false) {
+  function checkBodyInput(requiredFields: string[], presenceOnly = false) {
     let conditions = {
       username: {minLength: 3, maxLength: 20, alphanumeric_: true },
       biography: {maxLength: 3000 },
@@ -33,8 +35,6 @@ export async function loginRoutes(fastifyInstance) {
           return reply.code(401).send({success: false, message: `query ${field} missing`});
         if (presenceOnly) 
           continue ;
-        if (!Object.hasOwn(conditions, field)) // during development only. Should never happen anyway
-          return reply.code(500).send("That input is not in our conditions, no idea how to parse it. Our fault LOL");
         if (typeof req.body[field] !== "string")
           return reply.code(401).send({success: false, message: MSG.MUST_BE_STR(field)});
         if (conditions[field].minLength && req.body[field].length < conditions[field].minLength)
@@ -74,7 +74,7 @@ export async function loginRoutes(fastifyInstance) {
     identifyUser = async (req, reply) => {
       try {
         await req.jwtVerify();
-        const row = statement1.get({id: req.user.id});
+        const row= statement1.get({id: req.user.id}) as UserRow;
         if (!row) {
           reply.header('x-authenticated', false);
           return reply.code(404).send({success: false, message: MSG.NOT_IN_DB()});
@@ -94,7 +94,7 @@ export async function loginRoutes(fastifyInstance) {
 
   {
     const statement1 = db.prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
-    fastifyInstance.post("/register",
+    fastifyInstance.post<{Body: {username: string, password: string}}>("/register",
       {
         preValidation: checkBodyInput(["username", "password"]),
       },
@@ -121,7 +121,7 @@ export async function loginRoutes(fastifyInstance) {
 
   {
     const statement1 = db.prepare("SELECT id, password FROM users WHERE lower(username) = lower(:username)");
-    fastifyInstance.post("/login",
+    fastifyInstance.post<{Body: {username: string, password: string}}>("/login",
       {
         onRequest: [needFormBody],
         preValidation: checkBodyInput(["username", "password"], true),
@@ -129,7 +129,7 @@ export async function loginRoutes(fastifyInstance) {
       async (req, reply) => {
         const username = req.body.username;
         const password = req.body.password;
-        let row = statement1.get({username});
+        let row = statement1.get({username}) as UserRow;
         if (!row) {
           return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(username)});
         }
@@ -149,7 +149,7 @@ export async function loginRoutes(fastifyInstance) {
 
   {
     const statement1 = db.prepare("UPDATE users SET username = :username, bio = :bio WHERE id = :id");
-    fastifyInstance.put("/update",
+    fastifyInstance.put<{Body: {username: string, biography: string}, User: {id: number}}>("/update",
       {
         onRequest: [identifyUser, needFormBody],
         preValidation: checkBodyInput(["username", "biography"]),
@@ -161,7 +161,6 @@ export async function loginRoutes(fastifyInstance) {
           const res = statement1.run({username, bio, id: req.user.id});
           if (!res.changes) {
             // might happen if account deleted between start of request treating and statement's run
-            reply.clearCookie();
             return reply.code(404).header("x-authenticated", false).send({success: false, message: MSG.NOT_IN_DB()});
           }
           return reply.send({success: true, message: ":D"});
@@ -196,11 +195,10 @@ export async function loginRoutes(fastifyInstance) {
         } catch (error) {
           return reply.code(500).send({ success: false, message: 'Failed to save file: ' + error });
         }
-        const row = statement1.get({id: req.user.id});
+        const row = statement1.get({id: req.user.id}) as UserRow;
         const res = statement2.run({pfp: filename, id: req.user.id});
         // below might happen on race condition, if someone deleted their accounts between SQL request for instance
         if (!row || !res.changes) {
-          reply.clearCookie();
           return reply.code(404).header("x-authenticated", false).send({success: false, message: MSG.NOT_IN_DB()});
         }
         if (row.pfp !== "default.jpg" && row.pfp !== filename) {
@@ -213,7 +211,7 @@ export async function loginRoutes(fastifyInstance) {
 
   {
     const statement1 = db.prepare("UPDATE users SET password = :password WHERE id = :id");
-    fastifyInstance.put("/password",
+    fastifyInstance.put<{Body: {password: string}}>("/password",
       {
         onRequest: [identifyUser, needFormBody],
         preValidation: checkBodyInput(["password"]),
@@ -250,7 +248,7 @@ export async function loginRoutes(fastifyInstance) {
       return "Blocked";
     });
 
-    fastifyInstance.post("/block",
+    fastifyInstance.post<{Querystring: {user: string}}>("/block",
       {
         onRequest: [identifyUser],
       },
@@ -263,7 +261,7 @@ export async function loginRoutes(fastifyInstance) {
         if (req.user.username === target) {
           return reply.send({success: false, message: MSG.THAT_IS_YOU()});
         }
-        let row = statement1.get(target);
+        let row = statement1.get(target) as UserRow;
         if (!row) {
           return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(target)});
         }
@@ -308,7 +306,7 @@ export async function loginRoutes(fastifyInstance) {
       statement7.run(params);
       return "friend request :D";
     });
-    fastifyInstance.post("/friend",
+    fastifyInstance.post<{Querystring: {user: string}}>("/friend",
       {
         onRequest: [identifyUser],
       },
@@ -319,7 +317,7 @@ export async function loginRoutes(fastifyInstance) {
           return reply.code(401).send({success: false, message: "You need to tell the target in the query as example /friend?user=AllMighty"});
         if (req.user.username === target)
           return reply.code(403).send({success: false, message: MSG.THAT_IS_YOU()});
-        let row = statement1.get(target);
+        let row = statement1.get(target) as UserRow;
         if (!row)
           return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(target)});
         try {
@@ -333,7 +331,7 @@ export async function loginRoutes(fastifyInstance) {
 
   {
     const statement1 = db.prepare("DELETE FROM users WHERE id = :id RETURNING pfp");
-    fastifyInstance.delete("/delete",
+    fastifyInstance.delete<{Body: {username: string}}>("/delete",
       {
         onRequest: [identifyUser, needFormBody],
         preValidation: checkBodyInput(["username"], true),
@@ -345,7 +343,7 @@ export async function loginRoutes(fastifyInstance) {
         if (req.body.username != req.user.username) {
           return reply.code(401).send({success: false, message: MSG.WRONG_USERNAME()});
         }
-        const row = statement1.get({id: req.user.id});
+        const row = statement1.get({id: req.user.id}) as UserRow;
         if (!row) {
           // should not happen, unless two /delete request at the same time, i think
           return reply.code(404).header("x-authenticated", false).send({success: false, message: MSG.NOT_IN_DB()});
