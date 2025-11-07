@@ -52,6 +52,7 @@ export function InitConnectionChat() {
   ws.addEventListener('message', (event) => {
     try {
       const receivemsg: WSmessage = JSON.parse(event.data);
+      console.log("[incoming message]:", receivemsg);
       // check type
       if (receivemsg.type === "message")
       {
@@ -64,6 +65,9 @@ export function InitConnectionChat() {
       if (receivemsg.type === "pong"){
         console.log("pong");
         lastPong = Date.now();
+      }
+      if (receivemsg.type === "readyForDirectMessage"){
+        sendOrQueue(JSON.stringify({id: localStorage.getItem('token'), type: "direct_message", target: receivemsg.id}))
       }
     } catch (err) {
       alert("error : "+ err);
@@ -117,13 +121,39 @@ function sendChatMessage() {
   if (!textarea || !textarea.value) {
     return;
   }
-  const msg: WSmessage =  {
-    id: localStorage.getItem("token"),
-    type: "message",
-    content: textarea.value
-  };
-  textarea.value = "";
-  sendOrQueue(JSON.stringify(msg));
+
+  if (textarea.value.startsWith('/'))
+  {
+    let command = textarea.value.split(" ")[0];
+    command = command.slice(1);
+    const args = textarea.value.slice(1).trim().split(' ');
+
+    if (command === 'msg')
+    {
+      const targets = args[1].split(',');
+      const msg: WSmessage =  {
+        id: localStorage.getItem("token"),
+        type: "message",
+        content: args.slice(2).join(' ')
+      };
+      textarea.value = "";
+      for (let client of targets)
+      {
+        msg.target = client;
+        sendOrQueue(JSON.stringify(msg));
+      }
+    }
+  }
+  else
+  {
+    const msg: WSmessage =  {
+      id: localStorage.getItem("token"),
+      type: "message",
+      content: textarea.value
+    };
+    textarea.value = "";
+    sendOrQueue(JSON.stringify(msg));
+  }
 }
 
 export function sendStatusMessage()
