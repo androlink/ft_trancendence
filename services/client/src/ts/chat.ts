@@ -1,4 +1,5 @@
 import { sendMessage } from "./events.js";
+import { goToURL } from "./utils.js";
 
 
 // WEBSOCKET
@@ -54,13 +55,13 @@ export function InitConnectionChat() {
       const receivemsg: WSmessage = JSON.parse(event.data);
       console.log("[incoming message]:", receivemsg);
       // check type
-      if (receivemsg.type === "message")
+      if (receivemsg.type === "message" || receivemsg.type === "direct_message")
       {
         //check Id to set username
         const username = receivemsg.id;
         //construct message to show on the chat
         const msgformat = `${username}: ${receivemsg.content}`;
-        sendMessage(msgformat);
+        showMessageToChat(receivemsg);
       }
       if (receivemsg.type === "pong"){
         console.log("pong");
@@ -95,6 +96,59 @@ export function InitConnectionChat() {
   });
   (window as any).sendChatMessage = sendChatMessage;
 }
+
+
+
+function showMessageToChat(message: WSmessage): boolean {
+  
+  const chat = document.getElementById("chat-content");
+  if (!chat) {
+    console.error(`message '${message}' not sent to the chat because the chat is not found`);
+    return false;
+  }
+  
+  // true if at the end of the chat
+  let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
+  const para = document.createElement('p');
+  
+  if (message.type == "direct_message"){
+    // setup username
+    para.className = 'text-pink-400';
+    const userLink = document.createElement('span');
+    userLink.onclick = () => {goToURL(`profile/${message.id}`)};
+    userLink.textContent = `${message.id}:`;
+    userLink.className = 'text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ';
+    // setup text
+    const messageText = document.createElement('span');
+    messageText.textContent = message.content;
+    messageText.className = 'italic';
+    para.appendChild(userLink);
+    para.appendChild(messageText);
+  }
+  else if (message.id === "server"){
+    para.className = 'text-red-500 font-bold text-center';
+    const node = document.createTextNode(message.content);
+    para.appendChild(node);
+  }
+  else {
+    // setup username
+    const userLink = document.createElement('span');
+    userLink.onclick = () => {goToURL(`profile/${message.id}`)};
+    userLink.textContent = `${message.id}:`;
+    userLink.className = 'text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ';
+    // setup text
+    const node = document.createTextNode(message.content);
+    para.appendChild(userLink);
+    para.appendChild(node);
+  }
+
+  chat.appendChild(para);
+  if (scroll) {
+    chat.scrollTop = chat.scrollHeight;
+  }
+  return scroll;
+}
+
 
 
 function waitForSocketConnection(socket, send: Function) {

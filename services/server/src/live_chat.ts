@@ -24,7 +24,7 @@ interface WSmessage {
  * @param _username username of client (null if is not connected)
  * @param _id id of client (null if is not connected)
  */
-class wsClient{
+class WSClient{
   _socket: any;
   _username: string | null;
   _id: number | null;
@@ -49,9 +49,9 @@ class wsClient{
 
 /**
  * List of Clients
- * @class wsclient
+ * @class WSClient
  */
-const connectedClients = new Map<WebSocket, wsClient>();
+const connectedClients = new Map<WebSocket, WSClient>();
 
 /**
  * List of target messages
@@ -63,6 +63,7 @@ function DirectMessage( message:WSmessage, connection: any)
 {
   for (let msg of listOfMsg)
   {
+    console.log('==================\n', message, '\n', msg,'\n==================');
     if (message.id === msg.target && message.target === msg.id)
     {
       connection.send(JSON.stringify(msg));
@@ -72,13 +73,12 @@ function DirectMessage( message:WSmessage, connection: any)
   }
 }
 
-function getClientById(id: number): wsClient | null {
+function getClientById(id: number): WSClient | null {
  // check if the sender is on the list
-  const pair = connectedClients
-    .entries()
+  const pair = Array
+    .from(connectedClients.entries())
     .find(([ws, client]) => client._id == id);
-  if (pair) return pair[1];
-  return null;
+  return pair ? pair[1] : null;
 }
 
 function Message(msg: WSmessage, connection: any)
@@ -105,7 +105,7 @@ function Message(msg: WSmessage, connection: any)
     }));
     return;
   }
-  const client: wsClient | null = getClientById(sender_id);
+  const client: WSClient | null = getClientById(sender_id);
   if (!client) {
     connection.send(JSON.stringify({id: 'server',
       type: "message", 
@@ -116,23 +116,21 @@ function Message(msg: WSmessage, connection: any)
   {
     if (msg.content != null)
     {
-      const newMsg = { id: client._username, type: "message", content: msg.content};
+      const newMsg = { id: client._username!, type: "message", content: msg.content};
   
       if (!msg.target || msg.target === "all")
       {
-        connectedClients.forEach((cl:wsClient) => cl._socket.send(JSON.stringify(newMsg)));
+        connectedClients.forEach((cl:WSClient) => cl._socket.send(JSON.stringify(newMsg)));
         return;
       }
       for (let [sock, cl] of connectedClients) {
         if (cl._username === msg.target)
         {
-          listOfMsg.add(msg);
+          const newDirectMsg = {id: client._username!, type: "direct_message", target: msg.target, content: msg.content}
+          listOfMsg.add(newDirectMsg);
           const query = {id: client._username, type: "readyForDirectMessage"};
           console.log("[sending]", query)
           sock.send(JSON.stringify(query));
-          // connectedClients.forEach((cl:wsClient) =>{
-            // cl._socket.send(JSON.stringify({id: 'server', type:'message', content: "caca" + cl._id}));
-          // });
           return;
         }
       }
@@ -221,7 +219,7 @@ export default function liveChat(fastify: FastifyInstance){
     const testClient = connectedClients.get(ws);
     if (!testClient)
     {
-      const newClient = new wsClient(ws, null, null);
+      const newClient = new WSClient(ws, null, null);
       connectedClients.set(ws, newClient);
     }
   });
