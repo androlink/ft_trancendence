@@ -19,34 +19,39 @@ interface WSmessage {
   target?: string | null,
   content?: string | null
 };
+let lastPong: number;
+
+let reconnectTimeout = 1000;
+function retryConnection() {
+  console.log("Retry chat connection");
+  setTimeout(WSconnect, reconnectTimeout);
+  reconnectTimeout = Math.min(reconnectTimeout * 2, 10000); 
+}
+
 /**
  * Create New connection Websocket
  */
 function WSconnect()
 {
-  if (!ws || ws.readyState != WebSocket.OPEN)
-  {
-    ws = new WebSocket("/api/chat");
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    return; 
+  }
+
+  ws = new WebSocket("/api/chat");
+
+  ws.onopen = () => {
+    console.log("WebSocket open");
     sendStatusMessage();
   }
   
-}
-// setup connection chat
-export function InitConnectionChat() {
-  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-  const chat = document.getElementById("chat-content");
-  let lastPong;
-
-  if (!chat || !textarea)
-    return alert("chat broken");
-
-  WSconnect();
-  if (!ws)
-    return;
-
   ws.onclose = () => {
-    alert("connection close");
-    WSconnect();
+    console.log("Chat connection close");
+    retryConnection();
+  }
+
+  ws.onerror = (err) => {
+    console.error(`Chat connection error: ${err}`)
+    ws.close();
   }
 
   //receive msg from back and show on chat
@@ -55,12 +60,9 @@ export function InitConnectionChat() {
       const receivemsg: WSmessage = JSON.parse(event.data);
       console.log("[incoming message]:", receivemsg);
       // check type
-      if (receivemsg.type === "message" || receivemsg.type === "direct_message")
+      if (receivemsg.type === "message" || receivemsg.type === "directMessage")
       {
-        //check Id to set username
-        const username = receivemsg.id;
         //construct message to show on the chat
-        const msgformat = `${username}: ${receivemsg.content}`;
         showMessageToChat(receivemsg);
       }
       if (receivemsg.type === "pong"){
@@ -68,16 +70,39 @@ export function InitConnectionChat() {
         lastPong = Date.now();
       }
       if (receivemsg.type === "readyForDirectMessage"){
-        sendOrQueue(JSON.stringify({id: localStorage.getItem('token'), type: "direct_message", target: receivemsg.id}))
+        sendOrQueue(JSON.stringify({id: localStorage.getItem('token'), type: "directMessage", target: receivemsg.id}))
       }
     } catch (err) {
       alert("error : "+ err);
     }
   });
 
+}
+
+
+// setup connection chat
+export function InitConnectionChat() {
+
+  // get the chat box
+  const chat = document.getElementById("chat-content");
+  // get the chat input
+  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+  if (!chat || !textarea)
+    return alert("chat broken");
+
+  WSconnect();
+
+  //call sendChatMessage with Enter key
+  textarea.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendChatMessage();
+    }
+  });
+  (window as any).sendChatMessage = sendChatMessage;
+
   //ping pong
   setInterval(() => {
-
     const ping: WSmessage = {id: localStorage.getItem("token"), type: "ping"}
     ws.send(JSON.stringify(ping));
   }, 15000);
@@ -87,18 +112,15 @@ export function InitConnectionChat() {
       WSconnect();
     }
   }, 5000);
-
-  textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendChatMessage();
-    }
-  });
-  (window as any).sendChatMessage = sendChatMessage;
 }
 
 
-
+/**
+ * Show receive message to the chat
+ * @param message @type
+ * 
+ * @returns 
+ */
 function showMessageToChat(message: WSmessage): boolean {
   
   const chat = document.getElementById("chat-content");
@@ -111,7 +133,8 @@ function showMessageToChat(message: WSmessage): boolean {
   let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
   const para = document.createElement('p');
   
-  if (message.type == "direct_message"){
+  if (message.type == "directMessage"){ // <====   For direct message
+
     // setup username
     para.className = 'text-pink-400';
     const userLink = document.createElement('span');
@@ -125,12 +148,15 @@ function showMessageToChat(message: WSmessage): boolean {
     para.appendChild(userLink);
     para.appendChild(messageText);
   }
-  else if (message.id === "server"){
+  else if (message.id === "server"){ // <====     For Server message
+
+    // setup server text
     para.className = 'text-red-500 font-bold text-center';
     const node = document.createTextNode(message.content);
     para.appendChild(node);
   }
-  else {
+  else { // <====     For regular message
+
     // setup username
     const userLink = document.createElement('span');
     userLink.onclick = () => {goToURL(`profile/${message.id}`)};
@@ -163,25 +189,35 @@ function waitForSocketConnection(socket, send: Function) {
     }, 5);
 }
 
+
 function sendOrQueue(message: string) {
   if (ws.readyState === WebSocket.OPEN)
     ws.send(message);
-  else
+  else{
+    console.log('connection not ready');
     waitForSocketConnection(ws, () => { ws.send(message); })
+  }
 }
 
+/**
+ * Send message to the chat
+ * - can send Direct messgage with /msg commands
+ * @example
+ * /msg [username1,username2,...] Hello World !
+ */
 function sendChatMessage() {
+  
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-  if (!textarea || !textarea.value) {
-    return;
-  }
-
+  if (!textarea || !textarea.value)
+      return;
+  // check commands
   if (textarea.value.startsWith('/'))
   {
     let command = textarea.value.split(" ")[0];
     command = command.slice(1);
     const args = textarea.value.slice(1).trim().split(' ');
 
+    // Direct Message command
     if (command === 'msg')
     {
       const targets = args[1].split(',');
@@ -194,7 +230,7 @@ function sendChatMessage() {
       for (let client of targets)
       {
         msg.target = client;
-        sendOrQueue(JSON.stringify(msg));
+        sendOrQueue(JSON.stringify(msg));// <=== send message
       }
     }
   }
@@ -206,10 +242,17 @@ function sendChatMessage() {
       content: textarea.value
     };
     textarea.value = "";
-    sendOrQueue(JSON.stringify(msg));
+    sendOrQueue(JSON.stringify(msg));// <=== send message
   }
 }
 
+/**
+ * Send a Status of the actuel Websocket connection
+ * - when is register/login
+ * - when is logout
+ * - when their update there infos
+ * - when a new Websocket connection is made
+ */
 export function sendStatusMessage()
 {
   const msg: WSmessage =  {

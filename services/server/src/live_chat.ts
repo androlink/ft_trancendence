@@ -3,6 +3,7 @@ import { FastifyInstance } from "fastify";
 import db from "./database"
 import { send } from "process";
 import server from "./server";
+import { Console } from "console";
 
 /**
  * Interface Message
@@ -63,7 +64,6 @@ function DirectMessage( message:WSmessage, connection: any)
 {
   for (let msg of listOfMsg)
   {
-    console.log('==================\n', message, '\n', msg,'\n==================');
     if (message.id === msg.target && message.target === msg.id)
     {
       connection.send(JSON.stringify(msg));
@@ -81,6 +81,20 @@ function getClientById(id: number): WSClient | null {
   return pair ? pair[1] : null;
 }
 
+function getClientByUsername(username: string): WSClient | null {
+ // check if the sender is on the list
+  const pair = Array
+    .from(connectedClients.entries())
+    .find(([ws, client]) => client._username == username);
+  return pair ? pair[1] : null;
+}
+
+/**
+ * process incoming message from the client
+ * @param msg Message of the Sender
+ * @param connection Websocket of the Sender 
+ * @returns 
+ */
 function Message(msg: WSmessage, connection: any)
 {
   let sender_id: number | undefined;
@@ -92,7 +106,7 @@ function Message(msg: WSmessage, connection: any)
         connection.send(JSON.stringify({
         id: 'server',
         type: "message",
-        content: "not connected",
+        content: "You are not connected",
       }));
       return;
     }
@@ -101,47 +115,59 @@ function Message(msg: WSmessage, connection: any)
     connection.send(JSON.stringify({
       id: 'server',
       type: "message",
-      content: "not connected",
+      content: "You are not connected",
     }));
     return;
   }
-  const client: WSClient | null = getClientById(sender_id);
-  if (!client) {
+
+  const senderClient: WSClient | null = getClientById(sender_id);
+  if (!senderClient) {
     connection.send(JSON.stringify({id: 'server',
       type: "message", 
-      content: "user not connected"}));
+      content: "You are not connected"}));
     return;
   }
+
+
   if (msg.type === "message")
   {
-    if (msg.content != null)
+    if (msg.content != null && msg.content.length != 0)
     {
-      const newMsg = { id: client._username!, type: "message", content: msg.content};
+      const newMsg = { id: senderClient._username!, type: "message", content: msg.content};
   
-      if (!msg.target || msg.target === "all")
+      if (!msg.target || msg.target === "all") // <== Check for public message
       {
         connectedClients.forEach((cl:WSClient) => cl._socket.send(JSON.stringify(newMsg)));
         return;
       }
-      for (let [sock, cl] of connectedClients) {
-        if (cl._username === msg.target)
-        {
-          const newDirectMsg = {id: client._username!, type: "direct_message", target: msg.target, content: msg.content}
-          listOfMsg.add(newDirectMsg);
-          const query = {id: client._username, type: "readyForDirectMessage"};
-          console.log("[sending]", query)
-          sock.send(JSON.stringify(query));
+      else { // <==   Check for direct message
+
+        // check if the client exist in the database
+        const row = db.prepare("SELECT username FROM users WHERE username = ? -- chat on message").get(msg.target);
+        if (!row){
+          connection.send(JSON.stringify({id: 'server', type: "message", content: `${msg.target} doesn't exist`}));
           return;
         }
+        // check if the client is connected
+        const targetClient = getClientByUsername(msg.target)
+        if (!targetClient){
+          connection.send(JSON.stringify({id: 'server', type: "message", content: `${msg.target} is not connected`}));
+          return;
+        }
+        const newDirectMsg = {id: senderClient._username!, type: "directMessage", target: targetClient?._username, content: msg.content}
+        listOfMsg.add(newDirectMsg);     
+        const query = {id: senderClient._username, type: "readyForDirectMessage"};
+        console.log("[sending]", query)
+        
+        targetClient._socket.send(JSON.stringify(query));
       }
-      connection.send(JSON.stringify({id: 'server', type: "message", content: msg.target + " not connected or doesn't exist"}));
     }
     else
       console.error("error : no message content");
   }
-  else if (msg.type === "direct_message")
+  else if (msg.type === "directMessage")
   {
-    msg.id = client._username!;
+    msg.id = senderClient._username!;
     DirectMessage(msg, connection);
   }
 }
@@ -156,7 +182,7 @@ function PingUser(connection:any)
   connection.send(JSON.stringify(response))
 }
 
-function ConnectionUser(msg: WSmessage, socket: any){
+function ConnectionStatusUser(msg: WSmessage, socket: any){
   
   let sender = null;
   try {
@@ -189,7 +215,7 @@ function ConnectionUser(msg: WSmessage, socket: any){
         {
           if (sock != socket &&  cl._id != null && cl._id === sender)
           {
-            console.log(cl._username, "got deleted");
+            console.log(cl._username, " got deleted");
             connectedClients.delete(sock);
           }
         }
@@ -210,7 +236,6 @@ function ConnectionUser(msg: WSmessage, socket: any){
       console.error("Error : ", err);
   }
 }
-
 
 
 export default function liveChat(fastify: FastifyInstance){
@@ -235,6 +260,7 @@ export default function liveChat(fastify: FastifyInstance){
   fastify.get('/api/chat', { websocket: true }, (connection, req) => {
     connection.on("message", (event) => {
       try {
+        console.log(`${connectedClients.size}`);
         const msg: WSmessage = JSON.parse(event.toString());
         console.log({
             messageType: msg.type,
@@ -242,12 +268,12 @@ export default function liveChat(fastify: FastifyInstance){
             target: msg.target,
             content: msg.content,
           });
-        if (msg.type === "message" || msg.type === "direct_message")
+        if (msg.type === "message" || msg.type === "directMessage")
           Message(msg, connection);
         if (msg.type === "ping")
           PingUser(connection);
         if (msg.type === "connection")
-          ConnectionUser(msg, connection);
+          ConnectionStatusUser(msg, connection);
       }
       catch (err)
       {
