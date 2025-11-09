@@ -34,11 +34,11 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     const statement2 = db.prepare<{targetId: Id}, {time: string, winner: string, loser: string}>("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = :targetId OR loser = :targetId");
     fastifyInstance.get<{Querystring: {user: string}}>('/history', (req, reply) => {
       let target = req.query.user;
-      if (!target) return reply.send([]);
+      if (target === undefined) return reply.send([]);
       const row = statement1.get({target});
       if (!row) return reply.send([]);
       let arr = statement2.all({targetId: row.id});
-      arr = arr.sort((a, b) => a.time > b.time ? 1 : -1);
+      arr = arr.sort((a, b) => a.time < b.time ? 1 : -1);
       return reply.send(arr.slice(0, 100));
     });
   }

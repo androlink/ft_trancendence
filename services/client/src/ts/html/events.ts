@@ -563,6 +563,26 @@ export function setCtrlEventUsername(): void {
         ).catch(err => alert('Caught: ' + err));
       }
     }
+    
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      const buttons = document.getElementById("inner-buttons");
+      if (!buttons)
+        return;
+      const checked = buttons.querySelector("[data-checked]");
+      let target: Element;
+      if (checked) {
+        target = e.key === 'ArrowLeft' ? checked.previousElementSibling : checked.nextElementSibling;
+        if (target === null)
+          target = e.key === 'ArrowLeft' ? buttons.lastElementChild : buttons.firstElementChild;
+      } else {
+        target = e.key === 'ArrowLeft' ? buttons.firstElementChild : buttons.lastElementChild;
+      }
+      if (target !== null && target instanceof HTMLElement){
+        target.click();
+        e.preventDefault();
+      }
+      return;
+    }
   })
 
   const app = document.getElementById("app");

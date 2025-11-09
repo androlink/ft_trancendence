@@ -165,7 +165,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
           "profile-picture": `${assetsPath}/pfp/${row.pfp}`,
           "friend request": friend, "blocking request": block,
           wins: String(row.wins), loses: String(row.losses),
-          ratio: String((row.wins / row.losses).toFixed(2)),
+          ratio: row.losses ? String((row.wins / row.losses).toFixed(2)) : '¯\\_(ツ)_/¯',
         },
         title: row.username, inner: "Profile2",
       });

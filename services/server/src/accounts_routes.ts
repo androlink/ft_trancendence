@@ -33,7 +33,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       for (const field of requiredFields) {
         if (!Object.hasOwn(req.body, field))
           return reply.code(401).send({success: false, message: `query ${field} missing`});
-        if (presenceOnly || req.user.admin)
+        if (presenceOnly || (req.user && req.user.admin))
           continue ;
         if (typeof req.body[field] !== "string")
           return reply.code(401).send({success: false, message: MSG.MUST_BE_STR(field)});
