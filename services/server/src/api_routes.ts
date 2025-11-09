@@ -101,6 +101,17 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     });
   });
 
+  fastifyInstance.get('/friends', { onRequest: needConnection }, (req, reply) => {
+    return reply.send({
+      template: "Home",
+      replace: {"username-p1": req.user.username, "biography-p1": req.user.bio,
+        "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`
+      },
+      title: MSG.FRIENDS(),
+      inner: "Friend",
+    });
+  });
+
   {
     /** get all the infos for the user searched */
     const statement1 = db.prepare<{username: string}, {bio: string, pfp: string, id: Id, username: string, wins: number, losses: number}>('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS losses FROM users u WHERE lower(username) = lower(:username)');

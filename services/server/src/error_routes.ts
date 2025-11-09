@@ -16,6 +16,8 @@ import MSG from './messages_collection.js'
 // it's collossal but this way it's gonna always have something to send
 //
 // It's mainly used by Nginx when it fails to treat the request
+// I think i might set it in another Docker
+// So it's another service, and it's no longer accessible from user perspective
 
 export async function errorRoutes(fastifyInstance: FastifyInstance) {
   

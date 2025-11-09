@@ -27,6 +27,7 @@ export default {
   UN_FRIEND: () => "enlever des amis",
   REQUEST_FRIEND: () => "demander en ami ?",
   ACCEPT_FRIEND: () => "accepter la demande d'ami",
+  FRIENDS: () => "Amis",
   BLOCK: () => "bloquer ?",
   UN_BLOCK: () => "débloquer ?",
   NO_FILE: () => "Pas de fichiers reçus",

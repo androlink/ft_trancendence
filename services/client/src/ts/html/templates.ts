@@ -12,6 +12,7 @@ const htmlSnippetsTemplate:  {
   readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
+  readonly Friend: string;
   readonly Pdf: string;
   readonly Login: string;
   readonly Blank: string;
@@ -44,6 +45,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('blank')" name="blank">debug</div>
     <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
+    <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
   </span>
   <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
     <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
@@ -75,10 +77,10 @@ const htmlSnippetsTemplate:  {
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
       <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
-        <img id="profile-picture" class="pointer-events-auto size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
+        <img id="profile-picture" class="pointer-events-auto aspect-square size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
         <div id="pfp-preview-div" hidden class="relative">
           <p class="bg-gray-400 border px-1 top-2 rounded absolute">[[preview]]</p>
-          <img id="pfp-preview" class="rounded-full size-40" />
+          <img id="pfp-preview" class="rounded-full aspect-square size-40" />
         </div>
         <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
         <label for="pfp-input" class="pointer-events-auto cursor-pointer bg-white rounded border border-gray-600 size-fit px-1" >[[upload image]]</label>
@@ -110,7 +112,6 @@ const htmlSnippetsTemplate:  {
       </form>
     </span>
   </div>
-
   `,
   Profile2:
     `
@@ -165,6 +166,22 @@ const htmlSnippetsTemplate:  {
       </tbody>
     </table>
   </div>
+  `,
+  Friend: `
+    <div class="bg-gray-800 rounded-2xl size-full overflow-hidden flex flex-col">
+      <div id="friends-grid" class="grow grid grid-cols-4 grid-rows-4">
+      <p class="col-span-full row-span-full m-auto text-white">it should load soon</p>
+      </div>
+      <script>
+        loadFriendsDisplay();
+        document.currentScript?.remove();
+      </script>
+      <span id="friends-span" class="px-3 h-15 py-2 relative border-3 border-y-gray-950">
+        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute left-0 rotate-180 cursor-pointer" onclick="moveFriendsDisplay(-1)"/>
+        <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
+        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
+      </span>
+    </div>
   `,
   Pdf:
     `
@@ -297,5 +314,5 @@ export function findLanguage(name: string) {
   let language = localStorage.getItem('language');
   if (language === null || !Object.hasOwn(handled, language)) language = 'en';
   if (Object.hasOwn(handled[language], name)) return handled[language][name];
-  return "translation not found";
+  return `translation not found => "${name}"`;
 }

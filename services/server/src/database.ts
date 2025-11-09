@@ -33,7 +33,7 @@ import db from './database.js'
  * init the db if not exists already
  */
 export async function launchDB() {
-  const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ? -- lauching program")
+  const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?")
     .get('users');
   if (row)
     return ;

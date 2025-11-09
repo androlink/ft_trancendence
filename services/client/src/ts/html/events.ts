@@ -1,9 +1,9 @@
 
 
-import { goToURL, keyExist, resetReconnectTimer } from "../utils.js";
+import { encodeURIUsername, goToURL, keyExist, resetReconnectTimer } from "../utils.js";
 import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
 import { main } from "../app.js";
-import { InitConnectionChat, sendStatusMessage} from "../chat.js";
+import { sendChatMessage, sendStatusMessage } from "../chat.js";
 
 /**
  * set all the events that the page need to work properly
@@ -33,7 +33,6 @@ export function setEvents(): void {
     }
   }
 }
-
 
 /**
  * it will try to write the error on the last child of the element if named "error-handler.
@@ -188,6 +187,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
       return;
     const formData = new FormData(form);
     try {
+      const username = formData.get('username') as string;
       const response = await fetch('/update', {
         method: 'PUT',
         headers: {
@@ -195,7 +195,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
           "Authorization": `Bearer ${localStorage.getItem("token")}`
         },
         body: new URLSearchParams({
-          username: formData.get('username') as string,
+          username: username,
           biography: formData.get('biography') as string,
         }),
       });
@@ -207,7 +207,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
         return ;
       }
-      goToURL(`profile/${formData.get('username') as string}`);
+      goToURL(`profile/${encodeURIUsername(username)}`);
     } catch (error) {
       displayErrorOrAlert(form, String(error));
     }
@@ -252,7 +252,7 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
       }
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value"))
-        goToURL(`profile/${elem.getAttribute("value")}`);
+        goToURL(`profile/${encodeURIUsername(elem.getAttribute("value"))}`);
       else
         goToURL( );
     } catch (error) {
@@ -304,7 +304,7 @@ function setClickEventProfile(text: HTMLElement): void {
     return ;
   const username: string = usernameElem.getAttribute("value");
   text.addEventListener("click", (event: PointerEvent) => 
-    goToURL(`profile/${username}`)
+    goToURL(`profile/${encodeURIUsername(username)}`)
   );
 }
 
@@ -371,14 +371,10 @@ function setClickEventFriendRequest(text: HTMLElement): void {
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
-  InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      if (textarea && textarea.value) {
-        sendMessage(textarea.value);
-        textarea.value = "";
-      }
+      sendChatMessage();
     }
   });
 }
@@ -417,6 +413,11 @@ export function sendMessage(...args: any[]): boolean {
   if (scroll) {
     chat.scrollTop = chat.scrollHeight;
   }
+  if (chat.childElementCount > 1000) {
+    // we have to remove by an even (% 2) amount due to CSS even and odd colors 
+    chat.firstElementChild?.remove();
+    chat.firstElementChild?.remove();
+  }
   return scroll;
 }
 self["sendMessage"] = sendMessage;
@@ -438,7 +439,7 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === 'Enter' && textarea.value) {
       event.preventDefault();
-      goToURL(`profile/${textarea.value}`, true);
+      goToURL(`profile/${encodeURIUsername(textarea.value)}`, true);
       textarea.value = "";
       clearSibling();
     }
@@ -448,27 +449,38 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
       clearSibling();
     }
   });
+  let searchController: AbortController | null = null;
   textarea.addEventListener("input", async (e) => {
     textarea.value = Array.from(textarea.value.matchAll(/[0-9a-zA-Z_:]/g), (m) => m[0]).join("");
     try {
-      const res = await fetch("/misc/users?start=" + textarea.value);
+      if (searchController) searchController.abort(); // cancel previous request
+      searchController = new AbortController();
+      const res = await fetch(`/misc/users?start=${textarea.value}`, {
+        signal: searchController.signal
+      });
       const json = await res.json();
       const div = clearSibling();
       if (!div) return;
       if (json[0]) first = json[0].username;
+      const fragment = document.createDocumentFragment();
       for (let user of json) {
-        div.innerHTML +=
-          `<span onclick="goToURL('/profile/${user.username}', true)" class="flex flex-row cursor-pointer *:my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400">
-            <img class="size-5 rounded-full" src="${assetsPath}/pfp/${user.pfp}"/>
-            <p>${user.username}</p>
-          <span>
-          `;
+        const span = document.createElement("span");
+        span.className = "flex flex-row cursor-pointer my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400";
+        span.addEventListener("pointerdown", () => goToURL(`/profile/${encodeURIUsername(user.username)}`, true));
+        const img = document.createElement("img");
+        img.className = "size-5 rounded-full";
+        img.src = `${assetsPath}/pfp/${user.pfp}`;
+        const p = document.createElement("p");
+        p.textContent = user.username;
+        span.append(img, p);
+        fragment.appendChild(span);
       }
+      div.innerHTML = "";
+      div.appendChild(fragment);
     }
     catch (err) {};
   });
   textarea.addEventListener("blur", async () => {
-    await new Promise(r => setTimeout(r, 100));
     clearSibling();
   });
 }
@@ -504,29 +516,6 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
   });
 }
 
-function loadGameHistory() {
-  const tr = document.getElementById("history-tbody");
-  let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
-  if (!tr || !username)
-    return ;
-  tr.innerHTML = "";
-  fetch(`/misc/history?user=${username}`)
-    .then(res => res.json())
-    .then(json => {
-    if (!json.length) tr.innerHTML += `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td>${findLanguage("never played")}</td></tr>`;
-    for (let game of json)
-      tr.innerHTML += `
-        <tr class="*:border *:border-gray-300 *:text-center">
-          <td ${game.winner !== null ? `${game.winner !== username ? `class="cursor-pointer" onclick="goToURL('/profile/${game.winner}')` : ""}">${game.winner}`: `class="text-red-400">${findLanguage("deleted")}`}</td>
-          <td ${game.loser !== null ? `${game.loser !== username ? `class="cursor-pointer" onclick="goToURL('/profile/${game.loser}')`: ""}">${game.loser}`: `class="text-red-400">${findLanguage("deleted")}`}</td>
-          <td>${game.time}</td>
-        </tr>
-        `;
-    })
-    .catch((err) => console.error(err));
-}
-self["loadGameHistory"] = loadGameHistory;
-
 /**
  * Used at the start of the app-launching, to keyboard shortcut
  * - control K will select (if present) the user-search
@@ -556,7 +545,7 @@ export function setCtrlEventUsername(): void {
       e.preventDefault();
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value")) {
-        goToURL(`profile/${elem.getAttribute("value")}`);
+        goToURL(`profile/${encodeURIUsername(elem.getAttribute("value"))}`);
         return ;
       }
       goToURL('profile');

@@ -37,7 +37,7 @@ export async function main(force = false, requests = true): Promise<void> {
     return;
   }
   {
-    // if you want to have headers, make a new fetch
+    // if you want to have headers, make a new fetch -geymat
     let {headers, ...rest} = data;
     last = rest;
   }
@@ -112,7 +112,9 @@ async function fetchApi(): Promise<ServerResponse> {
 function changeSnippet(elem: HTMLElement, template: string): boolean {
   if (!keyExist(htmlSnippets, template)) {
     elem.innerHTML = "";
-    elem.innerText = `Snippet ${template} not Found in template.js`;
+    if (elem.className.indexOf("text-white") === -1)
+      elem.className += " text-white";
+    elem.innerText = `Snippet ${template} not Found in template.js\nIf you didn't traficate your front-end files, consider refreshing and then calling @geymat, @gcros or @sjean`;
     return false;
   }
   elem.innerHTML = htmlSnippets[template];
@@ -136,7 +138,7 @@ function toggleButtons(parent: HTMLElement) {
   for (let i = 0; i < elements.length; i++) {
     const name = elements[i].getAttribute("name");
     elements[i].toggleAttribute("data-checked",
-      name !== null && (`/${name}` === location.pathname));
+      name !== null && (`/${name}` === location.pathname + location.search));
   }
 }
 

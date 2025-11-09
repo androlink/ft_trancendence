@@ -32,19 +32,14 @@ function WSconnect()
 }
 // setup connection chat
 export function InitConnectionChat() {
-  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-  const chat = document.getElementById("chat-content");
-  let lastPong;
-
-  if (!chat || !textarea)
-    return alert("chat broken");
+  let lastPong: ReturnType <typeof Date.now>;
 
   WSconnect();
   if (!ws)
     return;
 
   ws.onclose = () => {
-    sendMessage("connection close");
+    console.log("connection close");
     WSconnect();
   }
 
@@ -62,7 +57,7 @@ export function InitConnectionChat() {
         sendMessage(msgformat);
       }
       if (receivemsg.type === "pong"){
-        sendMessage("pong");
+        console.log("pong");
         lastPong = Date.now();
       }
     } catch (err) {
@@ -78,26 +73,19 @@ export function InitConnectionChat() {
   }, 15000);
   setInterval(() => {
     if (Date.now() - lastPong > 30000){
-      sendMessage("chat connection lost");
+      console.log("chat connection lost");
       WSconnect();
     }
   }, 5000);
-
-  textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendChatMessage();
-    }
-  });
   (window as any).sendChatMessage = sendChatMessage;
 }
 
 
-function waitForSocketConnection(socket, send: Function) {
+function waitForSocketConnection(socket: WebSocket, send: Function) {
   setTimeout(
     function () {
       if (socket.readyState === 1) {
-        sendMessage("Connection is made");
+        console.log("Connection is made");
         send();
       } else {
         waitForSocketConnection(socket, send);
@@ -112,7 +100,7 @@ function sendOrQueue(message: string) {
     waitForSocketConnection(ws, () => { ws.send(message); })
 }
 
-function sendChatMessage() {
+export function sendChatMessage() {
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
   if (!textarea || !textarea.value) {
     return;
@@ -132,6 +120,6 @@ export function sendStatusMessage()
     id: localStorage.getItem("token"),
     type: "connection",
   };
-  sendMessage("Websocket status changed...")
+  console.log("Websocket status changed...")
   sendOrQueue(JSON.stringify(msg));
 }

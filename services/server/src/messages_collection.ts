@@ -5,7 +5,7 @@ import es from "./languages/es"
 /**
  * creates strings according to the translations in the files in /language
  * @param {string} NAME name of the translation
- * @param  {...string} args substring to set inside the translatins
+ * @param  {...any} args substring to set inside the translatins
  * @returns an object containing the strings created or error message string
  */
 export function search_languages_packs(NAME: string, ...args: any[]){
@@ -49,6 +49,7 @@ export default {
   UN_FRIEND_REQUEST: () => search_languages_packs("UN_FRIEND_REQUEST"),
   UN_FRIEND: () => search_languages_packs("UN_FRIEND"),
   UN_BLOCK: () => search_languages_packs("UN_BLOCK"),
+  FRIENDS: () => search_languages_packs("FRIENDS"),
   BLOCK: () => search_languages_packs("BLOCK"),
   REQUEST_FRIEND: () => search_languages_packs("REQUEST_FRIEND"),
   ACCEPT_FRIEND: () => search_languages_packs("ACCEPT_FRIEND"),

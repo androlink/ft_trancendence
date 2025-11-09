@@ -4,12 +4,12 @@ import fastifyJWT from '@fastify/jwt';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart'
 import fastifyWebSocket from "@fastify/websocket";
-import { JwtUserPayload } from './types';
+import { JwtUserPayload, Id } from './types';
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: JwtUserPayload   // payload type used when signing
-    user: JwtUserPayload      // request.user type after verify
+    payload: Id;
+    user: JwtUserPayload;
   }
 }
 
@@ -22,7 +22,6 @@ export default function () {
     bodyLimit: 100485760,
     routerOptions: {
       ignoreTrailingSlash: true,
-      ignoreDuplicateSlashes: true
     }
   });
 

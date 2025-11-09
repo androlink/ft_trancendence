@@ -1,7 +1,7 @@
 
 import { main } from "./app.js"
 import { sendMessage, setCtrlEventUsername } from "./html/events.js";
-import { sendStatusMessage } from "./chat.js";
+import { InitConnectionChat, sendStatusMessage } from "./chat.js";
 import { selectLanguage } from "./html/templates.js";
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
@@ -27,7 +27,7 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
 
   if (!nextURL.startsWith('/'))
     nextURL = `/${nextURL}`;
-  if (!force && location.pathname === nextURL)
+  if (!force && location.pathname + location.search === nextURL)
     return false;
   history.pushState({page: ""}, "", nextURL);
   await main(true);
@@ -39,7 +39,7 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener('popstate', () => main());
+  self.addEventListener('popstate', () => main(true));
 };
 
 //----------------------------------------------------------------------------#
@@ -105,10 +105,11 @@ export function launchSinglePageApp(): void {
     "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
     "(example: a popup saying you are disconnected even tho you are not)\n" +
     "This been said, have fun breaking the website");
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     setArrowButton();
-    main().catch(err => console.error(err));
+    await main();
     setCtrlEventUsername();
+    InitConnectionChat();
   });
 }
 
@@ -119,6 +120,10 @@ export function launchSinglePageApp(): void {
  */
 export function keyExist(object: object, key: PropertyKey): boolean {
   return Object.hasOwn(object, key);
+}
+
+export function encodeURIUsername(username: string){
+  return encodeURIComponent(username) + (username.length ? "" : "/");
 }
 
 /**
