@@ -389,12 +389,13 @@ export class PongGameManager
 	state: "pause" | "wait" | "end" | "run" = "pause";
 	canvas :HTMLCanvasElement | null = null;
 	setting :PongGameManagerDTO;
+	dimFactor: number = 1
 
 	constructor(setting: PongGameManagerDTO)
 	{
 		this.canvas = (document.getElementById("canvas") as HTMLCanvasElement);
-		this.canvas.width = 200;
-		this.canvas.height = 100;
+		this.canvas.width = 200 * this.dimFactor;
+		this.canvas.height = 100 * this.dimFactor;
 		
 		// setup effect
 		this.effect = new Map<string, Function>();
@@ -408,39 +409,6 @@ export class PongGameManager
 		this.board = new PongBoard(this.setting.board.segments);
 		this.teams = this.setting.teams.map(team => {return new PongTeam({...team.toObject(), score: 0})});
 	}
-
-	
-
-	// public generate()
-	// {
-	// 	this.randSeed = Math.random() * (2 ** 31);
-	// 	this.random = new Random(this.randSeed);
-
-	// 	this.board = new PongBoard([
-	// 		{p0: {x: 0, y: 0},p1: {x: 200, y: 0}},
-	// 		{p0: {x: 200, y: 100},p1: {x: 0, y: 100},}
-	// 	]);
-	// 	this.teams = [];
-	// 	var paddle = new PongPaddle({p0: {x: 20, y: 90},p1: {x: 20, y: 10}}, 0.4, 0.05);
-	// 	// var player = new KeyboardPlayer("w", "s") as IPongPlayer;
-	// 	var player = new RandomPlayer(new Random(1001)) as IPongPlayer;
-	// 	var base = new PlayerBase([
-	// 		{p0: {x: 200, y: 0},p1: {x: 200, y: 100}}
-	// 	]);
-	// 	this.teams.push({player: player, paddle: paddle, base: base, score: 0})
-	// 	var paddle = new PongPaddle({p0: {x: 180, y: 10},p1: {x: 180, y: 90}}, 0.4, 0.05);
-	// 	// var player = new KeyboardPlayer("l", "o");
-	// 	var player = new RandomPlayer(new Random(1000)) as IPongPlayer;
-	// 	var base = new PlayerBase([
-	// 		{p0: {x: 0, y: 100},p1: {x: 0, y: 0}}
-	// 	]);
-	// 	this.teams.push({player: player, paddle: paddle, base: base, score: 0})
-
-	// 	this.effect = new Map<string, Function>();
-	// 	this.effect.set("PongBoard", simpleBounce);
-	// 	this.effect.set("PongPaddle", this.pongPaddle_callBack);
-	// 	this.effect.set("PlayerBase", this.playerBase_callBack);
-	// }
 
 	private pongPaddle_callBack = (ball: PongBall, ce: {
     		event: CollideEvent;
@@ -508,6 +476,7 @@ export class PongGameManager
 
 	public update()
 	{
+		this.dimFactor = 5
 		if (this.teams == null || this.board == null || this.balls == null)
 			return ;	
 		for (const team of this.teams)
@@ -532,6 +501,8 @@ export class PongGameManager
 		// 	|| this.board == null
 		// 	|| this.balls == null)
 		// 	return ;
+		this.canvas.width = 200 * this.dimFactor;
+		this.canvas.height = 100 * this.dimFactor;
 		const context = this.canvas.getContext("2d");
 		if (context == null)
 			return ;
@@ -545,9 +516,11 @@ export class PongGameManager
 			score_text += t.score + "|";
 		}
 		context.textAlign = "center";
-		context.font = "20px monospace";
+		context.font = 20 * this.dimFactor + "px monospace";
 		context.fillStyle = "black";
 		context.fillText(score_text, this.canvas.width / 2, this.canvas.height / 2);
+
+		context.scale(this.dimFactor, this.dimFactor);
 		this.board.draw(context);
 		this.balls.forEach((b) => {b.draw(context)})
 		for (const team of this.teams)

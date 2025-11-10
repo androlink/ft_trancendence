@@ -4,12 +4,6 @@ import { PongGameManagerDTO } from "./dto.js";
 
 var pong_game : PongGameManager | null = null;
 var intervalId: number | null = null;
-function newGame() : void
-{
-	clearGame();
-	pong_game = new PongGameManager({});
-	startGame();
-}
 
 function startGame()
 {
@@ -32,6 +26,7 @@ document.getElementById("runConfig")?.addEventListener("click", async (ev) => {
 	try {
 		clearGame();
 		let pongGameDTO = new PongGameManagerDTO(textEditor.value);
+		pongGameDTO = new PongGameManagerDTO(pongGameDTO.toJSON());
 		console.debug("DTO:", pongGameDTO.toJSON());
 		pong_game = new PongGameManager(pongGameDTO);
 		pong_game.startRound();
@@ -76,5 +71,4 @@ document.getElementById("loadConfig")?.addEventListener("click", async (ev) => {
 	}
 })
 
-self["newGame"] = newGame
 self["clearGame"] = clearGame

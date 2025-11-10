@@ -171,7 +171,6 @@ const htmlSnippetsTemplate:  {
   Pong: `
   <div class="size-full flex flex-col">
   		<script  type="module" src="${assetsPath}/pong/main.js"></script>
-		<button class="bg-gray-600 text-red-500 border place-self-start border-gray-400 px-1 rounded" onclick="newGame()">test</button>
 		<canvas class="border border-white aspect-auto" style="image-rendering: pixelated" id="canvas"></canvas>
 		<div>
 		<button class="bg-gray-300 text-gray-800 border place-self-start border-gray-400 px-1 rounded" type="" id="runConfig">[[run config]]</button>

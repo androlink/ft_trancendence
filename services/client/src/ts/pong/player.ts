@@ -26,6 +26,7 @@ export function playerFactory(type: playerType, option: any):IPongPlayer
 
 interface IPongPlayer
 {
+	update();
 	getInput() : CONTROL;
 }
 
@@ -50,6 +51,11 @@ class KeyboardPlayer implements IPongPlayer
 			return CONTROL.RIGHT;
 		return CONTROL.NONE;
 	}
+
+	public update()
+	{
+
+	}
 }
 
 
@@ -67,5 +73,9 @@ class RandomPlayer implements IPongPlayer
 	{
 		return this.random.next() * 10 > 5 ? CONTROL.LEFT : CONTROL.RIGHT
 	}
+		
+	public update()
+	{
 
+	}
 }

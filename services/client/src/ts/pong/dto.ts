@@ -53,7 +53,7 @@ export class PongBoardDTO implements DTO
 	public toObject()
 	{
 		return {
-			segments: this.segments
+			segments: this.segments.map(s => ({p0: s.p0, p1: s.p1}))
 		}
 	}
 
@@ -191,7 +191,7 @@ export class PongGameManagerDTO implements DTO
 		return {
 			balls: this.balls.map(ball => ball.toObject()),
 			seed: this.seed,
-			board: this.board,
+			board: this.board.toObject(),
 			teams: this.teams.map(team => team.toObject())
 		}
 	}
