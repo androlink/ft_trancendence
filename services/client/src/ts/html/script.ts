@@ -46,7 +46,9 @@ function loadGameHistory(): void {
           tr.append(td);
         }
         const td = document.createElement("td");
-        td.textContent = game.time;
+        const time = new Date(game.time);
+        td.textContent = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${time.getDate()}/${time.getMonth() + 1}/${time.getFullYear()}`;
+        td.title = "HH:MM:SS DD/MM/YYYY"
         tr.append(td);
         fragment.appendChild(tr);
       }

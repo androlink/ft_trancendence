@@ -31,7 +31,7 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     /** find id of the user searched */
     const statement1 = db.prepare<{target: string}, {id: Id}>("SELECT id FROM users WHERE lower(username) = lower(:target)");
     /** find all the infos of the user from the id above */
-    const statement2 = db.prepare<{targetId: Id}, {time: string, winner: string, loser: string}>("SELECT time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = :targetId OR loser = :targetId");
+    const statement2 = db.prepare<{targetId: Id}, {time: string, winner: string, loser: string}>("SELECT strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = :targetId OR loser = :targetId");
     fastifyInstance.get<{Querystring: {user: string}}>('/history', (req, reply) => {
       let target = req.query.user;
       if (target === undefined) return reply.send([]);

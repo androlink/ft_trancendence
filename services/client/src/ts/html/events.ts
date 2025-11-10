@@ -314,8 +314,6 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     return ;
   }
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
-  if (!username)
-    return ;
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
       const response = await fetch(`/block?user=${username}`,{
@@ -343,8 +341,6 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     return ;
   }
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
-  if (!username)
-    return ;
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
       const response = await fetch(`/friend?user=${username}`, {

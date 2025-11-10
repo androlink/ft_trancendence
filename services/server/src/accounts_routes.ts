@@ -260,7 +260,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       (req, reply) => {
         let target = req.query.user;
         // line below doesn't need translation, the front should never see it
-        if (!target) {
+        if (target === undefined) {
           return reply.send({success: false, message: "You need to tell the target in the query as example /block?user=AllMighty"});
         }
         if (req.user.username === target) {
@@ -320,7 +320,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       (req, reply) => {
         let target = req.query.user;
         // line below doesn't need translation, the front should never see it
-        if (!target)
+        if (target === undefined)
           return reply.code(401).send({success: false, message: "You need to tell the target in the query as example /friend?user=AllMighty"});
         if (req.user.username === target)
           return reply.code(403).send({success: false, message: MSG.THAT_IS_YOU()});
