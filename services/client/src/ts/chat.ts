@@ -9,23 +9,30 @@ let ws: WebSocket | null;
 /**
  * Interface Message
  * @param type Type of message send (message, ping, etc..).
- * @param id Id of who send the message.
+ * @param user User who send the message.
  * @param target where the message is send (everyone by default) [optional]
  * @param content Content of the message if is necessary [optional]
+ * @param msgId Id of the message (for direct message) [optional]
  */
 interface WSmessage {
   type: string,
-  id: string,
+  user: string | null,
   target?: string | null,
-  content?: string | null
+  content?: string | null,
+  msgId: string | null
 };
 let lastPong: number;
+
+function GenerateRandomId(): string{
+    return Date.now().toString() + Math.random().toString(36).slice(2,8)
+}
+
 
 let reconnectTimeout = 1000;
 function retryConnection() {
   console.log("Retry chat connection");
   setTimeout(WSconnect, reconnectTimeout);
-  reconnectTimeout = Math.min(reconnectTimeout * 2, 10000); 
+  reconnectTimeout = Math.min(reconnectTimeout * 2, 10000);
 }
 
 /**
@@ -34,7 +41,7 @@ function retryConnection() {
 function WSconnect()
 {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-    return; 
+    return;
   }
 
   ws = new WebSocket("/api/chat");
@@ -43,7 +50,7 @@ function WSconnect()
     console.log("WebSocket open");
     sendStatusMessage();
   }
-  
+
   ws.onclose = () => {
     console.log("Chat connection close");
     retryConnection();
@@ -70,7 +77,7 @@ function WSconnect()
         lastPong = Date.now();
       }
       if (receivemsg.type === "readyForDirectMessage"){
-        sendOrQueue(JSON.stringify({id: localStorage.getItem('token'), type: "directMessage", target: receivemsg.id}))
+        sendOrQueue(JSON.stringify({user: localStorage.getItem('token'), type: "directMessage", target: receivemsg.user}))
       }
     } catch (err) {
       alert("error : "+ err);
@@ -103,7 +110,7 @@ export function InitConnectionChat() {
 
   //ping pong
   setInterval(() => {
-    const ping: WSmessage = {id: localStorage.getItem("token"), type: "ping"}
+    const ping: WSmessage = {user: localStorage.getItem("token"), type: "ping", msgId: GenerateRandomId()};
     ws.send(JSON.stringify(ping));
   }, 15000);
   setInterval(() => {
@@ -118,28 +125,28 @@ export function InitConnectionChat() {
 /**
  * Show receive message to the chat
  * @param message @type
- * 
- * @returns 
+ *
+ * @returns
  */
 function showMessageToChat(message: WSmessage): boolean {
-  
+
   const chat = document.getElementById("chat-content");
   if (!chat) {
     console.error(`message '${message}' not sent to the chat because the chat is not found`);
     return false;
   }
-  
+
   // true if at the end of the chat
   let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
   const para = document.createElement('p');
-  
+
   if (message.type == "directMessage"){ // <====   For direct message
 
     // setup username
     para.className = 'text-pink-400';
     const userLink = document.createElement('span');
-    userLink.onclick = () => {goToURL(`profile/${message.id}`)};
-    userLink.textContent = `${message.id}:`;
+    userLink.onclick = () => {goToURL(`profile/${message.user}`)};
+    userLink.textContent = `${message.user}:`;
     userLink.className = 'text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ';
     // setup text
     const messageText = document.createElement('span');
@@ -148,7 +155,7 @@ function showMessageToChat(message: WSmessage): boolean {
     para.appendChild(userLink);
     para.appendChild(messageText);
   }
-  else if (message.id === "server"){ // <====     For Server message
+  else if (message.user === "server"){ // <====     For Server message
 
     // setup server text
     para.className = 'text-red-500 font-bold text-center';
@@ -159,8 +166,8 @@ function showMessageToChat(message: WSmessage): boolean {
 
     // setup username
     const userLink = document.createElement('span');
-    userLink.onclick = () => {goToURL(`profile/${message.id}`)};
-    userLink.textContent = `${message.id}:`;
+    userLink.onclick = () => {goToURL(`profile/${message.user}`)};
+    userLink.textContent = `${message.user}:`;
     userLink.className = 'text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ';
     // setup text
     const node = document.createTextNode(message.content);
@@ -206,7 +213,7 @@ function sendOrQueue(message: string) {
  * /msg [username1,username2,...] Hello World !
  */
 function sendChatMessage() {
-  
+
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
   if (!textarea || !textarea.value)
       return;
@@ -222,9 +229,10 @@ function sendChatMessage() {
     {
       const targets = args[1].split(',');
       const msg: WSmessage =  {
-        id: localStorage.getItem("token"),
+        user: localStorage.getItem("token"),
         type: "message",
-        content: args.slice(2).join(' ')
+        content: args.slice(2).join(' '),
+        msgId: GenerateRandomId()
       };
       textarea.value = "";
       for (let client of targets)
@@ -237,9 +245,10 @@ function sendChatMessage() {
   else
   {
     const msg: WSmessage =  {
-      id: localStorage.getItem("token"),
+      user: localStorage.getItem("token"),
       type: "message",
-      content: textarea.value
+      content: textarea.value,
+      msgId: GenerateRandomId()
     };
     textarea.value = "";
     sendOrQueue(JSON.stringify(msg));// <=== send message
@@ -256,8 +265,9 @@ function sendChatMessage() {
 export function sendStatusMessage()
 {
   const msg: WSmessage =  {
-    id: localStorage.getItem("token"),
+    user: localStorage.getItem("token"),
     type: "connection",
+    msgId: GenerateRandomId()
   };
   console.log("Websocket status changed...")
   sendOrQueue(JSON.stringify(msg));

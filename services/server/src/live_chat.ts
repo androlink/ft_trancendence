@@ -1,22 +1,21 @@
 import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import db from "./database"
-import { send } from "process";
-import server from "./server";
-import { Console } from "console";
 
 /**
  * Interface Message
  * @param type Type of message send (message, ping, etc..).
- * @param id Id of who send the message.
+ * @param user User who send the message.
  * @param target where the message is send (everyone by default) [optional]
  * @param content Content of the message if is necessary [optional]
+ * @param msgId Id of the message (for direct message) [optional]
  */
 interface WSmessage {
   type: string,
-  id: string,
+  user: string,
   target?: string | null,
-  content?: string | null
+  content?: string | null,
+  msgId: string | null
 };
 
 /**
@@ -29,7 +28,7 @@ class WSClient{
   _socket: any;
   _username: string | null;
   _id: number | null;
-  
+
   constructor(client: any, username: any, id: any)
   {
     this._socket = client;
@@ -60,13 +59,30 @@ const connectedClients = new Map<WebSocket, WSClient>();
  */
 const listOfMsg = new Set<WSmessage>();
 
+
+const directMsgTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+
+function GenerateRandomId(): string{
+    return Date.now().toString() + Math.random().toString(36).slice(2,8)
+}
+
+
 function DirectMessage( message:WSmessage, connection: any)
 {
   for (let msg of listOfMsg)
   {
-    if (message.id === msg.target && message.target === msg.id)
+    if (message.user === msg.target && message.target === msg.user)
     {
+      const msgId = message.msgId;
+      if (msgId && directMsgTimers.has(msgId)) {
+        clearInterval(directMsgTimers.get(msgId)!);
+        directMsgTimers.delete(msgId);
+      }
       connection.send(JSON.stringify(msg));
+      const Sender = getClientByUsername(msg.user);
+      if (Sender)
+        Sender._socket.send(JSON.stringify(msg));
       listOfMsg.delete(msg);
       return;
     }
@@ -92,8 +108,8 @@ function getClientByUsername(username: string): WSClient | null {
 /**
  * process incoming message from the client
  * @param msg Message of the Sender
- * @param connection Websocket of the Sender 
- * @returns 
+ * @param connection Websocket of the Sender
+ * @returns
  */
 function Message(msg: WSmessage, connection: any)
 {
@@ -101,10 +117,10 @@ function Message(msg: WSmessage, connection: any)
 
   // get id of the sender
   try {
-    sender_id = (fastify.jwt.decode(msg.id) as {id: number | undefined}).id
+    sender_id = (fastify.jwt.decode(msg.user) as {id: number | undefined}).id
     if (!sender_id) {
         connection.send(JSON.stringify({
-        id: 'server',
+        user: 'server',
         type: "message",
         content: "You are not connected",
       }));
@@ -113,7 +129,7 @@ function Message(msg: WSmessage, connection: any)
   }
   catch (err) {
     connection.send(JSON.stringify({
-      id: 'server',
+      user: 'server',
       type: "message",
       content: "You are not connected",
     }));
@@ -122,8 +138,8 @@ function Message(msg: WSmessage, connection: any)
 
   const senderClient: WSClient | null = getClientById(sender_id);
   if (!senderClient) {
-    connection.send(JSON.stringify({id: 'server',
-      type: "message", 
+    connection.send(JSON.stringify({user: 'server',
+      type: "message",
       content: "You are not connected"}));
     return;
   }
@@ -133,8 +149,8 @@ function Message(msg: WSmessage, connection: any)
   {
     if (msg.content != null && msg.content.length != 0)
     {
-      const newMsg = { id: senderClient._username!, type: "message", content: msg.content};
-  
+      const newMsg = { user: senderClient._username!, type: "message", content: msg.content};
+
       if (!msg.target || msg.target === "all") // <== Check for public message
       {
         connectedClients.forEach((cl:WSClient) => cl._socket.send(JSON.stringify(newMsg)));
@@ -145,20 +161,66 @@ function Message(msg: WSmessage, connection: any)
         // check if the client exist in the database
         const row = db.prepare("SELECT username FROM users WHERE username = ? -- chat on message").get(msg.target);
         if (!row){
-          connection.send(JSON.stringify({id: 'server', type: "message", content: `${msg.target} doesn't exist`}));
+          connection.send(JSON.stringify({user: 'server',
+            type: "message",
+            content: `${msg.target} doesn't exist`,
+            msgId: GenerateRandomId()
+        }));
           return;
         }
         // check if the client is connected
         const targetClient = getClientByUsername(msg.target)
         if (!targetClient){
-          connection.send(JSON.stringify({id: 'server', type: "message", content: `${msg.target} is not connected`}));
+          connection.send(JSON.stringify({
+            user: 'server',
+            type: "message",
+            content: `${msg.target} is not connected`,
+            msgId: GenerateRandomId()
+          }));
           return;
         }
-        const newDirectMsg = {id: senderClient._username!, type: "directMessage", target: targetClient?._username, content: msg.content}
-        listOfMsg.add(newDirectMsg);     
-        const query = {id: senderClient._username, type: "readyForDirectMessage"};
+
+        const newDirectMsg = {
+            user: senderClient._username!,
+            type: "directMessage",
+            target: targetClient?._username,
+            content: msg.content,
+            msgId: msg.msgId
+        };
+
+        listOfMsg.add(newDirectMsg);
+
+        const timeout = setTimeout(() => {
+            try {
+                const waitMsg = Array.from(listOfMsg).entries().find(([index,msg]) => msg.msgId === newDirectMsg.msgId)?.[1];
+                if (waitMsg) {
+
+                    listOfMsg.delete(waitMsg);
+                    const Sender = getClientByUsername(newDirectMsg.user);
+                    if (Sender) {
+                        Sender._socket.send(JSON.stringify({
+                            user: 'server',
+                            type: "message",
+                            content: `${newDirectMsg.target} not responded`,
+                            msgId: GenerateRandomId()
+                        }));
+                    }
+                }
+            }
+            catch (err) {
+                console.error(err);
+            } finally {
+                directMsgTimers.delete(newDirectMsg.msgId!);
+            }
+        }, 15000);
+
+        const query = {
+            user: senderClient._username,
+            type: "readyForDirectMessage",
+            msgId: GenerateRandomId()
+        };
         console.log("[sending]", query)
-        
+
         targetClient._socket.send(JSON.stringify(query));
       }
     }
@@ -167,7 +229,7 @@ function Message(msg: WSmessage, connection: any)
   }
   else if (msg.type === "directMessage")
   {
-    msg.id = senderClient._username!;
+    msg.user = senderClient._username!;
     DirectMessage(msg, connection);
   }
 }
@@ -176,30 +238,31 @@ function Message(msg: WSmessage, connection: any)
 function PingUser(connection:any)
 {
   const response: WSmessage = {
-    id:"server",
-    type:"pong"
+    user:"server",
+    type:"pong",
+    msgId: null
   };
   connection.send(JSON.stringify(response))
 }
 
 function ConnectionStatusUser(msg: WSmessage, socket: any){
-  
+
   let sender = null;
   try {
-      // check the wich client is with the websocket 
+      // check the wich client is with the websocket
       const client = connectedClients.get(socket);
       if (!client){
         console.log("client don't exist");
         return;
-      } 
+      }
       try
       {
         //update id
         // @ts-ignore
-        sender = fastify.jwt.decode(msg.id).id;
+        sender = fastify.jwt.decode(msg.user).id;
         client.setId = sender;
       }
-      catch {sender = null;} 
+      catch {sender = null;}
 
       if (client._id !== null)
       {
@@ -264,7 +327,7 @@ export default function liveChat(fastify: FastifyInstance){
         const msg: WSmessage = JSON.parse(event.toString());
         console.log({
             messageType: msg.type,
-            origin: msg.id,
+            origin: msg.user,
             target: msg.target,
             content: msg.content,
           });
