@@ -564,7 +564,7 @@ export function setCtrlEventUsername(): void {
       }
     }
     
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !isPressed && document.activeElement === document.body) {
       const buttons = document.getElementById("inner-buttons");
       if (!buttons)
         return;
