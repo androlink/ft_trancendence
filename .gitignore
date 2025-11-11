@@ -6,3 +6,4 @@ data
 .*.swp
 *.lock
 js/
+.vscode
