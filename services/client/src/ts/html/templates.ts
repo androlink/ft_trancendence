@@ -241,8 +241,7 @@ const htmlSnippetsTemplate:  {
     `,
   Pong: `
   <div class="size-full flex flex-col">
-  		<script  type="module" src="${assetsPath}/pong/main.js"></script>
-		<button class="bg-gray-600 text-red-500 border place-self-start border-gray-400 px-1 rounded" onclick="newGame()">test</button>
+  		<script  type="module" src="${assetsPath}/pong/pong.js"></script>
 		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
