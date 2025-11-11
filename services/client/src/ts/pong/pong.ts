@@ -1,0 +1,4 @@
+
+
+const dimention = {x: 100, y: 50}
+
