@@ -1,5 +1,5 @@
 
-const assetsPath = `/resources`;
+export const assetsPath = `/resources`;
 const thenMain = `.then(main)`;
 const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
 
@@ -12,6 +12,7 @@ const htmlSnippetsTemplate:  {
   readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
+  readonly Friend: string;
   readonly Pdf: string;
   readonly Login: string;
   readonly Blank: string;
@@ -23,10 +24,12 @@ const htmlSnippetsTemplate:  {
   Home:
     `
   <span class="grid grid-cols-3 mx-8 my-2">
-    <span class="flex justify-self-start">
+    <div class="relative justify-self-start">
       <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
-    </span>
-    <p class="justify-self-center self-center text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
+      <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
+      </div>
+    </div>
+    <p class=" text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -42,10 +45,11 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('blank')" name="blank">debug</div>
     <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
+    <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
   </span>
-  <span class="flex-1 min-h-0 flex gap-x-2 mx-8 mb-8 mt-4 select-none">
-    <div id="inner" class="h-full w-3/4 overflow-hidden"></div>
-    <div class="h-full w-1/4 flex flex-col overflow-hidden">
+  <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
+    <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
+    <div class="h-full flex flex-col overflow-hidden">
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[auto reconnected]]</p>
       </div>
@@ -70,17 +74,28 @@ const htmlSnippetsTemplate:  {
   Profile1:
     `
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
-    <form id="profile-form" class="relative border-4 border-gray-900 rounded-2xl p-3 w-full grow flex flex-col overflow-y-scroll overflow-x-hidden">
+    <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
-      <span class="flex justify-around place-items-center">
-        <input title="username" id="username" value="" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-        <img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
-      </span>
-      <p class="text-white -ml-2">[[biography]]:</p>
-      <textarea title="biography" id="biography" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
-      <button class="place-self-center bg-white rounded size-fit p-1 my-1 mt-auto hover:cursor-pointer" type="submit">[[update]]</button>
-    </form>
-    <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden">
+      <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
+        <img id="profile-picture" class="pointer-events-auto aspect-square size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
+        <div id="pfp-preview-div" hidden class="relative">
+          <p class="bg-gray-400 border px-1 top-2 rounded absolute">[[preview]]</p>
+          <img id="pfp-preview" class="rounded-full aspect-square size-40" />
+        </div>
+        <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
+        <label for="pfp-input" class="pointer-events-auto cursor-pointer bg-white rounded border border-gray-600 size-fit px-1" >[[upload image]]</label>
+        <button title="[[will cause a reload]]"  class="pointer-events-auto bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
+      </form>
+      <form id="profile-form" class="p-3 flex flex-col justify-around size-full overflow-scroll">
+        <input title="username" id="username-p1" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <div class="my-auto">
+          <p class="text-white -ml-2">[[biography]]:</p>
+          <textarea title="biography" id="biography-p1" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
+        </div>
+        <button class="ml-[20%] bg-white rounded size-fit p-1 my-1 cursor-pointer" type="submit">[[update]]</button>
+      </form>
+    </div>
+    <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden flex-none">
       <p class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-amber-900">[[private infos]]</p>
       <form id="change-password-form" class="mt-5">
         <span class="flex gap-5 w-1/2">
@@ -92,24 +107,81 @@ const htmlSnippetsTemplate:  {
         </span>
       </form>
       <form id="delete-account-form" class="mt-5 flex flex-col items-center">
-          <input placeholder="[[confirm username]]" title="username" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-          <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
-        </span>
+        <input placeholder="[[confirm username]]" title="username" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
       </form>
     </span>
   </div>
-
   `,
   Profile2:
     `
-  <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll">
+  <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll relative">
+    <img src="${assetsPath}/arrow-refresh.png" class="absolute size-10 right-3 cursor-pointer hover:animate-spin" onclick="main(true)"/>
     <span class="flex justify-around place-items-center">
-      <h1 class="text-white" id="username"></h1>
-      <img class="size-40 rounded-full" src="${assetsPath}/default-avatar.jpg" draggable="false">
+      <style>
+        .dropdown:hover .dropdown-content {display: flex;}
+      </style>
+      <div class="dropdown relative border px-1 rounded">
+        <h1 class="text-white" id="username-p2"></h1>
+        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit cursor-pointer *:px-1 bg-white *:hover:bg-gray-400">
+          <a id="friend request">friend request</a>
+          <a id="blocking request">block !</a>
+        </div>
+      </div>
+      <img id="profile-picture" class="size-50 rounded-full" src="${assetsPath}/default-avatar.jpg">
     </span>
     <p class="text-white -ml-2">[[biography]]:</p>
-    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography"></p>
+    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography-p2"></p>
+    <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
+      <caption class="caption-bottom">[[remote counter]]</caption>
+      <thead>
+        <tr class="*:border *:border-gray-300 *:text-center">
+          <th class="border border-gray-300" scope="col">[[wins]]</th>
+          <th class="border border-gray-300" scope="col">[[loses]]</th>
+          <th class="border border-gray-300" scope="col">[[w/l ratio]]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="*:border *:border-gray-300 *:text-center">
+          <td id="wins"></td>
+          <td id="loses"></td>
+          <td id="ratio"></td>
+        </tr>
+      </tbody>
+    </table>
+    <script>
+      loadGameHistory();
+      document.currentScript?.remove();
+    </script>
+    <table class="overflow-y-scroll w-1/2 h-full table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
+      <caption class="caption-bottom">[[remote counter]]</caption>
+      <thead>
+        <tr class="*:border *:border-gray-300 *:text-center">
+          <th scope="col">[[winner]]</th>
+          <th scope="col">[[loser]]</th>
+          <th scope="col">[[date]]</th>
+        </tr>
+      </thead>
+      <tbody id="history-tbody">
+      </tbody>
+    </table>
   </div>
+  `,
+  Friend: `
+    <div class="bg-gray-800 rounded-2xl size-full overflow-hidden flex flex-col">
+      <div id="friends-grid" class="grow grid grid-cols-4 grid-rows-4">
+      <p class="col-span-full row-span-full m-auto text-white">it should load soon</p>
+      </div>
+      <script>
+        loadFriendsDisplay();
+        document.currentScript?.remove();
+      </script>
+      <span id="friends-span" class="px-3 h-15 py-2 relative border-3 border-y-gray-950">
+        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute left-0 rotate-180 cursor-pointer" onclick="moveFriendsDisplay(-1)"/>
+        <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
+        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
+      </span>
+    </div>
   `,
   Pdf:
     `
@@ -164,8 +236,7 @@ const htmlSnippetsTemplate:  {
   `,
   PopUp:
     `
-  <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50">
-    <p class="text-black p-1 text-center">[[pop up]]</p>
+  <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
   </div>
     `,
   Pong: `
@@ -177,7 +248,7 @@ const htmlSnippetsTemplate:  {
   `,
   ErrorMessageHandler:
     `
-  <p name="error-handler" class="text-red-500 font-bold mb-2"></p>
+  <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `
 } as const;
 
@@ -187,11 +258,11 @@ const htmlSnippetsTemplate:  {
 export let htmlSnippets = {} as typeof htmlSnippetsTemplate;
 
 // @ts-ignore
-import en from './languages/en.json' with { type: 'json' };
+import en from '../languages/en.json' with { type: 'json' };
 // @ts-ignore
-import fr from './languages/fr.json' with { type: 'json' };
+import fr from '../languages/fr.json' with { type: 'json' };
 // @ts-ignore
-import es from './languages/es.json' with { type: 'json' };
+import es from '../languages/es.json' with { type: 'json' };
 
 setLanguage();
 
@@ -243,5 +314,5 @@ export function findLanguage(name: string) {
   let language = localStorage.getItem('language');
   if (language === null || !Object.hasOwn(handled, language)) language = 'en';
   if (Object.hasOwn(handled[language], name)) return handled[language][name];
-  return "translation not found";
+  return `translation not found => "${name}"`;
 }

@@ -1,7 +1,7 @@
 import { PongGameManager } from "./core.js"; 
 
 var pong_game : PongGameManager | null = null;
-var intervalId: number | null = null;
+var intervalId: ReturnType<typeof setInterval> | null = null;
 function newGame() : void
 {
 	clearGame();
