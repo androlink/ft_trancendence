@@ -1,0 +1,28 @@
+
+export type TranslatedString<T = string> = T | LanguageObject<T>;
+
+export interface LanguageObject<T = string> {
+  en: T;
+  fr: T;
+  es: T;
+}
+
+export type Id = number | bigint; 
+
+export interface JwtUserPayload {
+  id: Id;
+  username?: string;
+  admin?: number;
+  password?: string;
+  bio?: string;
+  pfp?: string;
+}
+
+export type UserRow = {
+  id: Id;
+  username: string;
+  admin: number;
+  password: string;
+  bio: string;
+  pfp: string;
+}

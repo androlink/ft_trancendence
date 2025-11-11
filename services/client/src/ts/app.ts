@@ -1,7 +1,7 @@
 var exports = {};
-import { htmlSnippets, selectLanguage } from "./templates.js"
+import { htmlSnippets, selectLanguage } from "./html/templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
-import { setEvents } from "./events.js";
+import { setEvents } from "./html/events.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -37,10 +37,12 @@ export async function main(force = false, requests = true): Promise<void> {
     return;
   }
   {
-    // if you want to have headers, make a new fetch
+    // if you want to have headers, make a new fetch -geymat
     let {headers, ...rest} = data;
     last = rest;
   }
+
+  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
   if (keyExist(data, 'title')) {
     document.title = selectLanguage(data.title);
   }
@@ -63,9 +65,10 @@ export async function main(force = false, requests = true): Promise<void> {
   }
   if (keyExist(data, 'headers')) {
     resetReconnectTimer(data.headers.get('x-authenticated'));
-  } else if (!self['isConnected']) {
+  } else if (!localStorage.getItem("token")) {
     resetReconnectTimer('false');
   }
+  if (force && chatInnerHTML) document.getElementById("chat-content")?.insertAdjacentHTML('beforeend', chatInnerHTML);
   setEvents();
 }
 self["main"] = main;
@@ -76,7 +79,11 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`${self.location.origin}/api${self.location.pathname}`);
+    const response = await fetch(`/api${self.location.pathname}`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
+    });
     if (response.status >= 500 && response.status < 600
       || !(response.headers.has('content-type'))
       || !response.headers.get("content-type").startsWith("application/json")) {
@@ -105,19 +112,17 @@ async function fetchApi(): Promise<ServerResponse> {
 function changeSnippet(elem: HTMLElement, template: string): boolean {
   if (!keyExist(htmlSnippets, template)) {
     elem.innerHTML = "";
-    elem.innerText = `Snippet ${template} not Found in template.js`;
+    if (elem.className.indexOf("text-white") === -1)
+      elem.className += " text-white";
+    elem.innerText = `Snippet ${template} not Found in template.js\nIf you didn't traficate your front-end files, consider refreshing and then calling @geymat, @gcros or @sjean`;
     return false;
   }
   elem.innerHTML = htmlSnippets[template];
   const scripts = elem.querySelectorAll('script');
   scripts.forEach(oldScript => {
     const newScript = document.createElement('script');
-    if (newScript.textContent) {
-      newScript.textContent = oldScript.textContent;
-    }
-    [...oldScript.attributes].forEach(attr => {
-      newScript.setAttribute(attr.name, attr.value);
-    });
+    newScript.textContent = oldScript.textContent;
+    [...oldScript.attributes].forEach(attr => newScript.setAttribute(attr.name, attr.value));
     oldScript.parentNode.replaceChild(newScript, oldScript);
   });
   return true;
@@ -133,7 +138,7 @@ function toggleButtons(parent: HTMLElement) {
   for (let i = 0; i < elements.length; i++) {
     const name = elements[i].getAttribute("name");
     elements[i].toggleAttribute("data-checked",
-      name !== null && (`/${name}` === location.pathname));
+      name !== null && (`/${name}` === location.pathname + location.search));
   }
 }
 
@@ -150,6 +155,8 @@ function replaceElements(toReplace: {[key:string]:string | {[language:string]:st
         element.setAttribute("value", selectLanguage(toReplace[key]));
       } else if (element.hasAttribute("srcdoc")) { // for <iframe>
         element.setAttribute("srcdoc", selectLanguage(toReplace[key]));
+      } else if (element.hasAttribute("src")) { // for <iframe>
+        element.setAttribute("src", selectLanguage(toReplace[key]));
       } else if (element.tagName === "TEXTAREA") { // when <br> doesn't work
         element.textContent = selectLanguage(toReplace[key]);
       } else {

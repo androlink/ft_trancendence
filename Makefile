@@ -1,6 +1,8 @@
 DOCKER_COMPOSE = docker compose
 DOCKER_TARGET = Docker-compose-dev.yml
 
+export COMPOSE_BAKE=true
+
 .PHONY: all
 all: start
 
@@ -10,7 +12,7 @@ build:
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) build
 
 .PHONY: start
-start: stop build
+start: build
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
 
 .PHONY: restart
@@ -37,6 +39,10 @@ rm: stop
 prune: stop
 	docker system prune --all --force
 
+.PHONY: repair_vscode
+repair_vscode:
+	@docker exec server cp -r node_modules src
+	@docker exec client cp -r node_modules src
 .PHONY: prod
 prod: prune
 	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"

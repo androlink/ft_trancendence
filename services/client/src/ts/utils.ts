@@ -1,8 +1,8 @@
 
 import { main } from "./app.js"
-import { setCtrlEventUsername } from "./events.js";
-import { setLanguage } from "./templates.js";
-
+import { sendMessage, setCtrlEventUsername } from "./html/events.js";
+import { InitConnectionChat, sendStatusMessage } from "./chat.js";
+import { selectLanguage } from "./html/templates.js";
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
 //----------------------------------------------------------------------------#
@@ -27,10 +27,10 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
 
   if (!nextURL.startsWith('/'))
     nextURL = `/${nextURL}`;
-  if (!force && location.pathname === nextURL)
+  if (!force && location.pathname + location.search === nextURL)
     return false;
   history.pushState({page: ""}, "", nextURL);
-  await main();
+  await main(true);
   return true;
 }
 self["goToURL"] = goToURL;
@@ -39,7 +39,7 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener('popstate', () => main());
+  self.addEventListener('popstate', () => main(true));
 };
 
 //----------------------------------------------------------------------------#
@@ -47,8 +47,6 @@ function setArrowButton() {
 //----------------------------------------------------------------------------#
 
 let reconnectTimer: ReturnType<typeof setTimeout>;
-self["isConnected"] = false;
-
 /**
  * sets a timer to tell you when you're gonna be disconnected soon
  * @param auth the header X-authenticated after a fresh request
@@ -66,27 +64,27 @@ export function resetReconnectTimer(auth: string | null): boolean {
     return false;
   }
 
-  let setVisibility = (id: string, state: boolean) => {
-    const elem = document.getElementById(id);
-    if (elem) elem.toggleAttribute("hidden", !state);
-  };
+  const setVisibility = (id: string, state: boolean): boolean | undefined => 
+    document.getElementById(id)?.toggleAttribute("hidden", !state);
+
   clearTimeout(reconnectTimer);
   setVisibility("account-reconnected", false);
-  if (auth !== 'true') {
+  if (auth === 'false') {
+    localStorage.removeItem("token");
     setVisibility("account-disconnected", true);
-    self["isConnected"] = false;
     return false;
   }
+  localStorage.setItem("token", auth);
   setVisibility("account-disconnected", false);
-  self["isConnected"] = true;
   reconnectTimer = setTimeout(
     () => {
-      fetch('/api')
-        .then(res => {
-          if (resetReconnectTimer(res.headers.get('x-authenticated')))
-            setVisibility("account-reconnected", true);
-        })
-        .catch(() => {}); // if it failed don't bother
+      fetch('/api',
+        {headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`}}
+      ).then(res => {
+        if (resetReconnectTimer(res.headers.get('x-authenticated')))
+          setVisibility("account-reconnected", true);
+      })
+      .catch(() => {}); //if it fails don't bother
     },
     14 * 60 * 1000
   );
@@ -101,27 +99,51 @@ export function resetReconnectTimer(auth: string | null): boolean {
  * launch the SPA at the end of loading
  * and set history control
  */
-export function launchSinglePageApp() {
+export function launchSinglePageApp(): void {
   console.log("Hello dear user.\n" +
     "Just so you know, this website rely heavily on javascript running in the front, " +
     "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
     "(example: a popup saying you are disconnected even tho you are not)\n" +
     "This been said, have fun breaking the website");
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     setArrowButton();
-    main().catch(err => console.error(err));
+    await main();
     setCtrlEventUsername();
+    InitConnectionChat();
   });
-  
 }
 
 /**
  * Check if object has the key to prevent crash,
  * easier to read than native js
- * @param object
- * @param key 
  * @returns Object.hasOwn(object, key);
  */
-export function keyExist(object: object, key: PropertyKey) {
+export function keyExist(object: object, key: PropertyKey): boolean {
   return Object.hasOwn(object, key);
 }
+
+export function encodeURIUsername(username: string){
+  return encodeURIComponent(username) + (username.length ? "" : "/");
+}
+
+/**
+ * delog the front app
+ */
+export async function accountLogOut(): Promise<void> {
+  const token = localStorage.getItem("token");
+  if (token === null)
+    return;
+  try {
+    const res = await fetch("/logout", {method: 'POST'});
+    const json = await res.json();
+    if (json.success)
+    if (res.headers.get("x-authenticated") === 'false'){
+      sendStatusMessage();
+      main();
+      return;
+    }
+  } catch(err) {
+    alert('Caught: ' + err)
+  };
+}
+self["accountLogOut"] = accountLogOut;
