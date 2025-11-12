@@ -3,7 +3,7 @@
 import { encodeURIUsername, goToURL, keyExist, resetReconnectTimer } from "../utils.js";
 import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
 import { main } from "../app.js";
-import { sendChatMessage, sendStatusMessage } from "../chat.js";
+import { sendChatMessage, InitConnectionChat, sendStatusMessage } from "../chat.js";
 
 /**
  * set all the events that the page need to work properly

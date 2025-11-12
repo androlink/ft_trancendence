@@ -211,7 +211,7 @@ function sendOrQueue(message: string) {
  * @example
  * /msg [username1,username2,...] Hello World !
  */
-function sendChatMessage() {
+export function sendChatMessage() {
 
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement | null;
   if (!textarea || !textarea.value)
