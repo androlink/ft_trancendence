@@ -1,4 +1,3 @@
-import { sendMessage } from "./events.js";
 import { goToURL } from "./utils.js";
 
 

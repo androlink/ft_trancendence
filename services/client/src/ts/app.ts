@@ -1,7 +1,7 @@
 var exports = {};
-import { htmlSnippets } from "./templates.js"
+import { htmlSnippets, selectLanguage } from "./html/templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
-import { setEvents } from "./events.js";
+import { setEvents } from "./html/events.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -9,39 +9,50 @@ import { setEvents } from "./events.js";
 interface ServerResponse {
   template?: string,
   title?: string,
-  replace?: {[key: string]: string},
+  replace?:  {[key:string]:string | {[language:string]:string}},
   inner?: string,
   headers?: Headers,
 }
 
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
+let last: ServerResponse | null = null;
 /**
  * The main function of the Single-Page-Application:
  *  - fetch the website infos
  *  - set the UI accordingly
+ * @param force if true change the app even if same as before, default as false
+ * @param requests if false uses the last response received without fetching, default as true (better with force set to true)
  */
-export async function main(): Promise<void> {
+// btw no Syntax Errow throwed if params bad due to function working with 1 and 0 too, as well as "yay" and ""
+export async function main(force = false, requests = true): Promise<void> {
   const app = document.getElementById('app');
   if (!app) {
     console.error('We need an element (preferably a div) with id="app"');
     return;
   }
 
-  const data = await fetchApi();
+  const data = requests ? await fetchApi() : last;
   if (!data) {
     return;
   }
-  if (keyExist(data, 'title')) {
-    document.title = data.title;
+  {
+    // if you want to have headers, make a new fetch -geymat
+    let {headers, ...rest} = data;
+    last = rest;
   }
-  if (keyExist(data, 'template') && data.template !== mainTemplate) {
+
+  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
+  if (keyExist(data, 'title')) {
+    document.title = selectLanguage(data.title);
+  }
+  if (keyExist(data, 'template') && (data.template !== mainTemplate || force)) {
     mainTemplate = data.template;
     mainInner = null;
     changeSnippet(app, data['template']);
   }
   const inner = document.getElementById('inner');
-  if (inner && keyExist(data, 'inner') && data.inner != mainInner) {
+  if (inner && keyExist(data, 'inner') && (data.inner != mainInner || force)) {
     mainInner = data.inner;
     changeSnippet(inner, data['inner']);
   }
@@ -49,12 +60,15 @@ export async function main(): Promise<void> {
   if (parent){
     toggleButtons(parent);
   }
-  if (keyExist(data, "replace")) {
+  if (keyExist(data, 'replace')) {
     replaceElements(data.replace);
   }
   if (keyExist(data, 'headers')) {
     resetReconnectTimer(data.headers.get('x-authenticated'));
+  } else if (!localStorage.getItem("token")) {
+    resetReconnectTimer('false');
   }
+  if (force && chatInnerHTML) document.getElementById("chat-content")?.insertAdjacentHTML('beforeend', chatInnerHTML);
   setEvents();
 }
 self["main"] = main;
@@ -65,7 +79,7 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`${self.location.origin}/api${self.location.pathname}`, {
+    const response = await fetch(`/api${self.location.pathname}`, {
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("token")}`
       }
@@ -98,10 +112,19 @@ async function fetchApi(): Promise<ServerResponse> {
 function changeSnippet(elem: HTMLElement, template: string): boolean {
   if (!keyExist(htmlSnippets, template)) {
     elem.innerHTML = "";
-    elem.innerText = `Snippet ${template} not Found in template.js`;
+    if (elem.className.indexOf("text-white") === -1)
+      elem.className += " text-white";
+    elem.innerText = `Snippet ${template} not Found in template.js\nIf you didn't traficate your front-end files, consider refreshing and then calling @geymat, @gcros or @sjean`;
     return false;
   }
   elem.innerHTML = htmlSnippets[template];
+  const scripts = elem.querySelectorAll('script');
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
+    newScript.textContent = oldScript.textContent;
+    [...oldScript.attributes].forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
   return true;
 }
 
@@ -115,7 +138,7 @@ function toggleButtons(parent: HTMLElement) {
   for (let i = 0; i < elements.length; i++) {
     const name = elements[i].getAttribute("name");
     elements[i].toggleAttribute("data-checked",
-      name !== null && (`/${name}` === location.pathname));
+      name !== null && (`/${name}` === location.pathname + location.search));
   }
 }
 
@@ -124,18 +147,20 @@ function toggleButtons(parent: HTMLElement) {
  * their attribute value, srcdoc or their innertext 
  * @param toReplace toReplace[key] = val — 'key' are the id of the elements selected, 'val' are the new values
  */
-function replaceElements(toReplace: {[key:string]:string}): void {
+function replaceElements(toReplace: {[key:string]:string | {[language:string]:string}}): void {
   for (const key in toReplace) {
     let element = document.getElementById(key);
     if (element) {
       if (element.hasAttribute("value")) { // for <input>
-        element.setAttribute("value", toReplace[key]);
+        element.setAttribute("value", selectLanguage(toReplace[key]));
       } else if (element.hasAttribute("srcdoc")) { // for <iframe>
-        element.setAttribute("srcdoc", toReplace[key]);
+        element.setAttribute("srcdoc", selectLanguage(toReplace[key]));
+      } else if (element.hasAttribute("src")) { // for <iframe>
+        element.setAttribute("src", selectLanguage(toReplace[key]));
       } else if (element.tagName === "TEXTAREA") { // when <br> doesn't work
-        element.textContent = toReplace[key];
+        element.textContent = selectLanguage(toReplace[key]);
       } else {
-        element.innerText = toReplace[key];
+        element.innerText = selectLanguage(toReplace[key]);
       }
     }
   }

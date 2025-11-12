@@ -39,10 +39,6 @@ rm: stop
 prune: stop
 	docker system prune --all --force
 
-.PHONY: prune_full
-prune_full: stop
-	rm -rf data
-	docker system prune --all --force --volumes 
 .PHONY: repair_vscode
 repair_vscode:
 	@docker exec server cp -r node_modules src
