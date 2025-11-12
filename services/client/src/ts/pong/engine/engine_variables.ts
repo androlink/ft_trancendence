@@ -35,7 +35,7 @@ export const players =
  * the ball from the game, only one except if we change the functions
  */
 export const ball = {
-  view: {x: 50, y: 50, size: 3 },
+  view: {x: 50, y: 50, radius: 1.5 },
   speed: {x: 1, y: 0},
   last: players[0],
 } as BallEntity;

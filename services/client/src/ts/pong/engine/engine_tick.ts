@@ -1,5 +1,5 @@
 import { BallEntity, PlayerEntity } from "./engine_interfaces.js";
-import { resetBall, resetPlayer } from "./engine_inits.js";
+import { resetBall } from "./engine_inits.js";
 import { containsBetween } from "./engine_utils.js";
 import GameView from "./engine_variables.js"
 
@@ -11,8 +11,13 @@ import GameView from "./engine_variables.js"
 export function tick(ball: BallEntity, players: PlayerEntity[])
 {
   moveBall(ball);
-  movePlayers(players, ball.view.size);
-  collideWithPlayers(ball, players);
+  movePlayers(players, ball.view.radius * 2);
+  collideWithPlayers(ball, players); 
+  // gonna need to either : 
+  //    cap the speed.x of the ball at the witdh of the paddle
+  //    set a collision detection based on the movement of the ball and not its finishing point
+  // also, need to add a detection of the colision based on the radius of the ball, 
+  // unlike now where it's based on it's single coordinate  
   checkPoints(ball, players);
   console.log(GameView.ball, GameView.players[0], GameView.players[0].TL, GameView.players[1], GameView.players[1].TL)
 }

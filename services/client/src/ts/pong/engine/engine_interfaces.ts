@@ -38,7 +38,7 @@ export interface PlayerEntity {
 export interface BallView {
   x: number;
   y: number;
-  size: number;
+  radius: number;
 }
 
 /**
