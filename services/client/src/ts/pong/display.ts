@@ -1,15 +1,11 @@
-import { DataFrame } from "./data_frame";
-export { PongDisplay }
-
+import { BallView, DataFrame, PlayerView } from "./engine/engine_interfaces.js";
 
 export interface IPongDisplay
 {
 	update(data_frame: DataFrame): void;
 }
 
-
-
-class PongDisplay implements IPongDisplay
+export class PongDisplay implements IPongDisplay
 {
 	canvas: HTMLCanvasElement
 	color:{
@@ -23,7 +19,6 @@ class PongDisplay implements IPongDisplay
 	constructor()
 	{
 		this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-		let ctx = this.canvas.getContext("2d");
 
 		this.color = {
 			paddle: "blue",
@@ -35,53 +30,69 @@ class PongDisplay implements IPongDisplay
 
 	public update(data_frame: DataFrame)
 	{
+		if (this.canvas == null)
+			this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 		let context = this.canvas.getContext("2d");
 
 		this.canvas.width = 100 * this.scale_factor;
-		this.canvas.height = 50 * this.scale_factor;
+		this.canvas.height = 100 * this.scale_factor;
 		context.reset();
 		context.scale(this.scale_factor, this.scale_factor);
 
 		context.fillStyle = this.color.bg;
 		context.fillRect(0, 0, this.canvas.width, this.canvas.height)
-		// display score 1
-		this.displayText(context, data_frame.score_1.toString(), 25, 25, this.color.score);
 
-		// display score 2
-		this.displayText(context, data_frame.score_2.toString(), 75, 25, this.color.score);
+		this.displayScore(context, data_frame.player_1.score, 25, 25);
+		this.displayScore(context, data_frame.player_2.score, 75, 25);
 
 		// display ball
-		this.displayRect(context, data_frame.ball.x, data_frame.ball.y, 5, 5, this.color.ball);
+		this.displayBall(context, data_frame.ball);
 
 		// display player 1
-		this.displayRect(context, 5, data_frame.player_1, 2, 10, this.color.paddle);
+		this.displayPlayer(context, data_frame.player_1);
 
 		// display player 2
-		this.displayRect(context, 95, data_frame.player_2, 2, 10, this.color.paddle);
+		this.displayPlayer(context, data_frame.player_2);
 
 	}
 
-	private displayRect(context: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string | CanvasGradient | CanvasPattern)
+	private displayScore(context: CanvasRenderingContext2D, score: number, x: number, y: number)
 	{
-		context.save();
-		context.translate(x, y);
-		context.beginPath();
-		context.rect(-w/2, -h/2, w, h);
-		context.closePath();
-		context.fillStyle = color;
-		context.fill()
-		context.restore();
+		displayText(context, score.toString(), x, y, this.color.score);
 	}
 
-	private displayText(context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string | CanvasGradient | CanvasPattern)
+	private displayPlayer(context: CanvasRenderingContext2D, playerView: PlayerView)
 	{
-		context.save();
-		context.translate(x, y);
-		context.fillStyle = color;
-		context.textAlign = "center";
-		context.font = "monospace";
-		context.textBaseline = "middle";
-		context.fillText(text, 0, 0);
-		context.restore();
+		displayRect(context, playerView.TL.x, playerView.TL.y, playerView.width, playerView.height, this.color.paddle);
 	}
+
+	private displayBall(context: CanvasRenderingContext2D, ballView: BallView)
+	{
+		displayRect(context, ballView.x, ballView.y, ballView.radius, ballView.radius, this.color.ball);
+	}
+
+}
+
+function displayRect(context: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string | CanvasGradient | CanvasPattern)
+{
+	context.save();
+	context.translate(x, y);
+	context.beginPath();
+	context.rect(0, 0, w, h);
+	context.closePath();
+	context.fillStyle = color;
+	context.fill()
+	context.restore();
+}
+
+function displayText(context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string | CanvasGradient | CanvasPattern)
+{
+	context.save();
+	context.translate(x, y);
+	context.fillStyle = color;
+	context.textAlign = "center";
+	context.font = "monospace";
+	context.textBaseline = "middle";
+	context.fillText(text, 0, 0);
+	context.restore();
 }

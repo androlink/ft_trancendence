@@ -49,3 +49,10 @@ export interface BallEntity {
   last?: PlayerEntity;
   speed: {x: number, y: number};
 }
+
+export interface DataFrame
+{
+	ball: BallView,
+	player_1: PlayerView,
+	player_2: PlayerView
+}
