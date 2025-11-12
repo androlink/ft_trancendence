@@ -29,8 +29,8 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
     nextURL = `/${nextURL}`;
   if (!force && location.pathname + location.search === nextURL)
     return false;
-  history.pushState({page: ""}, "", nextURL);
-  await main(true);
+  history.pushState({}, "", nextURL);
+  window.dispatchEvent(new PopStateEvent('popstate'));
   return true;
 }
 self["goToURL"] = goToURL;

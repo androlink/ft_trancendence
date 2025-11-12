@@ -240,8 +240,12 @@ const htmlSnippetsTemplate:  {
   </div>
     `,
   Pong: `
-  <div class="size-full flex flex-col">
+  <div class="size-full flex flex-col overflow-scroll">
   		<script  type="module" src="${assetsPath}/pong/pong.js"></script>
+      <script>
+        createLocalPong();
+        document.currentScript.remove();
+      </script>
 		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
