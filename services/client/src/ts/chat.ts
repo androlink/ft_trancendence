@@ -66,7 +66,7 @@ function WSconnect()
       const receivemsg: WSmessage = JSON.parse(event.data);
       console.log("[incoming message]:", receivemsg);
       // check type
-      if (receivemsg.type === "message" || receivemsg.type === "directMessage")
+      if (receivemsg.type !== "pong")
       {
         //construct message to show on the chat
         showMessageToChat(receivemsg);
@@ -154,7 +154,10 @@ function showMessageToChat(message: WSmessage): boolean {
     para.appendChild(userLink);
     para.appendChild(messageText);
   }
-  else if (message.user === "server"){ // <====     For Server message
+  else if (message.type == "serverMessage"){ // <====     For Server message
+
+    if (message.content === "You are not connected")
+      goToURL("/profile");
 
     // setup server text
     para.className = 'text-red-500 font-bold text-center';

@@ -62,10 +62,54 @@ const listOfMsg = new Set<WSmessage>();
 
 const directMsgTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
+//UTILS FUNCTIONS ========================================================================================================
 
 function GenerateRandomId(): string{
     return Date.now().toString() + Math.random().toString(36).slice(2,8)
 }
+
+function getClientById(id: number): WSClient | null {
+ // check if the sender is on the list
+  const pair = Array
+    .from(connectedClients.entries())
+    .find(([ws, client]) => client._id == id);
+  return pair ? pair[1] : null;
+}
+
+function getClientByUsername(username: string): WSClient | null {
+ // check if the sender is on the list
+  const pair = Array
+    .from(connectedClients.entries())
+    .find(([ws, client]) => client._username == username);
+  return pair ? pair[1] : null;
+}
+
+function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage)
+{
+  const timeout = setTimeout(() => {
+            try {
+                const waitMsg = Array.from(listOfMsg).entries().find(([index,msg]) => msg.msgId === message.msgId)?.[1];
+                if (waitMsg) {
+
+                    listOfMsg.delete(waitMsg);
+                    Sender._socket.send(JSON.stringify({
+                        user: 'server',
+                        type: "serverMessage",
+                        content: `${message.target} not responded`,
+                        msgId: GenerateRandomId()
+                    }));
+                }
+            }
+            catch (err) {
+                console.error(err);
+            } finally {
+                directMsgTimers.delete(message.msgId!);
+            }
+        }, 15000);
+        directMsgTimers.set(message.msgId as string, timeout);
+}
+
+//MAIN FUNCTIONS =========================================================================================================
 
 
 function DirectMessage( message:WSmessage, connection: any)
@@ -89,21 +133,6 @@ function DirectMessage( message:WSmessage, connection: any)
   }
 }
 
-function getClientById(id: number): WSClient | null {
- // check if the sender is on the list
-  const pair = Array
-    .from(connectedClients.entries())
-    .find(([ws, client]) => client._id == id);
-  return pair ? pair[1] : null;
-}
-
-function getClientByUsername(username: string): WSClient | null {
- // check if the sender is on the list
-  const pair = Array
-    .from(connectedClients.entries())
-    .find(([ws, client]) => client._username == username);
-  return pair ? pair[1] : null;
-}
 
 /**
  * process incoming message from the client
@@ -121,7 +150,7 @@ function Message(msg: WSmessage, connection: any)
     if (!sender_id) {
         connection.send(JSON.stringify({
         user: 'server',
-        type: "message",
+        type: "serverMessage",
         content: "You are not connected",
       }));
       return;
@@ -130,7 +159,7 @@ function Message(msg: WSmessage, connection: any)
   catch (err) {
     connection.send(JSON.stringify({
       user: 'server',
-      type: "message",
+      type: "serverMessage",
       content: "You are not connected",
     }));
     return;
@@ -139,7 +168,7 @@ function Message(msg: WSmessage, connection: any)
   const senderClient: WSClient | null = getClientById(sender_id);
   if (!senderClient) {
     connection.send(JSON.stringify({user: 'server',
-      type: "message",
+      type: "serverMessage",
       content: "You are not connected"}));
     return;
   }
@@ -162,7 +191,7 @@ function Message(msg: WSmessage, connection: any)
         const row = db.prepare("SELECT username FROM users WHERE username = ? -- chat on message").get(msg.target);
         if (!row){
           connection.send(JSON.stringify({user: 'server',
-            type: "message",
+            type: "serverMessage",
             content: `${msg.target} doesn't exist`,
             msgId: GenerateRandomId()
         }));
@@ -171,9 +200,7 @@ function Message(msg: WSmessage, connection: any)
         // check if the client is connected
         const targetClient = getClientByUsername(msg.target)
         if (!targetClient){
-          connection.send(JSON.stringify({
-            user: 'server',
-            type: "message",
+          connection.send(JSON.stringify({ user: 'server', type: "serverMessage",
             content: `${msg.target} is not connected`,
             msgId: GenerateRandomId()
           }));
@@ -181,42 +208,17 @@ function Message(msg: WSmessage, connection: any)
         }
 
         const newDirectMsg = {
-            user: senderClient._username!,
-            type: "directMessage",
+            user: senderClient._username!, type: "directMessage",
             target: targetClient?._username,
             content: msg.content,
             msgId: msg.msgId
         };
 
         listOfMsg.add(newDirectMsg);
-
-        const timeout = setTimeout(() => {
-            try {
-                const waitMsg = Array.from(listOfMsg).entries().find(([index,msg]) => msg.msgId === newDirectMsg.msgId)?.[1];
-                if (waitMsg) {
-
-                    listOfMsg.delete(waitMsg);
-                    const Sender = getClientByUsername(newDirectMsg.user);
-                    if (Sender) {
-                        Sender._socket.send(JSON.stringify({
-                            user: 'server',
-                            type: "message",
-                            content: `${newDirectMsg.target} not responded`,
-                            msgId: GenerateRandomId()
-                        }));
-                    }
-                }
-            }
-            catch (err) {
-                console.error(err);
-            } finally {
-                directMsgTimers.delete(newDirectMsg.msgId!);
-            }
-        }, 15000);
-
+        setTimeoutDirectMsg(senderClient, newDirectMsg);
+        
         const query = {
-            user: senderClient._username,
-            type: "readyForDirectMessage",
+            user: senderClient._username, type: "readyForDirectMessage",
             msgId: GenerateRandomId()
         };
         console.log("[sending]", query)
@@ -300,9 +302,10 @@ function ConnectionStatusUser(msg: WSmessage, socket: any){
   }
 }
 
-
+// "main" live chat
 export default function liveChat(fastify: FastifyInstance){
 
+  // add client from connected clients
   fastify.websocketServer.on("connection", (ws: WebSocket) => {
     const testClient = connectedClients.get(ws);
     if (!testClient)
@@ -311,6 +314,8 @@ export default function liveChat(fastify: FastifyInstance){
       connectedClients.set(ws, newClient);
     }
   });
+
+  // remove clients from connected clients
   fastify.websocketServer.on("close", (client: WebSocket) => {
       const deleteClient = connectedClients.get(client);
       if (deleteClient)
@@ -320,6 +325,7 @@ export default function liveChat(fastify: FastifyInstance){
       }
   });
 
+  // get incoming message from clients
   fastify.get('/api/chat', { websocket: true }, (connection, req) => {
     connection.on("message", (event) => {
       try {

@@ -553,7 +553,8 @@ export function setCtrlEventUsername(): void {
         e.preventDefault();
         fetch("/logout", {method: 'POST'}).then(
           res => {
-            resetReconnectTimer(res.headers.get("x-authenticated")); 
+            resetReconnectTimer(res.headers.get("x-authenticated"));
+            sendStatusMessage();
             if (document.activeElement.id !== "user-search") main();
             else sendMessage("You found a debug option, won't force a reload if user-search is selected");
           }
