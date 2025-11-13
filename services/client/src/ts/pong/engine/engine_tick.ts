@@ -19,7 +19,8 @@ export function tick(ball: BallEntity, players: PlayerEntity[])
   // also, need to add a detection of the colision based on the radius of the ball, 
   // unlike now where it's based on it's single coordinate  
   checkPoints(ball, players);
-  console.log(GameView.ball, GameView.players[0], GameView.players[0].TL, GameView.players[1], GameView.players[1].TL)
+  console.log(ball.speed);
+  // console.log(GameView.ball, GameView.players[0], GameView.players[0].TL, GameView.players[1], GameView.players[1].TL)
 }
 
 /**
@@ -60,15 +61,15 @@ function movePlayers(players : PlayerEntity[], gap: number): void {
 function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
   function move(player: PlayerEntity){
     if (
-      ball.view.x >= player.view.TL.x &&
+      ball.view.x + ball.view.radius * 2 >= player.view.TL.x &&
       ball.view.x <= player.view.TL.x + player.view.width &&
-      ball.view.y >= player.view.TL.y &&
+      ball.view.y + ball.view.radius * 2 >= player.view.TL.y &&
       ball.view.y <= player.view.TL.y + player.view.height
     ) {
       ball.last = player;
       ball.speed.x =
         (player.view.direction === "E" ? 1 : -1)
-        * Math.abs(ball.speed.x * 1.03);
+        * (Math.abs(ball.speed.x) + 0.05);
       const angle = ((ball.view.y - player.view.TL.y) / player.view.height - 0.5) * Math.PI * 5 / 6;
       ball.speed.y = Math.tan(angle) * ball.speed.x;
     }

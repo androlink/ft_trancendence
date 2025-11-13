@@ -53,6 +53,5 @@ export interface BallEntity {
 export interface DataFrame
 {
 	ball: BallView,
-	player_1: PlayerView,
-	player_2: PlayerView
+	players: PlayerView[],
 }

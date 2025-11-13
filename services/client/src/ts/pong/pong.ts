@@ -1,11 +1,12 @@
 import { IPongDisplay, PongDisplay } from "./display.js";
+import { DataFrame } from "./engine/engine_interfaces.js";
 import game_view from './engine/engine_variables.js'
 
 export let display : PongDisplay;
 
 let interval: ReturnType<typeof requestAnimationFrame>;
 let update = () => {
-	display.update({player_1: game_view.players[0], player_2: game_view.players[1], ball: game_view.ball});
+	display.update(game_view);
 	interval = requestAnimationFrame(update);
 }
 

@@ -10,7 +10,7 @@ export const width = 2;
  */
 export const height = 20;
 
-export const delay = 50;
+export const delay = 1000/20;
 export const speed = 3;
 
 /**

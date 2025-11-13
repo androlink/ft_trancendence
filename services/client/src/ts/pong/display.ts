@@ -42,17 +42,14 @@ export class PongDisplay implements IPongDisplay
 		context.fillStyle = this.color.bg;
 		context.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
-		this.displayScore(context, data_frame.player_1.score, 25, 25);
-		this.displayScore(context, data_frame.player_2.score, 75, 25);
+		this.displayScore(context, data_frame.players[0].score, 25, 25);
+		this.displayScore(context, data_frame.players[1].score, 75, 25);
+
+		// display player
+		data_frame.players.forEach(player => this.displayPlayer(context, player));
 
 		// display ball
 		this.displayBall(context, data_frame.ball);
-
-		// display player 1
-		this.displayPlayer(context, data_frame.player_1);
-
-		// display player 2
-		this.displayPlayer(context, data_frame.player_2);
 
 	}
 
@@ -68,7 +65,7 @@ export class PongDisplay implements IPongDisplay
 
 	private displayBall(context: CanvasRenderingContext2D, ballView: BallView)
 	{
-		displayRect(context, ballView.x - ballView.radius, ballView.y - ballView.radius, ballView.radius * 2, ballView.radius * 2, this.color.ball);
+		displayRect(context, ballView.x, ballView.y, ballView.radius * 2, ballView.radius * 2, this.color.ball);
 	}
 
 }
