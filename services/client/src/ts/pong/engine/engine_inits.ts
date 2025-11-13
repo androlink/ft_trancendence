@@ -1,5 +1,5 @@
 import { BallEntity, keyControl, PlayerEntity, PlayerView } from "./engine_interfaces.js";
-import { width, height } from "./engine_variables.js";
+import { width, height, speed } from "./engine_variables.js";
 
 /**
  * will reset the ball to it's default place
@@ -35,11 +35,11 @@ export function resetPlayer(player: PlayerEntity, options?: { resetScore?: boole
  * @param speed the speed of the bar. Set all bars at the same speed for mandatory requirements
  * @returns the new PlayerEntity
  */
-export function generatePLayerEntity(TL: {x: number, y: number}, up: keyControl, down: keyControl, direction: PlayerView["direction"], speed = 1): PlayerEntity{
+export function generatePLayerEntity(TL: {x: number, y: number}, up: keyControl, down: keyControl, direction: PlayerView["direction"], speedHere = speed): PlayerEntity{
   return {
     view: {score: 0, TL, width, height, direction},
     up,
     down,
-    speed,
+    speed: speedHere,
   }
 }

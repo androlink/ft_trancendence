@@ -1,7 +1,7 @@
 
 import { resetBall, resetPlayer } from './engine_inits.js';
 import { tick } from './engine_tick.js';
-import { ball, players } from './engine_variables.js';
+import { ball, delay, players } from './engine_variables.js';
 
 function eventKeyInputPong(event: KeyboardEvent)
 {
@@ -30,7 +30,7 @@ function createLocalPong(): void {
   document.addEventListener("keyup", eventKeyInputPong);
   self.addEventListener('popstate', deleteLocalPong);
   document.addEventListener("visibilitychange", toggleLocalPongOnHidden);
-  game = setInterval(tick, 200, ball, players)
+  game = setInterval(tick, delay, ball, players)
 }
 self["createLocalPong"] = createLocalPong;
 
@@ -50,7 +50,7 @@ function pauseLocalPong() {
 function resumeLocalPong() {
     if (game !== undefined)
       return;
-    game = setInterval(tick, 200, ball, players);
+    game = setInterval(tick, delay, ball, players);
 }
 
 /**
@@ -74,5 +74,5 @@ function deleteLocalPong(): void {
   game = undefined;
   resetPlayer(players[0], {resetScore: true});
   resetPlayer(players[1], {resetScore: true});
-  resetBall(ball, 1, 1, players[0]);
+  resetBall(ball, 1, 0, players[0]);
 }

@@ -68,7 +68,7 @@ export class PongDisplay implements IPongDisplay
 
 	private displayBall(context: CanvasRenderingContext2D, ballView: BallView)
 	{
-		displayRect(context, ballView.x, ballView.y, ballView.radius, ballView.radius, this.color.ball);
+		displayRect(context, ballView.x - ballView.radius, ballView.y - ballView.radius, ballView.radius * 2, ballView.radius * 2, this.color.ball);
 	}
 
 }

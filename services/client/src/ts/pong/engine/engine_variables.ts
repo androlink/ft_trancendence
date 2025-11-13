@@ -10,6 +10,9 @@ export const width = 2;
  */
 export const height = 20;
 
+export const delay = 50;
+export const speed = 3;
+
 /**
  * an array of players, 
  * can theorically take as many as wanted, 

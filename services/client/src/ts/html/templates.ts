@@ -241,12 +241,12 @@ const htmlSnippetsTemplate:  {
     `,
   Pong: `
   <div class="size-full flex flex-col overflow-scroll">
-  		<script  type="module" src="${assetsPath}/pong/pong.js"></script>
       <script>
         createLocalPong();
+		updateLocalGame();
         document.currentScript.remove();
       </script>
-		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
+      <canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:
