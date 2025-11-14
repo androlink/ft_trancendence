@@ -25,11 +25,11 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
    */
   function checkBodyInput(requiredFields: string[], presenceOnly = false) {
     let conditions = {
-      username: {minLength: 3, maxLength: 20, alphanumeric_: true },
+      username: {minLength: 3, maxLength: 20, alphanumeric_: true, forbidden: ["server", "You"]},
       biography: {maxLength: 3000 },
       password: {minLength: 4, maxByteLength: 42 },
     }
-    return async function (req:FastifyRequest<{Body: Object}>, reply: FastifyReply) {
+    return async function (req:FastifyRequest<{Body: {[key: string]: string}}>, reply: FastifyReply) {
       for (const field of requiredFields) {
         if (!Object.hasOwn(req.body, field))
           return reply.code(401).send({success: false, message: `query ${field} missing`});

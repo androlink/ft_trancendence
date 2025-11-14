@@ -4,6 +4,16 @@ import { goToURL } from "./utils.js";
 // WEBSOCKET
 let ws: WebSocket | null;
 
+enum TypeMessage {
+  message = "message",
+  yourMessage = "yourMessage",
+  directMessage = "directMessage",
+  readyForDirectMessage = "readyForDirectMessage",
+  serverMessage= "serverMessage",
+  connection = "connection",
+  ping = "ping",
+  pong = "pong"
+}
 
 /**
  * Interface Message
@@ -14,7 +24,7 @@ let ws: WebSocket | null;
  * @param msgId Id of the message (for direct message) [optional]
  */
 interface WSmessage {
-  type: string,
+  type: TypeMessage,
   user: string | null,
   target?: string | null,
   content?: string | null,
@@ -76,7 +86,7 @@ function WSconnect()
         lastPong = Date.now();
       }
       if (receivemsg.type === "readyForDirectMessage"){
-        sendOrQueue(JSON.stringify({user: localStorage.getItem('token'), type: "directMessage", target: receivemsg.user}))
+        sendOrQueue(JSON.stringify({user: localStorage.getItem('token'), type: TypeMessage.directMessage, target: receivemsg.user}))
       }
     } catch (err) {
       alert("error : "+ err);
@@ -109,7 +119,7 @@ export function InitConnectionChat() {
 
   //ping pong
   setInterval(() => {
-    const ping: WSmessage = {user: localStorage.getItem("token"), type: "ping", msgId: GenerateRandomId()};
+    const ping: WSmessage = {user: localStorage.getItem("token"), type: TypeMessage.ping, msgId: GenerateRandomId()};
     ws.send(JSON.stringify(ping));
   }, 15000);
   setInterval(() => {
@@ -134,56 +144,59 @@ function showMessageToChat(message: WSmessage): boolean {
     console.error(`message '${message}' not sent to the chat because the chat is not found`);
     return false;
   }
-
   // true if at the end of the chat
   let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
+
   const para = document.createElement('p');
+  const userLink = document.createElement('span');
+  const node = document.createTextNode(message.content);
 
-  if (message.type == "directMessage"){ // <====   For direct message
+  switch (message.type) {
+    case TypeMessage.message :
+      // setup username
+      userLink.onclick = () => {goToURL(`profile/${message.user}`)};
+      userLink.textContent = `${message.user}:`;
+      userLink.className = 'text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ';
+      
+      break;
+    case TypeMessage.yourMessage :
+      // setup username
+      userLink.onclick = () => {goToURL(`profile/${message.user}`)};
+      userLink.textContent = `${message.user}:`;
+      userLink.className = 'text-yellow-500 hover:font-bold p-2 rounded-md cursor-pointer ';
+      
+      break
+    case TypeMessage.directMessage:
+      // setup username
+      para.className = 'text-pink-400';
+      userLink.onclick = () => {goToURL(`profile/${message.user}`)};
+      userLink.textContent = `${message.user}:`;
+      userLink.className = 'text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ';
+      // setup text
+      const messageText = document.createElement('span');
+      messageText.textContent = message.content;
+      messageText.className = 'italic';
+      para.appendChild(userLink);
+      para.appendChild(messageText);
 
-    // setup username
-    para.className = 'text-pink-400';
-    const userLink = document.createElement('span');
-    userLink.onclick = () => {goToURL(`profile/${message.user}`)};
-    userLink.textContent = `${message.user}:`;
-    userLink.className = 'text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ';
-    // setup text
-    const messageText = document.createElement('span');
-    messageText.textContent = message.content;
-    messageText.className = 'italic';
-    para.appendChild(userLink);
-    para.appendChild(messageText);
+      break;
+    case TypeMessage.serverMessage:
+      para.className = 'text-red-500 font-bold text-center';
+      if (message.content === "You are not connected")
+        goToURL("/profile");
+
+      break;
   }
-  else if (message.type == "serverMessage"){ // <====     For Server message
 
-    if (message.content === "You are not connected")
-      goToURL("/profile");
-
-    // setup server text
-    para.className = 'text-red-500 font-bold text-center';
-    const node = document.createTextNode(message.content);
-    para.appendChild(node);
-  }
-  else { // <====     For regular message
-
-    // setup username
-    const userLink = document.createElement('span');
-    userLink.onclick = () => {goToURL(`profile/${message.user}`)};
-    userLink.textContent = `${message.user}:`;
-    userLink.className = 'text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ';
-    // setup text
-    const node = document.createTextNode(message.content);
-    para.appendChild(userLink);
-    para.appendChild(node);
-  }
-
+  para.appendChild(userLink);
+  para.appendChild(node);
   chat.appendChild(para);
+
   if (scroll) {
     chat.scrollTop = chat.scrollHeight;
   }
   return scroll;
 }
-
 
 
 function waitForSocketConnection(socket, send: Function) {
@@ -232,7 +245,7 @@ export function sendChatMessage() {
       const targets = args[1].split(',');
       const msg: WSmessage =  {
         user: localStorage.getItem("token"),
-        type: "message",
+        type: TypeMessage.message,
         content: args.slice(2).join(' '),
         msgId: GenerateRandomId()
       };
@@ -248,7 +261,7 @@ export function sendChatMessage() {
   {
     const msg: WSmessage =  {
       user: localStorage.getItem("token"),
-      type: "message",
+      type: TypeMessage.message,
       content: textarea.value,
       msgId: GenerateRandomId()
     };
@@ -268,7 +281,7 @@ export function sendStatusMessage()
 {
   const msg: WSmessage =  {
     user: localStorage.getItem("token"),
-    type: "connection",
+    type: TypeMessage.connection,
     msgId: GenerateRandomId()
   };
   console.log("Websocket status changed...")

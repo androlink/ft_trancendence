@@ -41,8 +41,10 @@ export async function main(force = false, requests = true): Promise<void> {
     let {headers, ...rest} = data;
     last = rest;
   }
-
-  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
+  let chatElement: HTMLElement | null | undefined;
+  if (force) {
+    chatElement = document.getElementById("chat-content");
+  }
   if (keyExist(data, 'title')) {
     document.title = selectLanguage(data.title);
   }
@@ -68,7 +70,7 @@ export async function main(force = false, requests = true): Promise<void> {
   } else if (!localStorage.getItem("token")) {
     resetReconnectTimer('false');
   }
-  if (force && chatInnerHTML) document.getElementById("chat-content")?.insertAdjacentHTML('beforeend', chatInnerHTML);
+  if (force && chatElement) document.getElementById("chat-content")?.replaceWith(chatElement);
   setEvents();
 }
 self["main"] = main;

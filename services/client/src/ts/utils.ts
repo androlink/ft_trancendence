@@ -30,7 +30,7 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
   if (!force && location.pathname + location.search === nextURL)
     return false;
   history.pushState({page: ""}, "", nextURL);
-  await main(true);
+  await main();
   return true;
 }
 self["goToURL"] = goToURL;
@@ -39,7 +39,7 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener('popstate', () => main(true));
+  self.addEventListener('popstate', () => main());
 };
 
 //----------------------------------------------------------------------------#
