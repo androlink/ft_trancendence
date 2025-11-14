@@ -38,7 +38,7 @@ export interface PlayerEntity {
 export interface BallView {
   x: number;
   y: number;
-  radius: number;
+  size: number;
 }
 
 /**
@@ -55,3 +55,5 @@ export interface DataFrame
 	ball: BallView,
 	players: PlayerView[],
 }
+
+export type point = {x: number, y: number};

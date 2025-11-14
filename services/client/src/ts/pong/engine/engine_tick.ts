@@ -1,4 +1,4 @@
-import { BallEntity, PlayerEntity } from "./engine_interfaces.js";
+import { BallEntity, PlayerEntity, point } from "./engine_interfaces.js";
 import { resetBall } from "./engine_inits.js";
 import { containsBetween } from "./engine_utils.js";
 import GameView from "./engine_variables.js"
@@ -10,9 +10,11 @@ import GameView from "./engine_variables.js"
  */
 export function tick(ball: BallEntity, players: PlayerEntity[])
 {
+  movePlayers(players, ball.view.size);
+
   moveBall(ball);
-  movePlayers(players, ball.view.radius * 2);
-  collideWithPlayers(ball, players); 
+  collideWithPlayers(ball, players);
+
   // gonna need to either : 
   //    cap the speed.x of the ball at the witdh of the paddle
   //    set a collision detection based on the movement of the ball and not its finishing point
@@ -30,9 +32,9 @@ export function tick(ball: BallEntity, players: PlayerEntity[])
 function moveBall(ball: BallEntity): void {
   ball.view.x += ball.speed.x;
   ball.view.y += ball.speed.y;
-  if (ball.view.y >= 100 || ball.view.y <= 0) {
+  if (ball.view.y + ball.view.size > 100 || ball.view.y <= 0) {
     ball.speed.y *= -1;
-    ball.view.y = (ball.view.y >= 100 ? 200 - ball.view.y : - ball.view.y);
+    ball.view.y = (ball.view.y + ball.view.size  >= 100 ? (200 - (ball.view.y + ball.view.size * 2)): - ball.view.y);
   }
 }
 
@@ -59,19 +61,38 @@ function movePlayers(players : PlayerEntity[], gap: number): void {
  * @param players array of players
  */
 function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
+  function overlap(p1: point, s1: point, p2: point, s2: point): boolean {
+    if (p1.x > (p2.x + s2.x) || p2.x > (p1.x + s1.x))
+      return false;
+    if (p1.y > (p2.y + s2.y) || p2.y > (p1.y + s1.y))
+      return false;
+    console.log("overlap detected");
+    return true;
+  }
+
   function move(player: PlayerEntity){
-    if (
-      ball.view.x + ball.view.radius * 2 >= player.view.TL.x &&
-      ball.view.x <= player.view.TL.x + player.view.width &&
-      ball.view.y + ball.view.radius * 2 >= player.view.TL.y &&
-      ball.view.y <= player.view.TL.y + player.view.height
-    ) {
+    if (overlap(ball.view,
+                {x: ball.view.size, y: ball.view.size},
+                player.view.TL,
+                {x: player.view.width, y: player.view.height}))
+    {
       ball.last = player;
-      ball.speed.x =
-        (player.view.direction === "E" ? 1 : -1)
-        * (Math.abs(ball.speed.x) + 0.05);
-      const angle = ((ball.view.y - player.view.TL.y) / player.view.height - 0.5) * Math.PI * 5 / 6;
-      ball.speed.y = Math.tan(angle) * ball.speed.x;
+      let nspeed = (Math.abs(ball.speed.x) + 0.1)
+      const angle = ((ball.view.y - player.view.TL.y + ball.view.size) / (player.view.height + ball.view.size) - 0.5) * Math.PI * 3 / 6;
+      if (nspeed > ball.view.size + player.view.width)
+        nspeed = ball.view.size + player.view.width;
+      if (player.view.direction === "E")
+      {
+        ball.speed.x = nspeed;
+        // ball.view.x = player.view.TL.x + player.view.width;
+        ball.speed.y = Math.tan(angle) * ball.speed.x;
+      }
+      else if (player.view.direction === "W"){
+        ball.speed.x = -nspeed;
+        // ball.view.x = player.view.TL.x - ball.view.size;
+        ball.speed.y = Math.tan(-angle) * ball.speed.x;
+      }
+      console.log(Math.tan(angle));
     }
   };
   players.forEach(move);
@@ -82,7 +103,7 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
  * @param ball the ball in the game
  */
 function checkPoints(ball: BallEntity, players: PlayerEntity[]): void {
-  if (ball.view.x < 100 && ball.view.x > 0)
+  if (ball.view.x + ball.view.size < 100 && ball.view.x > 0)
     return;
 
   ball.last.view.score += 1;

@@ -14,7 +14,7 @@ export class PongDisplay implements IPongDisplay
 		ball: string | CanvasGradient | CanvasPattern;
 		score: string | CanvasGradient | CanvasPattern;
 	}
-	scale_factor: number = 50
+	scale_factor: number = 20
 
 	constructor()
 	{
@@ -42,10 +42,23 @@ export class PongDisplay implements IPongDisplay
 		context.fillStyle = this.color.bg;
 		context.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
-		this.displayScore(context, data_frame.players[0].score, 25, 25);
-		this.displayScore(context, data_frame.players[1].score, 75, 25);
+    context.save();
+    context.beginPath();
+    {
+      context.moveTo(50, 0);
+      context.lineTo(50, 100);
+      context.setLineDash([4]);
+      context.strokeStyle = "white";
+      context.stroke();
+    }
+    context.closePath();
+    context.restore();
 
-		// display player
+	  // display scores
+		this.displayScore(context, data_frame.players[0].score, 25, 50);
+		this.displayScore(context, data_frame.players[1].score, 75, 50);
+
+		// display players
 		data_frame.players.forEach(player => this.displayPlayer(context, player));
 
 		// display ball
@@ -65,7 +78,7 @@ export class PongDisplay implements IPongDisplay
 
 	private displayBall(context: CanvasRenderingContext2D, ballView: BallView)
 	{
-		displayRect(context, ballView.x, ballView.y, ballView.radius * 2, ballView.radius * 2, this.color.ball);
+		displayRect(context, ballView.x, ballView.y, ballView.size, ballView.size, this.color.ball);
 	}
 
 }
@@ -73,23 +86,29 @@ export class PongDisplay implements IPongDisplay
 function displayRect(context: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string | CanvasGradient | CanvasPattern)
 {
 	context.save();
-	context.translate(x, y);
-	context.beginPath();
-	context.rect(0, 0, w, h);
-	context.closePath();
-	context.fillStyle = color;
-	context.fill()
+  context.beginPath();
+  {
+    context.translate(x, y);
+    context.rect(0, 0, w, h);
+    context.fillStyle = color;
+    context.fill()
+  }
+  context.closePath();
 	context.restore();
 }
 
 function displayText(context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string | CanvasGradient | CanvasPattern)
 {
 	context.save();
-	context.translate(x, y);
-	context.fillStyle = color;
-	context.textAlign = "center";
-	context.font = "monospace";
-	context.textBaseline = "middle";
-	context.fillText(text, 0, 0);
+  context.beginPath();
+  {
+    context.translate(x, y);
+    context.fillStyle = color;
+    context.textAlign = "center";
+    context.font = "20px monospace";
+    context.textBaseline = "middle";
+    context.fillText(text, 0, 0);
+  }
+  context.closePath();
 	context.restore();
 }
