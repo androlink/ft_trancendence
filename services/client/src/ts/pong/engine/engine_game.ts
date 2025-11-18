@@ -36,14 +36,20 @@ function createLocalPong(): void {
   document.addEventListener("keyup", eventKeyInputPong);
   self.addEventListener('popstate', deleteLocalPong);
   document.addEventListener("visibilitychange", toggleLocalPongOnHidden);
-  document.getElementById("canvas").addEventListener("click", startLocalPong, { once: true });
+  document.getElementById("canvas").addEventListener("click", startLocalPong);
   game = generateParty(players, ball, 5);
   game.intervalId = setInterval(tick, delay, game)
 }
 self["createLocalPong"] = createLocalPong;
 
 function startLocalPong(): void {
-  game.views.state = 'playing';
+  if (game.views.state === 'waiting')
+    game.views.state = 'playing';
+  else if (game.views.state === 'ended')
+  {
+    resetParty(game);
+    game.intervalId = setInterval(tick, delay, game)
+  }
 }
 
 /**

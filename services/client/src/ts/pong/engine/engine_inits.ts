@@ -29,6 +29,7 @@ export function resetPlayer(player: PlayerEntity, options?: { resetScore?: boole
 export function resetParty(game: GameParty) {
   game.players.forEach(p => resetPlayer(p, {resetScore: true}));
   resetBall(game.ball, 1, 0, game.players[0]);
+  game.views.state = 'waiting';
 }
 
 /**
