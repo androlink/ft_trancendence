@@ -1,5 +1,5 @@
 var exports = {};
-import { htmlSnippets, selectLanguage } from "./html/templates.js"
+import { htmlSnippets, languageString, selectLanguage } from "./html/templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
 import { setEvents } from "./html/events.js";
 
@@ -9,7 +9,7 @@ import { setEvents } from "./html/events.js";
 interface ServerResponse {
   template?: string,
   title?: string,
-  replace?:  {[key:string]:string | {[language:string]:string}},
+  replace?:  {[key:string]:string | languageString},
   inner?: string,
   headers?: Headers,
 }
@@ -147,7 +147,7 @@ function toggleButtons(parent: HTMLElement) {
  * their attribute value, srcdoc or their innertext 
  * @param toReplace toReplace[key] = val — 'key' are the id of the elements selected, 'val' are the new values
  */
-function replaceElements(toReplace: {[key:string]:string | {[language:string]:string}}): void {
+function replaceElements(toReplace: {[key:string]:string | languageString }): void {
   for (const key in toReplace) {
     let element = document.getElementById(key);
     if (element) {

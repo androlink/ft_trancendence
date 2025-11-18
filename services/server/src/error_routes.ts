@@ -1,6 +1,5 @@
 
 import { FastifyInstance } from 'fastify'
-import MSG from './messages_collection.js'
 
 // response format for that page :
 // {
@@ -26,9 +25,9 @@ export async function errorRoutes(fastifyInstance: FastifyInstance) {
       template: "Home",
       title: "413 Payload Too Large",
       inner: "Error",
-      replace: {status: "404 Not Found", message: MSG.ERR_413()},
+      replace: {status: "404 Not Found", message: ["ERR_413"]},
       success: false,
-      message: MSG.ERR_413(),
+      message: ["ERR_413"],
     });
   });
 
@@ -37,9 +36,9 @@ export async function errorRoutes(fastifyInstance: FastifyInstance) {
       template: "Home",
       title: "400 Bad Request",
       inner: "Error",
-      replace: {status: "400 Bad Request", message: MSG.ERR_400()},
+      replace: {status: "400 Bad Request", message: ["ERR_400"]},
       success: false,
-      message: MSG.ERR_400(),
+      message: ["ERR_400"],
     });
   });
 }

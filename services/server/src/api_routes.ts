@@ -2,10 +2,9 @@
 import db from "./database";
 import { dbLogFile } from "./database";
 import fs from 'fs';
-import MSG from './messages_collection.js'
 import { assetsPath } from "./config.js";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
-import { Id, TranslatedString, UserRow } from "./types.js";
+import { Id, LanguageObject, UserRow } from "./types.js";
 
 // response format for that page :
 // {
@@ -20,7 +19,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.setNotFoundHandler ( (req, reply) => {
     return reply.code(404).send({
       template: "Error",
-      replace: {status: "404 Not Found", message: MSG.ERR_404()}, 
+      replace: {status: "404 Not Found", message: ["ERR_404"]}, 
       title: "404 Not Found",
     });
   });
@@ -44,7 +43,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       if (req.user.id === -1) {
         return void reply.code(403).send({
           template: "Home",
-          title: MSG.LOGIN(),
+          title: ["LOGIN"],
           inner: "Login",
         });
       }
@@ -54,7 +53,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
         reply.header('x-authenticated', false);
         return void reply.send({
           template: "Home",
-          title: MSG.LOGIN(),
+          title: ["LOGIN"],
           inner: "Login",
         });
       }
@@ -77,7 +76,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.get('/game', (req, reply) => {
     return reply.send({
       template: "Home",
-      title: MSG.PONG_SOON(),
+      title: ["PONG_SOON"],
       inner: "Game",
     });
   });
@@ -96,7 +95,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       replace: {"username-p1": req.user.username, "biography-p1": req.user.bio,
         "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`
       },
-      title: MSG.YOU(),
+      title: ["YOU"],
       inner: "Profile1",
     });
   });
@@ -107,7 +106,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       replace: {"username-p1": req.user.username, "biography-p1": req.user.bio,
         "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`
       },
-      title: MSG.FRIENDS(),
+      title: ["FRIENDS"],
       inner: "Friend",
     });
   });
@@ -125,28 +124,28 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     const statement5 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("SELECT 1 FROM friends WHERE (friend_one = :requesterId AND friend_two = :targetId) OR (friend_one = :targetId AND friend_two = :requesterId)");
     /** transaction to do all the sql at once from the db view */
     const selectSituation = db.transaction(
-      (requesterId: Id, targetId: Id): {friend: TranslatedString, block: TranslatedString} =>
+      (requesterId: Id, targetId: Id): {friend: LanguageObject, block: LanguageObject} =>
       {
         const params = {requesterId, targetId};
         if (requesterId === -1) {
           return {friend: "NOT CONNECTED", block: "NOT CONNECTED"}
         }
         if (requesterId === targetId) {
-          return {friend: "IT IS YOU", block: "IT IS YOU"}
+          return {friend: ["IT IS YOU"], block: "IT IS YOU"}
         }
         if (statement2.get(params)) {
-          return {friend: "THEY ARE BLOCKED", block: MSG.UN_BLOCK()}
+          return {friend: ["THEY ARE BLOCKED"], block: ["UN_BLOCK"]}
         }
         if (statement3.get(params)) {
-          return {friend: MSG.UN_FRIEND_REQUEST(), block: MSG.BLOCK()}
+          return {friend: ["UN_FRIEND_REQUEST"], block: ["BLOCK"]}
         }
         if (statement4.get(params)) {
-          return {friend: MSG.ACCEPT_FRIEND(), block: MSG.BLOCK()}
+          return {friend: ["ACCEPT_FRIEND"], block: ["BLOCK"]}
         }
         if (statement5.get(params)) {
-          return {friend: MSG.UN_FRIEND(), block: MSG.BLOCK()}
+          return {friend: ["UN_FRIEND"], block: ["BLOCK"]}
         }
-        return {friend:  MSG.REQUEST_FRIEND(), block: MSG.BLOCK()};
+        return {friend: ["REQUEST_FRIEND"], block: ["BLOCK"]};
       }
     );
     fastifyInstance.get<{Params: {username: string}}>('/profile/:username', (req, reply) => {
@@ -155,7 +154,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       if (!row) {
         return reply.send({
           template: "Home", title: username, inner: "Error",
-          replace: {status: "404 Not Found", message: MSG.USERNAME_NOT_FOUND(username)},
+          replace: {status: "404 Not Found", message: ["USERNAME_NOT_FOUND", username.length > 20 ? username.substring(0, 20) + '...' : username]},
         });
       }
       let {friend, block} = selectSituation(req.user.id, row.id);
@@ -175,7 +174,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.get('/blank', (req, reply) => {
     return reply.send({
       template: "Home",
-      title: MSG.BORING(),
+      title: ["BORING"],
       inner: "Blank",
     });
   });
@@ -184,7 +183,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     if (!req.user.admin) {
       return reply.code(403).send({
         template: "Error", title: "403 Forbidden",
-        replace: {status: "403 NUH UH", message: MSG.NEED_ADMIN()},
+        replace: {status: "403 NUH UH", message: ["NEED_ADMIN"]},
       });
     }
     const file = fs.readFileSync(dbLogFile, { encoding: 'utf8', flag: 'r' })
