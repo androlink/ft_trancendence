@@ -64,6 +64,11 @@ export class PongDisplay implements IPongDisplay
 		// display ball
 		this.displayBall(context, data_frame.ball);
 
+    if (data_frame.state !== 'playing')
+    {
+      displayText(context, data_frame.state.toUpperCase(), 50, 50, "white");
+    }
+
 	}
 
 	private displayScore(context: CanvasRenderingContext2D, score: number, x: number, y: number)

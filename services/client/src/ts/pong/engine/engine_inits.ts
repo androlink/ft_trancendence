@@ -49,15 +49,17 @@ export function generatePLayerEntity(TL: {x: number, y: number}, up: keyControl,
   }
 }
 
-export function generateParty(players: PlayerEntity[], ball: BallEntity)
+export function generateParty(players: PlayerEntity[], ball: BallEntity, max_score = 10): GameParty
 {
   let game_party: GameParty = {
+    max_score: max_score,
     ball: ball,
     players: players,
     views: {
       ball: ball.view,
       players: players.map(p => p.view),
-    }
+      state: "waiting"
+    },
   }
   return game_party;
 }

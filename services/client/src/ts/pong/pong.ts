@@ -12,11 +12,10 @@ let update = () => {
 
 function updateLocalGame() {
 	function remove() {
-		self.removeEventListener("popstate", remove);
 		if (interval)
 			cancelAnimationFrame(interval);
 	}
-	self.addEventListener("popstate", remove );
+	self.addEventListener("popstate", remove, { once: true });
 	display = new PongDisplay();
 	interval = requestAnimationFrame(update);
 }

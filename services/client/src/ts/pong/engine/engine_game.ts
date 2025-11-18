@@ -6,6 +6,11 @@ import { ball, delay, players } from './engine_variables.js';
 
 function eventKeyInputPong(event: KeyboardEvent)
 {
+  if (event.key === " " && event.type === "keydown" && !event.repeat)
+  {
+    game.views.state === 'playing' ? pauseLocalPong() : resumeLocalPong();
+  }
+
   game.players.forEach(player => {
     for (let control of [player.up, player.down]) {
       if (
@@ -20,40 +25,50 @@ function eventKeyInputPong(event: KeyboardEvent)
   });
 }
 
-
 export let game: GameParty | undefined = undefined;
 /**
  * will set the events to play the local game, and launch the game
  */
 function createLocalPong(): void {
-  if (game !== undefined)
+  if (game?.intervalId !== undefined)
     return;
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
   self.addEventListener('popstate', deleteLocalPong);
   document.addEventListener("visibilitychange", toggleLocalPongOnHidden);
-  game = generateParty(players, ball);
+  document.getElementById("canvas").addEventListener("click", startLocalPong, { once: true });
+  game = generateParty(players, ball, 5);
   game.intervalId = setInterval(tick, delay, game)
 }
 self["createLocalPong"] = createLocalPong;
+
+function startLocalPong(): void {
+  game.views.state = 'playing';
+}
 
 /**
  * will stop the tick function from be called 
  */
 function pauseLocalPong() {
-  if (!game)
+  if (game.views.state !== 'playing')
+    return
+  if (!game.intervalId)
     return
   clearInterval(game.intervalId);
   game.intervalId = undefined;
+  game.views.state = 'paused';
 }
 
 /**
  * will provoque the tick function from be called 
  */
 function resumeLocalPong() {
-    if (game !== undefined)
-      return;
-    game.intervalId = setInterval(tick, delay, game);
+  if (game.views.state !== 'paused')
+    return
+  if (game.intervalId !== undefined)
+    return;
+  game.intervalId = setInterval(tick, delay, game);
+  game.views.state = 'playing';
 }
 
 /**
@@ -73,7 +88,8 @@ function deleteLocalPong(): void {
   document.removeEventListener("keyup", eventKeyInputPong);
   self.removeEventListener('popstate', deleteLocalPong);
   document.removeEventListener("visibilitychange", toggleLocalPongOnHidden);
-  clearInterval(game.intervalId);
+  if (game.intervalId)
+    clearInterval(game.intervalId);
   game.intervalId = undefined;
   resetParty(game);
 }

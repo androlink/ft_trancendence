@@ -9,6 +9,9 @@ import { containsBetween } from "./engine_utils.js";
  */
 export function tick( game: GameParty)
 {
+  if (game.views.state !== 'playing')
+    return;
+
   let { ball, players } = game;
 
   movePlayers(players, ball.view.size);
@@ -20,7 +23,13 @@ export function tick( game: GameParty)
   //    set a collision detection based on the movement of the ball and not its finishing point
   // also, need to add a detection of the colision based on the radius of the ball, 
   // unlike now where it's based on it's single coordinate  
-  checkPoints(ball, players);
+  if (checkPoints(ball, players))
+    if (Math.max(...players.map(p => p.view.score)) >= game.max_score)
+    {
+      clearInterval(game.intervalId);
+      game.intervalId = undefined;
+      game.views.state = 'ended';
+    }
   console.log(ball.speed);
   // console.log(GameView.ball, GameView.players[0], GameView.players[0].TL, GameView.players[1], GameView.players[1].TL)
 }
@@ -66,7 +75,6 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
       return false;
     if (p1.y > (p2.y + s2.y) || p2.y > (p1.y + s1.y))
       return false;
-    console.log("overlap detected");
     return true;
   }
 
@@ -102,10 +110,11 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
  * check if the ball touches one of the side walls
  * @param ball the ball in the game
  */
-function checkPoints(ball: BallEntity, players: PlayerEntity[]): void {
+function checkPoints(ball: BallEntity, players: PlayerEntity[]): boolean {
   if (ball.view.x + ball.view.size < 100 && ball.view.x > 0)
-    return;
+    return false;
 
   ball.last.view.score += 1;
   resetBall(ball, ball.last.view.direction === 'E' ? 1 : -1, 0, ball.last);
+  return true;
 }

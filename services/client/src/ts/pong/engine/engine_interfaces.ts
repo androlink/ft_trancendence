@@ -54,6 +54,7 @@ export interface DataFrame
 {
 	ball: BallView,
 	players: PlayerView[],
+  state: 'ended' | 'playing' | 'paused' | 'waiting',
 }
 
 export type point = {x: number, y: number};
@@ -64,4 +65,5 @@ export interface GameParty
   ball: BallEntity,
   players: PlayerEntity[],
   views: DataFrame,
+  max_score: number,
 }
