@@ -4,6 +4,7 @@ import { encodeURIUsername, goToURL, keyExist, resetReconnectTimer } from "../ut
 import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
 import { main } from "../app.js";
 import { sendChatMessage, InitConnectionChat, sendStatusMessage } from "../chat.js";
+import { toASCII } from "punycode";
 
 /**
  * set all the events that the page need to work properly
@@ -335,13 +336,16 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     main(true);
   });
 }
+//  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
+//  "toi" -> "toi", et la c'est un autre type,
+// Stephane sjean
 
 function setClickEventFriendRequest(text: HTMLElement): void {
   if (["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"].map(findLanguage).includes(text.innerText)) {
     text.className = "";
     return ;
   }
-  text.className = " cursor-pointer";
+  text.className = "cursor-pointer";
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
