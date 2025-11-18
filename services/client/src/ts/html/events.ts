@@ -309,10 +309,11 @@ function setClickEventProfile(text: HTMLElement): void {
 }
 
 function setClickEventBlockRequest(text: HTMLElement): void {
-  if (text.innerText === "NOT CONNECTED" || text.innerText === "IT IS YOU") {
-    text.innerText = findLanguage(text.innerText.toLowerCase());
+  if (["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)) {
+    text.className = "";
     return ;
   }
+  text.className = "cursor-pointer";
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
@@ -325,21 +326,22 @@ function setClickEventBlockRequest(text: HTMLElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
+        console.error(keyExist(result, "message") ? selectLanguage(result.message) : 
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      sendMessage(String(error));
+      console.error(String(error));
     }
     main(true);
   });
 }
 
 function setClickEventFriendRequest(text: HTMLElement): void {
-  if (text.innerText === "NOT CONNECTED" || text.innerText === "IT IS YOU" || text.innerText === "THEY ARE BLOCKED") {
-    text.innerText = findLanguage(text.innerText.toLowerCase());
+  if (["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"].map(findLanguage).includes(text.innerText)) {
+    text.className = "";
     return ;
   }
+  text.className = " cursor-pointer";
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
@@ -352,11 +354,11 @@ function setClickEventFriendRequest(text: HTMLElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
+        console.error(keyExist(result, "message") ? selectLanguage(result.message) : 
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      sendMessage(String(error));
+      console.error(String(error));
     }
     main(true);
   });

@@ -1,11 +1,5 @@
 
-export type TranslatedString<T = string> = T | LanguageObject<T>;
-
-export interface LanguageObject<T = string> {
-  en: T;
-  fr: T;
-  es: T;
-}
+export type LanguageObject = [string, ...(string | LanguageObject)[]] | string;
 
 export type Id = number | bigint; 
 

@@ -85,10 +85,10 @@ const htmlSnippetsTemplate:  {
         <button title="[[will cause a reload]]"  class="pointer-events-auto bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
       </form>
       <form id="profile-form" class="p-3 flex flex-col justify-around size-full overflow-scroll">
-        <input title="username" id="username-p1" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <input id="username-p1" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
         <div class="my-auto">
           <p class="text-white -ml-2">[[biography]]:</p>
-          <textarea title="biography" id="biography-p1" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
+          <textarea id="biography-p1" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
         </div>
         <button class="ml-[20%] bg-white rounded size-fit p-1 my-1 cursor-pointer" type="submit">[[update]]</button>
       </form>
@@ -98,14 +98,14 @@ const htmlSnippetsTemplate:  {
       <form id="change-password-form" class="mt-5">
         <span class="flex gap-5 w-1/2">
           <div class="flex gap-2 flex-col p-1">
-            <input title="password" placeholder="[[new password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
-            <input title="password" placeholder="[[confirm password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
+            <input placeholder="[[new password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
+            <input placeholder="[[confirm password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
           </div>
           <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[change password]]</button>
         </span>
       </form>
       <form id="delete-account-form" class="mt-5 flex flex-col items-center">
-        <input placeholder="[[confirm username]]" title="username" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
+        <input placeholder="[[confirm username]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
         <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
       </form>
     </span>
@@ -121,7 +121,7 @@ const htmlSnippetsTemplate:  {
       </style>
       <div class="dropdown relative border px-1 rounded">
         <h1 class="text-white" id="username-p2"></h1>
-        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit cursor-pointer *:px-1 bg-white *:hover:bg-gray-400">
+        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit *:px-1 bg-white *:hover:bg-gray-400">
           <a id="friend request">friend request</a>
           <a id="blocking request">block !</a>
         </div>
@@ -191,18 +191,18 @@ const htmlSnippetsTemplate:  {
   <span class="grid grid-cols-2 grid-rows-2 place-items-center size-full *:border-3 *:bg-gray-600 *:border-gray-500 *:p-2 *:rounded *:gap-1 *:flex *:flex-col *:relative">
     <form id="login-form">
       <label class="text-white size-fit" for="username">[[username]]:</label>
-      <input title="username" spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="text" name="username">
+      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="text" name="username">
       <label class="text-white size-fit" for="password">[[password]]:</label>
-      <input title="password" spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="password" name="password">
+      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="password" name="password">
       <button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">[[login]]</button>
     </form>
     <form id="register-form">
       <label class="text-white size-fit" for="username">[[username]]:</label>
-      <input title="username" spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="text" name="username">
+      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="text" name="username">
       <label class="text-white size-fit" for="password">[[password]]:</label>
-      <input title="password" spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password">
+      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password">
       <label class="text-white size-fit" for="password">[[confirm password]]:</label>
-      <input title="password" spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
+      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
       <button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">[[register]]</button>
     </form>
     <div>
@@ -285,6 +285,7 @@ export function setLanguage(): void{
   });
 }
 
+export type languageString = [string, ...(string | languageString)[]] | string;
 /**
  * select a string (or techinically anything) that correspond to localStorage["language"],
  * or the arg given if it's a string
@@ -292,13 +293,13 @@ export function setLanguage(): void{
  * @param strs examples: {'en': 'hello', 'fr': 'bonjour', 'es': 'hola'}, 'hey'
  * @returns the right string; else if localStorage["language"] not corresponding => str['en']; else if no str['en'] "language not found"
  */
-export function selectLanguage(strs: {[key:string]: string} | string): string {
-  if (typeof strs === 'string') return strs;
-  let language = localStorage.getItem('language');
-  if (language === null) language = 'en';
-  if (Object.hasOwn(strs, language)) return strs[language];
-  if (Object.hasOwn(strs, 'en')) return strs['en'];
-  return 'language not found';
+export function selectLanguage(strs: languageString): string {
+  if (typeof strs !== 'object') return String(strs);
+  let res = findLanguage(strs[0]);
+  for (let i = 1; i < strs.length; i++) {
+    res = res.replaceAll(`[[${i - 1}]]`, selectLanguage(strs[i]))
+  }
+  return res;
 }
 
 /**
