@@ -157,15 +157,19 @@ function showMessageToChat(message: WSmessage): boolean {
       userLink.onclick = () => {goToURL(`profile/${message.user}`)};
       userLink.textContent = `${message.user}:`;
       userLink.className = 'text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ';
-      
+      para.appendChild(userLink);
+      para.appendChild(node);
+
       break;
     case TypeMessage.yourMessage :
       // setup username
       userLink.onclick = () => {goToURL(`profile/${message.user}`)};
       userLink.textContent = `${message.user}:`;
       userLink.className = 'text-yellow-500 hover:font-bold p-2 rounded-md cursor-pointer ';
-      
-      break
+      para.appendChild(userLink);
+      para.appendChild(node);
+  
+      break;
     case TypeMessage.directMessage:
       // setup username
       para.className = 'text-pink-400';
@@ -184,12 +188,12 @@ function showMessageToChat(message: WSmessage): boolean {
       para.className = 'text-red-500 font-bold text-center';
       if (message.content === "You are not connected")
         goToURL("/profile");
+      para.appendChild(node);
 
       break;
   }
 
-  para.appendChild(userLink);
-  para.appendChild(node);
+  
   chat.appendChild(para);
 
   if (scroll) {

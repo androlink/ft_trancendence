@@ -1,10 +1,12 @@
 import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import db from "./database";
+import { typeErrorMessage } from "ajv/dist/vocabularies/jtd/error";
 
 enum TypeMessage {
   message = "message",
   yourMessage = "yourMessage",
+  friendMessage = "friendMessage",
   directMessage = "directMessage",
   readyForDirectMessage = "readyForDirectMessage",
   serverMessage= "serverMessage",
@@ -203,6 +205,7 @@ function Message(msg: WSmessage, connection: any)
               newMsg.type = TypeMessage.yourMessage;
           if (senderBlocked && !senderBlocked.has(cl._id)){
             cl._socket.send(JSON.stringify(newMsg));
+            newMsg.type = TypeMessage.message;
           }
         });
         return;
