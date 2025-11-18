@@ -123,7 +123,7 @@ const htmlSnippetsTemplate:  {
       </style>
       <div class="dropdown relative border px-1 rounded">
         <h1 class="text-white" id="username-p2"></h1>
-        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit cursor-pointer *:px-1 bg-white *:hover:bg-gray-400">
+        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit *:px-1 bg-white *:hover:bg-gray-400">
           <a id="friend request">friend request</a>
           <a id="blocking request">block !</a>
         </div>

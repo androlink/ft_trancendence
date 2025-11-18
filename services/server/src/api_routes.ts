@@ -128,10 +128,10 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       {
         const params = {requesterId, targetId};
         if (requesterId === -1) {
-          return {friend: "NOT CONNECTED", block: "NOT CONNECTED"}
+          return {friend: ["NOT_CONNECTED"], block: ["NOT_CONNECTED"]}
         }
         if (requesterId === targetId) {
-          return {friend: ["IT IS YOU"], block: "IT IS YOU"}
+          return {friend: ["IT_IS_YOU"], block: ["IT_IS_YOU"]}
         }
         if (statement2.get(params)) {
           return {friend: ["THEY ARE BLOCKED"], block: ["UN_BLOCK"]}
