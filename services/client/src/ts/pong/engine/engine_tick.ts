@@ -30,9 +30,7 @@ export function tick( game: GameParty)
       game.intervalId = undefined;
       game.views.state = 'ended';
     }
-  console.log(ball.speed);
-  // console.log(GameView.ball, GameView.players[0], GameView.players[0].TL, GameView.players[1], GameView.players[1].TL)
-}
+  }
 
 /**
  * will move a ball according to it's speed and between top and lower walls
@@ -100,7 +98,6 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
         // ball.view.x = player.view.TL.x - ball.view.size;
         ball.speed.y = Math.tan(-angle) * ball.speed.x;
       }
-      console.log(Math.tan(angle));
     }
   };
   players.forEach(move);

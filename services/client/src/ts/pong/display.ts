@@ -64,9 +64,15 @@ export class PongDisplay implements IPongDisplay
 		// display ball
 		this.displayBall(context, data_frame.ball);
 
-    if (data_frame.state !== 'playing')
-    {
+    if (data_frame.state === 'paused')
       displayText(context, data_frame.state.toUpperCase(), 50, 50, "white");
+    else if (data_frame.state === 'ended')
+      displayText(context, data_frame.state.toUpperCase(), 50, 70, "white");
+    else if (data_frame.state === 'waiting')
+    {
+      displayText(context, 'click on', 50, 40, "white", 10, "grey");
+      displayText(context, 'screen', 50, 50, "white", 10, "grey");
+      displayText(context, 'to start', 50, 60, "white", 10, "grey");
     }
 
 	}
@@ -102,17 +108,23 @@ function displayRect(context: CanvasRenderingContext2D, x: number, y: number, w:
 	context.restore();
 }
 
-function displayText(context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string | CanvasGradient | CanvasPattern)
+function displayText(context: CanvasRenderingContext2D, text: string, x: number, y: number, color: string | CanvasGradient | CanvasPattern, size: number = 20, border: string = undefined)
 {
 	context.save();
   context.beginPath();
   {
     context.translate(x, y);
-    context.fillStyle = color;
     context.textAlign = "center";
-    context.font = "20px monospace";
+    context.font = size + "px monospace";
     context.textBaseline = "middle";
+    if (border)
+    {
+      context.strokeStyle = border;
+      context.strokeText(text, 0, 0);
+    }
+    context.fillStyle = color;
     context.fillText(text, 0, 0);
+
   }
   context.closePath();
 	context.restore();
