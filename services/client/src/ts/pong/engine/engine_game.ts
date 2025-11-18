@@ -1,11 +1,12 @@
 
-import { resetBall, resetPlayer } from './engine_inits.js';
+import { generateParty, resetBall, resetParty, resetPlayer } from './engine_inits.js';
+import { GameParty } from './engine_interfaces.js';
 import { tick } from './engine_tick.js';
 import { ball, delay, players } from './engine_variables.js';
 
 function eventKeyInputPong(event: KeyboardEvent)
 {
-  players.forEach(player => {
+  game.players.forEach(player => {
     for (let control of [player.up, player.down]) {
       if (
         control.code !== undefined ?
@@ -19,7 +20,8 @@ function eventKeyInputPong(event: KeyboardEvent)
   });
 }
 
-let game: ReturnType<typeof setInterval>;
+
+export let game: GameParty | undefined = undefined;
 /**
  * will set the events to play the local game, and launch the game
  */
@@ -30,7 +32,8 @@ function createLocalPong(): void {
   document.addEventListener("keyup", eventKeyInputPong);
   self.addEventListener('popstate', deleteLocalPong);
   document.addEventListener("visibilitychange", toggleLocalPongOnHidden);
-  game = setInterval(tick, delay, ball, players)
+  game = generateParty(players, ball);
+  game.intervalId = setInterval(tick, delay, game)
 }
 self["createLocalPong"] = createLocalPong;
 
@@ -40,8 +43,8 @@ self["createLocalPong"] = createLocalPong;
 function pauseLocalPong() {
   if (!game)
     return
-  clearInterval(game);
-  game = undefined;
+  clearInterval(game.intervalId);
+  game.intervalId = undefined;
 }
 
 /**
@@ -50,7 +53,7 @@ function pauseLocalPong() {
 function resumeLocalPong() {
     if (game !== undefined)
       return;
-    game = setInterval(tick, delay, ball, players);
+    game.intervalId = setInterval(tick, delay, game);
 }
 
 /**
@@ -70,9 +73,7 @@ function deleteLocalPong(): void {
   document.removeEventListener("keyup", eventKeyInputPong);
   self.removeEventListener('popstate', deleteLocalPong);
   document.removeEventListener("visibilitychange", toggleLocalPongOnHidden);
-  clearInterval(game);
-  game = undefined;
-  resetPlayer(players[0], {resetScore: true});
-  resetPlayer(players[1], {resetScore: true});
-  resetBall(ball, 1, 0, players[0]);
+  clearInterval(game.intervalId);
+  game.intervalId = undefined;
+  resetParty(game);
 }

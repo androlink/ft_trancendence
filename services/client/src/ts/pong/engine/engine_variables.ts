@@ -1,4 +1,4 @@
-import { BallEntity } from "./engine_interfaces.js";
+import { BallEntity, PlayerEntity } from "./engine_interfaces.js";
 import { generatePLayerEntity, resetBall } from "./engine_inits.js";
 
 /**
@@ -35,7 +35,7 @@ export const players =
     {key: 'l', pressed: false},
     'W'
   ),
-]
+] as PlayerEntity[];
 
 /**
  * the ball from the game, only one except if we change the functions
@@ -45,15 +45,3 @@ export const ball = {
   speed: {x: 1, y: 0},
   last: players[0],
 } as BallEntity;
-
-
-/**
- * the elements required to display the game
- */
-export default {
-  ball : ball.view,
-  players: [
-    players[0].view,
-    players[1].view,
-  ]
-};

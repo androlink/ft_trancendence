@@ -57,3 +57,11 @@ export interface DataFrame
 }
 
 export type point = {x: number, y: number};
+
+export interface GameParty
+{
+  intervalId?: ReturnType<typeof setInterval>
+  ball: BallEntity,
+  players: PlayerEntity[],
+  views: DataFrame,
+}

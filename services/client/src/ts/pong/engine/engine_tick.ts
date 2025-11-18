@@ -1,17 +1,17 @@
-import { BallEntity, PlayerEntity, point } from "./engine_interfaces.js";
+import { BallEntity, PlayerEntity, point, GameParty } from "./engine_interfaces.js";
 import { resetBall } from "./engine_inits.js";
 import { containsBetween } from "./engine_utils.js";
-import GameView from "./engine_variables.js"
 
 /**
  * will do a single iteration of the game, this function should be called many times by second
  * @param ball the ball of the game
  * @param players the players of the game
  */
-export function tick(ball: BallEntity, players: PlayerEntity[])
+export function tick( game: GameParty)
 {
-  movePlayers(players, ball.view.size);
+  let { ball, players } = game;
 
+  movePlayers(players, ball.view.size);
   moveBall(ball);
   collideWithPlayers(ball, players);
 

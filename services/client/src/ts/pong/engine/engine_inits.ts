@@ -1,4 +1,4 @@
-import { BallEntity, keyControl, PlayerEntity, PlayerView } from "./engine_interfaces.js";
+import { BallEntity, keyControl, PlayerEntity, PlayerView, GameParty } from "./engine_interfaces.js";
 import { paddle_width, paddle_height, paddle_speed } from "./engine_variables.js";
 
 /**
@@ -26,6 +26,11 @@ export function resetPlayer(player: PlayerEntity, options?: { resetScore?: boole
   if (options?.resetScore) player.view.score = 0
 }
 
+export function resetParty(game: GameParty) {
+  game.players.forEach(p => resetPlayer(p, {resetScore: true}));
+  resetBall(game.ball, 1, 0, game.players[0]);
+}
+
 /**
  * a constructor for the interface PlayerEntity
  * @param TL the coordonnates of the top left corner
@@ -42,4 +47,17 @@ export function generatePLayerEntity(TL: {x: number, y: number}, up: keyControl,
     down,
     speed: speedHere,
   }
+}
+
+export function generateParty(players: PlayerEntity[], ball: BallEntity)
+{
+  let game_party: GameParty = {
+    ball: ball,
+    players: players,
+    views: {
+      ball: ball.view,
+      players: players.map(p => p.view),
+    }
+  }
+  return game_party;
 }
