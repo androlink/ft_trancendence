@@ -261,8 +261,11 @@ function Message(msg: WSmessage, connection: any)
   }
 }
 
-// PING MESSAGE
-function PingUser(connection:any)
+/**
+ * Ping user
+ * @param connection the connection to ping
+ */
+function PingUser(connection: any): void
 {
   const response: WSmessage = {
     user:"server",
@@ -271,58 +274,64 @@ function PingUser(connection:any)
   };
   connection.send(JSON.stringify(response))
 }
+/**
+ * 
+ */
+let ConnectionStatusUser: (msg: WSmessage, socket: any) => void;
+{
+  /** search an username accoridng to an id */
+  const statement1 = db.prepare<{sender:number}, {username:string}>("SELECT username FROM users WHERE id = :sender");
+  ConnectionStatusUser = (msg: WSmessage, socket: any) => {
 
-function ConnectionStatusUser(msg: WSmessage, socket: any){
-
-  let sender = null;
-  try {
-      // check the wich client is with the websocket
-      const client = connectedClients.get(socket as WebSocket);
-      if (!client){
-        console.log("client don't exist");
-        return;
-      }
-      try
-      {
-        //update id
-        // @ts-ignore
-        sender = fastify.jwt.decode(msg.user).id;
-        client.setId = sender;
-      }
-      catch {sender = null; client._id = null;}
-      if (client._id !== null)
-      {
-        const row = db.prepare("SELECT username FROM users WHERE id = ? -- chat on message").get(sender);
-        if (!row)
-        {
-          console.error("client don't exist in the database");
+    let sender = null;
+    try {
+        // check the wich client is with the websocket
+        const client = connectedClients.get(socket as WebSocket);
+        if (!client){
+          console.log("client don't exist");
           return;
         }
-
-        // delete old connections
-        for (let [sock, cl] of connectedClients)
+        try
         {
-          if (sock != socket &&  cl._id != null && cl._id === sender)
-          {
-            console.log(cl._username, " got deleted");
-            connectedClients.delete(sock);
-          }
+          //update id
+          // @ts-ignore
+          sender = fastify.jwt.decode(msg.user).id;
+          client.setId = sender;
         }
-        // update username
-        client._username = row.username;
-      }
-      else
-        client._username = null;
+        catch {sender = null; client._id = null;}
+        if (client._id !== null)
+        {
+          const row = statement1.get({sender});
+          if (!row)
+          {
+            console.error("client don't exist in the database");
+            return;
+          }
+          // delete old connections
+          for (let [sock, cl] of connectedClients)
+          {
+            if (sock != socket &&  cl._id != null && cl._id === sender)
+            {
+              console.log(cl._username, " got deleted");
+              connectedClients.delete(sock);
+            }
+          }
+          // update username
+          client._username = row.username;
+        }
+        else
+          client._username = null;
 
-      console.log("Websocket info updated");
-      console.log("=============================",
-                "\nclient username : ", client._username,
-                  "\nclient id : ", client._id,
-                  "\n list size : ", connectedClients.size,
-                "\n=============================");
-  }
-  catch (err){
-      console.error("Error : ", err);
+        console.log("Websocket info updated");
+        console.log("=============================",
+                  "\nclient username : ", client._username,
+                    "\nclient id : ", client._id,
+                    "\n list size : ", connectedClients.size,
+                  "\n=============================");
+    }
+    catch (err){
+        console.error("Error : ", err);
+    }
   }
 }
 
