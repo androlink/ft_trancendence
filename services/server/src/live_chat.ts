@@ -1,7 +1,6 @@
 import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import db from "./database";
-import { typeErrorMessage } from "ajv/dist/vocabularies/jtd/error";
 
 enum TypeMessage {
   message = "message",
@@ -90,15 +89,18 @@ function getClientById(id: number): WSClient | null {
   return pair ? pair[1] : null;
 }
 
-function getClientByUsername(username: string): WSClient | null {
- // check if the sender is on the list
+function getClientByUsername(username: string | null | undefined): WSClient | null {
+
+  if (username === null || username === undefined)
+		return null;
+  // check if the sender is on the list
   const pair = Array
     .from(connectedClients.entries())
     .find(([ws, client]) => client._username == username);
   return pair ? pair[1] : null;
 }
 
-function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage)
+function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage) : void
 {
   const timeout = setTimeout(() => {
             try {
@@ -125,8 +127,12 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage)
 
 //MAIN FUNCTIONS =========================================================================================================
 
-
-function DirectMessage( message:WSmessage, connection: any)
+/**
+ * Send direct message after receive the check from the target
+ * @param message message from the target
+ * @param connection Websocket from the target
+ */
+function DirectMessage( message:WSmessage, connection: any) : void
 {
   for (let msg of listOfMsg)
   {
@@ -147,117 +153,124 @@ function DirectMessage( message:WSmessage, connection: any)
   }
 }
 
+/**
+ * send a ping to the target and set timout for respond
+ * @param msg message of sender
+ * @param senderClient Class client of sender
+ */
+function GetReadyDirectMessage(msg: WSmessage, senderClient: WSClient, senderBlocked : Set<number | null>)
+{
+	// check if the client exist in the database
+	const row = db.prepare("SELECT username FROM users WHERE username = ? -- chat on message").get(msg.target);
+	if (!row){
+		senderClient._socket.send(JSON.stringify({user: 'server',
+		type: TypeMessage.serverMessage,
+		content: `${msg.target} doesn't exist`,
+		msgId: GenerateRandomId()
+	}));
+		return;
+	}
+	// check if the client is connected
+	const targetClient = getClientByUsername(msg.target)
+	if (!targetClient){
+		senderClient._socket.send(JSON.stringify({ user: 'server', type: TypeMessage.serverMessage,
+		content: `${msg.target} is not connected`,
+		msgId: GenerateRandomId()
+		}));
+		return;
+	}
+
+	const newDirectMsg = {
+		user: senderClient._username!, type: TypeMessage.directMessage,
+		target: targetClient?._username,
+		content: msg.content,
+		msgId: msg.msgId
+	};
+
+	listOfMsg.add(newDirectMsg);
+	setTimeoutDirectMsg(senderClient, newDirectMsg);
+
+	const query = {
+		user: senderClient._username, type: "readyForDirectMessage",
+		msgId: GenerateRandomId()
+	};
+	console.log("[sending]", query)
+
+	targetClient._socket.send(JSON.stringify(query));
+}
 
 /**
  * process incoming message from the client
  * @param msg Message of the Sender
  * @param connection Websocket of the Sender
- * @returns
  */
-function Message(msg: WSmessage, connection: any)
+let Message: (msg: WSmessage, connection: any) => void;
 {
-  let sender_id: number | undefined;
+  const statement1 = db.prepare<{senderid: number}, {blocker_id:number}>("SELECT blocker_id FROM user_blocks WHERE blocked_id = :senderid");
+  Message = (msg: WSmessage, connection: any) => {
+    let sender_id: number | undefined;
 
-  // get id of the sender
-  try {
-    sender_id = (fastify.jwt.decode(msg.user) as {id: number | undefined}).id
-    if (!sender_id) {
-        connection.send(JSON.stringify({
+    // get id of the sender
+    try {
+      sender_id = (fastify.jwt.decode(msg.user) as {id: number | undefined}).id
+      if (!sender_id) {
+          connection.send(JSON.stringify({
+          user: 'server',
+          type: TypeMessage.serverMessage,
+          content: "You are not connected",
+        }));
+        return;
+      }
+    }
+    catch (err) {
+      connection.send(JSON.stringify({
         user: 'server',
         type: TypeMessage.serverMessage,
         content: "You are not connected",
       }));
       return;
     }
-  }
-  catch (err) {
-    connection.send(JSON.stringify({
-      user: 'server',
-      type: TypeMessage.serverMessage,
-      content: "You are not connected",
-    }));
-    return;
-  }
 
-  const senderClient: WSClient | null = getClientById(sender_id);
-  if (!senderClient) {
-    connection.send(JSON.stringify({user: 'server',
-      type: TypeMessage.serverMessage,
-      content: "You are not connected"}));
-    return;
-  }
-
-
-  if (msg.type === "message")
-  {
-    if (msg.content != null && msg.content.length != 0)
-    {
-      const newMsg = { user: senderClient._username!, type: TypeMessage.message, content: msg.content};
-
-      if (!msg.target || msg.target === "all") // <== Check for public message
-      {
-        // get all blocked clients from the sender
-        const sender_blocked_list = db.prepare("SELECT blocker_id FROM user_blocks WHERE blocked_id = ? -- chat on message").all(senderClient._id);
-        const senderBlocked = new Set(sender_blocked_list.map((row: any) => row.blocker_id));
-
-        connectedClients.forEach((cl:WSClient) => {
-          if (senderClient._id === cl._id)
-              newMsg.type = TypeMessage.yourMessage;
-          if (senderBlocked && !senderBlocked.has(cl._id)){
-            cl._socket.send(JSON.stringify(newMsg));
-            newMsg.type = TypeMessage.message;
-          }
-        });
-        return;
-      }
-      else { // <==   Check for direct message
-
-        // check if the client exist in the database
-        const row = db.prepare("SELECT username FROM users WHERE username = ? -- chat on message").get(msg.target);
-        if (!row){
-          connection.send(JSON.stringify({user: 'server',
-            type: TypeMessage.serverMessage,
-            content: `${msg.target} doesn't exist`,
-            msgId: GenerateRandomId()
-        }));
-          return;
-        }
-        // check if the client is connected
-        const targetClient = getClientByUsername(msg.target)
-        if (!targetClient){
-          connection.send(JSON.stringify({ user: 'server', type: TypeMessage.serverMessage,
-            content: `${msg.target} is not connected`,
-            msgId: GenerateRandomId()
-          }));
-          return;
-        }
-
-        const newDirectMsg = {
-            user: senderClient._username!, type: TypeMessage.directMessage,
-            target: targetClient?._username,
-            content: msg.content,
-            msgId: msg.msgId
-        };
-
-        listOfMsg.add(newDirectMsg);
-        setTimeoutDirectMsg(senderClient, newDirectMsg);
-        
-        const query = {
-            user: senderClient._username, type: "readyForDirectMessage",
-            msgId: GenerateRandomId()
-        };
-        console.log("[sending]", query)
-
-        targetClient._socket.send(JSON.stringify(query));
-      }
+    const senderClient: WSClient | null = getClientById(sender_id);
+    if (!senderClient) {
+      connection.send(JSON.stringify({user: 'server',
+        type: TypeMessage.serverMessage,
+        content: "You are not connected"}));
+      return;
     }
-    else
-      console.error("error : no message content");
-  }
-  else if (msg.type === "directMessage")
-  {
-    msg.user = senderClient._username!;
-    DirectMessage(msg, connection);
+
+    if (msg.type === "message")
+    {
+    // get all blocked clients from the sender
+    const senderid = senderClient._id;
+    const sender_blocked_list = statement1.all({senderid});
+    const senderBlocked = new Set<number | null>(sender_blocked_list.map((row: any) => row.blocker_id));
+      if (msg.content != null && msg.content.length != 0)
+      {
+        const newMsg = { user: senderClient._username!, type: TypeMessage.message, content: msg.content};
+
+        if (msg.target !== undefined && msg.target !== "all") {
+          GetReadyDirectMessage(msg, senderClient, senderBlocked);
+        }
+        else {
+          connectedClients.forEach((cl:WSClient) => {
+            if (senderClient._id === cl._id)
+                newMsg.type = TypeMessage.yourMessage;
+            if (senderBlocked && !senderBlocked.has(cl._id)){
+              cl._socket.send(JSON.stringify(newMsg));
+              newMsg.type = TypeMessage.message;
+            }
+          });
+        }
+      }
+      else
+        console.error("error : no message content");
+    }
+    else if (msg.type === "directMessage")
+    {
+      msg.user = senderClient._username!;
+      DirectMessage(msg, connection);
+    }
   }
 }
 
@@ -274,8 +287,11 @@ function PingUser(connection: any): void
   };
   connection.send(JSON.stringify(response))
 }
+
 /**
- * 
+ * Change the status of the connection (username, id)
+ * @param msg message from sender
+ * @param socket Websocket from sender
  */
 let ConnectionStatusUser: (msg: WSmessage, socket: any) => void;
 {
@@ -294,7 +310,6 @@ let ConnectionStatusUser: (msg: WSmessage, socket: any) => void;
         try
         {
           //update id
-          // @ts-ignore
           sender = fastify.jwt.decode(msg.user).id;
           client.setId = sender;
         }
@@ -306,15 +321,6 @@ let ConnectionStatusUser: (msg: WSmessage, socket: any) => void;
           {
             console.error("client don't exist in the database");
             return;
-          }
-          // delete old connections
-          for (let [sock, cl] of connectedClients)
-          {
-            if (sock != socket &&  cl._id != null && cl._id === sender)
-            {
-              console.log(cl._username, " got deleted");
-              connectedClients.delete(sock);
-            }
           }
           // update username
           client._username = row.username;
@@ -363,9 +369,10 @@ export default function liveChat(fastify: FastifyInstance){
     connection.on("message", (event) => {
       try {
         const msg: WSmessage = JSON.parse(event.toString());
+        const origin = (typeof msg.user === "string" && msg.user.length > 0) ? (msg.user.substring(0, 21) + "...") : "unknown";
         console.log({
             messageType: msg.type,
-            origin: msg.user.substring(0, 21) + "...",
+            origin,
             target: msg.target,
             content: msg.content,
           });
