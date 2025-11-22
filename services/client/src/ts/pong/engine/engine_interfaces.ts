@@ -19,7 +19,7 @@ export interface PlayerView {
 export interface keyControl {
   key: string;
   code?: string;
-  pressed: boolean;
+  pressed?: boolean;
 }
 
 /**

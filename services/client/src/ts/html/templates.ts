@@ -48,7 +48,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
   </span>
   <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
-    <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
+    <div id="inner" class="h-full col-span-3 overflow-hidden relative"></div>
     <div class="h-full flex flex-col overflow-hidden">
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[auto reconnected]]</p>
@@ -240,13 +240,18 @@ const htmlSnippetsTemplate:  {
   </div>
     `,
   Pong: `
-  <div class="size-full flex flex-col overflow-scroll">
-      <script>
-        createLocalPong();
-		updateLocalGame();
-        document.currentScript.remove();
+  <div class="relative size-full flex flex-col overflow-scroll">
+      <script id="local config">
+        loadLocalConfig();
       </script>
-      <canvas class="border border-white aspect-auto" id="canvas"></canvas>
+      <!--
+        <script>
+          createLocalPong();
+		      updateLocalGame();
+          document.currentScript.remove();
+        </script>
+        -->
+        <canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:

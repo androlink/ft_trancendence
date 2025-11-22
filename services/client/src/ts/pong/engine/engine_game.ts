@@ -1,8 +1,8 @@
 
 import { generateParty, resetBall, resetParty, resetPlayer } from './engine_inits.js';
-import { GameParty } from './engine_interfaces.js';
+import { GameParty, PlayerEntity } from './engine_interfaces.js';
 import { tick } from './engine_tick.js';
-import { ball, delay, players } from './engine_variables.js';
+import { ball, config, delay, players } from './engine_variables.js';
 
 function eventKeyInputPong(event: KeyboardEvent)
 {
@@ -19,7 +19,7 @@ function eventKeyInputPong(event: KeyboardEvent)
           control.key.toLowerCase() === event.key.toLowerCase()
         )
       {
-        control.pressed = event.type === 'keydown';
+        control.pressed = event.type === "keydown";
       }
     }
   });
@@ -29,16 +29,16 @@ export let game: GameParty | undefined = undefined;
 /**
  * will set the events to play the local game, and launch the game
  */
-function createLocalPong(): void {
+export function createLocalPong(): void {
   if (game?.intervalId !== undefined)
     return;
+  game = generateParty(players, ball, 5);
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
-  self.addEventListener('popstate', deleteLocalPong);
+  document.addEventListener("popstate", deleteLocalPong, {once: true});
   document.addEventListener("visibilitychange", toggleLocalPongOnHidden);
   document.getElementById("canvas").addEventListener("click", startLocalPong);
-  game = generateParty(players, ball, 5);
-  game.intervalId = setInterval(tick, delay, game)
+  game.intervalId = setInterval(tick, delay, game);
 }
 self["createLocalPong"] = createLocalPong;
 
@@ -92,7 +92,6 @@ function toggleLocalPongOnHidden() {
 function deleteLocalPong(): void {
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
-  self.removeEventListener('popstate', deleteLocalPong);
   document.removeEventListener("visibilitychange", toggleLocalPongOnHidden);
   if (game.intervalId)
     clearInterval(game.intervalId);

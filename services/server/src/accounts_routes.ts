@@ -27,7 +27,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
     let conditions = {
       username: {minLength: 3, maxLength: 20, alphanumeric_: true },
       biography: {maxLength: 3000 },
-      password: {minLength: 4, maxByteLength: 42 },
+      password: {minLength: 4, maxByteLength: 71 },
     }
     return async function (req:FastifyRequest<{Body: Object}>, reply: FastifyReply) {
       for (const field of requiredFields) {
