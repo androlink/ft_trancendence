@@ -35,9 +35,9 @@ export function createLocalPong(): void {
   game = generateParty(players, ball, 5);
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
-  document.addEventListener("popstate", deleteLocalPong);
+  self.addEventListener("popstate", deleteLocalPong, {once: true});
   document.addEventListener("visibilitychange", toggleLocalPongOnHidden);
-  document.getElementById("canvas").addEventListener("click", startLocalPong);
+  document.getElementById("canvas")?.addEventListener("click", startLocalPong);
   game.intervalId = setInterval(tick, delay, game);
 }
 self["createLocalPong"] = createLocalPong;
@@ -92,7 +92,6 @@ function toggleLocalPongOnHidden() {
 function deleteLocalPong(): void {
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
-  document.removeEventListener("popstate", deleteLocalPong);
   document.removeEventListener("visibilitychange", toggleLocalPongOnHidden);
   if (game.intervalId)
     clearInterval(game.intervalId);
