@@ -8,6 +8,7 @@ enum TypeMessage {
   message = "message",
   yourMessage = "yourMessage",
   directMessage = "directMessage",
+  yourDirectMessage = "yourDirectMessage",
   readyForDirectMessage = "readyForDirectMessage",
   serverMessage= "serverMessage",
   connection = "connection",
@@ -38,7 +39,10 @@ function GenerateRandomId(): string{
 
 
 let reconnectTimeout = 1000;
-function retryConnection() {
+/**
+ * try to call WSconnect to re set a connection websocket
+ */
+function retryConnection(): void {
   console.log("Retry chat connection");
   setTimeout(WSconnect, reconnectTimeout);
   reconnectTimeout = Math.min(reconnectTimeout * 2, 10000);
@@ -46,8 +50,10 @@ function retryConnection() {
 
 /**
  * Create New connection Websocket
+ * Setup message eventListener
+ * call retryConnection if the connection close
  */
-function WSconnect()
+function WSconnect() : void
 {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
     return;
@@ -96,8 +102,10 @@ function WSconnect()
 }
 
 
-// setup connection chat
-export function InitConnectionChat() {
+/**
+ * Initialise chat and create a connection Websocket 
+ */
+export function InitConnectionChat(): void {
 
   // get the chat box
   const chat = document.getElementById("chat-content");
@@ -133,9 +141,9 @@ export function InitConnectionChat() {
 
 /**
  * Show receive message to the chat
- * @param message @type
+ * @param message receive message to show to the chat
+ * 
  *
- * @returns
  */
 function showMessageToChat(message: WSmessage): boolean {
 
@@ -165,23 +173,27 @@ function showMessageToChat(message: WSmessage): boolean {
       // setup username
       userLink.onclick = () => {goToURL(`profile/${message.user}`)};
       userLink.textContent = `${message.user}:`;
-      userLink.className = 'text-yellow-500 hover:font-bold p-2 rounded-md cursor-pointer ';
+      userLink.className = 'text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ';
       para.appendChild(userLink);
       para.appendChild(node);
   
       break;
     case TypeMessage.directMessage:
       // setup username
-      para.className = 'text-pink-400';
       userLink.onclick = () => {goToURL(`profile/${message.user}`)};
       userLink.textContent = `${message.user}:`;
-      userLink.className = 'text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ';
-      // setup text
-      const messageText = document.createElement('span');
-      messageText.textContent = message.content;
-      messageText.className = 'italic';
+      userLink.className = 'text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ';
       para.appendChild(userLink);
-      para.appendChild(messageText);
+      para.appendChild(node);
+
+      break;
+    case TypeMessage.yourDirectMessage:
+      // setup username
+      userLink.onclick = () => {goToURL(`profile/${message.user}`)};
+      userLink.textContent = `[Me] ${message.user}:`;
+      userLink.className = 'text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ';
+      para.appendChild(userLink);
+      para.appendChild(node);
 
       break;
     case TypeMessage.serverMessage:
@@ -193,7 +205,6 @@ function showMessageToChat(message: WSmessage): boolean {
       break;
   }
 
-  
   chat.appendChild(para);
 
   if (scroll) {
@@ -202,8 +213,12 @@ function showMessageToChat(message: WSmessage): boolean {
   return scroll;
 }
 
-
-function waitForSocketConnection(socket, send: Function) {
+/**
+ * wait if the websocket is on
+ * @param socket Websocket to check
+ * @param send function to send the message on backend
+ */
+function waitForSocketConnection(socket: WebSocket, send: Function) {
   setTimeout(
     function () {
       if (socket.readyState === 1) {
@@ -215,7 +230,11 @@ function waitForSocketConnection(socket, send: Function) {
     }, 5);
 }
 
-
+/**
+ * send the message or call waitForSocketConnection 
+ * if the connection websocket isn't on
+ * @param message message to send
+ */
 function sendOrQueue(message: string) {
   if (ws.readyState === WebSocket.OPEN)
     ws.send(message);

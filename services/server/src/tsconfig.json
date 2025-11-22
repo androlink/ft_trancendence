@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "strict": true,
     "skipLibCheck": true,
-    "lib": ["esnext", "dom"]
+    "lib": []
   },
     "watchOptions": {
     "watchFile": "fixedpollinginterval"
