@@ -244,7 +244,7 @@ const htmlSnippetsTemplate:  {
     <script id="local config">
       loadLocalConfig();
     </script>
-    <canvas class="border border-white aspect-auto" id="canvas"></canvas>
+    <canvas class="border border-white size-full" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:
