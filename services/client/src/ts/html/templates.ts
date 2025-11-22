@@ -241,17 +241,10 @@ const htmlSnippetsTemplate:  {
     `,
   Pong: `
   <div class="relative size-full flex flex-col overflow-scroll">
-      <script id="local config">
-        loadLocalConfig();
-      </script>
-      <!--
-        <script>
-          createLocalPong();
-		      updateLocalGame();
-          document.currentScript.remove();
-        </script>
-        -->
-        <canvas class="border border-white aspect-auto" id="canvas"></canvas>
+    <script id="local config">
+      loadLocalConfig();
+    </script>
+    <canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:

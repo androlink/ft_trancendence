@@ -94,6 +94,9 @@ function player_config(player_id: "player_one" | "player_two") {
 
 }
 
+
+const span = document.createElement("span");
+const button = document.createElement("button");
 /**
  * used to chose who will play with what when playing local
  * Display will be inspired of smash bros, kinda
@@ -110,14 +113,17 @@ function loadLocalConfig() {
     return;
   }
 
+  if (inner.contains(span)) inner.removeChild(span);
+  if (inner.contains(button)) inner.removeChild(button);
+
   const fragment = document.createDocumentFragment();
-  const span = document.createElement("span");
+  span.innerHTML = "";
   span.className = "absolute top-0 size-full *:justify-self-center gap-30 grid grid-cols-2"
   for (const player of ["player_one", "player_two"] as const ) {
     span.appendChild(player_config(player))
   }
+
   fragment.appendChild(span);
-  const button = document.createElement("button");
   button.className = "max-w-30 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
   button.textContent = "launch game";
   button.onclick = () => {
@@ -125,6 +131,7 @@ function loadLocalConfig() {
     inner.removeChild(button);
     createLocalPong();
     updateLocalGame();
+    proof.remove();
   };
   fragment.appendChild(button);
   inner.appendChild(fragment);
