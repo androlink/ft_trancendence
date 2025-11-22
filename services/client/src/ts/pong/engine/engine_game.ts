@@ -25,7 +25,14 @@ function eventKeyInputPong(event: KeyboardEvent)
   });
 }
 
+function botKeyPressingPong(){
+  for (let player of players){
+    
+  }
+}
+
 export let game: GameParty | undefined = undefined;
+let bot: ReturnType<typeof setInterval> = undefined;
 /**
  * will set the events to play the local game, and launch the game
  */
@@ -33,6 +40,7 @@ export function createLocalPong(): void {
   if (game?.intervalId !== undefined)
     return;
   game = generateParty(players, ball, 5);
+  bot = setInterval(() => {});
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
   self.addEventListener("popstate", deleteLocalPong, {once: true});
