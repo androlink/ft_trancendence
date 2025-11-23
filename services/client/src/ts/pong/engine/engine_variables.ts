@@ -27,12 +27,12 @@ export const players =
   generatePLayerEntity(
     {x: 5, y: 50 - paddle_height / 2},
     ...get_key_config("player_one"),
-    'E', false
+    'E', 0,
   ),
   generatePLayerEntity(
     {x: 100 - 5 - paddle_width, y: 50 - paddle_height / 2},
     ...get_key_config("player_two"),
-    'W', true
+    'W', 10,
   ),
 ] as PlayerEntity[];
 
@@ -44,9 +44,3 @@ export const ball = {
   speed: {x: 1, y: 0},
   last: players[0],
 } as BallEntity;
-
-/**
- * the config of a local game (amount of player and their key binds)
- * a player undefined will be a bot. Will probably be changed soon
- */
-export const config: {player_one?: [keyControl, keyControl], player_two?: [keyControl, keyControl]} = {player_one: [players[0].up, players[0].down]};

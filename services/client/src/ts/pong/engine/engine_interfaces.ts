@@ -29,7 +29,7 @@ export interface PlayerEntity {
   view: PlayerView;
   up: keyControl;
   down: keyControl;
-  bot: boolean;
+  bot_difficulty: number;
   speed: number;
 }
 

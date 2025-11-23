@@ -2,7 +2,7 @@
 import { generateParty, resetBall, resetParty, resetPlayer } from './engine_inits.js';
 import { GameParty, PlayerEntity } from './engine_interfaces.js';
 import { tick } from './engine_tick.js';
-import { ball, ball_size, config, delay, players } from './engine_variables.js';
+import { ball, ball_size, delay, players } from './engine_variables.js';
 
 function eventKeyInputPong(event: KeyboardEvent)
 {
@@ -12,7 +12,7 @@ function eventKeyInputPong(event: KeyboardEvent)
   }
 
   game.players.forEach(player => {
-    if (player.bot)
+    if (player.bot_difficulty)
       return;
     for (let control of [player.up, player.down]) {
       if (
@@ -35,13 +35,19 @@ function botKeyPressingPong(){
   const dx = ball.view.x - last_ball.x;
   const dy = ball.view.y - last_ball.y;
   for (const player of players) {
-    if (!player.bot)
+    if (!player.bot_difficulty)
       continue;
     if ((dx > 0 && ball.view.x >= player.view.TL.x + player.view.width)
       || (dx < 0 && ball.view.x <= player.view.TL.x)) {
-     
       player.down.pressed = (player.view.TL.y < 50);
       player.up.pressed = (player.view.TL.y + player.view.height > 50);
+      continue;
+    }
+    if ((player.view.direction === "E" && (player.bot_difficulty + 1) ** 3 * 0.8 < ball.view.x - (player.view.TL.x + player.view.width)) ||
+        (player.view.direction === "W" && (player.bot_difficulty + 1) ** 3 * 0.8 < player.view.TL.x - ball.view.x)
+    ) {
+      player.down.pressed = false;
+      player.up.pressed = false;
       continue;
     }
     let estmated_nb_call = (player.view.TL.x - ball.view.x) / dx;

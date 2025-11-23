@@ -1,18 +1,18 @@
 
 import { createLocalPong } from "./engine/engine_game.js";
 import { keyControl } from "./engine/engine_interfaces.js";
-import { config, players } from "./engine/engine_variables.js";
+import { players } from "./engine/engine_variables.js";
 import { updateLocalGame } from "./pong.js";
 
 
 let controller = new AbortController();
-function changeInput(e: MouseEvent, which: 0 | 1, player_id: "player_one" | "player_two") {
+function changeInput(e: MouseEvent, which: "down" | "up", player_id: 0 | 1) {
   controller.abort();
   controller = new AbortController();
-  controller.signal.addEventListener("abort", () => ((e.target as Element).textContent = config[player_id][which].key));
+  controller.signal.addEventListener("abort", () => ((e.target as Element).textContent = players[player_id][which].key));
   document.addEventListener("keydown", (e: KeyboardEvent) => {
-    config[player_id][which].key = e.key;
-    config[player_id][which].code = e.code;
+    players[player_id][which].key = e.key;
+    players[player_id][which].code = e.code;
     set_key_config(player_id, which, {key: e.key, code: e.code})
     loadLocalConfig();
   }, {once: true, signal: controller.signal});
@@ -31,7 +31,8 @@ export function get_key_config(player_id: "player_one" | "player_two"): [keyCont
   const res = [undefined, undefined] as [keyControl, keyControl];
   for (const which of [0, 1]) {
     try {
-      res[which] = JSON.parse(localStorage.getItem(`${player_id}_${which}`) || "crash");
+      console.log("it's", `${player_id}_${which ? "down": "up" }`);
+      res[which] = JSON.parse(localStorage.getItem(`${player_id === "player_one" ? 0 : 1}_${which ? "down": "up" }`) || "crash");
     }
     catch (err){
       res[which] = defaultConfig[player_id][which];
@@ -44,8 +45,8 @@ export function get_key_config(player_id: "player_one" | "player_two"): [keyCont
  * set a keyControl to the local storage
  * @param controls the keyControl you wanna remember
  */
-function set_key_config(player_id: "player_one" | "player_two", which: 0 | 1, controls: keyControl) {
-  players[player_id === "player_one" ? 0 : 1][which ? "down" : "up"] = controls;
+function set_key_config(player_id: 0 | 1, which: "down" | "up", controls: keyControl) {
+  players[player_id][which] = controls;
   localStorage.setItem(`${player_id}_${which}`, JSON.stringify(controls));
 }
 
@@ -53,42 +54,56 @@ function set_key_config(player_id: "player_one" | "player_two", which: 0 | 1, co
  * gives a HTML element 
  * @param player_id the string value of the key corresponging to the player in config
  */
-function player_config(player_id: "player_one" | "player_two") {
+function player_config(player_id: 0 | 1) {
   controller.abort();
   const div = document.createElement("div");
   div.className = "flex flex-col justify-around h-3/4 my-auto border w-3/4 *:size-fit *:mx-auto rounded bg-gray-600";
-  if (config[player_id] === undefined) {
+  if (players[player_id].bot_difficulty) {
     const button = document.createElement("button");
     button.textContent = "add player ?";
     button.className = "text-white border border-black rounded px-1 cursor-pointer";
     button.onclick = () => {
-      config[player_id] = get_key_config(player_id);
-      players[player_id === "player_one" ? 0 : 1].bot = false;
+      players[player_id].bot_difficulty = 0;
       loadLocalConfig();
     };
     div.appendChild(button);
+    const span = document.createElement("span");
+    span.className = "flex flex-col *:size-fit place-items-center";
+    const label = document.createElement("label");
+    label.textContent = "Difficulty 1 - 4";
+    label.title = "Formula: starts predicting the ball when it is ≪((difficulty + 1) ** 3 * 0.8)% size of the board≫ close to you";
+    label.className = "whitespace-pre-line px-3";
+    span.appendChild(label);
+    const range = document.createElement("input");
+    range.type = "range";
+    range.min = "1";
+    range.max = "4";
+    range.value = String(players[player_id].bot_difficulty);
+    range.oninput = e => players[player_id].bot_difficulty = parseInt((e.target as HTMLInputElement).value);
+    span.appendChild(range);
+    div.appendChild(span);
     return div;
   }
   const p = document.createElement("p");
-  p.textContent = player_id;
+  p.textContent = player_id ? "right player" : "left player";
   p.className = "text-white";
   div.appendChild(p);
   const up = document.createElement("button");
-  up.textContent = config[player_id][0].key;
+  console.log(players);
+  up.textContent = players[player_id].up.key;
   up.className = "text-white border border-black rounded px-1 cursor-pointer";
-  up.onclick = e => changeInput(e, 0, player_id);
+  up.onclick = e => changeInput(e, "up", player_id);
   div.appendChild(up);
   const down = document.createElement("p");
-  down.textContent = config[player_id][1].key;
+  down.textContent = players[player_id].down.key;
   down.className = "text-white border border-black rounded px-1 cursor-pointer";
-  down.onclick = e => changeInput(e, 1, player_id);
+  down.onclick = e => changeInput(e, "down", player_id);
   div.appendChild(down);
   const button = document.createElement("button");
   button.textContent = "set a bot";
   button.className = "text-white border border-black rounded px-1 cursor-pointer";
   button.onclick = () => {
-    config[player_id] = undefined;
-    players[player_id === "player_one" ? 0 : 1].bot = true;
+    players[player_id].bot_difficulty = 10;
     loadLocalConfig();
   };
   div.appendChild(button);
@@ -121,8 +136,8 @@ function loadLocalConfig() {
   const fragment = document.createDocumentFragment();
   span.innerHTML = "";
   span.className = "absolute top-0 size-full *:justify-self-center gap-30 grid grid-cols-2"
-  for (const player of ["player_one", "player_two"] as const ) {
-    span.appendChild(player_config(player))
+  for (const player_id of [0 , 1] as [0 , 1]) {
+    span.appendChild(player_config(player_id))
   }
 
   fragment.appendChild(span);
