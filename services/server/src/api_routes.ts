@@ -114,7 +114,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
 
   {
     /** get all the infos for the user searched */
-    const statement1 = db.prepare<{username: string}, {bio: string, pfp: string, id: Id, username: string, wins: number, losses: number}>('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS losses FROM users u WHERE lower(username) = lower(:username)');
+    const statement1 = db.prepare<{username: string}, {bio: string, pfp: string, id: Id, username: string, wins: number, losses: number, draws: number}>('SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE player_one = u.id AND result_type = \'win\' OR player_two = u.id AND result_type = \'loss\') AS wins, (SELECT COUNT(*) FROM history_game WHERE player_two = u.id AND result_type = \'win\' OR player_one = u.id AND result_type = \'loss\') as losses, (SELECT COUNT(*) FROM history_game WHERE (player_one = u.id OR player_two = u.id) AND result_type = \'draw\') AS draws FROM users u WHERE lower(username) = lower(:username)');
     /** see if they are blocked */
     const statement2 = db.prepare<{requesterId: Id, targetId: Id}, {1: 1}>("SELECT 1 FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId");
     /** see if there is already a friend request sent */
@@ -164,7 +164,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
         replace: {"username-p2": row.username, "biography-p2": row.bio,
           "profile-picture": `${assetsPath}/pfp/${row.pfp}`,
           "friend request": friend, "blocking request": block,
-          wins: String(row.wins), loses: String(row.losses),
+          wins: String(row.wins), losses: String(row.losses), draws: String(row.draws),
           ratio: row.losses ? String((row.wins / row.losses).toFixed(2)) : '¯\\_(ツ)_/¯',
         },
         title: row.username, inner: "Profile2",

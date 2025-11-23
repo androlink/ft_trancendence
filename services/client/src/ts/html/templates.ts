@@ -137,15 +137,17 @@ const htmlSnippetsTemplate:  {
       <thead>
         <tr class="*:border *:border-gray-300 *:text-center">
           <th class="border border-gray-300" scope="col">[[wins]]</th>
-          <th class="border border-gray-300" scope="col">[[loses]]</th>
+          <th class="border border-gray-300" scope="col">[[losses]]</th>
           <th class="border border-gray-300" scope="col">[[w/l ratio]]</th>
+          <th class="border border-gray-300" scope="col">[[draws]]</th>
         </tr>
       </thead>
       <tbody>
         <tr class="*:border *:border-gray-300 *:text-center">
           <td id="wins"></td>
-          <td id="loses"></td>
+          <td id="losses"></td>
           <td id="ratio"></td>
+          <td id="draws"></td>
         </tr>
       </tbody>
     </table>
