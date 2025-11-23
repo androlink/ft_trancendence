@@ -29,6 +29,7 @@ export interface PlayerEntity {
   view: PlayerView;
   up: keyControl;
   down: keyControl;
+  bot: boolean;
   speed: number;
 }
 
@@ -66,4 +67,5 @@ export interface GameParty
   players: PlayerEntity[],
   views: DataFrame,
   max_score: number,
+  botIntervalId?: ReturnType<typeof setInterval>,
 }

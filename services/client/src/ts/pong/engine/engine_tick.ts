@@ -29,6 +29,8 @@ export function tick( game: GameParty)
       clearInterval(game.intervalId);
       game.intervalId = undefined;
       game.views.state = 'ended';
+      clearInterval(game.botIntervalId);
+      game.botIntervalId = undefined;
     }
   }
 

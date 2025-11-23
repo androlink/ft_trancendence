@@ -63,6 +63,7 @@ function player_config(player_id: "player_one" | "player_two") {
     button.className = "text-white border border-black rounded px-1 cursor-pointer";
     button.onclick = () => {
       config[player_id] = get_key_config(player_id);
+      players[player_id === "player_one" ? 0 : 1].bot = false;
       loadLocalConfig();
     };
     div.appendChild(button);
@@ -87,6 +88,7 @@ function player_config(player_id: "player_one" | "player_two") {
   button.className = "text-white border border-black rounded px-1 cursor-pointer";
   button.onclick = () => {
     config[player_id] = undefined;
+    players[player_id === "player_one" ? 0 : 1].bot = true;
     loadLocalConfig();
   };
   div.appendChild(button);
