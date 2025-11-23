@@ -82,17 +82,19 @@ function WSconnect() : void
       const receivemsg: WSmessage = JSON.parse(event.data);
       console.log("[incoming message]:", receivemsg);
       // check type
-      if (receivemsg.type !== "pong")
-      {
-        //construct message to show on the chat
-        showMessageToChat(receivemsg);
-      }
-      if (receivemsg.type === "pong"){
+      if (receivemsg.type === TypeMessage.pong) {
         console.log("pong");
         lastPong = Date.now();
       }
-      if (receivemsg.type === "readyForDirectMessage"){
-        sendOrQueue(JSON.stringify({user: localStorage.getItem('token'), type: TypeMessage.directMessage, target: receivemsg.user}))
+      else if (receivemsg.type === TypeMessage.readyForDirectMessage){
+        sendOrQueue(JSON.stringify({
+          user: localStorage.getItem('token'),
+          type: TypeMessage.readyForDirectMessage,
+          target: receivemsg.user}))
+      }
+      else {
+        //construct message to show on the chat
+        showMessageToChat(receivemsg);
       }
     } catch (err) {
       alert("error : "+ err);
@@ -276,7 +278,7 @@ export function sendChatMessage() {
       for (let client of targets)
       {
         msg.target = client;
-        sendOrQueue(JSON.stringify(msg));// <=== send message
+        sendOrQueue(JSON.stringify(msg));
       }
     }
   }
@@ -289,16 +291,16 @@ export function sendChatMessage() {
       msgId: GenerateRandomId()
     };
     textarea.value = "";
-    sendOrQueue(JSON.stringify(msg));// <=== send message
+    sendOrQueue(JSON.stringify(msg));
   }
 }
 
 /**
  * Send a Status of the actuel Websocket connection
- * - when is register/login
- * - when is logout
- * - when their update there infos
- * - when a new Websocket connection is made
+ * - when is `register/login`
+ * - when is `logout`
+ * - when their `update` there infos
+ * - when a `new Websocket` connection is made
  */
 export function sendStatusMessage()
 {

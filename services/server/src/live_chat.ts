@@ -40,7 +40,7 @@ interface WSmessage {
  * @param _id id of client (null if is not connected)
  */
 class WSClient{
-  _socket: any;
+  _socket: WebSocket;
   _username: string | null;
   _id: number | null;
 
@@ -136,10 +136,11 @@ function getClientByUsername(username: string | null | undefined): WSClient | nu
 function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage) : void
 {
   const timeout = setTimeout(() => {
+    console.log("timeout!")
             try {
               const msgIndex = listOfMsg.indexOf(message);
               if (msgIndex !== -1) {
-                listOfMsg.splice(msgIndex, 1);
+                listOfMsg.slice(msgIndex, 1);
               
                 Sender._socket.send(JSON.stringify({
                     user: 'server',
@@ -155,7 +156,8 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage) : void
                 directMsgTimers.delete(message.msgId!);
             }
         }, 5000);
-  directMsgTimers.set(message.msgId as string, timeout);
+        console.log("setting timeout " + timeout);
+  directMsgTimers.set(message.msgId!, timeout);
 }
 
 //MAIN FUNCTIONS =========================================================================================================
@@ -172,10 +174,11 @@ function DirectMessage( TargetRespondMsg:WSmessage , TargetSocket: any){
     {
       //clear message timout
       const msgId = msg.msgId;
+      console.log("message id", msgId);
       if (msgId && directMsgTimers.has(msgId)) {
-        clearInterval(directMsgTimers.get(msgId)!);
+        console.log("unsetting timeout " + directMsgTimers.get(msgId));
+        clearTimeout(directMsgTimers.get(msgId));
         directMsgTimers.delete(msgId);
-      
       }
       
       const targetClient = getClientByUsername(TargetRespondMsg.user);
@@ -189,15 +192,16 @@ function DirectMessage( TargetRespondMsg:WSmessage , TargetSocket: any){
         const Sender = getClientByUsername(msg.user);
         // send to the target if the sender is not blocked
         if (Sender && !targetBlocked.has(Sender._id))
-          TargetSocket.send(JSON.stringify(msg));
+          targetClient._socket.send(JSON.stringify(msg));
         //send to the sender
         if (Sender)
         {
-          msg.type = TypeMessage.yourDirectMessage,
+          msg.type = TypeMessage.yourDirectMessage
           Sender._socket.send(JSON.stringify(msg));
+          msg.type = TypeMessage.directMessage
         }
       }
-      listOfMsg.slice(listOfMsg.indexOf(msg), 1);
+      listOfMsg.splice(listOfMsg.indexOf(msg), 1);
       return;
     }
   }
@@ -216,7 +220,7 @@ function GetReadyDirectMessage(msg: WSmessage, senderClient: WSClient){
     type: TypeMessage.serverMessage,
     content: `${msg.target} doesn't exist`,
     msgId: GenerateRandomId()
-  }));
+    }));
     return;
   }
   // check if the client is connected
@@ -229,6 +233,7 @@ function GetReadyDirectMessage(msg: WSmessage, senderClient: WSClient){
     return;
   }
   else{
+    // don't send a direct message to yourself please
     if (targetClient._username === senderClient._username){
       senderClient._socket.send(JSON.stringify({ user: 'server', type: TypeMessage.serverMessage,
       content: `${msg.target} is you`,
@@ -236,6 +241,7 @@ function GetReadyDirectMessage(msg: WSmessage, senderClient: WSClient){
       }));
       return;
     }
+
     const newDirectMsg = {
       user: senderClient._username!, type: TypeMessage.directMessage,
       target: targetClient._username, content: msg.content,
@@ -246,13 +252,13 @@ function GetReadyDirectMessage(msg: WSmessage, senderClient: WSClient){
     setTimeoutDirectMsg(senderClient, newDirectMsg);
   
     const newGetReadyMsg = {
-      user: senderClient._username, type: "readyForDirectMessage",
+      user: senderClient._username, type: TypeMessage.readyForDirectMessage,
       msgId: GenerateRandomId()
     };
   
     //send a call to the target
-    console.log("[sending]", newGetReadyMsg)
     targetClient._socket.send(JSON.stringify(newGetReadyMsg));
+    console.log("[sending]", newGetReadyMsg)
   }
 
 }
@@ -320,7 +326,7 @@ function Message(msg: WSmessage, SenderSocket: any) {
     else
       console.error("error : no message content");
   }
-  else if (msg.type === TypeMessage.directMessage)
+  else if (msg.type === TypeMessage.readyForDirectMessage)
   {
     msg.user = senderClient._username!;
     DirectMessage(msg, SenderSocket);
@@ -351,29 +357,29 @@ function ConnectionStatusUser(msg: WSmessage, socket: any): void {
   // check the wich client is with the websocket
   const client = connectedClients.get(socket as WebSocket);
   if (!client){
-    console.log("client don't exist");
+    console.log("client doesn't exist");
     return;
   }
-  try
-  {
+  try {
     //update id
     sender = fastify.jwt.decode(msg.user);
     if (!sender)
       throw new Error("Invalid JsonWebToken");
-    client.setId = sender.id;
+    client._id = sender.id;
   }
   catch {
     client._id = null;
+    client._username = null;
     return;
   }
   let row: { username: string } | undefined;
-  try { row = dbQuery.getUserById.get({userId: sender!.id}); }
+  try { row = dbQuery.getUserById.get({userId: sender.id}); }
   catch (dbError) {
     console.error("database query failed");
     return;
   }
   if (!row) {
-    console.error("client don't exist in the database");
+    console.error("client doesn't exist in the database");
     return;
   }
   client._username = row.username;
@@ -397,6 +403,15 @@ export default function liveChat(fastify: FastifyInstance){
       const newClient = new WSClient(ws, null, null);
       connectedClients.set(ws, newClient);
     }
+
+    ws.on("close", (client: WebSocket) => {
+        const deleteClient = connectedClients.get(ws);
+        if (deleteClient)
+        {
+          console.log("client", deleteClient._username, "got deleted");
+          connectedClients.delete(ws);
+        }
+    });  
   });
 
   // remove clients from connected clients
@@ -425,11 +440,11 @@ export default function liveChat(fastify: FastifyInstance){
               msgId : msg.msgId
             });
         }
-        if (msg.type === "message" || msg.type === "directMessage")
+        if (msg.type === TypeMessage.message || msg.type === TypeMessage.readyForDirectMessage)
           Message(msg, connection);
-        if (msg.type === "ping")
+        if (msg.type === TypeMessage.ping)
           PingUser(connection);
-        if (msg.type === "connection")
+        if (msg.type === TypeMessage.connection)
           ConnectionStatusUser(msg, connection);
       }
       catch (err)
