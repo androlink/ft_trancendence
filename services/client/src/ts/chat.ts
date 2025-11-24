@@ -90,7 +90,8 @@ function WSconnect() : void
         sendOrQueue(JSON.stringify({
           user: localStorage.getItem('token'),
           type: TypeMessage.readyForDirectMessage,
-          target: receivemsg.user}))
+          target: receivemsg.user,
+          msgId: receivemsg.msgId}))
       }
       else {
         //construct message to show on the chat
