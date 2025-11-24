@@ -11,6 +11,17 @@ function changeInput(e: MouseEvent, which: "down" | "up", player_id: 0 | 1) {
   controller = new AbortController();
   controller.signal.addEventListener("abort", () => ((e.target as Element).textContent = players[player_id][which].key));
   document.addEventListener("keydown", (e: KeyboardEvent) => {
+    // the bare minimum to forbid is Space (because it pauses the game), AltLeft, AltRight and ContextMenu (because browser shortcut)
+    if (["Enter", "Space", "Backspace", "AltLeft", "AltRight", "ContextMenu"].includes(e.code)) {
+      loadLocalConfig();
+      return
+    }
+    const other = players[player_id][which === "down" ? "up" : "down"];
+    if (other.code !== undefined && other.code === e.code
+      || other.key.toLowerCase() === e.key.toLowerCase())  {
+      loadLocalConfig();
+      return ;
+    }
     players[player_id][which].key = e.key;
     players[player_id][which].code = e.code;
     set_key_config(player_id, which, {key: e.key, code: e.code})
@@ -106,7 +117,7 @@ function player_config(player_id: 0 | 1) {
   button.textContent = "set a bot";
   button.className = "text-white border border-black rounded px-1 cursor-pointer";
   button.onclick = () => {
-    players[player_id].bot_difficulty = 10;
+    players[player_id].bot_difficulty = 2;
     players[player_id].up = {};
     players[player_id].down = {};
     loadLocalConfig();

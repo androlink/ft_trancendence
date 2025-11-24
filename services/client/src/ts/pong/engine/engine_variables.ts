@@ -32,7 +32,7 @@ export const players =
   generatePLayerEntity(
     {x: 100 - 5 - paddle_width, y: 50 - paddle_height / 2},
     {}, {},
-    'W', 10,
+    'W', 2,
   ),
 ] as PlayerEntity[];
 

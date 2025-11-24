@@ -6,7 +6,7 @@ import { ball, ball_size, delay, players } from './engine_variables.js';
 
 function eventKeyInputPong(event: KeyboardEvent)
 {
-  if (event.key === " " && event.type === "keydown" && !event.repeat)
+  if (event.code === "Space" && event.type === "keydown" && !event.repeat)
   {
     game.views.state === 'playing' ? pauseLocalPong() : resumeLocalPong();
   }
