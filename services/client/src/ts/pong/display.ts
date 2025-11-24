@@ -60,7 +60,7 @@ export class PongDisplay implements IPongDisplay
     context.beginPath();
     {
       context.moveTo(this.ratio.width / 2, 0);
-      context.lineTo(this.ratio.width / 2, this.ratio.width);
+      context.lineTo(this.ratio.width / 2, this.ratio.height);
       context.setLineDash([4]);
       context.strokeStyle = "white";
       context.stroke();
