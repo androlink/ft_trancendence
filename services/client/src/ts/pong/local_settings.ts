@@ -1,12 +1,19 @@
 
+import { sendMessage } from "../html/events.js";
+import { findLanguage } from "../html/templates.js";
 import { createLocalPong } from "./engine/engine_game.js";
 import { keyControl } from "./engine/engine_interfaces.js";
 import { players } from "./engine/engine_variables.js";
 import { updateLocalGame } from "./pong.js";
 
-
 let controller = new AbortController();
-function changeInput(e: MouseEvent, which: "down" | "up", player_id: 0 | 1) {
+/**
+ * waits for a key press to change the input
+ * @param e mouse event from an "on click";
+ * @param which which keyConfig to change (up or down)
+ * @param player_id the player one (0) or player two (1)
+ */
+function changeInput(e: MouseEvent, which: "down" | "up", player_id: 0 | 1): void {
   controller.abort();
   controller = new AbortController();
   controller.signal.addEventListener("abort", () => ((e.target as Element).textContent = players[player_id][which].key));
@@ -42,7 +49,6 @@ export function get_key_config(player_id: "player_one" | "player_two"): [keyCont
   const res = [undefined, undefined] as [keyControl, keyControl];
   for (const which of [0, 1]) {
     try {
-      console.log("it's", `${player_id}_${which ? "down": "up" }`);
       res[which] = JSON.parse(localStorage.getItem(`${player_id === "player_one" ? 0 : 1}_${which ? "down": "up" }`) || "crash");
     }
     catch (err){
@@ -56,7 +62,7 @@ export function get_key_config(player_id: "player_one" | "player_two"): [keyCont
  * set a keyControl to the local storage
  * @param controls the keyControl you wanna remember
  */
-function set_key_config(player_id: 0 | 1, which: "down" | "up", controls: keyControl) {
+function set_key_config(player_id: 0 | 1, which: "down" | "up", controls: keyControl): void {
   players[player_id][which] = controls;
   localStorage.setItem(`${player_id}_${which}`, JSON.stringify(controls));
 }
@@ -65,16 +71,16 @@ function set_key_config(player_id: 0 | 1, which: "down" | "up", controls: keyCon
  * gives a HTML element 
  * @param player_id the string value of the key corresponging to the player in config
  */
-function player_config(player_id: 0 | 1) {
+function player_config(player_id: 0 | 1): HTMLElement {
   controller.abort();
   const div = document.createElement("div");
   div.className = "flex flex-col justify-around h-3/4 my-auto border w-3/4 *:size-fit *:mx-auto rounded bg-gray-600";
   if (players[player_id].up.key === undefined || players[player_id].down.key === undefined) {
     const button = document.createElement("button");
-    button.textContent = "add player ?";
+    button.textContent = findLanguage("add player");
     button.className = "text-white border border-black rounded px-1 cursor-pointer";
     button.onclick = () => {
-      players[player_id].bot_difficulty = 0;
+      players[player_id].view.name = [player_id ? "player_two" : "player_one"];
       const config = get_key_config(player_id ? "player_two" : "player_one");
       players[player_id].up = config[0];
       players[player_id].down = config[1];
@@ -84,8 +90,8 @@ function player_config(player_id: 0 | 1) {
     const span = document.createElement("span");
     span.className = "flex flex-col *:size-fit place-items-center";
     const label = document.createElement("label");
-    label.textContent = "Difficulty 1 - 4";
-    label.title = "Formula: starts predicting the ball when it is ≪((difficulty + 1) ** 3 * 0.8)% size of the board≫ close to you";
+    label.textContent = findLanguage("difficulty");
+    label.title = findLanguage("pong formula");
     label.className = "whitespace-pre-line px-3";
     span.appendChild(label);
     const range = document.createElement("input");
@@ -93,17 +99,29 @@ function player_config(player_id: 0 | 1) {
     range.min = "1";
     range.max = "4";
     range.value = String(players[player_id].bot_difficulty);
-    range.oninput = e => players[player_id].bot_difficulty = parseInt((e.target as HTMLInputElement).value);
+    range.oninput = e => {
+      players[player_id].view.name = ["bot", (e.target as HTMLInputElement).value];
+      players[player_id].bot_difficulty = parseInt((e.target as HTMLInputElement).value)
+    };
     span.appendChild(range);
     div.appendChild(span);
     return div;
   }
-  const p = document.createElement("p");
-  p.textContent = player_id ? "right player" : "left player";
-  p.className = "text-white";
-  div.appendChild(p);
+  const input = document.createElement("input");
+  input.placeholder = findLanguage("username");
+  if (typeof players[player_id].view.name === "string") {
+    input.value = players[player_id].view.name;
+  }
+  input.type = "text";
+  input.oninput = e => {
+    const nextName = (e.target as HTMLInputElement).value;
+    if (nextName) players[player_id].view.name = nextName.substring(0, 20);
+    else players[player_id].view.name = [player_id ? "player_two" : "player_one"];
+  };
+  input.maxLength = 20;
+  input.className = "text-white text-center border border-black text-black rounded";
+  div.appendChild(input);
   const up = document.createElement("button");
-  console.log(players);
   up.textContent = players[player_id].up.key;
   up.className = "text-white border border-black rounded px-1 cursor-pointer";
   up.onclick = e => changeInput(e, "up", player_id);
@@ -114,19 +132,17 @@ function player_config(player_id: 0 | 1) {
   down.onclick = e => changeInput(e, "down", player_id);
   div.appendChild(down);
   const button = document.createElement("button");
-  button.textContent = "set a bot";
+  button.textContent = findLanguage("add bot");
   button.className = "text-white border border-black rounded px-1 cursor-pointer";
   button.onclick = () => {
-    players[player_id].bot_difficulty = 2;
+    players[player_id].view.name = ["bot", String(players[player_id].bot_difficulty)];
     players[player_id].up = {};
     players[player_id].down = {};
     loadLocalConfig();
   };
   div.appendChild(button);
   return div;
-
 }
-
 
 const span = document.createElement("span");
 const button = document.createElement("button");
@@ -151,15 +167,18 @@ function loadLocalConfig() {
 
   const fragment = document.createDocumentFragment();
   span.innerHTML = "";
-  span.className = "absolute top-0 size-full *:justify-self-center gap-30 grid grid-cols-2"
+  span.className = "absolute top-0 size-full *:justify-self-center gap-40 grid grid-cols-2"
   for (const player_id of [0 , 1] as [0 , 1]) {
     span.appendChild(player_config(player_id))
   }
-
   fragment.appendChild(span);
-  button.className = "max-w-30 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
-  button.textContent = "launch game";
+  button.className = "max-w-40 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
+  button.textContent = findLanguage("launch game");
   button.onclick = () => {
+    // needs to be translated, but will be useful for tournament.
+    // We'll wait the merge with sjean branch for the translation, because it allows to set more complex messages
+    // like a text with texts inside, with texts inside, like the announcmenet + the bot + its level 
+    sendMessage(JSON.stringify(players[0].view.name) + " on the left against " + JSON.stringify(players[1].view.name) + " on the right");
     inner.removeChild(span);
     inner.removeChild(button);
     createLocalPong();

@@ -70,15 +70,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     return reply.send({
       template: "Home",
       title: "ft_transcendence",
-      inner: "Pdf",
-    });
-  });
-
-  fastifyInstance.get('/game', (req, reply) => {
-    return reply.send({
-      template: "Home",
-      title: MSG.PONG_SOON(),
-      inner: "Game",
+      inner: "Pong",
     });
   });
 

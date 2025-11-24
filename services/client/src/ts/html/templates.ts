@@ -8,12 +8,10 @@ const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
  */
 const htmlSnippetsTemplate:  {
   readonly Home: string;
-  readonly Game: string;
   readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
   readonly Friend: string;
-  readonly Pdf: string;
   readonly Login: string;
   readonly Blank: string;
   readonly Error: string;
@@ -40,12 +38,10 @@ const htmlSnippetsTemplate:  {
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
-    <div onclick="goToURL( )" name="">pdf</div>
-    <div onclick="goToURL('game')" name="game">[[game]]</div>    
-    <div onclick="goToURL('blank')" name="blank">debug</div>
-    <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
-    <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
-    <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
+  <div onclick="goToURL( )" name="">[[pong]]</div>
+  <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
+  <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
+  <div onclick="goToURL('blank')" name="blank">debug</div>
   </span>
   <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
     <div id="inner" class="h-full col-span-3 overflow-hidden relative"></div>
@@ -66,10 +62,6 @@ const htmlSnippetsTemplate:  {
       </div>
     </div>
   </span>
-  `,
-  Game:
-    `
-  <iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent outline" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
   `,
   Profile1:
     `
@@ -184,10 +176,6 @@ const htmlSnippetsTemplate:  {
         <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
       </span>
     </div>
-  `,
-  Pdf:
-    `
-  <iframe src="${assetsPath}/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
   `,
   Login:
     `

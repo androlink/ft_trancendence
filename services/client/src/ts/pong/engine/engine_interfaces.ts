@@ -3,6 +3,7 @@
  * for a player, what is needed to be displayed
  */
 export interface PlayerView {
+  name: string | [string, ...string[]];
   score: number;
   TL: {x: number, y: number};
   width: number;
