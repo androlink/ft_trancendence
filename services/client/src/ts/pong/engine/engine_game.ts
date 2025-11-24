@@ -12,8 +12,8 @@ function eventKeyInputPong(event: KeyboardEvent)
   }
 
   game.players.forEach(player => {
-    if (player.bot_difficulty)
-      return;
+    if (player.up.key === undefined || player.down.key === undefined)
+      return ;
     for (let control of [player.up, player.down]) {
       if (
         control.code !== undefined ?
@@ -35,7 +35,7 @@ function botKeyPressingPong(){
   const dx = ball.view.x - last_ball.x;
   const dy = ball.view.y - last_ball.y;
   for (const player of players) {
-    if (!player.bot_difficulty)
+    if (player.up.key !== undefined && player.up.key !== undefined)
       continue;
     if ((dx > 0 && ball.view.x >= player.view.TL.x + player.view.width)
       || (dx < 0 && ball.view.x <= player.view.TL.x)) {

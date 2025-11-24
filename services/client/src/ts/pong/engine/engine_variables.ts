@@ -31,7 +31,7 @@ export const players =
   ),
   generatePLayerEntity(
     {x: 100 - 5 - paddle_width, y: 50 - paddle_height / 2},
-    ...get_key_config("player_two"),
+    {}, {},
     'W', 10,
   ),
 ] as PlayerEntity[];

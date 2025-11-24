@@ -58,12 +58,15 @@ function player_config(player_id: 0 | 1) {
   controller.abort();
   const div = document.createElement("div");
   div.className = "flex flex-col justify-around h-3/4 my-auto border w-3/4 *:size-fit *:mx-auto rounded bg-gray-600";
-  if (players[player_id].bot_difficulty) {
+  if (players[player_id].up.key === undefined || players[player_id].down.key === undefined) {
     const button = document.createElement("button");
     button.textContent = "add player ?";
     button.className = "text-white border border-black rounded px-1 cursor-pointer";
     button.onclick = () => {
       players[player_id].bot_difficulty = 0;
+      const config = get_key_config(player_id ? "player_two" : "player_one");
+      players[player_id].up = config[0];
+      players[player_id].down = config[1];
       loadLocalConfig();
     };
     div.appendChild(button);
@@ -104,6 +107,8 @@ function player_config(player_id: 0 | 1) {
   button.className = "text-white border border-black rounded px-1 cursor-pointer";
   button.onclick = () => {
     players[player_id].bot_difficulty = 10;
+    players[player_id].up = {};
+    players[player_id].down = {};
     loadLocalConfig();
   };
   div.appendChild(button);

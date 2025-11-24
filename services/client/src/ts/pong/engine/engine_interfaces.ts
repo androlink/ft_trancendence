@@ -11,14 +11,27 @@ export interface PlayerView {
 }
 
 /**
- * correspond to a key.
- * key -> to display to the player their controls
- * code -> to know the exact touch, meaning ù and % are the same on azerty 
- * pressed -> says if currently pressed
+ * the handler of the input of the PLayerEntity.
+ * 
+ * To know what does what, refer to the JSDoc of each property
  */
 export interface keyControl {
-  key: string;
+/**
+ * to display to the player their controls,
+ * If either up.key or down.key are undefined, it will be a bot.
+ * To disable a paddle, set the code to a non-key value, like "" or "disabled"
+ */
+  key?: string;
+/**
+ * to keep in memory the physical key, meaning ù and % are the same on azerty
+ * When code is undefined, it will use the key.toLowerCase() to know what the key is.
+ * So please set a default key to be the same when shift or all caps is pressed
+ */
   code?: string;
+/**
+ * to know if the paddle will move at next tick
+ * When keyControl.pressed is undefined, will act as false
+ */
   pressed?: boolean;
 }
 
