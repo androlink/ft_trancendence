@@ -6,6 +6,8 @@ import { assetsPath } from "./config.js";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { Id, LanguageObject, UserRow } from "./types.js";
 
+import remotePongRoute from "./remote_pong_route.js";
+
 // response format for that page :
 // {
 //   template?: string,
@@ -87,6 +89,18 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       title: "actually the real Pong",
       inner: "Pong",
     });
+  });
+
+  fastifyInstance.get('/netplay', (req, reply) => {
+    return reply.send({
+      template: "Home",
+      title: "remote Pong",
+      inner: "RemotePong",
+    });
+  });
+
+  fastifyInstance.get('/ws/pong', { websocket: true }, (ws, req) => {
+    return remotePongRoute(ws, req);
   });
 
   fastifyInstance.get('/profile', { onRequest: needConnection }, (req, reply) => {

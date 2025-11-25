@@ -20,6 +20,7 @@ const htmlSnippetsTemplate:  {
   readonly Ouch: string;
   readonly PopUp: string;
   readonly ErrorMessageHandler: string;
+  RemotePong: string;
 } = {
   Home:
     `
@@ -46,6 +47,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
+    <div onclick="goToURL('netplay')" name="netplay">[[netplay]]</div>
   </span>
   <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
     <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
@@ -247,6 +249,14 @@ const htmlSnippetsTemplate:  {
         document.currentScript.remove();
       </script>
       <canvas class="border border-white aspect-auto" id="canvas"></canvas>
+	</div>
+  `,
+  RemotePong: `
+  <div class="size-full flex flex-col overflow-scroll">
+    <script>
+      document.currentScript.remove();
+    </script>
+    <canvas class="border border-white aspect-auto" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:

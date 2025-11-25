@@ -3,6 +3,7 @@ import { FastifyInstance } from "fastify";
 import db from "./database"
 import { send } from "process";
 import { UserRow } from "./types";
+import { connect } from "http2";
 
 /**
  * Interface Message
@@ -173,25 +174,24 @@ function ConnectionUser(msg: WSmessage, socket: any){
 }
 
 export default function liveChat(fastify: FastifyInstance){
-
-  fastify.websocketServer.on("connection", (client) => {
-    let testClient : wsClient | null = connectedClients.get(client);
-    if (!testClient)
-    {
-      const newClient = new wsClient(client, null, null);
-      connectedClients.set(client, newClient);
+  fastify.get('/api/chat', { websocket: true }, (connection, req) => {
+    {//on connection
+      let testClient : wsClient | null = connectedClients.get(connection);
+      if (!testClient)
+      {
+        const newClient = new wsClient(connection, null, null);
+        connectedClients.set(connection, newClient);
+      }
     }
-  });
-  fastify.websocketServer.on("close", (client) => {
-      let deleteClient: wsClient | null = connectedClients.get(client);
+
+    connection.onclose = (event) => {
+      let deleteClient: wsClient | null = connectedClients.get(event.target);
       if (deleteClient)
       {
         console.log("client ", deleteClient._username, "got deleted");
-        connectedClients.delete(client);
+        connectedClients.delete(event.target);
       }
-  });
-
-  fastify.get('/api/chat', { websocket: true }, (connection, req) => {
+    };
     connection.on("message", (event) => {
       try {
         const msg: WSmessage = JSON.parse(event.toString());
