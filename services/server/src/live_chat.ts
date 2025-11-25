@@ -110,12 +110,6 @@ function sendAll(senderId: Id, msg: WSmessage) {
     }
   });
   waitingConnections.forEach((sock) => sock.send(data));
-  console.log({
-    clients: Array.from(connectedClients.entries()).flatMap(
-      (conn) => conn[1].username
-    ),
-    guests: waitingConnections.length,
-  });
 }
 
 function disconnectedClient(socket: WebSocket) {
@@ -124,7 +118,6 @@ function disconnectedClient(socket: WebSocket) {
     sender.client.sockets.splice(sender.client.sockets.indexOf(socket), 1);
 
     if (sender.client.sockets.length == 0) {
-      console.log(`Removed: ${sender.client.username}`);
       connectedClients.delete(sender.id);
       waitingConnections.push(socket);
     }
@@ -169,28 +162,21 @@ function getClientByUsername(
  */
 function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
   const timeout = setTimeout(() => {
-    console.log("timeout!");
-    try {
-      const msgIndex = listOfMsg.indexOf(message);
-      if (msgIndex !== -1) {
-        listOfMsg.slice(msgIndex, 1);
-        Sender.sockets.forEach((ws) => {
-          ws.send;
-        });
-        JSON.stringify({
-          user: "server",
-          type: TypeMessage.serverMessage,
-          content: `${message.target} not responded`,
-          msgId: GenerateRandomId(),
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      directMsgTimers.delete(message.msgId!);
+    const msgIndex = listOfMsg.indexOf(message);
+    if (msgIndex !== -1) {
+      listOfMsg.slice(msgIndex, 1);
+      const data = JSON.stringify({
+        user: "server",
+        type: TypeMessage.serverMessage,
+        content: `${message.target} not responded`,
+        msgId: GenerateRandomId(),
+      });
+      Sender.sockets.forEach((ws) => {
+        ws.send(data);
+      });
     }
+    directMsgTimers.delete(message.msgId!);
   }, 5000);
-  console.log("setting timeout " + timeout);
   directMsgTimers.set(message.msgId!, timeout);
 }
 
@@ -233,7 +219,7 @@ function DirectMessage(TargetRespondMsg: WSmessage, TargetSocket: any) {
     }
     //send to the sender
     msg.type = TypeMessage.yourDirectMessage;
-    target.client.send(JSON.stringify(msg));
+    sender.client.send(JSON.stringify(msg));
     listOfMsg.splice(listOfMsg.indexOf(msg), 1);
     return;
   }
@@ -420,7 +406,6 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   socket.onclose = () => {
     const client = connectedClients.get(senderId.id)!;
     client.sockets.splice(client.sockets.indexOf(socket), 1);
-    console.log(`${client.username} has lost a connection`);
   };
 
   if (connectedClients.get(senderId.id)) {
