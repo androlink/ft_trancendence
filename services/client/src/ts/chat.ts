@@ -21,7 +21,7 @@ enum TypeMessage {
  * @param user User who send the message.
  * @param target where the message is send (everyone by default) [optional]
  * @param content Content of the message if is necessary [optional]
- * @param msgId Id of the message (for direct message) [optional]
+ * @param msgId Id of the message (for direct message)
  */
 interface WSmessage {
   type: TypeMessage;
@@ -147,7 +147,6 @@ export function InitConnectionChat(): void {
 /**
  * Show receive message to the chat
  * @param message receive message to show to the chat
- *
  *
  */
 function showMessageToChat(message: WSmessage): boolean {

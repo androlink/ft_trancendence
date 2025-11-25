@@ -22,7 +22,7 @@ enum TypeMessage {
  * @param user User who send the message.
  * @param target where the message is send (everyone by default) [optional]
  * @param content Content of the message if is necessary [optional]
- * @param msgId Id of the message (for direct message) [optional]
+ * @param msgId Id of the message (for direct message)
  */
 interface WSmessage {
   type: TypeMessage;
@@ -112,6 +112,10 @@ function sendAll(senderId: Id, msg: WSmessage) {
   waitingConnections.forEach((sock) => sock.send(data));
 }
 
+/**
+ * disconnect a client
+ * @param socket Websocket of client
+ */
 function disconnectedClient(socket: WebSocket) {
   const sender = getClientById(socketToId.get(socket)!);
   if (sender) {
@@ -187,7 +191,7 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
  * @param message message from the target
  * @param TargetSocket Websocket from the target
  */
-function DirectMessage(TargetRespondMsg: WSmessage, TargetSocket: any) {
+function DirectMessage(TargetRespondMsg: WSmessage) {
   for (let msg of listOfMsg) {
     if (TargetRespondMsg.msgId !== msg.msgId) {
       continue;
@@ -330,7 +334,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
 
   if (msg.type === TypeMessage.readyForDirectMessage) {
     msg.user = sender.client.username;
-    DirectMessage(msg, SenderSocket);
+    DirectMessage(msg);
     return;
   }
 
