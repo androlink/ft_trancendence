@@ -58,23 +58,13 @@ function WSconnect(): void {
   ) {
     return;
   }
-
   ws = new WebSocket("/api/chat");
 
-  ws.onopen = () => {
-    console.log("WebSocket open");
-    sendStatusMessage();
-  };
+  ws.onopen = sendStatusMessage;
 
-  ws.onclose = () => {
-    console.log("Chat connection close");
-    retryConnection();
-  };
+  ws.onclose = retryConnection;
 
-  ws.onerror = (err) => {
-    console.error(`Chat connection error: ${err}`);
-    ws.close();
-  };
+  ws.onerror = () => ws.close();
 
   //receive msg from back and show on chat
   ws.addEventListener("message", (event) => {
@@ -99,7 +89,7 @@ function WSconnect(): void {
         showMessageToChat(receivemsg);
       }
     } catch (err) {
-      alert("error : " + err);
+      console.error("error : " + err);
     }
   });
 }
@@ -111,10 +101,8 @@ export function InitConnectionChat(): void {
   // get the chat box
   const chat = document.getElementById("chat-content");
   // get the chat input
-  const textarea = document.getElementById(
-    "chat-input"
-  ) as HTMLTextAreaElement | null;
-  if (!chat || !textarea) return alert("chat broken");
+  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
+  if (!chat || !textarea) return;
 
   WSconnect();
 
@@ -223,6 +211,11 @@ function showMessageToChat(message: WSmessage): boolean {
 
   chat.appendChild(para);
 
+  if (chat.childElementCount > 1000) {
+    // we have to remove by an even (% 2) amount due to CSS even and odd colors
+    chat.firstElementChild?.remove();
+    chat.firstElementChild?.remove();
+  }
   if (scroll) {
     chat.scrollTop = chat.scrollHeight;
   }
@@ -267,9 +260,7 @@ function sendOrQueue(message: string) {
  * /msg [username1,username2,...] Hello World !
  */
 export function sendChatMessage() {
-  const textarea = document.getElementById(
-    "chat-input"
-  ) as HTMLTextAreaElement | null;
+  const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
   if (!textarea || !textarea.value) return;
   // check commands
   if (textarea.value.startsWith("/")) {
@@ -292,16 +283,16 @@ export function sendChatMessage() {
         sendOrQueue(JSON.stringify(msg));
       }
     }
-  } else {
-    const msg: WSmessage = {
-      user: localStorage.getItem("token"),
-      type: TypeMessage.message,
-      content: textarea.value,
-      msgId: GenerateRandomId(),
-    };
-    textarea.value = "";
-    sendOrQueue(JSON.stringify(msg));
+    return;
   }
+  const msg: WSmessage = {
+    user: localStorage.getItem("token"),
+    type: TypeMessage.message,
+    content: textarea.value,
+    msgId: GenerateRandomId(),
+  };
+  textarea.value = "";
+  sendOrQueue(JSON.stringify(msg));
 }
 
 /**
@@ -317,6 +308,5 @@ export function sendStatusMessage() {
     type: TypeMessage.connection,
     msgId: GenerateRandomId(),
   };
-  console.log("Websocket status changed...");
   sendOrQueue(JSON.stringify(msg));
 }
