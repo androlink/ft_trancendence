@@ -98,12 +98,19 @@ function player_config(player_id: 0 | 1): HTMLElement {
     range.type = "range";
     range.min = "1";
     range.max = "4";
+    range.step = "0.2";
     range.value = String(players[player_id].bot_difficulty);
     range.oninput = e => {
       players[player_id].view.name = ["bot", (e.target as HTMLInputElement).value];
       players[player_id].bot_difficulty = parseInt((e.target as HTMLInputElement).value)
     };
+    const label_value = document.createElement("label");
+    label_value.textContent = String(players[player_id].bot_difficulty);
+    range.oninput = e => {
+      label_value.textContent = (e.target as HTMLInputElement).value;
+    };
     span.appendChild(range);
+    span.appendChild(label_value);
     div.appendChild(span);
     return div;
   }
