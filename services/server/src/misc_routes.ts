@@ -31,7 +31,7 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     /** find id of the user searched */
     const statement1 = db.prepare<{target: string}, {id: Id}>("SELECT id FROM users WHERE lower(username) = lower(:target)");
     /** find all the infos of the user from the id above */
-    const statement2 = db.prepare<{targetId: Id}, {time: string, winner: string, loser: string}>("SELECT strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = :targetId OR loser = :targetId");
+    const statement2 = db.prepare<{targetId: Id}, {time: string, winner: string, loser: string}>("SELECT strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time, (SELECT username FROM users WHERE id = h.player_one AND h.result_type = 'win' OR id = h.player_two AND h.result_type = 'loss') AS winner, (SELECT username FROM users WHERE id = h.player_two AND h.result_type = 'win' OR id = h.player_one AND h.result_type = 'loss') AS loser FROM history_game h WHERE player_one = :targetId OR player_two = :targetId");
     fastifyInstance.get<{Querystring: {user: string}}>('/history', (req, reply) => {
       let target = req.query.user;
       if (target === undefined) return reply.send([]);
@@ -71,7 +71,7 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
      * while we don't have any way to make real games
      */
     /** insert a game according to the winner and loser */
-    const statement1 = db.prepare<[Id, Id], undefined>("INSERT INTO history_game (winner, loser) VALUES (?, ?)");
+    const statement1 = db.prepare<[Id, Id], undefined>("INSERT INTO history_game (player_one, player_two) VALUES (?, ?)");
     fastifyInstance.post<{Querystring: {winner: string, loser: string}}>('/win', (req, reply) => {
       let winner_id = parseInt(req.query.winner);
       let loser_id = parseInt(req.query.loser);

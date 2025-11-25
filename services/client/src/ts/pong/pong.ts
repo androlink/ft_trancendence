@@ -10,7 +10,7 @@ let update = () => {
 	interval = requestAnimationFrame(update);
 }
 
-function updateLocalGame() {
+export function updateLocalGame() {
 	function remove() {
 		if (interval)
 			cancelAnimationFrame(interval);

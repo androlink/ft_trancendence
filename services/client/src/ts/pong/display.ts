@@ -14,7 +14,11 @@ export class PongDisplay implements IPongDisplay
 		ball: string | CanvasGradient | CanvasPattern;
 		score: string | CanvasGradient | CanvasPattern;
 	}
-	scale_factor: number = 20
+	scale_factor: number = 10
+	ratio: {
+		height: number;
+		width: number;
+	}
 
 	constructor()
 	{
@@ -26,16 +30,26 @@ export class PongDisplay implements IPongDisplay
 			ball: "red",
 			score: "green"
 		};
+		this.ratio = {
+			// the text height is hard coded (usually h = 10 or h = 20)
+			// so better leave the height at 100, change the ratio by changing width
+			height: 100,
+			// Any DOM related information needs the browser to load the dom to know what the size is
+			// meaning, using .clientWidth to reload the ratio on each frame would be WAY to heavy
+			width: this.canvas.parentElement.clientWidth / this.canvas.parentElement.clientHeight * 100,
+		}
 	}
 
 	public update(data_frame: DataFrame)
 	{
 		if (this.canvas == null)
 			this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+		if (!this.canvas)
+			return ;
 		let context = this.canvas.getContext("2d");
 
-		this.canvas.width = 100 * this.scale_factor;
-		this.canvas.height = 100 * this.scale_factor;
+		this.canvas.height = this.ratio.height * this.scale_factor;
+		this.canvas.width = this.ratio.width * this.scale_factor;
 		context.reset();
 		context.scale(this.scale_factor, this.scale_factor);
 
@@ -45,8 +59,8 @@ export class PongDisplay implements IPongDisplay
     context.save();
     context.beginPath();
     {
-      context.moveTo(50, 0);
-      context.lineTo(50, 100);
+      context.moveTo(this.ratio.width / 2, 0);
+      context.lineTo(this.ratio.width / 2, this.ratio.height);
       context.setLineDash([4]);
       context.strokeStyle = "white";
       context.stroke();
@@ -65,31 +79,31 @@ export class PongDisplay implements IPongDisplay
 		this.displayBall(context, data_frame.ball);
 
     if (data_frame.state === 'paused')
-      displayText(context, data_frame.state.toUpperCase(), 50, 50, "white");
+      displayText(context, data_frame.state.toUpperCase(), this.ratio.width / 2, this.ratio.height / 2, "white");
     else if (data_frame.state === 'ended')
-      displayText(context, data_frame.state.toUpperCase(), 50, 70, "white");
+      displayText(context, data_frame.state.toUpperCase(), this.ratio.width / 2, this.ratio.height / 2 + 20, "white");
     else if (data_frame.state === 'waiting')
     {
-      displayText(context, 'click on', 50, 40, "white", 10, "grey");
-      displayText(context, 'screen', 50, 50, "white", 10, "grey");
-      displayText(context, 'to start', 50, 60, "white", 10, "grey");
+      displayText(context, 'click on', this.ratio.width / 2, this.ratio.height / 2 - 10, "white", 10, "grey");
+      displayText(context, 'screen', this.ratio.width / 2, this.ratio.height / 2, "white", 10, "grey");
+      displayText(context, 'to start', this.ratio.width / 2, this.ratio.height / 2 + 10, "white", 10, "grey");
     }
 
 	}
 
 	private displayScore(context: CanvasRenderingContext2D, score: number, x: number, y: number)
 	{
-		displayText(context, score.toString(), x, y, this.color.score);
+		displayText(context, score.toString(), x / 100 * this.ratio.width, y / 100 * this.ratio.height, this.color.score);
 	}
 
 	private displayPlayer(context: CanvasRenderingContext2D, playerView: PlayerView)
 	{
-		displayRect(context, playerView.TL.x, playerView.TL.y, playerView.width, playerView.height, this.color.paddle);
+		displayRect(context, playerView.TL.x / 100 * this.ratio.width, playerView.TL.y / 100 * this.ratio.height, playerView.width / 100 * this.ratio.width, playerView.height / 100 * this.ratio.height, this.color.paddle);
 	}
 
 	private displayBall(context: CanvasRenderingContext2D, ballView: BallView)
 	{
-		displayRect(context, ballView.x, ballView.y, ballView.size, ballView.size, this.color.ball);
+		displayRect(context, ballView.x / 100 * this.ratio.width, ballView.y / 100 * this.ratio.height, ballView.size / 100 * this.ratio.width, ballView.size / 100 * this.ratio.height, this.color.ball);
 	}
 
 }

@@ -29,6 +29,8 @@ export function tick( game: GameParty)
       clearInterval(game.intervalId);
       game.intervalId = undefined;
       game.views.state = 'ended';
+      clearInterval(game.botIntervalId);
+      game.botIntervalId = undefined;
     }
   }
 
@@ -97,6 +99,9 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
         ball.speed.x = -nspeed;
         // ball.view.x = player.view.TL.x - ball.view.size;
         ball.speed.y = Math.tan(-angle) * ball.speed.x;
+      }
+      if (Math.abs(ball.speed.y) < 0.001){
+        ball.speed.y = Math.random() * 0.01 - 0.005;
       }
     }
   };

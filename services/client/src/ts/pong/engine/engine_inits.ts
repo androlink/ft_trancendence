@@ -41,11 +41,12 @@ export function resetParty(game: GameParty) {
  * @param speed the speed of the bar. Set all bars at the same speed for mandatory requirements
  * @returns the new PlayerEntity
  */
-export function generatePLayerEntity(TL: {x: number, y: number}, up: keyControl, down: keyControl, direction: PlayerView["direction"], speedHere = paddle_speed): PlayerEntity{
+export function generatePLayerEntity(name: string | [string, ...string[]], TL: {x: number, y: number}, up: keyControl, down: keyControl, direction: PlayerView["direction"], bot_difficulty: number, speedHere = paddle_speed): PlayerEntity{
   return {
-    view: {score: 0, TL, width: paddle_width, height: paddle_height, direction},
+    view: {name, score: 0, TL, width: paddle_width, height: paddle_height, direction},
     up,
     down,
+    bot_difficulty,
     speed: speedHere,
   }
 }

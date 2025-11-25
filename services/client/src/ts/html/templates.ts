@@ -8,12 +8,10 @@ const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
  */
 const htmlSnippetsTemplate:  {
   readonly Home: string;
-  readonly Game: string;
   readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
   readonly Friend: string;
-  readonly Pdf: string;
   readonly Login: string;
   readonly Blank: string;
   readonly Error: string;
@@ -41,16 +39,14 @@ const htmlSnippetsTemplate:  {
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
-    <div onclick="goToURL( )" name="">pdf</div>
-    <div onclick="goToURL('game')" name="game">[[game]]</div>    
-    <div onclick="goToURL('blank')" name="blank">debug</div>
-    <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
-    <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
-    <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
+  <div onclick="goToURL( )" name="">[[pong]]</div>
+  <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
+  <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
+  <div onclick="goToURL('blank')" name="blank">debug</div>
     <div onclick="goToURL('netplay')" name="netplay">[[netplay]]</div>
   </span>
   <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
-    <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
+    <div id="inner" class="h-full col-span-3 overflow-hidden relative"></div>
     <div class="h-full flex flex-col overflow-hidden">
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[auto reconnected]]</p>
@@ -68,10 +64,6 @@ const htmlSnippetsTemplate:  {
       </div>
     </div>
   </span>
-  `,
-  Game:
-    `
-  <iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent outline" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
   `,
   Profile1:
     `
@@ -139,15 +131,17 @@ const htmlSnippetsTemplate:  {
       <thead>
         <tr class="*:border *:border-gray-300 *:text-center">
           <th class="border border-gray-300" scope="col">[[wins]]</th>
-          <th class="border border-gray-300" scope="col">[[loses]]</th>
+          <th class="border border-gray-300" scope="col">[[losses]]</th>
           <th class="border border-gray-300" scope="col">[[w/l ratio]]</th>
+          <th class="border border-gray-300" scope="col">[[draws]]</th>
         </tr>
       </thead>
       <tbody>
         <tr class="*:border *:border-gray-300 *:text-center">
           <td id="wins"></td>
-          <td id="loses"></td>
+          <td id="losses"></td>
           <td id="ratio"></td>
+          <td id="draws"></td>
         </tr>
       </tbody>
     </table>
@@ -184,10 +178,6 @@ const htmlSnippetsTemplate:  {
         <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
       </span>
     </div>
-  `,
-  Pdf:
-    `
-  <iframe src="${assetsPath}/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
   `,
   Login:
     `
@@ -242,21 +232,19 @@ const htmlSnippetsTemplate:  {
   </div>
     `,
   Pong: `
-  <div class="size-full flex flex-col overflow-scroll">
-      <script>
-        createLocalPong();
-		updateLocalGame();
-        document.currentScript.remove();
-      </script>
-      <canvas class="border border-white aspect-auto" id="canvas"></canvas>
+  <div class="relative size-full flex flex-col overflow-scroll">
+    <script id="local config">
+      loadLocalConfig();
+    </script>
+    <canvas class="border border-white size-full" id="canvas"></canvas>
 	</div>
   `,
   RemotePong: `
-  <div class="size-full flex flex-col overflow-scroll">
+  <div class="relative size-full flex flex-col overflow-scroll">
     <script>
-      document.currentScript.remove();
+    document.currentScript?.remove();
     </script>
-    <canvas class="border border-white aspect-auto" id="canvas"></canvas>
+    <canvas class="border border-white size-full" id="canvas"></canvas>
 	</div>
   `,
   ErrorMessageHandler:
