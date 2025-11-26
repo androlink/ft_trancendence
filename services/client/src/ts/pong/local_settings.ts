@@ -100,7 +100,7 @@ function player_config(player_id: 0 | 1): HTMLElement {
     range.max = "4";
     range.step = "0.2";
     range.value = String(players[player_id].bot_difficulty);
-    range.oninput = e => {
+    range.onchange = e => {
       players[player_id].view.name = ["bot", (e.target as HTMLInputElement).value];
       players[player_id].bot_difficulty = parseInt((e.target as HTMLInputElement).value)
     };
