@@ -281,6 +281,8 @@ export function sendChatMessage() {
         content: args.slice(2).join(" "),
         msgId: GenerateRandomId(),
       };
+      if (!msg.content.length) return;
+
       textarea.value = "";
       for (let client of targets) {
         msg.target = client;
