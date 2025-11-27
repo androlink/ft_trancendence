@@ -187,7 +187,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
         if (requesterId === targetId)
           return { friend: ["IT_IS_YOU"], block: ["IT_IS_YOU"] };
         if (statement2.get(params))
-          return { friend: ["THEY ARE BLOCKED"], block: ["UN_BLOCK"] };
+          return { friend: ["THEY_ARE_BLOCKED"], block: ["UN_BLOCK"] };
         if (statement3.get(params))
           return { friend: ["UN_FRIEND_REQUEST"], block: ["BLOCK"] };
         if (statement4.get(params))
