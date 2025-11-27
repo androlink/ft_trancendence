@@ -2,35 +2,7 @@ import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import { WebSocket, WebsocketHandler } from "@fastify/websocket";
 import db from "./database";
-import { Id } from "./types";
-
-enum TypeMessage {
-  message = "message",
-  yourMessage = "yourMessage",
-  directMessage = "directMessage",
-  yourDirectMessage = "yourDirectMessage",
-  readyForDirectMessage = "readyForDirectMessage",
-  serverMessage = "serverMessage",
-  connection = "connection",
-  ping = "ping",
-  pong = "pong",
-}
-
-/**
- * Interface Message
- * @param type Type of message send (message, ping, etc..).
- * @param user User who send the message.
- * @param target where the message is send (everyone by default) [optional]
- * @param content Content of the message if is necessary [optional]
- * @param msgId Id of the message (for direct message)
- */
-interface WSmessage {
-  type: TypeMessage;
-  user: string;
-  target?: string;
-  content?: string;
-  msgId: string;
-}
+import { Id, WSmessage, TypeMessage } from "./types";
 
 /**
  * Class client
@@ -47,8 +19,12 @@ class WSClient {
     this.username = username;
   }
 
-  send(data: string) {
+  send(data: string): void {
     this.sockets.forEach((sock) => sock.send(data));
+  }
+
+  removeSocket(ws: WebSocket): void {
+    this.sockets.splice(this.sockets.indexOf(ws), 1);
   }
 }
 
@@ -119,12 +95,12 @@ function sendAll(senderId: Id, msg: WSmessage) {
 function disconnectedClient(socket: WebSocket) {
   const sender = getClientById(socketToId.get(socket)!);
   if (sender) {
-    sender.client.sockets.splice(sender.client.sockets.indexOf(socket), 1);
+    sender.client.removeSocket(socket);
 
     if (sender.client.sockets.length == 0) {
       connectedClients.delete(sender.id);
-      waitingConnections.push(socket);
     }
+    waitingConnections.push(socket);
   }
 }
 /**
@@ -234,47 +210,45 @@ function DirectMessage(TargetRespondMsg: WSmessage) {
  * @param msg message of sender
  * @param senderClient Class client of sender
  */
-function GetReadyDirectMessage(msg: WSmessage, senderClient: WSClient) {
+function GetReadyDirectMessage(
+  msg: WSmessage,
+  senderClient: WSClient,
+  senderWS: WebSocket
+) {
   // check if the client exist in the database
   const row = dbQuery.getUserIdByUsername.get({ _username: msg.target! });
   if (!row) {
-    return senderClient.sockets.forEach((ws) => {
-      ws.send(
-        JSON.stringify({
-          user: "server",
-          type: TypeMessage.serverMessage,
-          content: `${msg.target} doesn't exist`,
-          msgId: GenerateRandomId(),
-        })
-      );
-    });
+    return senderWS.send(
+      JSON.stringify({
+        user: "server",
+        type: TypeMessage.serverMessage,
+        content: `${msg.target} doesn't exist`,
+        msgId: GenerateRandomId(),
+      })
+    );
   }
   // check if the client is connected
   const target = getClientByUsername(msg.target!);
   if (!target) {
-    return senderClient.sockets.forEach((ws) => {
-      ws.send(
-        JSON.stringify({
-          user: "server",
-          type: TypeMessage.serverMessage,
-          content: `${msg.target} is not connected`,
-          msgId: GenerateRandomId(),
-        })
-      );
-    });
+    return senderWS.send(
+      JSON.stringify({
+        user: "server",
+        type: TypeMessage.serverMessage,
+        content: `${msg.target} is not connected`,
+        msgId: GenerateRandomId(),
+      })
+    );
   }
   // don't send a direct message to yourself please
   if (target.client.username === senderClient.username) {
-    return senderClient.sockets.forEach((ws) => {
-      ws.send(
-        JSON.stringify({
-          user: "server",
-          type: TypeMessage.serverMessage,
-          content: `${msg.target} is you`,
-          msgId: GenerateRandomId(),
-        })
-      );
-    });
+    return senderWS.send(
+      JSON.stringify({
+        user: "server",
+        type: TypeMessage.serverMessage,
+        content: `${msg.target} is you`,
+        msgId: GenerateRandomId(),
+      })
+    );
   }
 
   const newDirectMsg = {
@@ -339,7 +313,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
   }
 
   if (msg.target !== undefined) {
-    GetReadyDirectMessage(msg, sender.client);
+    GetReadyDirectMessage(msg, sender.client, SenderSocket);
     return;
   }
   const newMsg: WSmessage = {
@@ -373,6 +347,7 @@ function PingUser(connection: any): void {
 function connectUser(msg: WSmessage, socket: WebSocket): void {
   let senderId: { id: number } | null;
 
+  // decode token of sender
   try {
     senderId = fastify.jwt.decode(msg.user);
   } catch {
