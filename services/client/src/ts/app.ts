@@ -25,12 +25,18 @@ interface ServerResponse {
 
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
+/**
+ * will cause a reload of the inner even without setting main with force to true 
+ */
+export function resetNextInner() {
+  mainInner = null;
+}
 let last: ServerResponse | null = null;
 /**
  * The main function of the Single-Page-Application:
  *  - fetch the website infos
  *  - set the UI accordingly
- * @param force if true change the app even if same as before, default as false
+ * @param force if true change the app even if same as before, default as false. Prefer using resetNextInner
  * @param requests if false uses the last response received without fetching, default as true (better with force set to true)
  */
 // btw no Syntax Errow throwed if params bad due to function working with 1 and 0 too, as well as "yay" and ""

@@ -21,12 +21,12 @@ export async function goToURL(
   }
   if (typeof nextURL !== "string") {
     throw new TypeError(
-      `first argument must be a string, not ${typeof nextURL}`
+      `first argument can be a string, not ${typeof nextURL}`
     );
   }
   if (typeof force !== "boolean") {
     throw new TypeError(
-      `second argument must be a boolean, not ${typeof force}`
+      `second argument can be a boolean, not ${typeof force}`
     );
   }
 
@@ -42,7 +42,7 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener("popstate", () => main(true));
+  self.addEventListener("popstate", () => main());
 }
 
 //----------------------------------------------------------------------------#

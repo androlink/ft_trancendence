@@ -11,7 +11,7 @@ import {
   assetsPath,
   setLanguage,
 } from "./templates.js";
-import { main } from "../app.js";
+import { main, resetNextInner } from "../app.js";
 import { sendChatMessage, sendStatusMessage } from "../chat.js";
 
 /**
@@ -106,7 +106,8 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
         );
         return;
       }
-      main(true);
+      resetNextInner();
+      main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
     }
@@ -372,7 +373,8 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     } catch (error) {
       console.error(String(error));
     }
-    main(true);
+    resetNextInner();
+    main();
   });
 }
 
@@ -410,7 +412,8 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     } catch (error) {
       console.error(String(error));
     }
-    main(true);
+    resetNextInner();
+    main();
   });
 }
 
@@ -569,6 +572,7 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
     const img = window.URL.createObjectURL(input.files[0]);
     const preview = document.getElementById("pfp-preview") as HTMLImageElement;
     if (preview && img) preview.src = img;
+    resetNextInner();
     document.getElementById("pfp-preview-div")?.removeAttribute("hidden");
   });
 }
