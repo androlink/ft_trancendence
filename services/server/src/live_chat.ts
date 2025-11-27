@@ -329,6 +329,17 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
     );
   }
 
+  if (msg.content && msg.content?.length > 280) {
+    return SenderSocket.send(
+      JSON.stringify({
+        user: "server",
+        type: TypeMessage.serverMessage,
+        content: "message size is fixed at 280 characters",
+        msgId: GenerateRandomId(),
+      })
+    );
+  }
+
   if (msg.type === TypeMessage.readyForDirectMessage) {
     msg.user = sender.client.username;
     DirectMessage(msg);

@@ -107,12 +107,6 @@ export function InitConnectionChat(): void {
   WSconnect();
 
   //call sendChatMessage with Enter key
-  textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendChatMessage();
-    }
-  });
   (window as any).sendChatMessage = sendChatMessage;
 
   //ping pong
@@ -262,6 +256,16 @@ function sendOrQueue(message: string) {
 export function sendChatMessage() {
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
   if (!textarea || !textarea.value) return;
+  if (textarea.value.length > 280) {
+    const err: WSmessage = {
+      user: null,
+      type: TypeMessage.serverMessage,
+      content: "message size is fixed at 280 characters",
+      msgId: GenerateRandomId(),
+    };
+    showMessageToChat(err);
+    return;
+  }
   // check commands
   if (textarea.value.startsWith("/")) {
     let command = textarea.value.split(" ")[0];
