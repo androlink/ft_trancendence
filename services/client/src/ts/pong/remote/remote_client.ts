@@ -37,7 +37,11 @@ export function connect_remote_play(game_id: string)
 
   ws_connect(game_id);
 
-  self.addEventListener("popstate", () => {ws_delete}, {once: true});
+  self.addEventListener("popstate", (ev) => {
+    console.log(location);
+    if(location.pathname !== "/netplay")
+      ws_delete();
+    }, {once: true});
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
 }
