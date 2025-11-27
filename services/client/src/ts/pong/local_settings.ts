@@ -115,7 +115,7 @@ function player_config(player_id: 0 | 1): HTMLElement {
     button.className =
       "text-white border border-black rounded px-1 cursor-pointer";
     button.onclick = () => {
-      players[player_id].view.name = [player_id ? "player_two" : "player_one"];
+      players[player_id].view.name = ["player", player_id ? "2" : "1"];
       const config = get_key_config(player_id ? "player_two" : "player_one");
       players[player_id].up = config[0];
       players[player_id].down = config[1];
