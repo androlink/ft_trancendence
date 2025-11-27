@@ -116,7 +116,7 @@ export function InitConnectionChat(): void {
       type: TypeMessage.ping,
       msgId: GenerateRandomId(),
     };
-    ws.send(JSON.stringify(ping));
+    sendOrQueue(JSON.stringify(ping));
   }, 15000);
   setInterval(() => {
     if (Date.now() - lastPong > 30000) {
