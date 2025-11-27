@@ -1,9 +1,9 @@
-import Database from 'better-sqlite3';
-import bcrypt from "bcrypt"
-import fs from 'fs';
+import Database from "better-sqlite3";
+import bcrypt from "bcrypt";
+import fs from "fs";
 
-export const dbPath = '/var/db/database.db';
-export const dbLogFile = '/var/db/log.txt';
+export const dbPath = "/var/db/database.db";
+export const dbLogFile = "/var/db/log.txt";
 
 /**
  * hash a string, works up to 72 Bytes due to the algorithm used
@@ -15,29 +15,34 @@ export async function hashPassword(str: string): Promise<string> {
 /**
  * compare a string to a password set with hashPassword (if the pepper hasn't changed)
  */
-export async function comparePassword(str: string, hashedPassword: string): Promise<boolean> {
-  return await bcrypt.compare(str + process.env.PEPPER_KEY_PASSWORDS, hashedPassword)
+export async function comparePassword(
+  str: string,
+  hashedPassword: string
+): Promise<boolean> {
+  return await bcrypt.compare(
+    str + process.env.PEPPER_KEY_PASSWORDS,
+    hashedPassword
+  );
 }
 
 /**
  * database connection. NEVER CLOSE IT. Faster than having many connections
  */
-export default new Database(dbPath,
-  {
-    verbose: (message) => fs.writeFileSync(dbLogFile, message + '\n', { flag: 'a' }),
-  }
-);
+export default new Database(dbPath, {
+  verbose: (message) =>
+    fs.writeFileSync(dbLogFile, message + "\n", { flag: "a" }),
+});
 
-import db from './database.js'
+import db from "./database.js";
 /**
  * init the db if not exists already
  */
 export async function launchDB() {
-  const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?")
-    .get('users');
-  if (row)
-    return ;
-  
+  const row = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?")
+    .get("users");
+  if (row) return;
+
   fs.unlink(dbLogFile, () => {});
   db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -78,6 +83,12 @@ export async function launchDB() {
     result_type TEXT NOT NULL DEFAULT 'win' CHECK (result_type IN ('win', 'loss', 'draw'))
   );
   `);
-  const res = db.prepare("INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)")
-    .run("AllMighty", await hashPassword(process.env.ADMIN_PASSWORD), "ADMIN", 1);
+  db.prepare(
+    "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
+  ).run(
+    "AllMighty",
+    await hashPassword(process.env.ADMIN_PASSWORD),
+    "ADMIN",
+    1
+  );
 }

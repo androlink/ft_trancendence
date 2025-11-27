@@ -1,7 +1,6 @@
-
 import { sendMessage } from "../html/events.js";
-import { findLanguage } from "../html/templates.js";
-import { createLocalPong } from "./engine/engine_game.js";
+import { findLanguage, selectLanguage } from "../html/templates.js";
+import { createLocalPong, game } from "./engine/engine_game.js";
 import { keyControl } from "./engine/engine_interfaces.js";
 import { players } from "./engine/engine_variables.js";
 import { updateLocalGame } from "./pong.js";
@@ -13,45 +12,72 @@ let controller = new AbortController();
  * @param which which keyConfig to change (up or down)
  * @param player_id the player one (0) or player two (1)
  */
-function changeInput(e: MouseEvent, which: "down" | "up", player_id: 0 | 1): void {
+function changeInput(
+  e: MouseEvent,
+  which: "down" | "up",
+  player_id: 0 | 1
+): void {
   controller.abort();
   controller = new AbortController();
-  controller.signal.addEventListener("abort", () => ((e.target as Element).textContent = players[player_id][which].key));
-  document.addEventListener("keydown", (e: KeyboardEvent) => {
-    // the bare minimum to forbid is Space (because it pauses the game), AltLeft, AltRight and ContextMenu (because browser shortcut)
-    if (["Enter", "Space", "Backspace", "AltLeft", "AltRight", "ContextMenu"].includes(e.code)) {
+  controller.signal.addEventListener(
+    "abort",
+    () => ((e.target as Element).textContent = players[player_id][which].key)
+  );
+  document.addEventListener(
+    "keydown",
+    (e: KeyboardEvent) => {
+      // the bare minimum to forbid is Space (because it pauses the game), AltLeft, AltRight and ContextMenu (because browser shortcut)
+      if (
+        [
+          "Enter",
+          "Space",
+          "Backspace",
+          "AltLeft",
+          "AltRight",
+          "ContextMenu",
+        ].includes(e.code)
+      ) {
+        loadLocalConfig();
+        return;
+      }
+      const other = players[player_id][which === "down" ? "up" : "down"];
+      if (
+        (other.code !== undefined && other.code === e.code) ||
+        other.key.toLowerCase() === e.key.toLowerCase()
+      ) {
+        loadLocalConfig();
+        return;
+      }
+      players[player_id][which].key = e.key;
+      players[player_id][which].code = e.code;
+      set_key_config(player_id, which, { key: e.key, code: e.code });
       loadLocalConfig();
-      return
-    }
-    const other = players[player_id][which === "down" ? "up" : "down"];
-    if (other.code !== undefined && other.code === e.code
-      || other.key.toLowerCase() === e.key.toLowerCase())  {
-      loadLocalConfig();
-      return ;
-    }
-    players[player_id][which].key = e.key;
-    players[player_id][which].code = e.code;
-    set_key_config(player_id, which, {key: e.key, code: e.code})
-    loadLocalConfig();
-  }, {once: true, signal: controller.signal});
+    },
+    { once: true, signal: controller.signal }
+  );
   (e.target as Element).textContent = "Listen...";
-} 
+}
 
 /**
  * gives a key config from the local storage
  * @param player_id the string value of the key corresponging to the player in config
  */
-export function get_key_config(player_id: "player_one" | "player_two"): [keyControl, keyControl] {
+export function get_key_config(
+  player_id: "player_one" | "player_two"
+): [keyControl, keyControl] {
   const defaultConfig = {
-    player_one: [ {key: 'w'}, {key: 's'} ] as [keyControl, keyControl],
-    player_two: [ {key: 'o'}, {key: 'l'} ] as [keyControl, keyControl],
+    player_one: [{ key: "w" }, { key: "s" }] as [keyControl, keyControl],
+    player_two: [{ key: "o" }, { key: "l" }] as [keyControl, keyControl],
   };
   const res = [undefined, undefined] as [keyControl, keyControl];
   for (const which of [0, 1]) {
     try {
-      res[which] = JSON.parse(localStorage.getItem(`${player_id === "player_one" ? 0 : 1}_${which ? "down": "up" }`) || "crash");
-    }
-    catch (err){
+      res[which] = JSON.parse(
+        localStorage.getItem(
+          `${player_id === "player_one" ? 0 : 1}_${which ? "down" : "up"}`
+        ) || "crash"
+      );
+    } catch (err) {
       res[which] = defaultConfig[player_id][which];
     }
   }
@@ -62,25 +88,34 @@ export function get_key_config(player_id: "player_one" | "player_two"): [keyCont
  * set a keyControl to the local storage
  * @param controls the keyControl you wanna remember
  */
-function set_key_config(player_id: 0 | 1, which: "down" | "up", controls: keyControl): void {
+function set_key_config(
+  player_id: 0 | 1,
+  which: "down" | "up",
+  controls: keyControl
+): void {
   players[player_id][which] = controls;
   localStorage.setItem(`${player_id}_${which}`, JSON.stringify(controls));
 }
 
 /**
- * gives a HTML element 
+ * gives a HTML element
  * @param player_id the string value of the key corresponging to the player in config
  */
 function player_config(player_id: 0 | 1): HTMLElement {
   controller.abort();
   const div = document.createElement("div");
-  div.className = "flex flex-col justify-around h-3/4 my-auto border w-3/4 *:size-fit *:mx-auto rounded bg-gray-600";
-  if (players[player_id].up.key === undefined || players[player_id].down.key === undefined) {
+  div.className =
+    "flex flex-col justify-around h-3/4 my-auto border w-3/4 *:size-fit *:mx-auto rounded bg-gray-600";
+  if (
+    players[player_id].up.key === undefined ||
+    players[player_id].down.key === undefined
+  ) {
     const button = document.createElement("button");
     button.textContent = findLanguage("add player");
-    button.className = "text-white border border-black rounded px-1 cursor-pointer";
+    button.className =
+      "text-white border border-black rounded px-1 cursor-pointer";
     button.onclick = () => {
-      players[player_id].view.name = [player_id ? "player_two" : "player_one"];
+      players[player_id].view.name = ["player", player_id ? "2" : "1"];
       const config = get_key_config(player_id ? "player_two" : "player_one");
       players[player_id].up = config[0];
       players[player_id].down = config[1];
@@ -100,15 +135,22 @@ function player_config(player_id: 0 | 1): HTMLElement {
     range.max = "4";
     range.step = "0.2";
     range.value = String(players[player_id].bot_difficulty);
-    range.onchange = e => {
-      players[player_id].view.name = ["bot", (e.target as HTMLInputElement).value];
-      players[player_id].bot_difficulty = parseInt((e.target as HTMLInputElement).value)
+    range.onchange = (e) => {
+      const difficulty = parseFloat((e.target as HTMLInputElement).value);
+      players[player_id].view.name = [
+        "bot",
+        difficulty < 4 ? String(difficulty) : ["wall"],
+      ];
+      players[player_id].bot_difficulty = difficulty;
     };
     const label_value = document.createElement("label");
-    label_value.textContent = String(players[player_id].bot_difficulty);
-    range.oninput = e => {
-      label_value.textContent = (e.target as HTMLInputElement).value;
-    };
+    function updateLabel() {
+      const difficulty = range.value;
+      label_value.textContent =
+        parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
+    }
+    updateLabel();
+    range.oninput = updateLabel;
     span.appendChild(range);
     span.appendChild(label_value);
     div.appendChild(span);
@@ -120,29 +162,34 @@ function player_config(player_id: 0 | 1): HTMLElement {
     input.value = players[player_id].view.name;
   }
   input.type = "text";
-  input.oninput = e => {
+  input.oninput = (e) => {
     const nextName = (e.target as HTMLInputElement).value;
     if (nextName) players[player_id].view.name = nextName.substring(0, 20);
-    else players[player_id].view.name = [player_id ? "player_two" : "player_one"];
+    else players[player_id].view.name = ["player", player_id ? "2" : "1"];
   };
   input.maxLength = 20;
-  input.className = "text-white text-center border border-black text-black rounded";
+  input.className =
+    "text-white text-center border border-black text-black rounded";
   div.appendChild(input);
   const up = document.createElement("button");
   up.textContent = players[player_id].up.key;
   up.className = "text-white border border-black rounded px-1 cursor-pointer";
-  up.onclick = e => changeInput(e, "up", player_id);
+  up.onclick = (e) => changeInput(e, "up", player_id);
   div.appendChild(up);
   const down = document.createElement("p");
   down.textContent = players[player_id].down.key;
   down.className = "text-white border border-black rounded px-1 cursor-pointer";
-  down.onclick = e => changeInput(e, "down", player_id);
+  down.onclick = (e) => changeInput(e, "down", player_id);
   div.appendChild(down);
   const button = document.createElement("button");
   button.textContent = findLanguage("add bot");
-  button.className = "text-white border border-black rounded px-1 cursor-pointer";
+  button.className =
+    "text-white border border-black rounded px-1 cursor-pointer";
   button.onclick = () => {
-    players[player_id].view.name = ["bot", String(players[player_id].bot_difficulty)];
+    players[player_id].view.name = [
+      "bot",
+      String(players[player_id].bot_difficulty),
+    ];
     players[player_id].up = {};
     players[player_id].down = {};
     loadLocalConfig();
@@ -158,14 +205,20 @@ const button = document.createElement("button");
  * Display will be inspired of smash bros, kinda
  */
 function loadLocalConfig() {
-  // below is in case we change page while changing keyboard config (the "Listen..." period) 
-  self.addEventListener("popstate", e => controller.abort(), {once: true});
+  if (game?.intervalId !== undefined) {
+    // happends if page changes with a game still running (example: changing language)
+    updateLocalGame();
+    return;
+  }
+  // below is in case we change page while changing keyboard config (the "Listen..." period)
+  self.addEventListener("popstate", (e) => controller.abort(), { once: true });
   const inner = document.getElementById("inner");
   const proof = document.getElementById("local config");
-  // will be used to set a pop-up without looking like one
 
   if (!inner || !proof) {
-    console.log("yeah no, calling that function by yourself would be annoying, trust me");
+    console.log(
+      "yeah no, calling that function by yourself would be annoying, trust me"
+    );
     return;
   }
 
@@ -174,18 +227,26 @@ function loadLocalConfig() {
 
   const fragment = document.createDocumentFragment();
   span.innerHTML = "";
-  span.className = "absolute top-0 size-full *:justify-self-center gap-40 grid grid-cols-2"
-  for (const player_id of [0 , 1] as [0 , 1]) {
-    span.appendChild(player_config(player_id))
+  span.className =
+    "absolute top-0 size-full *:justify-self-center gap-40 grid grid-cols-2";
+  for (const player_id of [0, 1] as [0, 1]) {
+    span.appendChild(player_config(player_id));
   }
   fragment.appendChild(span);
-  button.className = "max-w-40 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
+  button.className =
+    "max-w-40 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
   button.textContent = findLanguage("launch game");
   button.onclick = () => {
     // needs to be translated, but will be useful for tournament.
     // We'll wait the merge with sjean branch for the translation, because it allows to set more complex messages
-    // like a text with texts inside, with texts inside, like the announcmenet + the bot + its level 
-    sendMessage(JSON.stringify(players[0].view.name) + " on the left against " + JSON.stringify(players[1].view.name) + " on the right");
+    // like a text with texts inside, with texts inside, like the announcmenet + the bot + its level
+    sendMessage(
+      selectLanguage([
+        "game presentation",
+        players[0].view.name,
+        players[1].view.name,
+      ])
+    );
     inner.removeChild(span);
     inner.removeChild(button);
     createLocalPong();

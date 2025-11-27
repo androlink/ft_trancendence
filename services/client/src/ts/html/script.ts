@@ -2,6 +2,7 @@
 // This file is like events.ts except it's about <script>function()<script>
 // events.ts was too full when the top function was not acting as an index
 
+import { resetNextInner } from "../app.js";
 import { encodeURIUsername, goToURL } from "../utils.js";
 import { sendMessage } from "./events.js";
 import { assetsPath, findLanguage } from "./templates.js";
@@ -10,6 +11,7 @@ import { assetsPath, findLanguage } from "./templates.js";
  * will try to load a game history if a player when whatching their profile
  */
 function loadGameHistory(): void {
+  resetNextInner();
   const tbody = document.getElementById("history-tbody");
   const pathname = location.pathname.replace(/\/$/, '')
   let username = decodeURIComponent(pathname.substring(pathname.lastIndexOf('/') + 1));

@@ -1,4 +1,3 @@
-
 export const assetsPath = `/resources`;
 const thenMain = `.then(main)`;
 const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
@@ -6,7 +5,7 @@ const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
  */
-const htmlSnippetsTemplate:  {
+const htmlSnippetsTemplate: {
   readonly Home: string;
   readonly Pong: string;
   readonly Profile1: string;
@@ -20,15 +19,14 @@ const htmlSnippetsTemplate:  {
   readonly ErrorMessageHandler: string;
   RemotePong: string;
 } = {
-  Home:
-    `
+  Home: `
   <span class="grid grid-cols-3 mx-8 my-2">
     <div class="relative justify-self-start">
       <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <p class=" text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
+    <input type="text" value="ft_<[[insert title]]>" class="border outline-0 border-gray-500 text-3xl font-mono text-blue-900 font-semibold select-none"/>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -65,8 +63,7 @@ const htmlSnippetsTemplate:  {
     </div>
   </span>
   `,
-  Profile1:
-    `
+  Profile1: `
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
@@ -107,10 +104,9 @@ const htmlSnippetsTemplate:  {
     </span>
   </div>
   `,
-  Profile2:
-    `
+  Profile2: `
   <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll relative">
-    <img src="${assetsPath}/arrow-refresh.png" class="absolute size-10 right-3 cursor-pointer hover:animate-spin" onclick="main(true)"/>
+    <img src="${assetsPath}/arrow-refresh.png" class="absolute size-10 right-3 cursor-pointer hover:animate-spin" onclick="main()"/>
     <span class="flex justify-around place-items-center">
       <style>
         .dropdown:hover .dropdown-content {display: flex;}
@@ -179,8 +175,7 @@ const htmlSnippetsTemplate:  {
       </span>
     </div>
   `,
-  Login:
-    `
+  Login: `
   <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col gap-y-1">
   <span class="grid grid-cols-2 grid-rows-2 place-items-center size-full *:border-3 *:bg-gray-600 *:border-gray-500 *:p-2 *:rounded *:gap-1 *:flex *:flex-col *:relative">
     <form id="login-form">
@@ -208,11 +203,9 @@ const htmlSnippetsTemplate:  {
   </span>
   </div>
   `,
-  Blank:
-    `
+  Blank: `
   `,
-  Error:
-    `
+  Error: `
   <div class="flex flex-col items-center size-1/2 m-40 place-self-center">
     <h1 id=status class="text-white font-bold"></h1>
     <h2 id=message class="text-white"></h2>
@@ -221,13 +214,11 @@ const htmlSnippetsTemplate:  {
   </div>
   `,
 
-  Ouch:
-    `
+  Ouch: `
   <iframe id="container-iframe" class="size-full bg-gray-200" srcdoc="">
   </iframe>
   `,
-  PopUp:
-    `
+  PopUp: `
   <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
   </div>
     `,
@@ -247,10 +238,9 @@ const htmlSnippetsTemplate:  {
     <canvas class="border border-white size-full" id="canvas"></canvas>
 	</div>
   `,
-  ErrorMessageHandler:
-    `
+  ErrorMessageHandler: `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
-    `
+    `,
 } as const;
 
 /**
@@ -259,31 +249,33 @@ const htmlSnippetsTemplate:  {
 export let htmlSnippets = {} as typeof htmlSnippetsTemplate;
 
 // @ts-ignore
-import en from '../languages/en.json' with { type: 'json' };
+import en from "../languages/en.json" with { type: "json" };
 // @ts-ignore
-import fr from '../languages/fr.json' with { type: 'json' };
+import fr from "../languages/fr.json" with { type: "json" };
 // @ts-ignore
-import es from '../languages/es.json' with { type: 'json' };
+import es from "../languages/es.json" with { type: "json" };
 
 setLanguage();
 
 /**
  * that function will set the var htmlSnippets to the language in the localStorage
  * If language not recognized or not set, will do english
-*/
-export function setLanguage(): void{
-  let handled = {'en': en, 'fr': fr, 'es': es}
+ */
+export function setLanguage(): void {
+  let handled = { en: en, fr: fr, es: es };
   let language = localStorage.getItem("language");
-  if (language === null || !Object.hasOwn(handled, language)){
-    language = 'en';
+  if (language === null || !Object.hasOwn(handled, language)) {
+    language = "en";
   }
   const translations = handled[language];
 
   Object.entries(htmlSnippetsTemplate).forEach(([name, snippet]) => {
     htmlSnippets[name] = snippet;
     for (let pattern in translations) {
-      htmlSnippets[name] = htmlSnippets[name]
-      .replaceAll(`[[${pattern}]]`, translations[pattern]);
+      htmlSnippets[name] = htmlSnippets[name].replaceAll(
+        `[[${pattern}]]`,
+        translations[pattern]
+      );
     }
   });
 }
@@ -292,15 +284,15 @@ export type languageString = [string, ...(string | languageString)[]] | string;
 /**
  * select a string (or techinically anything) that correspond to localStorage["language"],
  * or the arg given if it's a string
- * 
- * @param strs examples: {'en': 'hello', 'fr': 'bonjour', 'es': 'hola'}, 'hey'
- * @returns the right string; else if localStorage["language"] not corresponding => str['en']; else if no str['en'] "language not found"
+ *
+ * @param strs examples: ["hello user", 'geymat']
+ * @returns the right string; else if localStorage["language"] not corresponding => str['en']; else if no str['en'] "translation not found"
  */
 export function selectLanguage(strs: languageString): string {
-  if (typeof strs !== 'object') return String(strs);
+  if (!Array.isArray(strs)) return String(strs);
   let res = findLanguage(strs[0]);
   for (let i = 1; i < strs.length; i++) {
-    res = res.replaceAll(`[[${i - 1}]]`, selectLanguage(strs[i]))
+    res = res.replaceAll(`[[${i - 1}]]`, selectLanguage(strs[i]));
   }
   return res;
 }
@@ -312,9 +304,9 @@ export function selectLanguage(strs: languageString): string {
  * @returns the string if found, "translation not found" if not
  */
 export function findLanguage(name: string) {
-  let handled = {'en': en, 'fr': fr, 'es': es}
-  let language = localStorage.getItem('language');
-  if (language === null || !Object.hasOwn(handled, language)) language = 'en';
+  const handled = { en, fr, es };
+  let language = localStorage.getItem("language");
+  if (language === null || !Object.hasOwn(handled, language)) language = "en";
   if (Object.hasOwn(handled[language], name)) return handled[language][name];
   return `translation not found => "${name}"`;
 }
