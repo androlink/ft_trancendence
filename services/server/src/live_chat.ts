@@ -2,7 +2,9 @@ import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import { WebSocket, WebsocketHandler } from "@fastify/websocket";
 import db from "./database";
+import Database from "better-sqlite3";
 import { Id, WSmessage, TypeMessage } from "./types";
+import { Data } from "ws";
 
 /**
  * Class client
@@ -51,16 +53,37 @@ const directMsgTimers = new Map<string, ReturnType<typeof setTimeout>>();
  * @param getUserByUsername find in the database the user with this username
  * @param getBlockedUserById find in the database users blocked by the client with this id
  */
-const dbQuery = {
-  getUserById: db.prepare<{ userId: Id }, { username: string }>(
-    "SELECT username FROM users WHERE id = :userId"
-  ),
-  getUserIdByUsername: db.prepare<{ _username: string }, { id: Id }>(
-    "SELECT id FROM users WHERE username = :_username"
-  ),
-  getBlockedUserById: db.prepare<{ userId: Id }, { blocker_id: number }>(
-    "SELECT blocker_id FROM user_blocks WHERE blocked_id = :userId"
-  ),
+let dbQuery: {
+  getUserById: Database.Statement<
+    [
+      {
+        userId: Id;
+      }
+    ],
+    {
+      username: string;
+    }
+  >;
+  getUserIdByUsername: Database.Statement<
+    [
+      {
+        _username: string;
+      }
+    ],
+    {
+      id: Id;
+    }
+  >;
+  getBlockedUserById: Database.Statement<
+    [
+      {
+        userId: Id;
+      }
+    ],
+    {
+      blocker_id: number;
+    }
+  >;
 };
 
 //UTILS FUNCTIONS ========================================================================================================
@@ -396,6 +419,17 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
 
 // "main" live chat
 export default function liveChat(fastify: FastifyInstance) {
+  dbQuery = {
+    getUserById: db.prepare<{ userId: Id }, { username: string }>(
+      "SELECT username FROM users WHERE id = :userId"
+    ),
+    getUserIdByUsername: db.prepare<{ _username: string }, { id: Id }>(
+      "SELECT id FROM users WHERE username = :_username"
+    ),
+    getBlockedUserById: db.prepare<{ userId: Id }, { blocker_id: number }>(
+      "SELECT blocker_id FROM user_blocks WHERE blocked_id = :userId"
+    ),
+  };
   // add client from connected clients
   fastify.websocketServer.on("connection", (ws: WebSocket) => {
     waitingConnections.push(ws);
