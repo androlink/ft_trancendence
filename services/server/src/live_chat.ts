@@ -153,7 +153,7 @@ function getClientByUsername(
 ): { id: Id; client: WSClient } | null {
   // check if the sender is on the list
   const pair = Array.from(connectedClients.entries()).find(
-    ([ws, client]) => client.username == username
+    ([ws, client]) => client.username.toLowerCase() == username.toLowerCase()
   );
   return pair ? { id: pair[0], client: pair[1] } : null;
 }
@@ -424,7 +424,7 @@ export default function liveChat(fastify: FastifyInstance) {
       "SELECT username FROM users WHERE id = :userId"
     ),
     getUserIdByUsername: db.prepare<{ _username: string }, { id: Id }>(
-      "SELECT id FROM users WHERE username = :_username"
+      "SELECT id FROM users WHERE lower(username) = lower(:_username)"
     ),
     getBlockedUserById: db.prepare<{ userId: Id }, { blocker_id: number }>(
       "SELECT blocker_id FROM user_blocks WHERE blocked_id = :userId"
