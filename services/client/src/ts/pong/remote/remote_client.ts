@@ -1,15 +1,11 @@
-import { DataFrame } from "../engine/engine_interfaces";
 
+import { PongDisplay } from "../display.js";
+import { goToURL } from "../../utils.js";
 
-let ws: WebSocket | null = null;
-let pingInterval: ReturnType<typeof setTimeout> | null = null;
-
+let pingTimeout: ReturnType<typeof setTimeout> | null = null;
 const ping_time = 5000;
-const ping_map: Map<number, number> = new Map();
 
-let game_view: DataFrame | null = null;
-
-type RequestType = "JOIN" | "LEAVE" | "PING" | "GAME" | "CONNECTION";
+type RequestType = "JOIN" | "PING" | "GAME";
 
 interface IMessage
 {
@@ -17,39 +13,71 @@ interface IMessage
   message?: any;
 };
 
-function ws_connect()
+
+
+let ws: WebSocket;
+let display: PongDisplay;
+let ping_map: Map<number, number> = new Map();
+let ping_count: number = 0;
+
+function eventKeyInputPong(event: KeyboardEvent)
 {
-  try {
-      
-    console.log("Connecting to remote pong websocket...");
-    ws = new WebSocket("/api/ws/pong");
-    ws.onopen = () => {
-      console.log("WebSocket connection established");
-      ws.send(JSON.stringify({ type: "CONNECTION", message: localStorage.getItem("token") || "" }));
-      pingInterval = setTimeout(ws_ping, ping_time);
-    };
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
-      ws = null;
-      clearTimeout(pingInterval!);
-      pingInterval = null;
-      ping_map.clear();
-    };
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      ping_map.clear();
-    };
-    ws.onmessage = (event) => {
-      console.log("WebSocket message received:", event.data);
-      ws_message(event);
-    };
-    } catch (error) {
-    console.error("WebSocket connection error:", error);
-    console.debug(ws);
-  }
+
+  let message = null;
+  if (event.key !== 'w' && event.key !== 's' )
+    return;
+  message = event.type === "keydown" ? "press" : "release";
+  message += event.key === 'w' ? "Up": "Down";
+  console.log("input:" + event.key);
+  return ws.send(JSON.stringify({type: "GAME", input: message}));
 }
 
-function ws_message(event: MessageEvent)
+export function connect_remote_play(game_id: string)
+{
+
+  ws_connect(game_id);
+
+  self.addEventListener("popstate", () => {ws_delete}, {once: true});
+  document.addEventListener("keydown", eventKeyInputPong);
+  document.addEventListener("keyup", eventKeyInputPong);
+}
+
+function ws_delete()
+{
+  document.removeEventListener("keydown", eventKeyInputPong);
+  document.removeEventListener("keyup", eventKeyInputPong);
+  ws.close();
+}
+
+function ws_connect(game_id: string)
+{
+  console.log("Connecting to remote pong websocket...");
+  ws = new WebSocket("/api/ws/pong");
+  ws.onopen = () => {
+    console.log("WebSocket connection established");
+    ws.send(JSON.stringify({ type: "JOIN", token: localStorage.getItem("token"), message: game_id}));
+    pingTimeout = setTimeout(() => ws_ping(), ping_time);
+  };
+  ws.onclose = () => {
+    console.log("WebSocket connection closed");
+    ws = null;
+    clearTimeout(pingTimeout);
+    pingTimeout = null;
+    ping_map.clear();
+    document.removeEventListener("keydown", eventKeyInputPong);
+    document.removeEventListener("keyup", eventKeyInputPong);
+  };
+  ws.onerror = (error) => {
+    console.error("WebSocket error:", error);
+    ping_map.clear();
+  };
+  ws.onmessage = (event) => {
+    console.log("WebSocket message received:", event.data);
+    ws_message(event);
+  };
+}
+
+function ws_message(event)
 {
   let message = JSON.parse(event.data.toString()) as IMessage;
 
@@ -57,28 +85,28 @@ function ws_message(event: MessageEvent)
   {
     case "PING":
     {
-      if (message.message !== undefined)
+      if (message.message === undefined)
         return ;
       let ping_id: number = message.message;
-      let sent_time = ping_map.get(ping_id);
-      if (!sent_time)
+      let send_time = ping_map.get(ping_id);
+      if (!send_time)
         return;
-      let rtt = performance.now() - sent_time;
+      let rtt = performance.now() - send_time;
       console.log(`Ping time: ${rtt} ms`);
       ping_map.delete(ping_id);
-      pingInterval = setTimeout(ws_ping, ping_time);
-    }break;
-    case "CONNECTION":
-    {
-
+      pingTimeout = setTimeout(() => ws_ping(), ping_time);
     }break;
     case "JOIN":
     {
-
+      if (message.message == "ok")
+        goToURL("netplay").then(() => display = new PongDisplay());
+      console.log(message);
     }break;
     case "GAME":
     {
-      
+      if (display === undefined)
+        display = new PongDisplay();
+      display.update(message.message);
     }break;
     default:
     {
@@ -87,8 +115,6 @@ function ws_message(event: MessageEvent)
   }
 }
 
-let ping_count = 0;
-
 function ws_ping()
 {
   let ping_id = ping_count++;
@@ -96,8 +122,6 @@ function ws_ping()
   ping_map.set(ping_id, performance_now);
   ws.send(JSON.stringify({ type: "PING", message: ping_id}));
 }
-
-ws_connect();
 
 function ws_disconnect()
 {
@@ -108,19 +132,4 @@ function ws_disconnect()
   }
 }
 
-export function ws_join(game_id: string)
-{
-  if (ws)
-  {
-    const message = {
-      type: "JOIN",
-      message: game_id
-    };
-    ws.send(JSON.stringify(message));
-  }
-}
-
-export function get_ws(): WebSocket | null
-{
-  return ws;
-}
+connect_remote_play("000");

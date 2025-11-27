@@ -6,7 +6,7 @@ import { assetsPath } from "./config.js";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { Id, LanguageObject, UserRow } from "./types.js";
 
-import remotePongRoute from "./remote_pong_route.js";
+import remotePongRoute from "./remote_pong/remote_pong_route.js";
 
 // response format for that page :
 // {
@@ -41,7 +41,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
   {
     /** get the full row corresponding to the id */
     const statement1 = db.prepare<{id: Id}, UserRow>("SELECT * FROM users WHERE id = :id");
-    needConnection = async (req: FastifyRequest, reply: FastifyReply) => {
+    needConnection = async(req: FastifyRequest, reply: FastifyReply) => {
       if (req.user.id === -1) {
         return void reply.code(403).send({
           template: "Home",
