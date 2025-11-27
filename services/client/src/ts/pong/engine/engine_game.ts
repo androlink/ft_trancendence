@@ -37,8 +37,9 @@ function botKeyPressingPong() {
   for (const player of players) {
     if (player.up.key !== undefined && player.up.key !== undefined) continue;
     if (
-      (dx > 0 && ball.view.x >= player.view.TL.x + player.view.width) ||
-      (dx < 0 && ball.view.x <= player.view.TL.x)
+      player.bot_difficulty >= 4 &&
+      ((dx > 0 && ball.view.x >= player.view.TL.x + player.view.width) ||
+        (dx < 0 && ball.view.x <= player.view.TL.x))
     ) {
       player.down.pressed = player.view.TL.y < 50;
       player.up.pressed = player.view.TL.y + player.view.height > 50;

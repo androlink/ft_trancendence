@@ -26,7 +26,7 @@ interface ServerResponse {
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
 /**
- * will cause a reload of the inner even without setting main with force to true 
+ * will cause a reload of the inner even without setting main with force to true
  */
 export function resetNextInner() {
   mainInner = null;

@@ -23,11 +23,11 @@ export const ball_size = 2;
  */
 export const players = [
   generatePLayerEntity(
-    ["player_one"],
+    ["player", "1"],
     { x: 5, y: 50 - paddle_height / 2 },
     ...get_key_config("player_one"),
     "E",
-    0
+    2
   ),
   generatePLayerEntity(
     ["bot", "2"],

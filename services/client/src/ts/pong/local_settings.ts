@@ -1,6 +1,6 @@
 import { sendMessage } from "../html/events.js";
-import { findLanguage } from "../html/templates.js";
-import { createLocalPong } from "./engine/engine_game.js";
+import { findLanguage, selectLanguage } from "../html/templates.js";
+import { createLocalPong, game } from "./engine/engine_game.js";
 import { keyControl } from "./engine/engine_interfaces.js";
 import { players } from "./engine/engine_variables.js";
 import { updateLocalGame } from "./pong.js";
@@ -136,18 +136,17 @@ function player_config(player_id: 0 | 1): HTMLElement {
     range.step = "0.2";
     range.value = String(players[player_id].bot_difficulty);
     range.onchange = (e) => {
+      const difficulty = parseFloat((e.target as HTMLInputElement).value);
       players[player_id].view.name = [
-        "bot",
-        (e.target as HTMLInputElement).value,
+        "bot", (difficulty < 4) ? String(difficulty) : findLanguage("wall")
       ];
-      players[player_id].bot_difficulty = parseInt(
-        (e.target as HTMLInputElement).value
-      );
+      players[player_id].bot_difficulty = difficulty;
     };
     const label_value = document.createElement("label");
     label_value.textContent = String(players[player_id].bot_difficulty);
     range.oninput = (e) => {
-      label_value.textContent = (e.target as HTMLInputElement).value;
+      const difficulty = (e.target as HTMLInputElement).value;
+      label_value.textContent = parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
     };
     span.appendChild(range);
     span.appendChild(label_value);
@@ -163,8 +162,7 @@ function player_config(player_id: 0 | 1): HTMLElement {
   input.oninput = (e) => {
     const nextName = (e.target as HTMLInputElement).value;
     if (nextName) players[player_id].view.name = nextName.substring(0, 20);
-    else
-      players[player_id].view.name = [player_id ? "player_two" : "player_one"];
+    else players[player_id].view.name = ["player", player_id ? "2" : "1"];
   };
   input.maxLength = 20;
   input.className =
@@ -204,11 +202,15 @@ const button = document.createElement("button");
  * Display will be inspired of smash bros, kinda
  */
 function loadLocalConfig() {
+  if (game?.intervalId !== undefined) {
+    // happends if page changes with a game still running (example: changing language)
+    updateLocalGame();
+    return;
+  }
   // below is in case we change page while changing keyboard config (the "Listen..." period)
   self.addEventListener("popstate", (e) => controller.abort(), { once: true });
   const inner = document.getElementById("inner");
   const proof = document.getElementById("local config");
-  // will be used to set a pop-up without looking like one
 
   if (!inner || !proof) {
     console.log(
@@ -236,10 +238,11 @@ function loadLocalConfig() {
     // We'll wait the merge with sjean branch for the translation, because it allows to set more complex messages
     // like a text with texts inside, with texts inside, like the announcmenet + the bot + its level
     sendMessage(
-      JSON.stringify(players[0].view.name) +
-        " on the left against " +
-        JSON.stringify(players[1].view.name) +
-        " on the right"
+      selectLanguage([
+        "game presentation",
+        players[0].view.name,
+        players[1].view.name,
+      ])
     );
     inner.removeChild(span);
     inner.removeChild(button);
