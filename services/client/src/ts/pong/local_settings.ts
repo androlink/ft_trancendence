@@ -138,16 +138,19 @@ function player_config(player_id: 0 | 1): HTMLElement {
     range.onchange = (e) => {
       const difficulty = parseFloat((e.target as HTMLInputElement).value);
       players[player_id].view.name = [
-        "bot", (difficulty < 4) ? String(difficulty) : findLanguage("wall")
+        "bot",
+        difficulty < 4 ? String(difficulty) : ["wall"],
       ];
       players[player_id].bot_difficulty = difficulty;
     };
     const label_value = document.createElement("label");
-    label_value.textContent = String(players[player_id].bot_difficulty);
-    range.oninput = (e) => {
-      const difficulty = (e.target as HTMLInputElement).value;
-      label_value.textContent = parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
-    };
+    function updateLabel() {
+      const difficulty = range.value;
+      label_value.textContent =
+        parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
+    }
+    updateLabel();
+    range.oninput = updateLabel;
     span.appendChild(range);
     span.appendChild(label_value);
     div.appendChild(span);

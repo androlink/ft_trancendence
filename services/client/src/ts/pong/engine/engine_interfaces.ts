@@ -1,8 +1,10 @@
+import { languageString } from "../../html/templates.js";
+
 /**
  * for a player, what is needed to be displayed
  */
 export interface PlayerView {
-  name: string | [string, ...string[]];
+  name: languageString;
   score: number;
   TL: { x: number; y: number };
   width: number;
