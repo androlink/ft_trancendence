@@ -586,7 +586,7 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
  */
 export function setCtrlEventUsername(): void {
   document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       const elem = document.getElementById(
         "user-search"
       ) as HTMLTextAreaElement;
@@ -605,7 +605,7 @@ export function setCtrlEventUsername(): void {
       }
     }
 
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "p") {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "p") {
       e.preventDefault();
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value")) {
@@ -615,7 +615,7 @@ export function setCtrlEventUsername(): void {
       goToURL("profile");
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.key === "e") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
         fetch("/logout", { method: "POST" })
