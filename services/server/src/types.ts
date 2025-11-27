@@ -1,7 +1,6 @@
-
 export type LanguageObject = [string, ...(string | LanguageObject)[]] | string;
 
-export type Id = number | bigint; 
+export type Id = number | bigint;
 
 export interface JwtUserPayload {
   id: Id;
@@ -19,4 +18,4 @@ export type UserRow = {
   password: string;
   bio: string;
   pfp: string;
-}
+};

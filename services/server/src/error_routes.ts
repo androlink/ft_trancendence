@@ -1,5 +1,4 @@
-
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance } from "fastify";
 
 // response format for that page :
 // {
@@ -19,24 +18,23 @@ import { FastifyInstance } from 'fastify'
 // So it's another service, and it's no longer accessible from user perspective
 
 export async function errorRoutes(fastifyInstance: FastifyInstance) {
-  
-  fastifyInstance.all('/413', (req, reply) => {
+  fastifyInstance.all("/413", (req, reply) => {
     return reply.code(413).send({
       template: "Home",
       title: "413 Payload Too Large",
       inner: "Error",
-      replace: {status: "404 Not Found", message: ["ERR_413"]},
+      replace: { status: "404 Not Found", message: ["ERR_413"] },
       success: false,
       message: ["ERR_413"],
     });
   });
 
-  fastifyInstance.all('/400', (req, reply) => {
+  fastifyInstance.all("/400", (req, reply) => {
     return reply.code(400).send({
       template: "Home",
       title: "400 Bad Request",
       inner: "Error",
-      replace: {status: "400 Bad Request", message: ["ERR_400"]},
+      replace: { status: "400 Bad Request", message: ["ERR_400"] },
       success: false,
       message: ["ERR_400"],
     });

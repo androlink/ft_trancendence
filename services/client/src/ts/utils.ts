@@ -1,8 +1,6 @@
-
-import { main } from "./app.js"
-import { sendMessage, setCtrlEventUsername } from "./html/events.js";
+import { main } from "./app.js";
+import { setCtrlEventUsername } from "./html/events.js";
 import { InitConnectionChat, sendStatusMessage } from "./chat.js";
-import { selectLanguage } from "./html/templates.js";
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
 //----------------------------------------------------------------------------#
@@ -14,33 +12,38 @@ import { selectLanguage } from "./html/templates.js";
  * @param force go to the page even if already on it, default to false
  * @returns true if main() is triggered, meaning the function was used
  */
-export async function goToURL(nextURL: string = "", force: boolean = false): Promise<boolean> {
+export async function goToURL(
+  nextURL: string = "",
+  force: boolean = false
+): Promise<boolean> {
   if (arguments.length > 2) {
-    throw new SyntaxError('expected 0 to 2 argument');
+    throw new SyntaxError("expected 0 to 2 argument");
   }
-  if (typeof nextURL !== 'string') {
-    throw new TypeError(`first argument must be a string, not ${typeof nextURL}`);
+  if (typeof nextURL !== "string") {
+    throw new TypeError(
+      `first argument must be a string, not ${typeof nextURL}`
+    );
   }
-  if (typeof force !== 'boolean') {
-    throw new TypeError(`second argument must be a boolean, not ${typeof force}`);
+  if (typeof force !== "boolean") {
+    throw new TypeError(
+      `second argument must be a boolean, not ${typeof force}`
+    );
   }
 
-  if (!nextURL.startsWith('/'))
-    nextURL = `/${nextURL}`;
-  if (!force && location.pathname + location.search === nextURL)
-    return false;
+  if (!nextURL.startsWith("/")) nextURL = `/${nextURL}`;
+  if (!force && location.pathname + location.search === nextURL) return false;
   history.pushState({}, "", nextURL);
   window.dispatchEvent(new PopStateEvent("popstate"));
   return true;
 }
 self["goToURL"] = goToURL;
 
-/** 
+/**
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
   self.addEventListener("popstate", () => main(true));
-};
+}
 
 //----------------------------------------------------------------------------#
 //                                  TIMER STUFF                               #
@@ -54,22 +57,24 @@ let reconnectTimer: ReturnType<typeof setTimeout>;
  */
 export function resetReconnectTimer(auth: string | null): boolean {
   if (arguments.length !== 1) {
-    throw new SyntaxError('expected 1 argument');
+    throw new SyntaxError("expected 1 argument");
   }
-  if (typeof auth !== 'string' && auth !== null) {
-    throw new TypeError(`argument must be a string or null, not ${typeof auth}`);
+  if (typeof auth !== "string" && auth !== null) {
+    throw new TypeError(
+      `argument must be a string or null, not ${typeof auth}`
+    );
   }
 
   if (auth === null) {
     return false;
   }
 
-  const setVisibility = (id: string, state: boolean): boolean | undefined => 
+  const setVisibility = (id: string, state: boolean): boolean | undefined =>
     document.getElementById(id)?.toggleAttribute("hidden", !state);
 
   clearTimeout(reconnectTimer);
   setVisibility("account-reconnected", false);
-  if (auth === 'false') {
+  if (auth === "false") {
     localStorage.removeItem("token");
     setVisibility("account-disconnected", true);
     return false;
@@ -77,14 +82,16 @@ export function resetReconnectTimer(auth: string | null): boolean {
   localStorage.setItem("token", auth);
   setVisibility("account-disconnected", false);
   reconnectTimer = setTimeout(
-    () => {
-      fetch('/api',
-        {headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`}}
-      ).then(res => {
-        if (resetReconnectTimer(res.headers.get('x-authenticated')))
+    async () => {
+      try {
+        const res = await fetch("/api", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (resetReconnectTimer(res.headers.get("x-authenticated")))
           setVisibility("account-reconnected", true);
-      })
-      .catch(() => {}); //if it fails don't bother
+      } catch (err) {
+        console.error("reconnect threw exception: ", err);
+      }
     },
     14 * 60 * 1000
   );
@@ -100,11 +107,13 @@ export function resetReconnectTimer(auth: string | null): boolean {
  * and set history control
  */
 export function launchSinglePageApp(): void {
-  console.log("Hello dear user.\n" +
-    "Just so you know, this website rely heavily on javascript running in the front, " +
-    "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
-    "(example: a popup saying you are disconnected even tho you are not)\n" +
-    "This been said, have fun breaking the website");
+  console.log(
+    "Hello dear user.\n" +
+      "Just so you know, this website rely heavily on javascript running in the front, " +
+      "messing with it might cause a lot of 4XX errors and weird display inconsistencies " +
+      "(example: a popup saying you are disconnected even tho you are not)\n" +
+      "This been said, have fun breaking the website"
+  );
   document.addEventListener("DOMContentLoaded", async () => {
     setArrowButton();
     await main();
@@ -122,7 +131,7 @@ export function keyExist(object: object, key: PropertyKey): boolean {
   return Object.hasOwn(object, key);
 }
 
-export function encodeURIUsername(username: string){
+export function encodeURIUsername(username: string) {
   return encodeURIComponent(username) + (username.length ? "" : "/");
 }
 
@@ -131,19 +140,18 @@ export function encodeURIUsername(username: string){
  */
 export async function accountLogOut(): Promise<void> {
   const token = localStorage.getItem("token");
-  if (token === null)
-    return;
+  if (token === null) return;
   try {
-    const res = await fetch("/logout", {method: 'POST'});
+    const res = await fetch("/logout", { method: "POST" });
     const json = await res.json();
     if (json.success)
-    if (res.headers.get("x-authenticated") === 'false'){
-      sendStatusMessage();
-      main();
-      return;
-    }
-  } catch(err) {
-    alert('Caught: ' + err)
-  };
+      if (res.headers.get("x-authenticated") === "false") {
+        sendStatusMessage();
+        main();
+        return;
+      }
+  } catch (err) {
+    alert("Caught: " + err);
+  }
 }
 self["accountLogOut"] = accountLogOut;
