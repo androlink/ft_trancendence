@@ -20,12 +20,20 @@ function ws_join_handler(ws: WebSocket.WebSocket, req: FastifyRequest, message: 
   try {
     const token: string = message.token;
     if (token == undefined)
-      return ws.send(JSON.stringify({ type: "JOIN", message: "token not found"}));
+    {
+      ws.send(JSON.stringify({ type: "JOIN", message: "token not found"}));
+      ws.close();
+      return ;
+    }
     const id: Id = fastify.jwt.decode(token)["id"]//get sender id;
     ws["id"] = id;
     const game_id: string = message.message;
     if (token === undefined)
-      return ws.send(JSON.stringify({ type: "JOIN", message: "invalid game_id"}));
+    {
+      ws.send(JSON.stringify({ type: "JOIN", message: "invalid game_id"}));
+      ws.close();
+      return ;
+    }
     if (!pong_party_exists(game_id)) {
       pong_party_create("000", [2, 3]);//return ws.send(JSON.stringify({ type: "JOIN", message: "game not found"}));
     }
