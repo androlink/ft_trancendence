@@ -1,5 +1,5 @@
 var exports = {};
-import { htmlSnippets, selectLanguage } from "./html/templates.js"
+import { htmlSnippets, languageString, selectLanguage } from "./html/templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
 import { setEvents } from "./html/events.js";
 
@@ -9,7 +9,7 @@ import { setEvents } from "./html/events.js";
 interface ServerResponse {
   template?: string,
   title?: string,
-  replace?:  {[key:string]:string | {[language:string]:string}},
+  replace?:  {[key:string]:string | languageString},
   inner?: string,
   headers?: Headers,
 }
@@ -41,8 +41,10 @@ export async function main(force = false, requests = true): Promise<void> {
     let {headers, ...rest} = data;
     last = rest;
   }
-
-  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
+  let chatElement: HTMLElement | null | undefined;
+  if (force) {
+    chatElement = document.getElementById("chat-content");
+  }
   if (keyExist(data, 'title')) {
     document.title = selectLanguage(data.title);
   }
@@ -68,7 +70,7 @@ export async function main(force = false, requests = true): Promise<void> {
   } else if (!localStorage.getItem("token")) {
     resetReconnectTimer('false');
   }
-  if (force && chatInnerHTML) document.getElementById("chat-content")?.insertAdjacentHTML('beforeend', chatInnerHTML);
+  if (force && chatElement) document.getElementById("chat-content")?.replaceWith(chatElement);
   setEvents();
 }
 self["main"] = main;
@@ -147,7 +149,7 @@ function toggleButtons(parent: HTMLElement) {
  * their attribute value, srcdoc or their innertext 
  * @param toReplace toReplace[key] = val — 'key' are the id of the elements selected, 'val' are the new values
  */
-function replaceElements(toReplace: {[key:string]:string | {[language:string]:string}}): void {
+function replaceElements(toReplace: {[key:string]:string | languageString }): void {
   for (const key in toReplace) {
     let element = document.getElementById(key);
     if (element) {

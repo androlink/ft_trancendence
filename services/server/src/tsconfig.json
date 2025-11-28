@@ -7,9 +7,9 @@
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true,
-    "lib": ["esnext", "dom"]
+    "lib": []
   },
     "watchOptions": {
     "watchFile": "fixedpollinginterval"

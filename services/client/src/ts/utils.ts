@@ -30,7 +30,7 @@ export async function goToURL(nextURL: string = "", force: boolean = false): Pro
   if (!force && location.pathname + location.search === nextURL)
     return false;
   history.pushState({page: ""}, "", nextURL);
-  await main(true);
+  await main();
   return true;
 }
 self["goToURL"] = goToURL;
@@ -39,7 +39,7 @@ self["goToURL"] = goToURL;
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener('popstate', () => main(true));
+  self.addEventListener('popstate', () => main());
 };
 
 //----------------------------------------------------------------------------#
@@ -136,11 +136,10 @@ export async function accountLogOut(): Promise<void> {
   try {
     const res = await fetch("/logout", {method: 'POST'});
     const json = await res.json();
-    if (json.success)
-    if (res.headers.get("x-authenticated") === 'false'){
+    if (json.success && res.headers.get("x-authenticated") === 'false'){
+      localStorage.removeItem("token");
       sendStatusMessage();
       main();
-      return;
     }
   } catch(err) {
     alert('Caught: ' + err)

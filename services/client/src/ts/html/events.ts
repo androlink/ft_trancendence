@@ -3,7 +3,8 @@
 import { encodeURIUsername, goToURL, keyExist, resetReconnectTimer } from "../utils.js";
 import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
 import { main } from "../app.js";
-import { sendChatMessage, sendStatusMessage } from "../chat.js";
+import { sendChatMessage, InitConnectionChat, sendStatusMessage } from "../chat.js";
+import { toASCII } from "punycode";
 
 /**
  * set all the events that the page need to work properly
@@ -309,10 +310,11 @@ function setClickEventProfile(text: HTMLElement): void {
 }
 
 function setClickEventBlockRequest(text: HTMLElement): void {
-  if (text.innerText === "NOT CONNECTED" || text.innerText === "IT IS YOU") {
-    text.innerText = findLanguage(text.innerText.toLowerCase());
+  if (["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)) {
+    text.className = "";
     return ;
   }
+  text.className = "cursor-pointer";
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
@@ -325,21 +327,25 @@ function setClickEventBlockRequest(text: HTMLElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
+        console.error(keyExist(result, "message") ? selectLanguage(result.message) : 
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      sendMessage(String(error));
+      console.error(String(error));
     }
     main(true);
   });
 }
+//  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
+//  "toi" -> "toi", et la c'est un autre type,
+// Stephane sjean
 
 function setClickEventFriendRequest(text: HTMLElement): void {
-  if (text.innerText === "NOT CONNECTED" || text.innerText === "IT IS YOU" || text.innerText === "THEY ARE BLOCKED") {
-    text.innerText = findLanguage(text.innerText.toLowerCase());
+  if (["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"].map(findLanguage).includes(text.innerText)) {
+    text.className = "";
     return ;
   }
+  text.className = "cursor-pointer";
   let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
@@ -352,11 +358,11 @@ function setClickEventFriendRequest(text: HTMLElement): void {
       resetReconnectTimer(response.headers.get('x-authenticated'));
       const result: {success?: boolean, message?: string} = await response.json();
       if (!result.success) {
-        sendMessage(keyExist(result, "message") ? selectLanguage(result.message) : 
+        console.error(keyExist(result, "message") ? selectLanguage(result.message) : 
         `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      sendMessage(String(error));
+      console.error(String(error));
     }
     main(true);
   });
@@ -367,6 +373,7 @@ function setClickEventFriendRequest(text: HTMLElement): void {
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+  InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -552,7 +559,8 @@ export function setCtrlEventUsername(): void {
         e.preventDefault();
         fetch("/logout", {method: 'POST'}).then(
           res => {
-            resetReconnectTimer(res.headers.get("x-authenticated")); 
+            resetReconnectTimer(res.headers.get("x-authenticated"));
+            sendStatusMessage();
             if (document.activeElement.id !== "user-search") main();
             else sendMessage("You found a debug option, won't force a reload if user-search is selected");
           }

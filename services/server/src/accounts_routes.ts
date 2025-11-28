@@ -1,6 +1,5 @@
 
 import db, { hashPassword, comparePassword } from "./database";
-import MSG from "./messages_collection";
 import fs from 'fs'
 import { fileTypeFromBuffer } from 'file-type';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
@@ -25,26 +24,26 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
    */
   function checkBodyInput(requiredFields: string[], presenceOnly = false) {
     let conditions = {
-      username: {minLength: 3, maxLength: 20, alphanumeric_: true },
+      username: {minLength: 3, maxLength: 20, alphanumeric_: true, forbidden: ["server", "You"]},
       biography: {maxLength: 3000 },
       password: {minLength: 4, maxByteLength: 42 },
     }
-    return async function (req:FastifyRequest<{Body: Object}>, reply: FastifyReply) {
+    return async function (req:FastifyRequest<{Body: {[key: string]: string}}>, reply: FastifyReply) {
       for (const field of requiredFields) {
         if (!Object.hasOwn(req.body, field))
           return reply.code(401).send({success: false, message: `query ${field} missing`});
         if (presenceOnly || (req.user && req.user.admin))
           continue ;
         if (typeof req.body[field] !== "string")
-          return reply.code(401).send({success: false, message: MSG.MUST_BE_STR(field)});
+          return reply.code(401).send({success: false, message: ["MUST_BE_STR", field]});
         if (conditions[field].minLength && req.body[field].length < conditions[field].minLength)
-          return reply.code(401).send({success: false, message: MSG.MIN_STR_LENGTH(field, conditions[field].minLength)});
+          return reply.code(401).send({success: false, message: ["MIN_STR_LENGTH", [field], conditions[field].minLength]});
         if (conditions[field].maxLength && req.body[field].length > conditions[field].maxLength)
-          return reply.code(401).send({success: false, message: MSG.MAX_STR_LENGTH(field, conditions[field].maxLength)});
+          return reply.code(401).send({success: false, message: ["MAX_STR_LENGTH", [field], conditions[field].maxLength]});
         if (conditions[field].maxByteLength && Buffer.byteLength(req.body[field]) > conditions[field].maxByteLength)
-          return reply.code(401).send({success: false, message: MSG.MAX_BYTE_LENGTH(field, conditions[field].maxByteLength)});
+          return reply.code(401).send({success: false, message: ["MAX_BYTE_LENGTH", [field], conditions[field].maxByteLength]});
         if (conditions[field].alphanumeric_ && !req.body[field].match("^[a-zA-Z0-9_]*$"))
-          return reply.code(401).send({success: false, message: MSG.ALPHANUMERIC_(field)});
+          return reply.code(401).send({success: false, message: ["ALPHANUMERIC_", [field]]});
       }
     };
   }
@@ -54,10 +53,10 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
    */
   async function needFormBody(req: FastifyRequest, reply: FastifyReply) {
     if (!("content-type" in req.headers)) {
-      return reply.code(415).send({success: false, message: MSG.EXPECTED_CONTENT_TYPE(req.method)});
+      return reply.code(415).send({success: false, message: ["EXPECTED_CONTENT_TYPE", req.method]});
     }
     if (!req.headers["content-type"].startsWith("application/x-www-form-urlencoded")){
-      return reply.code(415).send({success: false, message: MSG.EXPECTED_FORMBODY(req.method, req.url)});
+      return reply.code(415).send({success: false, message: ["EXPECTED_FORMBODY", req.method, req.url]});
     }
   };
 
@@ -77,7 +76,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         const row = statement1.get({id: req.user.id});
         if (!row) {
           reply.header('x-authenticated', false);
-          return reply.code(404).send({success: false, message: MSG.NOT_IN_DB()});
+          return reply.code(404).send({success: false, message: ["NOT_IN_DB"]});
         }
         req.user.username = row.username;
         req.user.admin = row.admin;
@@ -87,7 +86,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         reply.header('x-authenticated', token);
       } catch (err) {
         reply.header('x-authenticated', false);
-        return reply.code(401).send({success: false, message: MSG.NOT_RECOGNIZED()});
+        return reply.code(401).send({success: false, message: ["NOT_RECOGNIZED"]});
       }
     };
   }
@@ -105,16 +104,16 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
           const res = statement1.run({username, password});
           if (res.changes === 0) {
             // not normal
-            return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
+            return reply.code(403).send({success: false, message: ["DB_REFUSED"]});
           }
           const token = fastifyInstance.jwt.sign({id: res.lastInsertRowid},  {expiresIn: '15m'});
           const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
           return reply.header("x-authenticated", token)
-            .send({success: true, message: MSG.WELCOME_USERNAME(username)});
+            .send({success: true, message: ["WELCOME_USERNAME", username]});
         }
         catch (err) {
           // statement will crash if if doesn't respect db rules, so if username not UNIQUE
-          return reply.code(409).send({success: false, message: MSG.USERNAME_TAKEN(username)});
+          return reply.code(409).send({success: false, message: ["USERNAME_TAKEN", username]});
         }
     });
   }
@@ -132,20 +131,20 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         const password = req.body.password;
         let row = statement1.get({username});
         if (!row) {
-          return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(username)});
+          return reply.code(401).send({success: false, message: ["USERNAME_NOT_FOUND", username.length > 20 ? username.substring(0, 20) + '...' : username]});
         }
         if (!await comparePassword(password, row.password)) {
-          return reply.code(401).send({success: false, message: MSG.WRONG_PASSWORD()});
+          return reply.code(401).send({success: false, message: ["WRONG_PASSWORD"]});
         }
         const token = fastifyInstance.jwt.sign({id: row.id},  {expiresIn: '15m'});
         const cookiesOptions =  {path: '/', httpOnly: true, secure: true, sameSite: "Strict", maxAge: 15 * 60};
         return reply.header("x-authenticated", token)
-          .send({success: true, message: MSG.WELCOME_USERNAME(username)});
+          .send({success: true, message: ["WELCOME_USERNAME", username]});
     });
   }
   
   fastifyInstance.post("/logout", (req, reply) => {
-    return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
+    return reply.header("x-authenticated", false).send({success: true, message: ["GOODBYE"]});
   });
 
   {
@@ -163,13 +162,13 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
           const res = statement1.run({username, bio, id: req.user.id});
           if (!res.changes) {
             // might happen if account deleted between start of request treating and statement's run
-            return reply.code(404).header("x-authenticated", false).send({success: false, message: MSG.NOT_IN_DB()});
+            return reply.code(404).header("x-authenticated", false).send({success: false, message: ["NOT_IN_DB"]});
           }
           return reply.send({success: true, message: ":D"});
         }
         catch (err) {
           // statement will crash if if doesn't respect db rules, so if username not UNIQUE
-          return reply.code(409).send({success: false, message: MSG.USERNAME_TAKEN(username)});
+          return reply.code(409).send({success: false, message: ["USERNAME_TAKEN", username]});
         }
     });
   }
@@ -186,12 +185,12 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       async (req, reply) => {
         const data = await req.file();
         if (!data || !data.filename) {
-          return reply.code(400).send({ success: false, message: MSG.NO_FILE() });
+          return reply.code(400).send({ success: false, message: ["NO_FILE"]});
         }
         const buffer = await data.toBuffer();
         const detectedType = await fileTypeFromBuffer(buffer);
         if (!detectedType || !['image/png', 'image/apng', 'image/jpeg', 'image/gif', 'image/webp'].includes(detectedType.mime)) {
-          return reply.code(401).send({ success: false, message: MSG.NOT_IMG() });
+          return reply.code(401).send({ success: false, message: ["NOT_IMG"] });
         }
         const filename = `${req.user.id}${String(Math.random()).substring(2)}.${detectedType.ext}`;
         try {
@@ -203,7 +202,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         const res = statement2.run({pfp: filename, id: req.user.id});
         // below might happen on race condition, if someone deleted their accounts between SQL request for instance
         if (!row || !res.changes) {
-          return reply.code(404).header("x-authenticated", false).send({success: false, message: MSG.NOT_IN_DB()});
+          return reply.code(404).header("x-authenticated", false).send({success: false, message: ["NOT_IN_DB"]});
         }
         if (row.pfp !== "default.jpg" && row.pfp !== filename) {
           // if unlink fails, it's sad, but won't bother with an error
@@ -225,7 +224,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         const password = await hashPassword(req.body.password);
         const res = statement1.run({password, id: req.user.id});
         if (!res.changes) 
-          return reply.code(403).send({success: false, message: MSG.DB_REFUSED()});
+          return reply.code(403).send({success: false, message: ["DB_REFUSED"]});
         return reply.send({success: true, message: ":D"});
     });
   }
@@ -264,17 +263,17 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
           return reply.send({success: false, message: "You need to tell the target in the query as example /block?user=AllMighty"});
         }
         if (req.user.username === target) {
-          return reply.send({success: false, message: MSG.THAT_IS_YOU()});
+          return reply.send({success: false, message: ["THAT_IS_YOU"]});
         }
         let row = statement1.get({target});
         if (!row) {
-          return reply.send({success: false, message: MSG.USERNAME_NOT_FOUND(target)});
+          return reply.send({success: false, message: ["USERNAME_NOT_FOUND", target.length > 20 ? target.substring(0, 20) + '...' : target]});
         }
         try {
           return reply.send({success: true, message: toggleBlock(req.user.id, row.id)});
         }
         catch (err){
-          return reply.code(409).send({success: false, message: MSG.ERR_409()});
+          return reply.code(409).send({success: false, message: ["ERR_409"]});
         }
     });
   }
@@ -323,15 +322,15 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
         if (target === undefined)
           return reply.code(401).send({success: false, message: "You need to tell the target in the query as example /friend?user=AllMighty"});
         if (req.user.username === target)
-          return reply.code(403).send({success: false, message: MSG.THAT_IS_YOU()});
+          return reply.code(403).send({success: false, message: ["THAT_IS_YOU"]});
         let row = statement1.get({username: target});
         if (!row)
-          return reply.code(401).send({success: false, message: MSG.USERNAME_NOT_FOUND(target)});
+          return reply.code(401).send({success: false, message: ["USERNAME_NOT_FOUND", target.length > 20 ? target.substring(0, 20) + '...' : target]});
         try {
           return reply.send({success: true, message: toggleFriend(req.user.id, row.id)});
         }
         catch (err){
-          return reply.code(409).send({success: false, message: MSG.ERR_409()});
+          return reply.code(409).send({success: false, message: ["ERR_409"]});
         }
     });
   }
@@ -346,21 +345,21 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       },
       (req, reply) => {
         if (req.user.admin) {
-          return reply.code(403).send({success: false, message: MSG.REFUSED_ADMIN()});
+          return reply.code(403).send({success: false, message: ["REFUSED_ADMIN"]});
         }
         if (req.body.username != req.user.username) {
-          return reply.code(401).send({success: false, message: MSG.WRONG_USERNAME()});
+          return reply.code(401).send({success: false, message: ["WRONG_USERNAME"]});
         }
         const row = statement1.get({id: req.user.id}) as UserRow;
         if (!row) {
           // should not happen, unless two /delete request at the same time, i think
-          return reply.code(404).header("x-authenticated", false).send({success: false, message: MSG.NOT_IN_DB()});
+          return reply.code(404).header("x-authenticated", false).send({success: false, message: ["NOT_IN_DB"]});
         }
         if (row.pfp != "default.jpg") {
           fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
         }
         // Not a 204 No content because 204 should not have a body and the front wants to have success
-        return reply.header("x-authenticated", false).send({success: true, message: MSG.GOODBYE()});
+        return reply.header("x-authenticated", false).send({success: true, message: ["GOODBYE"]});
     });
   }
 }
