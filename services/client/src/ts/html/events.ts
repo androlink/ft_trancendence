@@ -4,7 +4,7 @@ import { encodeURIUsername, goToURL, keyExist, resetReconnectTimer } from "../ut
 import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
 import { main } from "../app.js";
 import { sendChatMessage, InitConnectionChat, sendStatusMessage } from "../chat.js";
-import { toASCII } from "punycode";
+
 
 /**
  * set all the events that the page need to work properly

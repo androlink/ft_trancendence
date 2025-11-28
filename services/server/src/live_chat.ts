@@ -4,7 +4,6 @@ import { WebSocket, WebsocketHandler } from "@fastify/websocket";
 import db from "./database";
 import Database from "better-sqlite3";
 import { Id, WSmessage, TypeMessage } from "./types";
-import { Data } from "ws";
 
 /**
  * Class client

@@ -7,6 +7,7 @@ import { assetsPath } from "./config";
 import liveChat from "./live_chat";
 import { errorRoutes } from "./error_routes";
 import { miscRoutes } from "./misc_routes";
+import authentification from "./authentification";
 
 export default fastifyConf();
 import fastify from "./server";
@@ -27,6 +28,7 @@ fastify.register(loginRoutes); // should be renamed /api/account due to being ab
 fastify.register(errorRoutes, { prefix: "/error" }); // does not need any prefix if its own docker
 fastify.register(miscRoutes, { prefix: "/misc" }); // should be renamed something like /api/misc
 fastify.register(liveChat); // i don't know ask sjean
+fastify.register(authentification); // i don't know don't ask sjean
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

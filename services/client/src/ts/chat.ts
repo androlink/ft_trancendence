@@ -73,7 +73,6 @@ function WSconnect(): void {
       console.log("[incoming message]:", receivemsg);
       // check type
       if (receivemsg.type === TypeMessage.pong) {
-        console.log("pong");
         lastPong = Date.now();
       } else if (receivemsg.type === TypeMessage.readyForDirectMessage) {
         sendOrQueue(

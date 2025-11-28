@@ -2,7 +2,7 @@ var exports = {};
 import { htmlSnippets, languageString, selectLanguage } from "./html/templates.js"
 import { goToURL, keyExist, launchSinglePageApp, resetReconnectTimer } from "./utils.js";
 import { setEvents } from "./html/events.js";
-
+import { loginWithGithub } from "./github_auth.js";
 /**
  * the infos we consider important that we get from a fetch to the server
  */
@@ -72,6 +72,7 @@ export async function main(force = false, requests = true): Promise<void> {
   }
   if (force && chatElement) document.getElementById("chat-content")?.replaceWith(chatElement);
   setEvents();
+  (window as any).loginWithGithub = loginWithGithub;
 }
 self["main"] = main;
 
