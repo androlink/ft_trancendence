@@ -87,17 +87,19 @@ export function generatePLayerEntity(
 export function generateParty(
   players: PlayerEntity[],
   ball: BallEntity,
+  ending: boolean,
   max_score = 10
 ): GameParty {
   let game_party: GameParty = {
-    max_score: max_score,
-    ball: ball,
-    players: players,
+    max_score,
+    ball,
+    players,
     views: {
       ball: ball.view,
       players: players.map((p) => p.view),
       state: "waiting",
     },
+    ending,
   };
   return game_party;
 }

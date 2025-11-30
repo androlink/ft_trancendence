@@ -5,7 +5,7 @@ import { assetsPath } from "./config.js";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Id, LanguageObject, UserRow } from "./types.js";
 
-import remotePongRoute from "./remote_pong_route.js";
+import remotePongRoute from "./remote_pong/remote_pong_route.js";
 
 // response format for that page :
 // {

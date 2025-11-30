@@ -10,11 +10,10 @@
     "strict": false,
     "skipLibCheck": true,
     "lib": ["esnext", "dom"],
-    "types": ["node" ]
+    "types": ["node"]
   },
-    "watchOptions": {
+  "watchOptions": {
     "watchFile": "fixedpollinginterval"
   },
-    "include": ["*.ts"]
+  "include": ["**.ts"]
 }
-

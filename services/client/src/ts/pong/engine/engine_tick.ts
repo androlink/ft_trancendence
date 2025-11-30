@@ -6,6 +6,9 @@ import {
 } from "./engine_interfaces.js";
 import { resetBall } from "./engine_inits.js";
 import { containsBetween } from "./engine_utils.js";
+import { deleteLocalPong } from "./engine_game.js";
+import { loadLocalConfig, nextGame } from "../local_settings.js";
+import { display, removeGameAnimation } from "../pong.js";
 
 /**
  * will do a single iteration of the game, this function should be called many times by second
@@ -20,20 +23,26 @@ export function tick(game: GameParty) {
   movePlayers(players, ball.view.size);
   moveBall(ball);
   collideWithPlayers(ball, players);
-
-  // gonna need to either :
-  //    cap the speed.x of the ball at the witdh of the paddle
-  //    set a collision detection based on the movement of the ball and not its finishing point
-  // also, need to add a detection of the colision based on the radius of the ball,
-  // unlike now where it's based on it's single coordinate
-  if (checkPoints(ball, players))
-    if (Math.max(...players.map((p) => p.view.score)) >= game.max_score) {
-      clearInterval(game.intervalId);
-      game.intervalId = undefined;
+  if (!checkPoints(ball, players)) return;
+  if (Math.max(...players.map((p) => p.view.score)) >= game.max_score) {
+    if (game.ending) {
+      removeGameAnimation();
       game.views.state = "ended";
-      clearInterval(game.botIntervalId);
-      game.botIntervalId = undefined;
+      display.update(game.views);
+      new Promise(r => setTimeout(r, 1500)).then( () => {
+        let winner = Number(players[1].view.score >= game.max_score) as 0 | 1;
+        deleteLocalPong();
+        game.views.state = "ended";
+        nextGame(winner);
+      });
+      return;
     }
+    clearInterval(game.intervalId);
+    game.intervalId = undefined;
+    game.views.state = "ended";
+    clearInterval(game.botIntervalId);
+    game.botIntervalId = undefined;
+  }
 }
 
 /**

@@ -1,10 +1,6 @@
-import {
-  generateParty,
-  resetBall,
-  resetParty,
-  resetPlayer,
-} from "./engine_inits.js";
-import { GameParty, PlayerEntity } from "./engine_interfaces.js";
+import { loadLocalConfig } from "../local_settings.js";
+import { generateParty, resetParty } from "./engine_inits.js";
+import { GameParty } from "./engine_interfaces.js";
 import { tick } from "./engine_tick.js";
 import { ball, ball_size, delay, players } from "./engine_variables.js";
 
@@ -82,10 +78,11 @@ function botKeyPressingPong() {
 export let game: GameParty | undefined = undefined;
 /**
  * will set the events to play the local game, and launch the game
+ * @param options other options, like if the games ends or loop (ending = true)
  */
-export function createLocalPong(): void {
+export function createLocalPong(options?: { ending?: boolean }): void {
   if (game?.intervalId !== undefined) return;
-  game = generateParty(players, ball, 5);
+  game = generateParty(players, ball, Boolean(options?.ending), 5);
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
   self.addEventListener("popstate", deleteLocalPong, { once: true });
@@ -141,13 +138,15 @@ function toggleLocalPongOnHidden() {
  * stop the game
  * and reset the variables
  */
-function deleteLocalPong(): void {
+export function deleteLocalPong(): void {
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
   document.removeEventListener("visibilitychange", toggleLocalPongOnHidden);
+  self.removeEventListener("popstate", deleteLocalPong);
   if (game.intervalId) clearInterval(game.intervalId);
   game.intervalId = undefined;
   clearInterval(game.botIntervalId);
   game.botIntervalId = undefined;
   resetParty(game);
+  game.views.state = "waiting";
 }

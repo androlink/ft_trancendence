@@ -303,7 +303,7 @@ export function selectLanguage(strs: languageString): string {
  * @param name the key for the jsons
  * @returns the string if found, "translation not found" if not
  */
-export function findLanguage(name: string) {
+export function findLanguage(name: string): string {
   const handled = { en, fr, es };
   let language = localStorage.getItem("language");
   if (language === null || !Object.hasOwn(handled, language)) language = "en";

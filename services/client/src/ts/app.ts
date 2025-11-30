@@ -10,7 +10,7 @@ import {
   launchSinglePageApp,
   resetReconnectTimer,
 } from "./utils.js";
-import { setEvents } from "./html/events.js";
+import { sendMessage, setEvents } from "./html/events.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -56,8 +56,6 @@ export async function main(force = false, requests = true): Promise<void> {
     let { headers, ...rest } = data;
     last = rest;
   }
-
-  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
   if (keyExist(data, "title")) {
     document.title = selectLanguage(data.title);
   }
@@ -83,10 +81,6 @@ export async function main(force = false, requests = true): Promise<void> {
   } else if (!localStorage.getItem("token")) {
     resetReconnectTimer("false");
   }
-  if (force && chatInnerHTML)
-    document
-      .getElementById("chat-content")
-      ?.insertAdjacentHTML("beforeend", chatInnerHTML);
   setEvents();
 }
 self["main"] = main;
@@ -119,7 +113,7 @@ async function fetchApi(): Promise<ServerResponse> {
     data.headers = response.headers;
     return data;
   } catch (error) {
-    alert(error instanceof Error ? error.message : String(error));
+    sendMessage(error instanceof Error ? error.message : String(error));
     return {};
   }
 }
