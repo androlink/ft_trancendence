@@ -1,4 +1,3 @@
-import { loadLocalConfig } from "../local_settings.js";
 import { generateParty, resetParty } from "./engine_inits.js";
 import { GameParty } from "./engine_interfaces.js";
 import { tick } from "./engine_tick.js";
@@ -18,6 +17,7 @@ function eventKeyInputPong(event: KeyboardEvent) {
           : control.key.toLowerCase() === event.key.toLowerCase()
       ) {
         control.pressed = event.type === "keydown";
+        event.preventDefault();
       }
     }
   });

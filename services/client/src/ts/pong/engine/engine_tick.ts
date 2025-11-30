@@ -7,8 +7,8 @@ import {
 import { resetBall } from "./engine_inits.js";
 import { containsBetween } from "./engine_utils.js";
 import { deleteLocalPong } from "./engine_game.js";
-import { loadLocalConfig, nextGame } from "../local_settings.js";
 import { display, removeGameAnimation } from "../pong.js";
+import { prepareNextGame } from "../config/tournaments_settings.js";
 
 /**
  * will do a single iteration of the game, this function should be called many times by second
@@ -29,11 +29,11 @@ export function tick(game: GameParty) {
       removeGameAnimation();
       game.views.state = "ended";
       display.update(game.views);
-      new Promise(r => setTimeout(r, 1500)).then( () => {
+      new Promise((r) => setTimeout(r, 1500)).then(() => {
         let winner = Number(players[1].view.score >= game.max_score) as 0 | 1;
         deleteLocalPong();
         game.views.state = "ended";
-        nextGame(winner);
+        prepareNextGame(winner);
       });
       return;
     }

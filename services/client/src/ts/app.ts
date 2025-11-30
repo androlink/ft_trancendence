@@ -127,8 +127,7 @@ async function fetchApi(): Promise<ServerResponse> {
 function changeSnippet(elem: HTMLElement, template: string): boolean {
   if (!keyExist(htmlSnippets, template)) {
     elem.innerHTML = "";
-    if (elem.className.indexOf("text-white") === -1)
-      elem.className += " text-white";
+    elem.classList.add("text-white");
     elem.innerText = `Snippet ${template} not Found in template.js\nIf you didn't traficate your front-end files, consider refreshing and then calling @geymat, @gcros or @sjean`;
     return false;
   }
