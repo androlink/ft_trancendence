@@ -3,6 +3,7 @@ import fastifyWebSocket from "@fastify/websocket";
 import fastifyJWT from "@fastify/jwt";
 
 import chatRoute from "./chat_route";
+import { initDB } from "../common/database";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -18,6 +19,8 @@ fastify.register(fastifyWebSocket);
 fastify.register(fastifyJWT, {
   secret: process.env.JWT_SECURITY_KEY || "",
 });
+
+await initDB();
 
 fastify.register(chatRoute, { prefix: "/api" });
 

@@ -5,6 +5,7 @@ import fastifyMultipart from "@fastify/multipart";
 
 import apiAccount from "./accounts_routes";
 import { Id, JwtUserPayload } from "../common/types";
+import { initDB } from "../common/database";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -29,6 +30,8 @@ fastify.register(fastifyFormbody);
 fastify.register(fastifyJWT, {
   secret: process.env.JWT_SECURITY_KEY || "",
 });
+
+await initDB();
 
 fastify.register(apiAccount, { prefix: "/api/account" });
 

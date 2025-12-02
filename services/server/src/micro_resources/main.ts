@@ -1,5 +1,6 @@
 import fastifyModule from "fastify";
 import fastifyStatic from "@fastify/static";
+import { initDB } from "../common/database";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -25,6 +26,8 @@ fastify.register(fastifyStatic, {
   root: "/var/www",
   prefix: assetsPath,
 });
+
+await initDB();
 
 fastify.get(`/${assetsPath}`, (req, reply) =>
   reply.send("Hello user, that's where we keep our static files\n")

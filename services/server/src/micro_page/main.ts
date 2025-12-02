@@ -3,6 +3,7 @@ import fastifyJWT from "@fastify/jwt";
 
 import pageRoute from "./api_page";
 import { Id, JwtUserPayload } from "../common/types";
+import { initDB } from "../common/database";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -22,6 +23,8 @@ const fastify = fastifyModule({
     ignoreDuplicateSlashes: true,
   },
 });
+
+await initDB();
 
 fastify.register(fastifyJWT, {
   secret: process.env.JWT_SECURITY_KEY || "",

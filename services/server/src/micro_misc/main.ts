@@ -1,6 +1,7 @@
 import fastifyModule from "fastify";
 
 import miscRoute from "./api_misc";
+import { initDB } from "../common/database";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -13,6 +14,8 @@ const fastify = fastifyModule({
     ignoreDuplicateSlashes: true,
   },
 });
+
+await initDB();
 
 fastify.register(miscRoute, { prefix: "/api/misc" });
 

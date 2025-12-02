@@ -1,6 +1,7 @@
 import fastifyModule from "fastify";
 
 import errorRoute from "./error_routes";
+import { initDB } from "../common/database";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -11,6 +12,8 @@ const fastify = fastifyModule({
     ignoreTrailingSlash: true,
   },
 });
+
+await initDB();
 
 fastify.register(errorRoute, { prefix: "/error" });
 
