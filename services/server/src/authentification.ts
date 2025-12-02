@@ -1,4 +1,3 @@
-import fastify from "./server";
 import { FastifyInstance } from "fastify";
 
 const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
@@ -25,11 +24,13 @@ export default function authentification(fastify: FastifyInstance) {
   });
 
   fastify.get("/api/github/getUserData", async (req, res) => {
-    const authorization = req.headers["authorization"];
-    const url = new URL("https://api.github.com/user");
-    const response = await fetch(url, {
+    const authHeader = req.headers["authorization"];
+    console.log("Authorization =>", authHeader);
+    const response = await fetch("https://api.github.com/user", {
       method: "GET",
-      headers: { Authorization: authorization },
+      headers: {
+        Authorization: authHeader,
+      },
     });
 
     const data = await response.json();

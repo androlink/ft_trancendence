@@ -70,7 +70,7 @@ function WSconnect(): void {
   ws.addEventListener("message", (event) => {
     try {
       const receivemsg: WSmessage = JSON.parse(event.data);
-      console.log("[incoming message]:", receivemsg);
+      // console.log("[incoming message]:", receivemsg);
       // check type
       if (receivemsg.type === TypeMessage.pong) {
         lastPong = Date.now();
