@@ -4,7 +4,7 @@ import fastifyJWT from "@fastify/jwt";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyWebSocket from "@fastify/websocket";
-import { JwtUserPayload, Id } from "./types";
+import { JwtUserPayload, Id } from "./common/types";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -26,9 +26,9 @@ export default function () {
   });
 
   fastify.register(fastifyMultipart);
+  fastify.register(fastifyFormbody);
 
   fastify.register(fastifyWebSocket);
-  fastify.register(fastifyFormbody);
 
   fastify.register(fastifyStatic, {
     root: "/var/www",

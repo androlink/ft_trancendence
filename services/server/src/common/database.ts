@@ -82,14 +82,13 @@ export async function launchDB() {
     loser INTEGER NOT NULL
   );
   `);
-  const res = db
-    .prepare(
-      "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
-    )
-    .run(
-      "AllMighty",
-      await hashPassword(process.env.ADMIN_PASSWORD),
-      "ADMIN",
-      1
-    );
+
+  db.prepare(
+    "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
+  ).run(
+    "AllMighty",
+    await hashPassword(process.env.ADMIN_PASSWORD || ""),
+    "ADMIN",
+    1
+  );
 }
