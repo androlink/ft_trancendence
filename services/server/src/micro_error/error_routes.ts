@@ -30,13 +30,6 @@ export default async function errorRoutes(fastifyInstance: FastifyInstance) {
   });
 
   fastifyInstance.all("/400", (req, reply) => {
-    return reply.code(400).send({
-      template: "Home",
-      title: "400 Bad Request",
-      inner: "Error",
-      replace: { status: "400 Bad Request", message: ["ERR_400"] },
-      success: false,
-      message: ["ERR_400"],
-    });
+    return reply.sendFile("page_400.html");
   });
 }

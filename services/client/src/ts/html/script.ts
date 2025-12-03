@@ -2,7 +2,6 @@
 // events.ts was too full when the top function was not acting as an index
 
 import { encodeURIUsername, goToURL } from "../utils.js";
-import { sendMessage } from "./events.js";
 import { assetsPath, findLanguage } from "./templates.js";
 
 /**
@@ -124,7 +123,7 @@ async function loadFriendsDisplay(): Promise<void> {
       grid.appendChild(fragment);
     }
   } catch (err) {
-    sendMessage(String(err));
+    console.error(err);
   }
 }
 self["loadFriendsDisplay"] = loadFriendsDisplay;

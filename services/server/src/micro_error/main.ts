@@ -1,6 +1,7 @@
 import fastifyModule from "fastify";
+import fastifyStatic from "@fastify/static";
 
-import errorRoute from "./error_routes";
+import errorRoutes from "./error_routes";
 import { initDB } from "../common/database";
 
 // if changed for better naming convention
@@ -13,9 +14,13 @@ const fastify = fastifyModule({
   },
 });
 
-await initDB();
+fastify.register(fastifyStatic, {
+  root: "/var/www",
+  prefix: assetsPath,
+  serve: false,
+});
 
-fastify.register(errorRoute, { prefix: "/error" });
+fastify.register(errorRoutes, { prefix: "/error" });
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

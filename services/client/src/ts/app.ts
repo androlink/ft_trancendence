@@ -91,7 +91,7 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`/api/page${self.location.pathname}`, {
+    const response = await fetch(`/api/page${encodeURI(self.location.pathname)}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
