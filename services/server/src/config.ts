@@ -41,7 +41,7 @@ export default function () {
   fastify.get(`/favicon.ico`, (req, reply) => reply.sendFile("favicon.ico"));
 
   fastify.register(fastifyJWT, {
-    secret: process.env.JWT_SECURITY_KEY,
+    secret: process.env.JWT_SECURITY_KEY || "",
   });
 
   return fastify;

@@ -1,12 +1,12 @@
 import fastifyConf from "./config";
 
-import { launchDB } from "./common/database";
+import { initDB } from "./common/database";
 import { assetsPath } from "./config";
 
 export default fastifyConf();
 import fastify from "./server";
 
-await launchDB();
+await initDB();
 
 fastify.setNotFoundHandler((req, reply) => {
   if (req.method !== "GET")
