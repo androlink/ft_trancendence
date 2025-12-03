@@ -50,8 +50,9 @@ export async function launchDB() {
     username TEXT NOT NULL UNIQUE,
     bio TEXT NOT NULL DEFAULT 'Damn is that the default bio ?',
     pfp TEXT NOT NULL DEFAULT 'default.jpg',
-    password TEXT NOT NULL,
-    admin INTEGER DEFAULT 0
+    password TEXT NOT NULL DEFAULT "",
+    admin INTEGER DEFAULT 0,
+    githubId INTEGER DEFAULT -1
   );
   CREATE UNIQUE INDEX idx_username_lower ON users (lower(username));
   CREATE TABLE user_blocks (

@@ -1,14 +1,13 @@
 import { sendStatusMessage } from "./chat.js";
 import { resetReconnectTimer } from "./utils.js";
 import { main } from "./app.js";
-import { access } from "fs";
 
 const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
 
 //leurs simple existant fait planter la page sans me dire d'erreur alors que je l'ai utilise po
 
 async function registerGithubAccount(userData) {
-  const response1 = await fetch("/register", {
+  const response1 = await fetch("github/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -16,27 +15,31 @@ async function registerGithubAccount(userData) {
     },
     body: new URLSearchParams({
       username: userData.login,
-      password: "ravioli>everything",
+      githubUser: userData.id,
     }),
   });
 
-  const response2 = await fetch("/pfp", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-    method: "PUT",
-    body: userData.avatar_url,
-  });
-
-  resetReconnectTimer(response2.headers.get("x-authenticated"));
   const result1: { success?: boolean; message?: string } =
     await response1.json();
-  const result2: { success?: boolean; message?: string } =
-    await response2.json();
-  if (!result1.success && result2.success) {
-    // j'ai pas de form ou renvoyer une erreur :c
+  if (!result1.success) {
+    console.log("not registered");
     return;
   }
+  // const response2 = await fetch("/pfp", {
+  //   headers: {
+  //     Authorization: `Bearer ${response1.headers.get("x-authenticated")}`,
+  //   },
+  //   method: "PUT",
+  //   body: userData.avatar_url,
+  // });
+
+  // resetReconnectTimer(response2.headers.get("x-authenticated"));
+  // const result2: { success?: boolean; message?: string } =
+  //   await response2.json();
+  // if (!result1.success && result2.success) {
+  //   console.log(`ca n'a pas marcher`); // j'ai pas de form ou renvoyer une erreur :c
+  //   return;
+  // }
   sendStatusMessage();
   main();
 }
