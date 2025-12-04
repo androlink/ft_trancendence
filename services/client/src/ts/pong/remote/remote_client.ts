@@ -102,8 +102,8 @@ function ws_message(event)
     }break;
     case "JOIN":
     {
-      if (message.message == "ok")
-        goToURL("netplay").then(() => display = new PongDisplay());
+      // if (message.message == "ok")
+      //   goToURL("netplay").then(() => display = new PongDisplay());
       console.log(message);
     }break;
     case "GAME":

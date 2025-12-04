@@ -10,7 +10,7 @@ import {
   launchSinglePageApp,
   resetReconnectTimer,
 } from "./utils.js";
-import { setEvents } from "./html/events.js";
+import { sendMessage, setEvents } from "./html/events.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -116,7 +116,7 @@ async function fetchApi(): Promise<ServerResponse> {
     data.headers = response.headers;
     return data;
   } catch (error) {
-    alert(error instanceof Error ? error.message : String(error));
+    sendMessage(error instanceof Error ? error.message : String(error));
     return {};
   }
 }
@@ -130,8 +130,7 @@ async function fetchApi(): Promise<ServerResponse> {
 function changeSnippet(elem: HTMLElement, template: string): boolean {
   if (!keyExist(htmlSnippets, template)) {
     elem.innerHTML = "";
-    if (elem.className.indexOf("text-white") === -1)
-      elem.className += " text-white";
+    elem.classList.add("text-white");
     elem.innerText = `Snippet ${template} not Found in template.js\nIf you didn't traficate your front-end files, consider refreshing and then calling @geymat, @gcros or @sjean`;
     return false;
   }

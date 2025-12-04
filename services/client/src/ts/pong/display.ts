@@ -41,7 +41,7 @@ export class PongDisplay implements IPongDisplay {
   }
 
   public update(data_frame: DataFrame) {
-    if (this.canvas == null)
+    if (!this.canvas.isConnected)
       this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (!this.canvas) return;
     let context = this.canvas.getContext("2d");

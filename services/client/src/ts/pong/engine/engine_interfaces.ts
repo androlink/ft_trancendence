@@ -81,4 +81,5 @@ export interface GameParty {
   views: DataFrame;
   max_score: number;
   botIntervalId?: ReturnType<typeof setInterval>;
+  ending?: boolean;
 }

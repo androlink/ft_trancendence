@@ -1,6 +1,6 @@
 import { BallEntity, keyControl, PlayerEntity } from "./engine_interfaces.js";
 import { generatePLayerEntity, resetBall } from "./engine_inits.js";
-import { get_key_config } from "../local_settings.js";
+import { getKeyConfig } from "../config/local_settings.js";
 
 /**
  * the for now default width of the players' bars
@@ -25,7 +25,7 @@ export const players = [
   generatePLayerEntity(
     ["player", "1"],
     { x: 5, y: 50 - paddle_height / 2 },
-    ...get_key_config("player_one"),
+    ...getKeyConfig("player_one"),
     "E",
     2
   ),

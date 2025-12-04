@@ -10,12 +10,17 @@ let update = () => {
   interval = requestAnimationFrame(update);
 };
 
-export function updateLocalGame() {
-  function remove() {
-    if (interval) cancelAnimationFrame(interval);
+export function removeGameAnimation() {
+  if (interval) {
+    cancelAnimationFrame(interval);
+    interval = 0;
   }
-  self.addEventListener("popstate", remove, { once: true });
+}
+
+export function updateGameAnimation() {
+  self.addEventListener("popstate", removeGameAnimation, { once: true });
+  if (interval) return;
   display = new PongDisplay();
   interval = requestAnimationFrame(update);
 }
-self["updateLocalGame"] = updateLocalGame;
+self["updateGameAnimation"] = updateGameAnimation;
