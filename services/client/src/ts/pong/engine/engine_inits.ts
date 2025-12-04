@@ -99,7 +99,6 @@ export function generateParty(
       players: players.map((p) => p.view),
       state: "waiting",
     },
-    ending,
   };
   return game_party;
 }

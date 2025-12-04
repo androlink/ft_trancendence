@@ -148,5 +148,5 @@ export function deleteLocalPong(): void {
   clearInterval(game.botIntervalId);
   game.botIntervalId = undefined;
   resetParty(game);
-  game.views.state = "waiting";
+  game.views.state = "ended";
 }

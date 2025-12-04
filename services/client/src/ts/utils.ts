@@ -14,7 +14,7 @@ import { InitConnectionChat, sendStatusMessage } from "./chat.js";
  * @returns true if main() is triggered, meaning the function was used
  */
 export async function goToURL(
-  nextURL: string = "",
+  nextURL: string = "profile",
   force: boolean = false
 ): Promise<boolean> {
   if (arguments.length > 2) {

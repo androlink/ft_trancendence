@@ -212,17 +212,6 @@ const span = document.createElement("span");
 const button = document.createElement("button");
 /** the button to launch tournaments */
 const button2 = document.createElement("button");
-/** the label of a checkbox to have a single game */
-const label = document.createElement("label");
-
-/**
- * the name is explicit enough
- * @param visible true if visible (meaning hidden to false)
- */
-export function toggleLabelVisibility(visible: boolean) {
-  if (visible !== undefined) label.hidden = !visible;
-  else label.hidden = !label.hidden;
-}
 
 /**
  * removes all the HTML elements above of the DOM
@@ -231,7 +220,6 @@ function removeSettingsMenu(): void {
   span.remove();
   button.remove();
   button2.remove();
-  label.remove();
 }
 
 /**
@@ -277,20 +265,13 @@ export function loadLocalConfig() {
         players[1].view.name,
       ])
     );
-    createLocalPong({ ending: Boolean(tournament || input.checked) });
+    createLocalPong();
     removeSettingsMenu();
     updateGameAnimation();
     launchingScript.remove();
   };
   fragment.append(button);
-  label.textContent = "single game";
-  label.className = `max-w-1/4 text-sm text-sm/6 leading text-white cursor-pointer rounded px-1 absolute top-1/2 ${!tournament ? "left-1/2" : "left-3/8"} transform -translate-x-1/2 translate-y-1/2`;
-  const input = document.createElement("input");
-  input.type = "checkbox";
-  input.className = "accent-sky-500 mx-1";
-  label.append(input);
-  fragment.append(label);
-  button2.className = `max-w-1/4 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 ${!tournament ? "left-1/2" : "left-3/8"} transform -translate-x-1/2 translate-y-4/2`;
+  button2.className = `max-w-1/4 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 ${!tournament ? "left-1/2" : "left-3/8"} transform -translate-x-1/2 translate-y-1/2`;
   button2.textContent = findLanguage(!tournament ? "tournament" : "classic");
   button2.onclick = () => {
     !tournament ? createTournament() : abortTournament();

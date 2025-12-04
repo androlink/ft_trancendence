@@ -25,23 +25,14 @@ export function tick(game: GameParty) {
   collideWithPlayers(ball, players);
   if (!checkPoints(ball, players)) return;
   if (Math.max(...players.map((p) => p.view.score)) >= game.max_score) {
-    if (game.ending) {
-      removeGameAnimation();
-      game.views.state = "ended";
-      display.update(game.views);
-      new Promise((r) => setTimeout(r, 1500)).then(() => {
-        let winner = Number(players[1].view.score >= game.max_score) as 0 | 1;
-        deleteLocalPong();
-        game.views.state = "ended";
-        prepareNextGame(winner);
-      });
-      return;
-    }
-    clearInterval(game.intervalId);
-    game.intervalId = undefined;
+    removeGameAnimation();
     game.views.state = "ended";
-    clearInterval(game.botIntervalId);
-    game.botIntervalId = undefined;
+    display.update(game.views);
+    new Promise((r) => setTimeout(r, 1500)).then(() => {
+      let winner = Number(players[1].view.score >= game.max_score) as 0 | 1;
+      deleteLocalPong();
+      prepareNextGame(winner);
+    });
   }
 }
 

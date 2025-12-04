@@ -24,7 +24,7 @@ const htmlSnippetsTemplate: {
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <input type="text" value="ft_<[[insert title]]>" class="border outline-0 border-gray-500 text-3xl font-mono text-blue-900 font-semibold select-none"/>
+    <input type="text" value="ft_ ¯\\_(ツ)_/¯" class="border outline-0 border-gray-500 text-3xl font-mono text-blue-900 font-semibold select-none"/>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -35,7 +35,7 @@ const htmlSnippetsTemplate: {
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
-  <div onclick="goToURL( )" name="">[[pong]]</div>
+  <div onclick="goToURL('')" name="">[[pong]]</div>
   <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
   <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
   <div onclick="goToURL('blank')" name="blank">debug</div>

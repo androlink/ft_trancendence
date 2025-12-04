@@ -12,7 +12,6 @@ import {
   getKeyConfig,
   inputController,
   loadLocalConfig,
-  toggleLabelVisibility,
 } from "./local_settings.js";
 
 /** a list of the players at the start of a tournament (and during the config) */
@@ -89,7 +88,6 @@ export function createTournament() {
     players[playerId].up = config[0];
     players[playerId].down = config[1];
   }
-  toggleLabelVisibility(false);
   self.addEventListener("popstate", abortTournament, { once: true });
   inputController.abort();
 }
@@ -99,7 +97,6 @@ export function createTournament() {
  */
 export function abortTournament() {
   remainingPlayers.length = 0;
-  toggleLabelVisibility(true);
   tournament = false;
   players[0].view.name = ["player", "1"];
   const difficulty = players[1].bot_difficulty;
