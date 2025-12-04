@@ -76,15 +76,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
     return reply.send({
       template: "Home",
       title: "ft_transcendence",
-      inner: "Pdf",
-    });
-  });
-
-  fastifyInstance.get("/game", (req, reply) => {
-    return reply.send({
-      template: "Home",
-      title: ["PONG_SOON"],
-      inner: "Game",
+      inner: "Pong",
     });
   });
 

@@ -18,7 +18,10 @@
     "prod-misc": "tsx src/micro_misc/main.ts",
 
     "dev-resources": "nodemon --watch \"src/micro_resources/**\" --watch \"src/common/**\" --exec tsx src/micro_resources/main.ts",
-    "prod-resources": "tsx src/micro_resources/main.ts"
+    "prod-resources": "tsx src/micro_resources/main.ts",
+
+    "dev-remote": "nodemon --watch \"src/micro_remote/**\" --watch \"src/common/**\" --exec tsx src/micro_remote/main.ts",
+    "prod-remote": "tsx src/micro_remote/main.ts"
   },
   "type": "module",
   "dependencies": {
