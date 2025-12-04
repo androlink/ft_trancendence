@@ -4,33 +4,52 @@ import { main } from "./app.js";
 
 const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
 
-//leurs simple existant fait planter la page sans me dire d'erreur alors que je l'ai utilise po
-
-async function registerGithubAccount(userData) {
-  const response1 = await fetch("github/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-    body: new URLSearchParams({
-      username: userData.login,
-      githubUser: userData.id,
-    }),
-  });
-
-  const result1: { success?: boolean; message?: string } =
-    await response1.json();
-  if (!result1.success) {
-    console.log("not registered");
+async function githubLogin() {
+  if (!localStorage.getItem("access_token")) {
     return;
   }
+  try {
+    const res = await fetch("/github/getUserData", {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
+    });
+    const userData = await res.json();
+    if (!userData) return;
+
+    const response1 = await fetch("/github/connection", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+      body: new URLSearchParams({
+        username: userData.login,
+        githubUser: userData.id,
+        pdp: userData.avatar_url,
+      }),
+    });
+
+    const result1: { success?: boolean; message?: string } =
+      await response1.json();
+    if (!result1.success) {
+      console.log("not registered");
+      return;
+    }
+  } catch (err) {
+    console.error("fetch error", err);
+  }
+  // const pdpResponse = await fetch(userData.avatar_url);
+  // if (!pdpResponse.ok) return console.log("po reussi");
+
+  // const pdp = Buffer.from(await pdpResponse.arrayBuffer());
   // const response2 = await fetch("/pfp", {
   //   headers: {
   //     Authorization: `Bearer ${response1.headers.get("x-authenticated")}`,
   //   },
   //   method: "PUT",
-  //   body: userData.avatar_url,
+  //   body: pdp,
   // });
 
   // resetReconnectTimer(response2.headers.get("x-authenticated"));
@@ -52,7 +71,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (codeParam && localStorage.getItem("access_token") === null) {
-      const res = await fetch(`/api/github/getAccessToken?code=${codeParam}`, {
+      const res = await fetch(`/github/getAccessToken?code=${codeParam}`, {
         method: "GET",
       });
       const data = await res.json();
@@ -62,27 +81,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     }
     // localStorage.removeItem("access_token");
-    getUserData();
+    githubLogin();
   } catch (err) {
     console.error("Error Github access token", err);
   }
 });
-
-export async function getUserData() {
-  const res = await fetch("/api/github/getUserData", {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + localStorage.getItem("access_token"),
-    },
-  });
-  const data = await res.json();
-  //se data sera cool pour avoir toute se qu'on a besoin pour cree un client
-  if (data) {
-    console.log(data);
-    if (localStorage.getItem("access_token")) registerGithubAccount(data);
-  }
-  // je sais juste pas se qu'on fait avec on lui créé quand meme un token local a nous ?
-}
 
 export function loginWithGithub() {
   window.location.assign(

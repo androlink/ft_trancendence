@@ -1,8 +1,9 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyReply } from "fastify";
 import db from "./database";
 import Database from "better-sqlite3";
 import { Id } from "./types";
 import { resolvePtr } from "dns";
+import { Data } from "ws";
 
 const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
 // je peu en régénérer une au besoin
@@ -11,17 +12,18 @@ const CLIENT_SECRET = "003530775d960f318554c656cc1e80c404e8cf52";
 let dbQuery: {
   InsertUser: Database.Statement<{
     username: string;
-    githubUser: number;
+    githubId: number;
   }>;
   getUserByUsername: Database.Statement<
     {
       username: string;
     },
-    { id: Id; githubUser: number }
+    { id: Id; githubId: number }
   >;
-  getAllUsername: Database.Statement<
-    { username: string },
-    { username: string }
+  getUsername: Database.Statement<{ username: string }, { username: string }>;
+  getUserByGithubId: Database.Statement<
+    { githubId: number },
+    { id: Id; username: string }
   >;
 };
 
@@ -36,7 +38,7 @@ function usernameFormator(username: string): string {
   if (username.length > 20) {
     username = username.substring(0, 20);
   }
-  const rows = dbQuery.getAllUsername.all({ username });
+  const rows = dbQuery.getUsername.all({ username });
   if (rows.every((row) => row.username != username)) return username;
 
   let nb = 0;
@@ -49,9 +51,11 @@ function usernameFormator(username: string): string {
   return InsertNumberInUsername(username, nb);
 }
 
+// =========================================================================
+
 export default function authentification(fastify: FastifyInstance) {
   dbQuery = {
-    InsertUser: db.prepare<{ username: string; githubId: number }, void>(
+    InsertUser: db.prepare<{ username: string; githubId: number }>(
       "INSERT INTO users (username, githubId) VALUES (:username, :githubId)"
     ),
     getUserByUsername: db.prepare<
@@ -60,77 +64,57 @@ export default function authentification(fastify: FastifyInstance) {
     >(
       "SELECT id, githubId FROM users WHERE lower(username) = lower(:username)"
     ),
-    getAllUsername: db.prepare<{ username: string }, { username: string }>(
+    getUsername: db.prepare<{ username: string }, { username: string }>(
       "SELECT username FROM users WHERE lower(username) LIKE REPLACE(:username, '_', '\\_') || '%' ESCAPE '\\'"
     ),
+    getUserByGithubId: db.prepare<
+      { githubId: number },
+      { id: Id; username: string }
+    >("SELECT id, username FROM users WHERE githubId = :githubId"),
   };
 
-  // REGISTER GITHUB
-  fastify.post<{ Body: { username: string; githubId: number } }>(
-    "/github/register",
+  async function GithubRegister(
+    username: string,
+    gitId: number,
+    pdp: URL,
+    reply: FastifyReply
+  ) {
+    try {
+      username = usernameFormator(username);
+      const res = dbQuery.InsertUser.run({ username, githubId: gitId });
+      if (res.changes === 0) {
+        // not normal
+        return reply
+          .code(403)
+          .send({ success: false, message: ["DB_REFUSED"] });
+      }
+      const token = fastify.jwt.sign(
+        { id: res.lastInsertRowid },
+        { expiresIn: "15m" }
+      );
+      return reply
+        .header("x-authenticated", token)
+        .send({ success: true, message: ["WELCOME_USERNAME", username] });
+    } catch (err) {}
+  }
+
+  fastify.post<{ Body: { username: string; githubId: number; pdp: URL } }>(
+    "/github/connection",
     {
       // preValidation: checkBodyInput(["username"], true),
     },
     async (req, reply) => {
       let username = req.body.username;
       const githubId = req.body.githubId;
-      try {
-        const res = dbQuery.InsertUser.run({ username, githubId });
-        if (res.changes === 0) {
-          // not normal
-          return reply
-            .code(403)
-            .send({ success: false, message: ["DB_REFUSED"] });
-        }
-        const token = fastify.jwt.sign(
-          { id: res.lastInsertRowid },
-          { expiresIn: "15m" }
-        );
-        return reply
-          .header("x-authenticated", token)
-          .send({ success: true, message: ["WELCOME_USERNAME", username] });
-      } catch (err) {
-        username = usernameFormator(username);
-        const res = dbQuery.InsertUser.run({ username, githubId });
-        if (res.changes === 0) {
-          // not normal
-          return reply
-            .code(403)
-            .send({ success: false, message: ["DB_REFUSED"] });
-        }
-        const token = fastify.jwt.sign(
-          { id: res.lastInsertRowid },
-          { expiresIn: "15m" }
-        );
-        return reply
-          .header("x-authenticated", token)
-          .send({ success: true, message: ["WELCOME_USERNAME", username] });
-      }
-    }
-  );
+      const pdp = req.body.pdp;
+      const row = dbQuery.getUserByGithubId.get({ githubId });
 
-  // LOGIN GITHUB
-  fastify.post<{ Body: { username: string; password: string } }>(
-    "/github/login",
-    {
-      // preValidation: checkBodyInput(["username"], true),
-    },
-    async (req, reply) => {
-      const username = req.body.username;
-      let row = dbQuery.getUserByUsername.get({ username });
-      if (!row) {
-        return reply.code(401).send({
-          success: false,
-          message: [
-            "USERNAME_NOT_FOUND",
-            username.length > 20 ? username.substring(0, 20) + "..." : username,
-          ],
-        });
-      }
+      if (!row) return GithubRegister(username, githubId, pdp, reply);
+
       const token = fastify.jwt.sign({ id: row.id }, { expiresIn: "15m" });
       return reply
         .header("x-authenticated", token)
-        .send({ success: true, message: ["WELCOME_USERNAME", username] });
+        .send({ success: true, message: ["WELCOME_USERNAME", row.username] });
     }
   );
 
