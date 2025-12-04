@@ -9,56 +9,39 @@ async function githubLogin() {
     return;
   }
   try {
-    const res = await fetch("/github/getUserData", {
+    const res = await fetch("/api/github/getUserData", {
       method: "GET",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
     });
     const userData = await res.json();
+    console.log(userData);
     if (!userData) return;
 
-    const response1 = await fetch("/github/connection", {
+    const response = await fetch("/api/github/connection", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
       body: new URLSearchParams({
         username: userData.login,
-        githubUser: userData.id,
+        githubId: userData.id,
         pdp: userData.avatar_url,
+        bio: userData.bio,
       }),
     });
 
-    const result1: { success?: boolean; message?: string } =
-      await response1.json();
-    if (!result1.success) {
+    const result: { success?: boolean; message?: string } =
+      await response.json();
+    if (!result.success) {
       console.log("not registered");
       return;
     }
+    resetReconnectTimer(response.headers.get("x-authenticated"));
   } catch (err) {
     console.error("fetch error", err);
   }
-  // const pdpResponse = await fetch(userData.avatar_url);
-  // if (!pdpResponse.ok) return console.log("po reussi");
-
-  // const pdp = Buffer.from(await pdpResponse.arrayBuffer());
-  // const response2 = await fetch("/pfp", {
-  //   headers: {
-  //     Authorization: `Bearer ${response1.headers.get("x-authenticated")}`,
-  //   },
-  //   method: "PUT",
-  //   body: pdp,
-  // });
-
-  // resetReconnectTimer(response2.headers.get("x-authenticated"));
-  // const result2: { success?: boolean; message?: string } =
-  //   await response2.json();
-  // if (!result1.success && result2.success) {
-  //   console.log(`ca n'a pas marcher`); // j'ai pas de form ou renvoyer une erreur :c
-  //   return;
-  // }
   sendStatusMessage();
   main();
 }
@@ -71,7 +54,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (codeParam && localStorage.getItem("access_token") === null) {
-      const res = await fetch(`/github/getAccessToken?code=${codeParam}`, {
+      const res = await fetch(`/api/github/getAccessToken?code=${codeParam}`, {
         method: "GET",
       });
       const data = await res.json();

@@ -75,13 +75,13 @@ export default function authentification(fastify: FastifyInstance) {
 
   async function GithubRegister(
     username: string,
-    gitId: number,
+    githubId: number,
     pdp: URL,
     reply: FastifyReply
   ) {
     try {
       username = usernameFormator(username);
-      const res = dbQuery.InsertUser.run({ username, githubId: gitId });
+      const res = dbQuery.InsertUser.run({ username, githubId });
       if (res.changes === 0) {
         // not normal
         return reply
@@ -118,7 +118,7 @@ export default function authentification(fastify: FastifyInstance) {
     }
   );
 
-  fastify.get("github/getAccessToken", async (req, res) => {
+  fastify.get("/github/getAccessToken", async (req, res) => {
     const { code } = req.query as { code: string };
 
     const url = new URL("https://github.com/login/oauth/access_token");
@@ -136,7 +136,7 @@ export default function authentification(fastify: FastifyInstance) {
     res.send(data);
   });
 
-  fastify.get("github/getUserData", async (req, res) => {
+  fastify.get("/github/getUserData", async (req, res) => {
     const authHeader = req.headers["authorization"];
     console.log("Authorization =>", authHeader);
     const response = await fetch("https://api.github.com/user", {
