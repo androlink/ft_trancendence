@@ -1,6 +1,4 @@
 export const assetsPath = `/resources`;
-const thenMain = `.then(main)`;
-const catchErrorAndAlert = `.catch(err => alert('Caught: ' + err));`;
 
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
@@ -33,7 +31,7 @@ const htmlSnippetsTemplate: {
         <option value="fr">Francais 🇫🇷</option>
         <option value="es">Español 🇪🇸</option>
       </select>
-      <img src="${assetsPath}/exit-icon.png" onclick="if (self.isConnected) fetch('/logout', {method: 'POST'})${thenMain}${catchErrorAndAlert}" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
+      <img src="${assetsPath}/exit-icon.png" onclick="accountLogOut()" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
     </span>
   </span>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
@@ -56,8 +54,8 @@ const htmlSnippetsTemplate: {
       <div class="size-full bg-white flex flex-col">
         <div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
         <span class="flex justify-items-stretch">
-          <textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none"></textarea>
-          <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
+          <textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none" maxlength="280"></textarea>
+          <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
         </span>
       </div>
     </div>

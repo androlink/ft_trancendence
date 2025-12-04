@@ -17,7 +17,7 @@ import { FastifyInstance } from "fastify";
 // I think i might set it in another Docker
 // So it's another service, and it's no longer accessible from user perspective
 
-export async function errorRoutes(fastifyInstance: FastifyInstance) {
+export default async function errorRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.all("/413", (req, reply) => {
     return reply.code(413).send({
       template: "Home",
@@ -30,13 +30,6 @@ export async function errorRoutes(fastifyInstance: FastifyInstance) {
   });
 
   fastifyInstance.all("/400", (req, reply) => {
-    return reply.code(400).send({
-      template: "Home",
-      title: "400 Bad Request",
-      inner: "Error",
-      replace: { status: "400 Bad Request", message: ["ERR_400"] },
-      success: false,
-      message: ["ERR_400"],
-    });
+    return reply.sendFile("page_400.html");
   });
 }

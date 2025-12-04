@@ -1,6 +1,4 @@
-
 services:
-
   #----------------------------------------------------------------------------#
   #                                    NGINX                                   #
   #----------------------------------------------------------------------------#
@@ -10,7 +8,7 @@ services:
     build:
       context: services/nginx/
     ports:
-      - 443:443
+      - 8443:443
     networks:
       - trancendence
     volumes:
@@ -34,9 +32,106 @@ services:
   #----------------------------------------------------------------------------#
   #                                    SERVER                                  #
   #----------------------------------------------------------------------------#
-  server:
-    container_name: server
-    image: server
+
+  # server:
+  #   container_name: server
+  #   image: server
+  #   build:
+  #     context: services/server/
+  #     target: dev
+  #   env_file: "services/server/conf/secrets.env"
+  #   networks:
+  #     - trancendence
+  #   volumes:
+  #     - src_server:/var/project/src
+  #     - www:/var/www
+  #     - database:/var/db/
+  #   restart: "always"
+
+  resources_microservice:
+    command: dev-resources
+    container_name: resources_microservice
+    image: resources_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
+  error_microservice:
+    command: dev-error
+    container_name: error_microservice
+    image: error_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
+  page_microservice:
+    command: dev-page
+    container_name: page_microservice
+    image: page_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
+  misc_microservice:
+    command: dev-misc
+    container_name: misc_microservice
+    image: misc_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
+  account_microservice:
+    command: dev-account
+    container_name: account_microservice
+    image: account_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
+  chat_microservice:
+    command: dev-chat
+    container_name: chat_microservice
+    image: chat_microservice
     build:
       context: services/server/
       target: dev
@@ -54,7 +149,7 @@ services:
   #----------------------------------------------------------------------------#
   client:
     container_name: client
-    image: client 
+    image: client
     build:
       context: services/client/
       target: dev

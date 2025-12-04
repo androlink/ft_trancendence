@@ -1,11 +1,9 @@
-import db from "./database";
-import { dbLogFile } from "./database";
+import db from "../common/database.js";
+import { dbLogFile } from "../common/database.js";
 import fs from "fs";
-import { assetsPath } from "./config.js";
+import { assetsPath } from "../config.js";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Id, LanguageObject, UserRow } from "./types.js";
-
-import remotePongRoute from "./remote_pong/remote_pong_route.js";
+import { Id, LanguageObject, UserRow } from "../common/types.js";
 
 // response format for that page :
 // {
@@ -16,7 +14,7 @@ import remotePongRoute from "./remote_pong/remote_pong_route.js";
 // }
 // if you reuse code for other page, take it into consideration
 
-export async function apiRoutes(fastifyInstance: FastifyInstance) {
+export default async function apiPage(fastifyInstance: FastifyInstance) {
   fastifyInstance.setNotFoundHandler((req, reply) => {
     return reply.code(404).send({
       template: "Error",
@@ -78,7 +76,15 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     return reply.send({
       template: "Home",
       title: "ft_transcendence",
-      inner: "Pong",
+      inner: "Pdf",
+    });
+  });
+
+  fastifyInstance.get("/game", (req, reply) => {
+    return reply.send({
+      template: "Home",
+      title: ["PONG_SOON"],
+      inner: "Game",
     });
   });
 
@@ -88,18 +94,6 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       title: "actually the real Pong",
       inner: "Pong",
     });
-  });
-
-  fastifyInstance.get("/netplay", (req, reply) => {
-    return reply.send({
-      template: "Home",
-      title: "remote Pong",
-      inner: "RemotePong",
-    });
-  });
-
-  fastifyInstance.get("/ws/pong", { websocket: true }, (ws, req) => {
-    return remotePongRoute(ws, req);
   });
 
   fastifyInstance.get(
@@ -141,24 +135,16 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
     const statement1 = db.prepare<
       { username: string },
       {
-        id: Id;
-        username: string;
         bio: string;
         pfp: string;
+        id: Id;
+        username: string;
         wins: number;
         losses: number;
-        draws: number;
       }
-    >(` SELECT
-          u.id,
-          u.username,
-          u.bio,
-          u.pfp,
-          (SELECT COUNT(*) FROM history_game WHERE player_one = u.id AND result_type = 'win' OR player_two = u.id AND result_type = 'loss') AS wins,
-          (SELECT COUNT(*) FROM history_game WHERE player_two = u.id AND result_type = 'win' OR player_one = u.id AND result_type = 'loss') as losses,
-          (SELECT COUNT(*) FROM history_game WHERE (player_one = u.id OR player_two = u.id) AND result_type = 'draw') AS draws 
-        FROM users u 
-        WHERE lower(username) = lower(:username)`);
+    >(
+      "SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS losses FROM users u WHERE lower(username) = lower(:username)"
+    );
     /** see if they are blocked */
     const statement2 = db.prepare<{ requesterId: Id; targetId: Id }, { 1: 1 }>(
       "SELECT 1 FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId"
@@ -182,18 +168,24 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
         targetId: Id
       ): { friend: LanguageObject; block: LanguageObject } => {
         const params = { requesterId, targetId };
-        if (requesterId === -1)
+        if (requesterId === -1) {
           return { friend: ["NOT_CONNECTED"], block: ["NOT_CONNECTED"] };
-        if (requesterId === targetId)
+        }
+        if (requesterId === targetId) {
           return { friend: ["IT_IS_YOU"], block: ["IT_IS_YOU"] };
-        if (statement2.get(params))
-          return { friend: ["THEY_ARE_BLOCKED"], block: ["UN_BLOCK"] };
-        if (statement3.get(params))
+        }
+        if (statement2.get(params)) {
+          return { friend: ["THEY ARE BLOCKED"], block: ["UN_BLOCK"] };
+        }
+        if (statement3.get(params)) {
           return { friend: ["UN_FRIEND_REQUEST"], block: ["BLOCK"] };
-        if (statement4.get(params))
+        }
+        if (statement4.get(params)) {
           return { friend: ["ACCEPT_FRIEND"], block: ["BLOCK"] };
-        if (statement5.get(params))
+        }
+        if (statement5.get(params)) {
           return { friend: ["UN_FRIEND"], block: ["BLOCK"] };
+        }
         return { friend: ["REQUEST_FRIEND"], block: ["BLOCK"] };
       }
     );
@@ -211,7 +203,9 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
               status: "404 Not Found",
               message: [
                 "USERNAME_NOT_FOUND",
-                username.substring(0, 20) + (username.length > 20 ? "..." : ""),
+                username.length > 20
+                  ? username.substring(0, 20) + "..."
+                  : username,
               ],
             },
           });
@@ -226,8 +220,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
             "friend request": friend,
             "blocking request": block,
             wins: String(row.wins),
-            losses: String(row.losses),
-            draws: String(row.draws),
+            loses: String(row.losses),
             ratio: row.losses
               ? String((row.wins / row.losses).toFixed(2))
               : "¯\\_(ツ)_/¯",
@@ -265,7 +258,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
       // Here it reads the whole file to send last 10Mo, waste of time if many Go long
       return reply.type("text/html")
         .send(`<!DOCTYPE html><html><head><title>db logs</title></head>
-      <body>${file.substring(file.length - 10 * 1024 ** 2)}</body></html>`);
+      <body>${file.substring(file.length - 10 * 1024 * 1024)}</body></html>`);
     }
   );
 }

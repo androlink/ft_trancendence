@@ -12,7 +12,11 @@ import {
   setLanguage,
 } from "./templates.js";
 import { main, resetNextInner } from "../app.js";
-import { sendChatMessage, sendStatusMessage } from "../chat.js";
+import {
+  sendChatMessage,
+  InitConnectionChat,
+  sendStatusMessage,
+} from "../chat.js";
 
 /**
  * set all the events that the page need to work properly
@@ -86,7 +90,7 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
     event.preventDefault();
     const formData = new FormData(form);
     try {
-      const response = await fetch("/pfp", {
+      const response = await fetch("/api/account/pfp", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -102,7 +106,9 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
           form,
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
         return;
       }
@@ -121,7 +127,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
     try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
-      const response = await fetch("/login", {
+      const response = await fetch("api/account/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -141,7 +147,9 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
           form,
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
         return;
       }
@@ -168,7 +176,7 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
         displayErrorOrAlert(form, findLanguage("passwords don't match"));
         return;
       }
-      const response = await fetch("/register", {
+      const response = await fetch("/api/account/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -188,7 +196,9 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
           form,
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
         return;
       }
@@ -211,7 +221,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
     const formData = new FormData(form);
     try {
       const username = formData.get("username") as string;
-      const response = await fetch("/update", {
+      const response = await fetch("/api/account/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -231,7 +241,9 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
           form,
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
         return;
       }
@@ -258,7 +270,7 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
         return;
       }
 
-      const response = await fetch("/password", {
+      const response = await fetch("/api/account/password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -277,7 +289,9 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
           form,
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
         return;
       }
@@ -297,7 +311,7 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
     if (needConnection(form) === false) return;
     const formData = new FormData(form);
     try {
-      const response = await fetch("/delete", {
+      const response = await fetch("/api/account/delete", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -316,7 +330,9 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
           form,
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
         return;
       }
@@ -354,7 +370,7 @@ function setClickEventBlockRequest(text: HTMLElement): void {
   );
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/block?user=${username}`, {
+      const response = await fetch(`/api/account/block?user=${username}`, {
         method: "post",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -367,7 +383,9 @@ function setClickEventBlockRequest(text: HTMLElement): void {
         console.error(
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
       }
     } catch (error) {
@@ -377,6 +395,9 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     main();
   });
 }
+//  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
+//  "toi" -> "toi", et la c'est un autre type,
+// Stephane sjean
 
 function setClickEventFriendRequest(text: HTMLElement): void {
   if (
@@ -387,13 +408,13 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     text.className = "";
     return;
   }
-  text.className = " cursor-pointer";
+  text.className = "cursor-pointer";
   let username = location.pathname.substring(
     location.pathname.lastIndexOf("/") + 1
   );
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/friend?user=${username}`, {
+      const response = await fetch(`/api/account/friend?user=${username}`, {
         method: "post",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -406,7 +427,9 @@ function setClickEventFriendRequest(text: HTMLElement): void {
         console.error(
           keyExist(result, "message")
             ? selectLanguage(result.message)
-            : `${findLanguage("server answered")} ${response.status} ${response.statusText}`
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
         );
       }
     } catch (error) {
@@ -422,6 +445,7 @@ function setClickEventFriendRequest(text: HTMLElement): void {
  * @param textarea the said chat input element
  */
 function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+  InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -511,7 +535,7 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
     try {
       if (searchController) searchController.abort(); // cancel previous request
       searchController = new AbortController();
-      const res = await fetch(`/misc/users?start=${textarea.value}`, {
+      const res = await fetch(`/api/misc/users?start=${textarea.value}`, {
         signal: searchController.signal,
       });
       const json = await res.json();
@@ -605,7 +629,11 @@ export function setCtrlEventUsername(): void {
       }
     }
 
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "p") {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      !e.shiftKey &&
+      e.key.toLowerCase() === "p"
+    ) {
       e.preventDefault();
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value")) {
@@ -618,9 +646,10 @@ export function setCtrlEventUsername(): void {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
-        fetch("/logout", { method: "POST" })
+        fetch("api/account/logout", { method: "POST" })
           .then((res) => {
             resetReconnectTimer(res.headers.get("x-authenticated"));
+            sendStatusMessage();
             if (document.activeElement.id !== "user-search") main();
             else
               sendMessage(

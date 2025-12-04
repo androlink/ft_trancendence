@@ -1,6 +1,6 @@
-import db from "./database.js";
+import db from "../common/database.js";
 import { FastifyInstance } from "fastify";
-import { Id } from "./types";
+import { Id } from "../common/types.js";
 
 // response format for that page :
 // whatever you need.
@@ -9,12 +9,12 @@ import { Id } from "./types";
 //
 // if you reuse code for other page, take it into consideration
 
-export async function miscRoutes(fastifyInstance: FastifyInstance) {
+export default async function apiMisc(fastifyInstance: FastifyInstance) {
   fastifyInstance.setNotFoundHandler((req, reply) => {
     return reply
       .code(404)
       .send(
-        "all the /misc request are for the frontend tools, like the user research thing at the top. You should not read this"
+        "all the /misc request are for the frontend tools, like the user research thing at the top. You should not be able to read this"
       );
   });
 
@@ -23,9 +23,9 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     const statement1 = db.prepare<
       { start: string },
       { username: string; pfp: string }
-    >(` SELECT username, pfp 
-        FROM users 
-        WHERE lower(username) LIKE REPLACE(:start, '_', '\\_') || '%' ESCAPE '\\'`);
+    >(
+      "SELECT username, pfp FROM users WHERE lower(username) LIKE REPLACE(:start, '_', '\\_') || '%' ESCAPE '\\'"
+    );
     fastifyInstance.get<{ Querystring: { start: string } }>(
       "/users",
       (req, reply) => {
@@ -47,12 +47,9 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     const statement2 = db.prepare<
       { targetId: Id },
       { time: string; winner: string; loser: string }
-    >(` SELECT 
-          strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time,
-          (SELECT username FROM users WHERE id = h.player_one AND h.result_type = 'win' OR id = h.player_two AND h.result_type = 'loss') AS winner,
-          (SELECT username FROM users WHERE id = h.player_two AND h.result_type = 'win' OR id = h.player_one AND h.result_type = 'loss') AS loser
-        FROM history_game h 
-        WHERE player_one = :targetId OR player_two = :targetId`);
+    >(
+      "SELECT strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = :targetId OR loser = :targetId"
+    );
     fastifyInstance.get<{ Querystring: { user: string } }>(
       "/history",
       (req, reply) => {
@@ -72,10 +69,9 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     const statement1 = db.prepare<
       { id: Id },
       { username: string; pfp: string }
-    >(` SELECT u.username, u.pfp
-        FROM friends f
-        JOIN users u ON u.id = CASE WHEN f.friend_one = :id THEN f.friend_two ELSE f.friend_one END
-        WHERE :id IN (f.friend_one, f.friend_two)`);
+    >(
+      "SELECT u.username, u.pfp FROM friends f JOIN users u ON u.id = CASE WHEN f.friend_one = :id THEN f.friend_two ELSE f.friend_one END WHERE :id IN (f.friend_one, f.friend_two)"
+    );
     fastifyInstance.get<{ Querystring: { page: string } }>(
       "/friends",
       async (req, reply) => {
@@ -105,14 +101,18 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
      */
     /** insert a game according to the winner and loser */
     const statement1 = db.prepare<[Id, Id], undefined>(
-      "INSERT INTO history_game (player_one, player_two) VALUES (?, ?)"
+      "INSERT INTO history_game (winner, loser) VALUES (?, ?)"
     );
     fastifyInstance.post<{ Querystring: { winner: string; loser: string } }>(
       "/win",
       (req, reply) => {
         let winner_id = parseInt(req.query.winner);
         let loser_id = parseInt(req.query.loser);
-        if (isNaN(winner_id) || isNaN(loser_id) || loser_id === winner_id)
+        if (
+          winner_id != winner_id ||
+          loser_id != loser_id ||
+          loser_id === winner_id
+        )
           return reply.send("failed");
         statement1.run(winner_id, loser_id);
         return reply.send("success");

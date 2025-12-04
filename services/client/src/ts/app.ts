@@ -56,8 +56,6 @@ export async function main(force = false, requests = true): Promise<void> {
     let { headers, ...rest } = data;
     last = rest;
   }
-
-  let chatInnerHTML = document.getElementById("chat-content")?.innerHTML;
   if (keyExist(data, "title")) {
     document.title = selectLanguage(data.title);
   }
@@ -83,10 +81,6 @@ export async function main(force = false, requests = true): Promise<void> {
   } else if (!localStorage.getItem("token")) {
     resetReconnectTimer("false");
   }
-  if (force && chatInnerHTML)
-    document
-      .getElementById("chat-content")
-      ?.insertAdjacentHTML("beforeend", chatInnerHTML);
   setEvents();
 }
 self["main"] = main;
@@ -97,11 +91,14 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`/api${self.location.pathname}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    const response = await fetch(
+      `/api/page${encodeURI(self.location.pathname)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
     if (
       (response.status >= 500 && response.status < 600) ||
       !response.headers.has("content-type") ||

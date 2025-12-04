@@ -3,7 +3,12 @@
   "biography": "biography",
   "username": "username",
   "password": "password",
+<<<<<<< HEAD
   "will cause a reload": "will cause an HTML reload",
+=======
+  "will cause a reload": "will clear the chat",
+  "game": "game",
+>>>>>>> micro_service
   "your profile": "your profile",
   "your friends": "your friends",
   "get friends": "Life is better with friends",

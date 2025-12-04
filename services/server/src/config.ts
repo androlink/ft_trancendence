@@ -4,7 +4,7 @@ import fastifyJWT from "@fastify/jwt";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyWebSocket from "@fastify/websocket";
-import { JwtUserPayload, Id } from "./types";
+import { JwtUserPayload, Id } from "./common/types";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -14,7 +14,7 @@ declare module "@fastify/jwt" {
 }
 
 // if changed for better naming convention
-// need to be changed in page.html and template.ts too
+// need to be changed in page.html and template too
 export const assetsPath = "/resources";
 
 export default function () {
@@ -26,9 +26,9 @@ export default function () {
   });
 
   fastify.register(fastifyMultipart);
+  fastify.register(fastifyFormbody);
 
   fastify.register(fastifyWebSocket);
-  fastify.register(fastifyFormbody);
 
   fastify.register(fastifyStatic, {
     root: "/var/www",
@@ -41,7 +41,7 @@ export default function () {
   fastify.get(`/favicon.ico`, (req, reply) => reply.sendFile("favicon.ico"));
 
   fastify.register(fastifyJWT, {
-    secret: process.env.JWT_SECURITY_KEY,
+    secret: process.env.JWT_SECURITY_KEY || "",
   });
 
   return fastify;
