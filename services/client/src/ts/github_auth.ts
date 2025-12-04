@@ -43,6 +43,7 @@ async function githubLogin() {
     console.error("fetch error", err);
   }
   sendStatusMessage();
+  // window.location.search = "";
   main();
 }
 
@@ -63,7 +64,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         localStorage.setItem("access_token", data.access_token);
       }
     }
-    // localStorage.removeItem("access_token");
+
     githubLogin();
   } catch (err) {
     console.error("Error Github access token", err);
