@@ -2,8 +2,7 @@ import { FastifyInstance, FastifyReply } from "fastify";
 import db from "./database";
 import Database from "better-sqlite3";
 import { Id } from "./types";
-import { resolvePtr } from "dns";
-import { Data } from "ws";
+import fs, { realpath } from "fs";
 
 const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
 // je peu en régénérer une au besoin
@@ -23,8 +22,9 @@ let dbQuery: {
   getUsername: Database.Statement<{ username: string }, { username: string }>;
   getUserByGithubId: Database.Statement<
     { githubId: number },
-    { id: Id; username: string }
+    { id: Id; pfp: string; username: string }
   >;
+  UpdateUserPfp: Database.Statement<{ pfp: string; githubId: number }>;
 };
 
 function InsertNumberInUsername(username: string, nb: number) {
@@ -51,9 +51,48 @@ function usernameFormator(username: string): string {
   return InsertNumberInUsername(username, nb);
 }
 
+async function setGithubAvatar(
+  pdp: URL,
+  githubId: number,
+  reply: FastifyReply
+) {
+  try {
+    const responsePdp = await fetch(pdp);
+    if (!responsePdp.ok) {
+      return false;
+    }
+
+    const buffer = Buffer.from(await (await fetch(pdp)).arrayBuffer());
+    const filename = `${githubId.toString()}avatar_github.png`;
+    await fs.promises.writeFile(`/var/www/pfp/${filename}`, buffer);
+    const row = dbQuery.getUserByGithubId.get({ githubId });
+    const res = dbQuery.UpdateUserPfp.run({ pfp: filename, githubId });
+    if (!row || !res.changes) {
+      reply
+        .code(404)
+        .header("x-authenticated", false)
+        .send({ success: false, message: ["NOT_IN_DB"] });
+      return false;
+    }
+    if (row.pfp !== "default.jpg" && row.pfp !== filename) {
+      fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
+    }
+  } catch (err) {
+    console.log("githubAvatar Error", err);
+    reply
+      .code(500)
+      .send({ success: false, message: "Failed to save file: " + err });
+    return false;
+  }
+  return true;
+}
+
 // =========================================================================
 
 export default function authentification(fastify: FastifyInstance) {
+  /**
+   * statement for database
+   */
   dbQuery = {
     InsertUser: db.prepare<{ username: string; githubId: number }>(
       "INSERT INTO users (username, githubId) VALUES (:username, :githubId)"
@@ -69,8 +108,11 @@ export default function authentification(fastify: FastifyInstance) {
     ),
     getUserByGithubId: db.prepare<
       { githubId: number },
-      { id: Id; username: string }
-    >("SELECT id, username FROM users WHERE githubId = :githubId"),
+      { id: Id; pfp: string; username: string }
+    >("SELECT id, username, pfp FROM users WHERE githubId = :githubId"),
+    UpdateUserPfp: db.prepare<{ pfp: string; githubId: number }>(
+      "UPDATE users SET pfp = :pfp WHERE githubId = :githubId"
+    ),
   };
 
   async function GithubRegister(
@@ -88,10 +130,15 @@ export default function authentification(fastify: FastifyInstance) {
           .code(403)
           .send({ success: false, message: ["DB_REFUSED"] });
       }
+
       const token = fastify.jwt.sign(
         { id: res.lastInsertRowid },
         { expiresIn: "15m" }
       );
+
+      const success = await setGithubAvatar(pdp, githubId, reply);
+      if (!success) return;
+
       return reply
         .header("x-authenticated", token)
         .send({ success: true, message: ["WELCOME_USERNAME", username] });
@@ -132,7 +179,6 @@ export default function authentification(fastify: FastifyInstance) {
     });
 
     const data = await response.json();
-    console.log(data);
     res.send(data);
   });
 
@@ -147,7 +193,6 @@ export default function authentification(fastify: FastifyInstance) {
     });
 
     const data = await response.json();
-    console.log(data);
     res.send(data);
   });
 }
