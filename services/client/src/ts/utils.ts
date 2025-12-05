@@ -143,7 +143,6 @@ export async function accountLogOut(): Promise<void> {
     const json = await res.json();
     if (json.success && res.headers.get("x-authenticated") === "false") {
       localStorage.removeItem("token");
-      localStorage.removeItem("access_token");
       sendStatusMessage();
       main();
     }

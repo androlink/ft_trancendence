@@ -48,14 +48,13 @@ async function githubLogin() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const codeParam = urlParams.get("code");
-  console.log("code truc:", codeParam);
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+  console.log("code truc:", code);
 
   try {
-    if (codeParam && localStorage.getItem("access_token") === null) {
-      const res = await fetch(`/api/github/getAccessToken?code=${codeParam}`, {
+    if (code) {
+      const res = await fetch(`/api/github/getAccessToken?code=${code}`, {
         method: "GET",
       });
       const data = await res.json();
@@ -64,8 +63,10 @@ window.addEventListener("DOMContentLoaded", async () => {
         localStorage.setItem("access_token", data.access_token);
       }
     }
-
+    url.searchParams.delete("code");
+    window.history.replaceState({}, document.title, url.toString());
     githubLogin();
+    localStorage.removeItem("access_token");
   } catch (err) {
     console.error("Error Github access token", err);
   }
