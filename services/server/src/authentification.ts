@@ -3,6 +3,7 @@ import db from "./database";
 import Database from "better-sqlite3";
 import { Id } from "./types";
 import fs, { realpath } from "fs";
+import { fileTypeFromBuffer } from "file-type";
 
 const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
 // je peu en régénérer une au besoin
@@ -15,6 +16,7 @@ let dbQuery: {
   InsertUser: Database.Statement<{
     username: string;
     githubId: number;
+    bio: string;
   }>;
   getUserByUsername: Database.Statement<
     {
@@ -30,6 +32,12 @@ let dbQuery: {
   UpdateUserPfp: Database.Statement<{ pfp: string; githubId: number }>;
 };
 
+/**
+ * insert a number to the username and slice if the username is greather than 20
+ * @param username usernane of github username
+ * @param nb number
+ * @returns
+ */
 function InsertNumberInUsername(username: string, nb: number) {
   const nbStr = nb.toString();
   if (username.length - nbStr.length < 3)
@@ -41,7 +49,6 @@ function InsertNumberInUsername(username: string, nb: number) {
 /**
  * format a username if it already exist on the database
  * @param username username of github user
- * @returns
  */
 function usernameFormator(username: string): string {
   if (username.length > 20) {
@@ -64,13 +71,12 @@ function usernameFormator(username: string): string {
  * @param pdp profile picture URL
  * @param githubId id of github user
  * @param reply fastify reply
- * @returns
  */
 async function setGithubAvatar(
   pdp: URL,
   githubId: number,
   reply: FastifyReply
-) {
+): Promise<boolean> {
   try {
     const responsePdp = await fetch(pdp);
     if (!responsePdp.ok) {
@@ -78,15 +84,15 @@ async function setGithubAvatar(
     }
 
     const buffer = Buffer.from(await (await fetch(pdp)).arrayBuffer());
-    const filename = `${githubId.toString()}avatar_github.png`;
+    const extensionBuffer = await fileTypeFromBuffer(buffer);
+    if (!extensionBuffer) return false;
+    const filename = `${githubId.toString()}avatar_github.${
+      extensionBuffer?.ext
+    }`;
     await fs.promises.writeFile(`/var/www/pfp/${filename}`, buffer);
     const row = dbQuery.getUserByGithubId.get({ githubId });
     const res = dbQuery.UpdateUserPfp.run({ pfp: filename, githubId });
     if (!row || !res.changes) {
-      reply
-        .code(404)
-        .header("x-authenticated", false)
-        .send({ success: false, message: ["NOT_IN_DB"] });
       return false;
     }
     if (row.pfp !== "default.jpg" && row.pfp !== filename) {
@@ -94,9 +100,6 @@ async function setGithubAvatar(
     }
   } catch (err) {
     console.log("githubAvatar Error", err);
-    reply
-      .code(500)
-      .send({ success: false, message: "Failed to save file: " + err });
     return false;
   }
   return true;
@@ -106,8 +109,8 @@ async function setGithubAvatar(
 
 export default function authentification(fastify: FastifyInstance) {
   dbQuery = {
-    InsertUser: db.prepare<{ username: string; githubId: number }>(
-      "INSERT INTO users (username, githubId) VALUES (:username, :githubId)"
+    InsertUser: db.prepare<{ username: string; githubId: number; bio: string }>(
+      "INSERT INTO users (username, githubId, bio) VALUES (:username, :githubId, :bio)"
     ),
     getUserByUsername: db.prepare<
       { username: string },
@@ -138,11 +141,12 @@ export default function authentification(fastify: FastifyInstance) {
     username: string,
     githubId: number,
     pdp: URL,
+    bio: string,
     reply: FastifyReply
   ) {
     try {
       username = usernameFormator(username);
-      const res = dbQuery.InsertUser.run({ username, githubId });
+      const res = dbQuery.InsertUser.run({ username, githubId, bio });
       if (res.changes === 0) {
         // not normal
         return reply
@@ -156,18 +160,27 @@ export default function authentification(fastify: FastifyInstance) {
       );
 
       const success = await setGithubAvatar(pdp, githubId, reply);
-      if (!success) return;
+      if (!success)
+        return reply
+          .code(502)
+          .send({ success: false, message: "Bad Gateaway from github.com" });
 
       return reply
         .header("x-authenticated", token)
         .send({ success: true, message: ["WELCOME_USERNAME", username] });
-    } catch (err) {}
+    } catch (err) {
+      return reply
+        .code(502)
+        .send({ success: false, message: "Bad Gateaway from github.com" });
+    }
   }
 
   /**
    * create a account or login if a user use Github
    */
-  fastify.post<{ Body: { username: string; githubId: number; pdp: URL } }>(
+  fastify.post<{
+    Body: { username: string; githubId: number; pdp: URL; bio: string };
+  }>(
     "/github/connection",
     {
       // preValidation: checkBodyInput(["username"], true),
@@ -176,9 +189,10 @@ export default function authentification(fastify: FastifyInstance) {
       let username = req.body.username;
       const githubId = req.body.githubId;
       const pdp = req.body.pdp;
+      const bio = req.body.bio;
       const row = dbQuery.getUserByGithubId.get({ githubId });
 
-      if (!row) return GithubRegister(username, githubId, pdp, reply);
+      if (!row) return GithubRegister(username, githubId, pdp, bio, reply);
 
       const token = fastify.jwt.sign({ id: row.id }, { expiresIn: "15m" });
       return reply
