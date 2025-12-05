@@ -8,6 +8,9 @@ const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
 // je peu en régénérer une au besoin
 const CLIENT_SECRET = "003530775d960f318554c656cc1e80c404e8cf52";
 
+/**
+ * statement for database
+ */
 let dbQuery: {
   InsertUser: Database.Statement<{
     username: string;
@@ -31,9 +34,15 @@ function InsertNumberInUsername(username: string, nb: number) {
   const nbStr = nb.toString();
   if (username.length - nbStr.length < 3)
     return "User" + Math.random().toString().slice(0, 8);
+  if (username.length + nbStr.length < 20) return username + nbStr;
   return username.slice(0, username.length - nbStr.length) + nbStr;
 }
 
+/**
+ * format a username if it already exist on the database
+ * @param username username of github user
+ * @returns
+ */
 function usernameFormator(username: string): string {
   if (username.length > 20) {
     username = username.substring(0, 20);
@@ -50,7 +59,13 @@ function usernameFormator(username: string): string {
   );
   return InsertNumberInUsername(username, nb);
 }
-
+/**
+ * Set the profile picture provided by GitHub user data in the database.
+ * @param pdp profile picture URL
+ * @param githubId id of github user
+ * @param reply fastify reply
+ * @returns
+ */
 async function setGithubAvatar(
   pdp: URL,
   githubId: number,
@@ -90,9 +105,6 @@ async function setGithubAvatar(
 // =========================================================================
 
 export default function authentification(fastify: FastifyInstance) {
-  /**
-   * statement for database
-   */
   dbQuery = {
     InsertUser: db.prepare<{ username: string; githubId: number }>(
       "INSERT INTO users (username, githubId) VALUES (:username, :githubId)"
@@ -115,6 +127,13 @@ export default function authentification(fastify: FastifyInstance) {
     ),
   };
 
+  /**
+   * create a account with user data get from github
+   * @param username username of github user
+   * @param githubId id of github user
+   * @param pdp profile picture of github user
+   * @param reply fastify reply
+   */
   async function GithubRegister(
     username: string,
     githubId: number,
@@ -145,6 +164,9 @@ export default function authentification(fastify: FastifyInstance) {
     } catch (err) {}
   }
 
+  /**
+   * create a account or login if a user use Github
+   */
   fastify.post<{ Body: { username: string; githubId: number; pdp: URL } }>(
     "/github/connection",
     {
@@ -165,6 +187,9 @@ export default function authentification(fastify: FastifyInstance) {
     }
   );
 
+  /**
+   * creates an access_token with a code provided after connecting to GitHub
+   */
   fastify.get("/github/getAccessToken", async (req, res) => {
     const { code } = req.query as { code: string };
 
@@ -181,7 +206,9 @@ export default function authentification(fastify: FastifyInstance) {
     const data = await response.json();
     res.send(data);
   });
-
+  /**
+   * get user data like: 'username', 'bio', 'id', 'profile picture' from github
+   */
   fastify.get("/github/getUserData", async (req, res) => {
     const authHeader = req.headers["authorization"];
     console.log("Authorization =>", authHeader);

@@ -284,56 +284,56 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
     const statement2 = db.prepare<{ pfp: string; id: Id }, undefined>(
       "UPDATE users SET pfp = :pfp WHERE id = :id"
     );
-      fastifyInstance.put(
-        "/pfp",
-        {
-          onRequest: [identifyUser],
-        },
-        async (req, reply) => {
-          const data = await req.file();
-          if (!data || !data.filename) {
-            return reply.code(400).send({ success: false, message: ["NO_FILE"] });
-          }
-          const buffer = await data.toBuffer();
-          const detectedType = await fileTypeFromBuffer(buffer);
-          if (
-            !detectedType ||
-            ![
-              "image/png",
-              "image/apng",
-              "image/jpeg",
-              "image/gif",
-              "image/webp",
-            ].includes(detectedType.mime)
-          ) {
-            return reply.code(401).send({ success: false, message: ["NOT_IMG"] });
-          }
-          const filename = `${req.user.id}${String(Math.random()).substring(2)}.${
-            detectedType.ext
-          }`;
-          try {
-            await fs.promises.writeFile(`/var/www/pfp/${filename}`, buffer);
-          } catch (error) {
-            return reply
-              .code(500)
-              .send({ success: false, message: "Failed to save file: " + error });
-          }
-          const row = statement1.get({ id: req.user.id }) as UserRow;
-          const res = statement2.run({ pfp: filename, id: req.user.id });
-          // below might happen on race condition, if someone deleted their accounts between SQL request for instance
-          if (!row || !res.changes) {
-            return reply
-              .code(404)
-              .header("x-authenticated", false)
-              .send({ success: false, message: ["NOT_IN_DB"] });
-          }
-          if (row.pfp !== "default.jpg" && row.pfp !== filename) {
-            // if unlink fails, it's sad, but won't bother with an error
-            fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
-          }
-          return reply.send({ success: true, message: ":D" });
+    fastifyInstance.put(
+      "/pfp",
+      {
+        onRequest: [identifyUser],
+      },
+      async (req, reply) => {
+        const data = await req.file();
+        if (!data || !data.filename) {
+          return reply.code(400).send({ success: false, message: ["NO_FILE"] });
         }
-      );
+        const buffer = await data.toBuffer();
+        const detectedType = await fileTypeFromBuffer(buffer);
+        if (
+          !detectedType ||
+          ![
+            "image/png",
+            "image/apng",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+          ].includes(detectedType.mime)
+        ) {
+          return reply.code(401).send({ success: false, message: ["NOT_IMG"] });
+        }
+        const filename = `${req.user.id}${String(Math.random()).substring(2)}.${
+          detectedType.ext
+        }`;
+        try {
+          await fs.promises.writeFile(`/var/www/pfp/${filename}`, buffer);
+        } catch (error) {
+          return reply
+            .code(500)
+            .send({ success: false, message: "Failed to save file: " + error });
+        }
+        const row = statement1.get({ id: req.user.id }) as UserRow;
+        const res = statement2.run({ pfp: filename, id: req.user.id });
+        // below might happen on race condition, if someone deleted their accounts between SQL request for instance
+        if (!row || !res.changes) {
+          return reply
+            .code(404)
+            .header("x-authenticated", false)
+            .send({ success: false, message: ["NOT_IN_DB"] });
+        }
+        if (row.pfp !== "default.jpg" && row.pfp !== filename) {
+          // if unlink fails, it's sad, but won't bother with an error
+          fs.unlink(`/var/www/pfp/${row.pfp}`, () => {});
+        }
+        return reply.send({ success: true, message: ":D" });
+      }
+    );
   }
 
   {
