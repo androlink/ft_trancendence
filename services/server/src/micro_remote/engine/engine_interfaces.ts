@@ -1,6 +1,4 @@
-
 import WebSocket from "ws";
-import {Id} from "../../types"
 
 /**
  * for a player, what is needed to be displayed
@@ -8,10 +6,10 @@ import {Id} from "../../types"
 export interface PlayerView {
   name: string | [string, ...string[]];
   score: number;
-  TL: {x: number, y: number};
+  TL: { x: number; y: number };
   width: number;
   height: number;
-  direction: 'E' | 'W';
+  direction: "E" | "W";
 }
 
 /**
@@ -41,41 +39,13 @@ export interface BallView {
 export interface BallEntity {
   view: BallView;
   last: PlayerEntity;
-  speed: {x: number, y: number};
+  speed: { x: number; y: number };
 }
 
-export interface DataFrame
-{
-	ball: BallView,
-	players: PlayerView[],
-  state: 'ended' | 'playing' | 'paused' | 'waiting',
+export interface DataFrame {
+  ball: BallView;
+  players: PlayerView[];
+  state: "ended" | "playing" | "paused" | "waiting";
 }
 
-export type point = {x: number, y: number};
-
-export interface GameParty
-{
-  id: string;
-  intervalId?: ReturnType<typeof setInterval>
-  ball: BallEntity,
-  players_id: Id[],
-  players: PlayerEntity[],
-  views: DataFrame,
-  max_score: number,
-}
-
-export type RequestType = "JOIN" | "PING" | "GAME";
-
-export interface IMessage
-{
-  type: RequestType;
-  message?: any;
-  token?: string;
-  input?: "pressUp" | "releaseUp" | "pressDown" | "releaseDown"
-}
-
-export class GameWebsocket extends WebSocket
-{
-  id: Id;
-  oninput?: (event: WebSocket.MessageEvent,message: IMessage) => void;
-};
+export type point = { x: number; y: number };

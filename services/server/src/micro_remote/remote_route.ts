@@ -4,12 +4,9 @@ import { fastify } from "./main.ts";
 
 import "@fastify/websocket";
 import WebSocket from "ws";
-import { Id } from "../common/types";
-import {
-  GameWebsocket,
-  IMessage,
-  RequestType,
-} from "./engine/engine_interfaces.ts";
+
+import { Id } from "../common/types.ts";
+import { GameWebSocket, JoinType, MessageType } from "./local_type.ts";
 
 import {
   pong_party_add_player,
@@ -17,85 +14,62 @@ import {
   pong_party_exists,
 } from "./pong_party.ts";
 
-function parse_message(data: WebSocket.Data): IMessage | null {
-  let message: IMessage;
-  message = JSON.parse(data.toString());
-  return message;
-}
-
-function ws_join_handler(
-  ws: WebSocket.WebSocket,
-  req: FastifyRequest,
-  message: IMessage
-) {
+async function authenticate(token: string): Promise<Id | null> {
   try {
-    const token: string = message.token;
-    if (token == undefined) {
-      ws.send(JSON.stringify({ type: "JOIN", message: "token not found" }));
-      ws.close();
-      return;
-    }
-    const id: Id = fastify.jwt.decode(token)["id"]; //get sender id;
-    ws["id"] = id;
-    const game_id: string = message.message;
-    if (token === undefined) {
-      ws.send(JSON.stringify({ type: "JOIN", message: "invalid game_id" }));
-      ws.close();
-      return;
-    }
-    if (!pong_party_exists(game_id)) {
-      pong_party_create("000", [2, 3]); //return ws.send(JSON.stringify({ type: "JOIN", message: "game not found"}));
-    }
-    pong_party_add_player(game_id, id, ws);
-    return ws.send(JSON.stringify({ type: "JOIN", message: "ok" }));
-  } catch (err) {
-    console.log("join:", err);
+    const id: { id: Id } | null = fastify.jwt.decode(token);
+    if (!id) throw 0;
+    return id.id;
+  } catch {
+    return null;
   }
 }
 
-function client_entrypoint(ws: WebSocket.WebSocket, req: FastifyRequest) {
-  {
-    {
-      //on connection
-      console.log("new connection to remote pong");
-    }
-    ws.onmessage = (event) => {
-      try {
-        let message = parse_message(event.data);
-        if (!message) {
-          throw new Error("Invalid message format");
-        }
-        switch (message.type as RequestType) {
-          case "JOIN":
-            {
-              ws_join_handler(ws, req, message);
-            }
-            break;
-          case "PING":
-            {
-              ws.send(
-                JSON.stringify({ type: "PING", message: message.message })
-              );
-            }
-            break;
-          case "GAME":
-            {
-              if (ws["oninput"]) (ws as GameWebsocket).oninput(event, message);
-            }
-            break;
-          default:
-            {
-              ws.send(
-                JSON.stringify({ type: "WTF", message: event.data.toString() })
-              );
-            }
-            break;
-        }
-      } catch (err) {
-        console.error("Error handling remote pong message: ", err);
-      }
-    };
+async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
+  const id = await authenticate(payload.token || "");
+  if (id === null) return ws.close(3000, "token not found");
+  (ws as GameWebSocket).id = id;
+  const room_id = payload.room_id;
+  if (!room_id) return ws.close(3001, "room not found");
+  if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false)
+    return ws.close(3002, "cannot join game");
+}
+
+async function ws_message_join(ws: WebSocket, message: string) {
+  try {
+    const messageObject = JSON.parse(message) as MessageType;
+    if (messageObject.type !== "join") return;
+
+    await ws_join(ws, messageObject.payload);
+  } catch (e) {
+    console.error("join: ", e);
   }
+}
+
+async function ws_message_ping(ws: WebSocket, message: string) {
+  const messageObject = JSON.parse(message) as MessageType;
+  if (messageObject.type !== "ping") return;
+
+  return ws.send(
+    JSON.stringify({ type: "pong", payload: messageObject.payload })
+  );
+}
+
+function client_entrypoint(ws: WebSocket, req: FastifyRequest) {
+  ws.addEventListener("open", (event) => {
+    event.target;
+  });
+  ws.addEventListener("open", (event) => {
+    console.log("new client");
+  });
+  ws.addEventListener("error", (event) => {
+    console.log("websocket error:", event.message);
+  });
+  ws.addEventListener("message", (event) => {
+    ws_message_join(event.target, event.data.toString());
+  });
+  ws.addEventListener("message", (event) => {
+    ws_message_ping(event.target, event.data.toString());
+  });
 }
 
 export default async function apiRemote(fastify: FastifyInstance) {

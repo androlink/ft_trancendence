@@ -232,6 +232,14 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
     });
   });
 
+  fastifyInstance.get("/netplay", (req, reply) => {
+    return reply.send({
+      template: "Home",
+      title: ["netplay"],
+      inner: "RemotePong",
+    });
+  });
+
   fastifyInstance.get(
     "/db-logs",
     { onRequest: needConnection },
