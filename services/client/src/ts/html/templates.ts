@@ -113,8 +113,20 @@ const htmlSnippetsTemplate:  {
   `,
   Profile2:
     `
-  <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col overflow-y-scroll relative">
+  <div class="bg-[#1E244E] rounded-md p-3 size-full flex flex-col overflow-y-scroll drop-shadow-xl/50">
+    <header class="w-full flex items-start gap-4">
+      <img
+        id="profile-picture"
+        class="ws-60 h-60 rounded-full" src="${assetsPath}/default-avatar.jpg"
+      >
+      <div class="flex flex-col justify-start h-60">
+        <h1 class="text-white text-6xl mt-10 mb-4" id="username-p2"></h1>
+        <p class="text-white mb-1">[[biography]]:</p>
+        <p class="w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto" id="biography-p2"></p>
+      </div>
+    </header>
     <img src="${assetsPath}/arrow-refresh.png" class="absolute size-10 right-3 cursor-pointer hover:animate-spin" onclick="main(true)"/>
+    <!--
     <span class="flex justify-around place-items-center">
       <style>
         .dropdown:hover .dropdown-content {display: flex;}
@@ -126,10 +138,20 @@ const htmlSnippetsTemplate:  {
           <a id="blocking request">block !</a>
         </div>
       </div>
-      <img id="profile-picture" class="size-50 rounded-full" src="${assetsPath}/default-avatar.jpg">
     </span>
+    -->
+    <div class="transform-none">
+      <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
+    </div>
+    <div class="w-full flex justify-center">
+      <div class=" bg-center w-175 h-25 rounded-2xl shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
+
+      </div>
+    </div>
+    <!--
     <p class="text-white -ml-2">[[biography]]:</p>
     <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography-p2"></p>
+    -->
     <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
       <caption class="caption-bottom">[[remote counter]]</caption>
       <thead>
