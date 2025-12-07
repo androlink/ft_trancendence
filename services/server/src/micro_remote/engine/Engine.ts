@@ -16,6 +16,11 @@ import {
 import { containsBetween } from "./engine_utils";
 import { pong_party_delete } from "../pong_party";
 import { get } from "http";
+import { GameWebSocket, MessageType } from "../local_type";
+
+interface GlobalEventHandlersEventMap {
+  build: CustomEvent<number>;
+}
 
 export { PongEngine };
 /**
@@ -214,4 +219,37 @@ class PongEngine extends EventTarget {
     }
     return true;
   }
+
+  public setPlayer(id: Id, ws: GameWebSocket): boolean {
+    let player_index = this.players_id.findIndex((i) => i == id);
+    if (player_index == -1) return false; //if not found in game
+    if (this.players[player_index].ready === "HERE") return false; //if already here
+
+    let player = this.players[player_index];
+
+    player.ready = "HERE";
+    player.ws = ws;
+
+    set_player_event(ws, player);
+    this.addEventListener("finish", () => {
+      ws.close();
+    });
+    return true;
+  }
+}
+
+function set_player_event(ws: GameWebSocket, player: PlayerEntity): void {
+  ws.addEventListener("message", (event) => {
+    const messageObject = JSON.parse(event.data.toString()) as MessageType;
+    if (messageObject.type !== "input") return;
+
+    if (messageObject.payload == "pressDown") player.down = true;
+    if (messageObject.payload == "releaseDown") player.down = false;
+    if (messageObject.payload == "pressUp") player.up = true;
+    if (messageObject.payload == "releaseUp") player.up = false;
+  });
+
+  ws.addEventListener("close", () => {
+    player.ready = "GONE";
+  });
 }

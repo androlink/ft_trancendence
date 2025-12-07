@@ -5,6 +5,7 @@ import fastifyJWT from "@fastify/jwt";
 import { Id, JwtUserPayload } from "../common/types";
 import { initDB } from "../common/database";
 import apiRemote from "./remote_route";
+import createRoute from "./create_route";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -31,6 +32,7 @@ fastify.register(fastifyJWT, {
 await initDB();
 
 fastify.register(apiRemote, { prefix: "/api" });
+fastify.register(createRoute, { prefix: "/api" });
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
