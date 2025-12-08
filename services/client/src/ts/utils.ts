@@ -140,7 +140,7 @@ export async function accountLogOut(): Promise<void> {
   const token = localStorage.getItem("token");
   if (token === null) return;
   try {
-    const res = await fetch("/logout", { method: "POST" });
+    const res = await fetch("/api/account/logout", { method: "POST" });
     const json = await res.json();
     if (json.success && res.headers.get("x-authenticated") === "false") {
       localStorage.removeItem("token");
