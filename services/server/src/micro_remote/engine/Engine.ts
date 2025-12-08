@@ -35,6 +35,7 @@ class PongEngine extends EventTarget {
   private players: PlayerEntity[];
   private views: DataFrame;
   private max_score: number;
+  private startTimeout?: ReturnType<typeof setTimeout>;
 
   /**
    *
@@ -78,9 +79,20 @@ class PongEngine extends EventTarget {
       players: this.players.map((p) => p.view),
       state: "waiting",
     };
-    setInterval(() => {
+    this.resetStartTimeout();
+  }
+
+  private start() {
+    if (this.intervalId !== undefined) this.stop();
+    this.intervalId = setInterval(() => {
       this.tick();
     }, delay);
+    this.resetStartTimeout(false);
+  }
+
+  private stop() {
+    clearInterval(this.intervalId);
+    this.intervalId = undefined;
   }
 
   getId(): string {
@@ -88,6 +100,16 @@ class PongEngine extends EventTarget {
   }
   setId(id: string): void {
     this.id = id;
+  }
+
+  private resetStartTimeout(restart: boolean = true) {
+    if (this.startTimeout !== undefined) clearTimeout(this.startTimeout);
+    this.startTimeout = undefined;
+    if (restart) {
+      this.startTimeout = setTimeout(() => {
+        this.abort();
+      }, 1000 * 60 * 3); // 3 minutes
+    }
   }
 
   /**
@@ -234,7 +256,19 @@ class PongEngine extends EventTarget {
     this.addEventListener("finish", () => {
       ws.close();
     });
+    this.resetStartTimeout();
+    if (this.players.every((p) => p.ready === "HERE")) this.start();
     return true;
+  }
+
+  public getPlayers() {
+    return this.players;
+  }
+
+  private abort() {
+    this.resetStartTimeout(false);
+    this.stop();
+    this.dispatchEvent(new Event("abort"));
   }
 }
 

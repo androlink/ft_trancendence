@@ -5,6 +5,7 @@ import { WebSocket } from "ws";
 import { PlayerEntity } from "./engine/engine_interfaces";
 import { PongEngine } from "./engine/Engine";
 import { randomUUID } from "crypto";
+import { info } from "console";
 
 let games: Map<string, PongEngine> = new Map();
 
@@ -21,6 +22,24 @@ let get_username: (id: Id) => string;
   };
 }
 
+function pong_party_log() {
+  let infos: string[] = [];
+  infos.push("============= game log =============");
+  infos.push(`game found: ${games.size}`);
+  for (let game of games) {
+    const players = game[1].getPlayers();
+    infos.push(
+      `  {${game[1].getId()}}: [${players[0].view.name}, ${
+        players[1].view.name
+      }]`
+    );
+  }
+
+  console.info(infos.join("\n"));
+}
+
+setInterval(pong_party_log, 10000);
+
 export function pong_party_create(players_id: Id[]): PongEngine {
   const players_name = players_id.map((id) => get_username(id));
   let game_id = randomUUID();
@@ -29,13 +48,31 @@ export function pong_party_create(players_id: Id[]): PongEngine {
   game.setId(game_id);
   games.set(game_id, game);
   console.log(game);
+  game.addEventListener("abort", () => {
+    pong_party_abort(game_id);
+  });
+  game.addEventListener("finish", () => {
+    pong_party_finish(game_id);
+  });
   return game;
+}
+
+function pong_party_finish(game_id: string) {
+  console.info(`game ${game_id} has been finished`);
+  //log to db
+  pong_party_delete(game_id);
+}
+
+function pong_party_abort(game_id: string) {
+  console.info(`game ${game_id} has been aborted`);
+  pong_party_delete(game_id);
 }
 
 export function pong_party_delete(game_id: string): void {
   let p = pong_party_get(game_id);
   if (!p) return;
   games.delete(game_id);
+  console.info(`game ${game_id} has been removed`);
 }
 
 export function pong_party_add_player(
