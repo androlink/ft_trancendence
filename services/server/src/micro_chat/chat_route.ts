@@ -5,6 +5,7 @@ import Database from "better-sqlite3";
 import { Id, WSmessage, TypeMessage } from "../common/types";
 import db from "../common/database";
 import { fastify } from "./main";
+import { invite_message } from "./chat_invite";
 
 /**
  * Class client
@@ -450,6 +451,8 @@ export default async function apiChat(fastify: FastifyInstance) {
     connection.on("close", (client: WebSocket) => {
       waitingConnections.splice(waitingConnections.indexOf(client), 1);
     });
+
+    connection.addEventListener("message", invite_message);
     connection.on("message", (event) => {
       try {
         const msg: WSmessage = JSON.parse(event.toString());

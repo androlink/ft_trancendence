@@ -11,6 +11,7 @@ enum TypeMessage {
   readyForDirectMessage = "readyForDirectMessage",
   serverMessage = "serverMessage",
   connection = "connection",
+  invite = "invite",
   ping = "ping",
   pong = "pong",
 }
@@ -288,6 +289,18 @@ export function sendChatMessage() {
         msg.target = client;
         sendOrQueue(JSON.stringify(msg));
       }
+    } else if (command === "invite") {
+      if (args.length !== 2) return;
+      const target = args[1];
+      const msg: WSmessage = {
+        user: localStorage.getItem("token") || "",
+        type: TypeMessage.invite,
+        target: target,
+        msgId: GenerateRandomId(),
+      };
+
+      textarea.value = "";
+      sendOrQueue(JSON.stringify(msg));
     }
     return;
   }

@@ -38,7 +38,7 @@ function pong_party_log() {
   console.info(infos.join("\n"));
 }
 
-setInterval(pong_party_log, 10000);
+setInterval(pong_party_log, 30000);
 
 export function pong_party_create(players_id: Id[]): PongEngine {
   const players_name = players_id.map((id) => get_username(id));

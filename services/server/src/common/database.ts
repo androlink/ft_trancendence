@@ -46,7 +46,7 @@ export async function initDB() {
     "SELECT name FROM sqlite_master WHERE type='table' AND name = ?"
   );
   const createDB = db.transaction(() => {
-    if (tableExists.get('users')) {
+    if (tableExists.get("users")) {
       return;
     }
     fs.unlink(dbLogFile, () => {});

@@ -28,6 +28,7 @@ export enum TypeMessage {
   readyForDirectMessage = "readyForDirectMessage",
   serverMessage = "serverMessage",
   connection = "connection",
+  invite = "invite",
   ping = "ping",
   pong = "pong",
 }
