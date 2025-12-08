@@ -11,19 +11,21 @@ export default async function createRoute(fastify: FastifyInstance) {
   fastify.post<{ Body: { player1: Id; player2: Id } }>(
     "/create",
     async (req, reply) => {
-      if (req.body === undefined) return reply.code(400);
-      console.log(req.body);
-      let party = pong_party_create([req.body.player1, req.body.player2]);
-      if (!party) return reply.code(500);
+      if (req.body === undefined) return reply.code(400).send("");
+      const body = JSON.parse(req.body as unknown as string);
+      console.log(body);
+      console.log(body.player1);
+      console.log(body.player2);
+      const ids = [body.player1, body.player2];
+      console.log("ids", ids);
+      let party = pong_party_create(ids);
+      if (party === null) return reply.code(500).send("");
       console.log(`new party id: ${party.getId()}`);
       return reply.code(200).send(
         JSON.stringify({
-          success: true,
-          content: {
-            game_id: party.getId(),
-            player1: req.body.player1,
-            player2: req.body.player2,
-          },
+          game_id: party.getId(),
+          player1: body.player1,
+          player2: body.player2,
         })
       );
     }

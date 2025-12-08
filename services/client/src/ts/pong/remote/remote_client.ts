@@ -40,7 +40,7 @@ function ws_delete() {
   if (ws) ws.close();
 }
 
-function ws_connect(game_id: string) {
+export function ws_connect(game_id: string) {
   console.log("Connecting to remote pong websocket...");
   ws = new WebSocket("/api/remote");
   ws.onopen = () => {
@@ -78,6 +78,8 @@ function ws_connect(game_id: string) {
     ws_message_pong(event.target as WebSocket, event.data.toString());
   });
 }
+
+self["ws_connect"] = ws_connect;
 
 function ws_message_pong(ws: WebSocket, message: string) {
   const messageObject = JSON.parse(message) as MessageType;

@@ -6,6 +6,8 @@ import { fastify } from "./main";
 import { send } from "process";
 import { req } from "pino-std-serializers";
 
+import { DirectMessage, connectedClients } from "./chat_route";
+
 const request_url = "http://remote_microservice:3000/api/create";
 
 export async function invite_message(event: WebSocket.MessageEvent) {
@@ -39,7 +41,21 @@ export async function invite_message(event: WebSocket.MessageEvent) {
     }
     const result = await response.json();
     console.log(result.game_id);
-    //todo do something with result;
+
+    let respond: WSmessage = {
+      type: TypeMessage.directMessage,
+      content: result.game_id,
+      msgId: "0",
+      user: "someone",
+      target: msg.target,
+    };
+
+    connectedClients.get(player1)?.send(JSON.stringify(respond));
+    connectedClients
+      .get(player2.id)
+      ?.send(JSON.stringify({ ...respond, target: msg.user }));
+    DirectMessage(respond);
+    DirectMessage({ ...respond, target: msg.user });
   } catch (e) {
     event.target.send(JSON.stringify({ msg: "cant generate party" }));
     console.error("invite:", e);

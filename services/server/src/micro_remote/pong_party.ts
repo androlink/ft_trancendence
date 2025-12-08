@@ -11,12 +11,12 @@ let games: Map<string, PongEngine> = new Map();
 
 let get_username: (id: Id) => string | undefined;
 {
-  const statement = db.prepare<{ id: Id }, string>(
+  const statement = db.prepare<{ id: Id }, { username: string }>(
     "SELECT username FROM users WHERE id = :id"
   );
 
   get_username = (id) => {
-    const username = statement.get({ id: id });
+    const username = statement.get({ id: id })?.username;
     return username;
   };
 }
@@ -40,8 +40,10 @@ function pong_party_log() {
 setInterval(pong_party_log, 30000);
 
 export function pong_party_create(players_id: Id[]): PongEngine | null {
+  console.log("players_id", players_id);
   const players_name = players_id.map((id) => get_username(id));
-  if (players_name.every((pn) => pn === undefined)) return null;
+  console.log("players_name", players_name);
+  if (!players_name.every((pn) => pn !== undefined)) return null;
   let game_id = randomUUID();
   while (games.has(game_id) === true) game_id = randomUUID();
   let game = new PongEngine(players_name as string[], players_id, 5);

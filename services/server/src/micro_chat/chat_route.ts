@@ -31,7 +31,7 @@ class WSClient {
   }
 }
 
-const connectedClients: Map<Id, WSClient> = new Map();
+export const connectedClients: Map<Id, WSClient> = new Map();
 
 const waitingConnections: WebSocket[] = [];
 
@@ -191,7 +191,7 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
  * @param message message from the target
  * @param TargetSocket Websocket from the target
  */
-function DirectMessage(TargetRespondMsg: WSmessage) {
+export function DirectMessage(TargetRespondMsg: WSmessage) {
   for (let msg of listOfMsg) {
     if (TargetRespondMsg.msgId !== msg.msgId) {
       continue;
