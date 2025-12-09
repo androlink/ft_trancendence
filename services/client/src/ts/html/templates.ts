@@ -38,7 +38,7 @@ const htmlSnippetsTemplate:  {
     </span>
   </span>
   <div class="transform-none">
-    <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
+    <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
   </div>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
     <div onclick="goToURL( )" name="">pdf</div>
@@ -152,9 +152,20 @@ const htmlSnippetsTemplate:  {
       <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
     </div>
     <div class="w-full flex justify-center">
-      <div class=" bg-center w-175 h-25 rounded-2xl shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
-        <div>
-          <>
+      <div class="bg-center w-175 h-25 rounded-2xl shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
+        <div class="size-full grid grid-cols-3 justify-items-stretch">
+          <div class="flex grid-cols-3 my-auto justify-self-auto">
+            <div class="text-2xl text-white font-bold ">RATIO<br>Victoire</div>
+            <div class="text-shadow-amber-200 font-bold">100%</div>
+          </div>
+          <div class="flex grid-cols-3 border-x border-white my-auto justify-self-auto">
+            <div class="text-white font-bold text-2xl text-center">PARTIE<br>Gagner</div>
+            <div class="text-shadow-amber-200 text-5xl font-bold">6969</div>
+          </div>
+          <div class="flex grid-cols-3 my-auto justify-self-auto">
+            <div class="text-white font-bold text-2xl text-center">PARTIE<br>Perdue</div>
+            <div class="text-shadow-amber-200 font-bold">100%</div>
+          </div>
         </div>
       </div>
     </div>
