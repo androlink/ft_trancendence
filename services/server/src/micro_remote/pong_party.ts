@@ -33,7 +33,6 @@ function pong_party_log() {
       }]`
     );
   }
-
   console.info(infos.join("\n"));
 }
 

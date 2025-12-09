@@ -18,6 +18,7 @@ export default async function createRoute(fastify: FastifyInstance) {
       console.log(body.player2);
       const ids = [body.player1, body.player2];
       console.log("ids", ids);
+      if (body.player1 === body.player2) return reply.code(400).send("");
       let party = pong_party_create(ids);
       if (party === null) return reply.code(500).send("");
       console.log(`new party id: ${party.getId()}`);

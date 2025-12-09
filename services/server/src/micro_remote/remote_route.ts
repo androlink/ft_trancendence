@@ -29,7 +29,7 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
   if (id === null) return ws.close(3000, "token not found");
   (ws as GameWebSocket).id = id;
   const room_id = payload.room_id;
-  if (!room_id) return ws.close(3001, "room not found");
+  if (!room_id) return ws.close(3001, `room ${payload.room_id} not found`);
   if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false)
     return ws.close(3002, "cannot join game");
 }

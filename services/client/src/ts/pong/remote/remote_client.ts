@@ -50,7 +50,7 @@ export function ws_connect(game_id: string) {
         type: "join",
         payload: {
           token: localStorage.getItem("token"),
-          message: game_id,
+          room_id: game_id,
         },
       })
     );
