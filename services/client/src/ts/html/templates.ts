@@ -27,7 +27,7 @@ const htmlSnippetsTemplate:  {
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <p class=" text-3xl font-mono text-blue-900 font-semibold select-none">ft_transcendence</p>
+    <p class=" text-3xl font-mono text-white font-semibold select-none">ft_transcendence</p>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -37,6 +37,9 @@ const htmlSnippetsTemplate:  {
       <img src="${assetsPath}/exit-icon.png" onclick="accountLogOut()" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
     </span>
   </span>
+  <div class="transform-none">
+    <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
+  </div>
   <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
     <div onclick="goToURL( )" name="">pdf</div>
     <div onclick="goToURL('game')" name="game">[[game]]</div>    
@@ -45,7 +48,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
   </span>
-  <span class="flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none">
+  <span class=" flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none drop-shadow-xl/50">
     <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
     <div class="h-full flex flex-col overflow-hidden">
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
@@ -55,18 +58,23 @@ const htmlSnippetsTemplate:  {
         <p class="m-2 font-bold">[[not connected]]</p>
         <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[login page]]</button>
       </div>
-      <div class="size-full bg-white flex flex-col">
+      <div class="rounded-md size-full bg-[#E9E9E9] flex flex-col">
         <div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
-        <span class="flex justify-items-stretch">
-          <textarea id="chat-input" class="px-1 flex-1 field-sizing-fixed border-gray-700 focus:border-black border-2 focus:outline m-1 rounded resize-none" maxlength="280"></textarea>
-          <img src="${assetsPath}/send-icon.png" onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value); d.value = '';}" class="self-center select-none invert-50 hover:invert-75 size-8 mr-1 cursor-pointer" draggable="false">
-        </span>
+        <div class="mx-4 mb-4 flex bg-white rounded ">
+          <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 resize-none" maxlength="280"></textarea>
+          <img
+            src="${assetsPath}/send-icon.png"
+            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
+            class="mx-2 justify-items-end self-center select-none invert-50 hover:invert-0 size-10 cursor-pointer"
+            draggable="false"
+          ></img>
+        </div>
       </div>
     </div>
   </span>
   `,
   Game:
-    `
+    ` 
   <iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent outline" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
   `,
   Profile1:
@@ -113,19 +121,19 @@ const htmlSnippetsTemplate:  {
   `,
   Profile2:
     `
-  <div class="bg-[#1E244E] rounded-md p-3 size-full flex flex-col overflow-y-scroll drop-shadow-xl/50">
+  <div class="bg-[#1E244E] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
     <header class="w-full flex items-start gap-4">
       <img
         id="profile-picture"
-        class="ws-60 h-60 rounded-full" src="${assetsPath}/default-avatar.jpg"
+        class="ws-60 h-60 rounded-full aspect-square" src="${assetsPath}/default-avatar.jpg"
       >
       <div class="flex flex-col justify-start h-60">
-        <h1 class="text-white text-6xl mt-10 mb-4" id="username-p2"></h1>
+        <h1 class="text-white text-6xl mt-10 mb-4 select-text font-Hammer" id="username-p2"></h1>
         <p class="text-white mb-1">[[biography]]:</p>
-        <p class="w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto" id="biography-p2"></p>
+        <p class="w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text" id="biography-p2"></p>
       </div>
+      <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin" onclick="main(true)"/>
     </header>
-    <img src="${assetsPath}/arrow-refresh.png" class="absolute size-10 right-3 cursor-pointer hover:animate-spin" onclick="main(true)"/>
     <!--
     <span class="flex justify-around place-items-center">
       <style>
@@ -145,7 +153,9 @@ const htmlSnippetsTemplate:  {
     </div>
     <div class="w-full flex justify-center">
       <div class=" bg-center w-175 h-25 rounded-2xl shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
-
+        <div>
+          <>
+        </div>
       </div>
     </div>
     <!--
