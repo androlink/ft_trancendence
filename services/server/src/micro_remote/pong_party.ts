@@ -62,8 +62,27 @@ export function pong_party_create(
 }
 
 function pong_party_finish(game_id: string) {
+  let p = pong_party_get(game_id);
+  if (!p) return;
   console.info(`game ${game_id} has been finished`);
-  //log to db
+
+  const scores = p.getPlayers().map((p) => p.view.score);
+
+  const [winner, loser] =
+    scores[0] > scores[1]
+      ? p.getPlayerId()
+      : p
+          .getPlayerId()
+          .map((_) => {
+            _;
+          })
+          .reverse();
+  if (winner === undefined || loser === undefined) return;
+  //const loser = 0;
+  let statement = db.prepare<{ winner: Id; loser: Id }>(
+    "INSERT INTO history_game winner, loser VALUES :winner,:loser;"
+  );
+  statement.run({ winner, loser });
   pong_party_delete(game_id);
 }
 

@@ -281,6 +281,10 @@ class PongEngine extends EventTarget {
     return this.players;
   }
 
+  public getPlayerId() {
+    return this.players_id;
+  }
+
   public abort() {
     this.resetStartTimeout(false);
     this.stop();
