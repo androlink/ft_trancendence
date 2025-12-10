@@ -1,14 +1,71 @@
 import { WebSocket } from "ws";
-import { WSmessage, TypeMessage, UserRow, Id } from "../common/types";
+import {
+  WSmessage,
+  TypeMessage,
+  UserRow,
+  Id,
+  InternalCreateResponse,
+  InternalCreateRequestBody,
+} from "../common/types";
 
 import db from "../common/database";
 import { fastify } from "./main";
 import { send } from "process";
-import { req } from "pino-std-serializers";
+import { req, res } from "pino-std-serializers";
 
 import { DirectMessage, connectedClients } from "./chat_route";
 
 const request_url = "http://remote_microservice:3000/api/create";
+
+function get_player(
+  token: string,
+  target: string
+):
+  | { status: true; player1: UserRow; player2: UserRow }
+  | { status: false; reason: string } {
+  try {
+    const get_user_from_name = db?.prepare<{ username: string }, UserRow>(
+      "SELECT * FROM users WHERE username = :username"
+    );
+    const get_user_from_id = db?.prepare<{ id: Id }, UserRow>(
+      "SELECT * FROM users WHERE id = :id"
+    );
+    const sender: { id: Id } | null = fastify.jwt.decode(token);
+    if (sender === null) return { status: false, reason: "not connected" };
+    const player1 = get_user_from_id.get({ id: sender.id });
+    const player2 = get_user_from_name.get({ username: target! });
+    if (player2 === undefined || player1 === undefined)
+      return { status: false, reason: "can't find players" };
+    return { status: true, player1, player2 };
+  } catch (e) {
+    return { status: false, reason: "invalid token" };
+  }
+}
+
+async function get_party(players: {
+  player1: Id;
+  player2: Id;
+}): Promise<InternalCreateResponse | null> {
+  try {
+    const request = {
+      method: "POST",
+      body: JSON.stringify({
+        player1: players.player1,
+        player2: players.player2,
+      } as InternalCreateRequestBody),
+    };
+
+    const response = await fetch(request_url, request);
+    if (!response.ok) {
+      throw new Error(`error on request: ${response.status}`);
+    }
+    const result = await response.json();
+
+    return result;
+  } catch (e) {
+    return null;
+  }
+}
 
 export async function invite_message(event: WebSocket.MessageEvent) {
   const msg: WSmessage = JSON.parse(event.data.toString());
@@ -16,48 +73,52 @@ export async function invite_message(event: WebSocket.MessageEvent) {
   if (msg.type !== TypeMessage.invite) return;
 
   console.log(msg);
-  try {
-    const get_id_from_name = db?.prepare<{ username: string }, UserRow>(
-      "SELECT * FROM users WHERE username = :username"
+
+  const players = get_player(msg.user, msg.target!);
+  if (players.status === false) {
+    event.target.send(
+      JSON.stringify({
+        type: TypeMessage.replyInvite,
+        status: false,
+        reason: players.reason,
+      } as WSmessage)
     );
-    const sender: { id: Id } | null = fastify.jwt.decode(msg.user);
-    if (sender === null) throw new Error("invalid token");
-    const player1 = sender.id;
-    const player2 = get_id_from_name.get({ username: msg.target! });
-    if (player2 === undefined)
-      throw new Error(`cannot found player: ${msg.target}`);
+    return;
+  }
 
-    const request = {
-      method: "POST",
-      body: JSON.stringify({
-        player1: player1,
-        player2: player2.id,
-      }),
+  let respond = await get_party({
+    player1: players.player1.id,
+    player2: players.player2.id,
+  });
+
+  if (respond === null) {
+    event.target.send(
+      JSON.stringify({
+        type: TypeMessage.replyInvite,
+        status: false,
+        reason: "internal error",
+      } as WSmessage)
+    );
+    return;
+  }
+
+  let reply: WSmessage;
+  if (respond.status === true) {
+    let reply: WSmessage = {
+      type: TypeMessage.replyInvite,
+      status: true,
+      room_id: respond.room_id,
+      sender: players.player1.username,
+      target: players.player2.username,
     };
-    console.log(request.body);
-    const response = await fetch(request_url, request);
-    if (!response.ok) {
-      throw new Error(`error on request: ${response.status}`);
-    }
-    const result = await response.json();
-    console.log(result.game_id);
-
-    let respond: WSmessage = {
-      type: TypeMessage.directMessage,
-      content: result.game_id,
-      msgId: "0",
-      user: "someone",
-      target: msg.target,
+    event.target.send(JSON.stringify(reply));
+    connectedClients.get(players.player2.id)?.send(JSON.stringify(reply));
+  } else {
+    let reply: WSmessage = {
+      type: TypeMessage.replyInvite,
+      status: false,
+      reason: respond.reason,
     };
-
-    connectedClients.get(player1)?.send(JSON.stringify(respond));
-    connectedClients
-      .get(player2.id)
-      ?.send(JSON.stringify({ ...respond, target: msg.user }));
-    DirectMessage(respond);
-    DirectMessage({ ...respond, target: msg.user });
-  } catch (e) {
-    event.target.send(JSON.stringify({ msg: "cant generate party" }));
-    console.error("invite:", e);
+    event.target.send(JSON.stringify(reply));
   }
 }

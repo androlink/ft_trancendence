@@ -28,9 +28,9 @@ function pong_party_log() {
   for (let game of games) {
     const players = game[1].getPlayers();
     infos.push(
-      `  {${game[1].getId()}}: [${players[0].view.name}, ${
-        players[1].view.name
-      }]`
+      `  {${game[1].getId()}}: [${players[0].view.name}(${
+        players[0].view.score
+      }), ${players[1].view.name}(${players[1].view.score})]`
     );
   }
   console.info(infos.join("\n"));
@@ -38,11 +38,14 @@ function pong_party_log() {
 
 setInterval(pong_party_log, 30000);
 
-export function pong_party_create(players_id: Id[]): PongEngine | null {
+export function pong_party_create(
+  players_id: Id[]
+): { status: false; reason: string } | { status: true; room_id: string } {
   console.log("players_id", players_id);
   const players_name = players_id.map((id) => get_username(id));
   console.log("players_name", players_name);
-  if (!players_name.every((pn) => pn !== undefined)) return null;
+  if (!players_name.every((pn) => pn !== undefined))
+    return { status: false, reason: "one of player is not found" };
   let game_id = randomUUID();
   while (games.has(game_id) === true) game_id = randomUUID();
   let game = new PongEngine(players_name as string[], players_id, 5);
@@ -55,7 +58,7 @@ export function pong_party_create(players_id: Id[]): PongEngine | null {
   game.addEventListener("finish", () => {
     pong_party_finish(game_id);
   });
-  return game;
+  return { status: true, room_id: game.getId() };
 }
 
 function pong_party_finish(game_id: string) {

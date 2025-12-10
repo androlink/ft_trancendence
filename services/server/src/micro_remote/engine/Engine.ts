@@ -27,6 +27,9 @@ export { PongEngine };
  *
  *
  */
+
+export const abortTime = 1000 * 60 * 0.5; // 3 minutes
+
 class PongEngine extends EventTarget {
   private id: string;
   private intervalId?: ReturnType<typeof setInterval>;
@@ -83,6 +86,7 @@ class PongEngine extends EventTarget {
   }
 
   private start() {
+    this.players.forEach((p) => {});
     if (this.intervalId !== undefined) this.stop();
     this.intervalId = setInterval(() => {
       this.tick();
@@ -108,7 +112,7 @@ class PongEngine extends EventTarget {
     if (restart) {
       this.startTimeout = setTimeout(() => {
         this.abort();
-      }, 1000 * 60 * 3); // 3 minutes
+      }, abortTime);
     }
   }
 
@@ -135,24 +139,28 @@ class PongEngine extends EventTarget {
     //    set a collision detection based on the movement of the ball and not its finishing point
     // also, need to add a detection of the colision based on the radius of the ball,
     // unlike now where it's based on it's single coordinate
+
     if (this.checkPoints())
       if (Math.max(...players.map((p) => p.view.score)) >= this.max_score) {
         clearInterval(this.intervalId);
         this.intervalId = undefined;
         this.views.state = "ended";
       }
-    let r = true;
-    for (let p of this.players) if (p.ready == "GONE") r = false;
-    if (r == false) {
+
+    if (
+      this.players.every((p) => {
+        return p.ready === "HERE";
+      })
+    ) {
       clearInterval(this.intervalId);
       this.intervalId = undefined;
       this.views.state = "ended";
     }
     this.players.forEach((p) => {
-      if (p.ready != "GONE")
-        p.ws?.send(JSON.stringify({ type: "GAME", message: this.views }));
+      if (p.ready === "HERE")
+        p.ws?.send(JSON.stringify({ type: "update", payload: this.views }));
     });
-    if (this.views.state === "ended") () => {}; //todo notify finish
+    if (this.views.state === "ended") this.dispatchEvent(new Event("finish"));
   }
 
   private moveBall(): void {
@@ -256,6 +264,9 @@ class PongEngine extends EventTarget {
     this.addEventListener("finish", () => {
       ws.close();
     });
+    this.addEventListener("abort", () => {
+      ws.close();
+    });
     this.resetStartTimeout();
     if (this.players.every((p) => p.ready === "HERE")) this.start();
     return true;
@@ -265,7 +276,7 @@ class PongEngine extends EventTarget {
     return this.players;
   }
 
-  private abort() {
+  public abort() {
     this.resetStartTimeout(false);
     this.stop();
     this.dispatchEvent(new Event("abort"));

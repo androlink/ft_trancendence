@@ -418,7 +418,8 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   socketToId.set(socket, senderId.id);
   waitingConnections.splice(waitingConnections.indexOf(socket), 1);
   socket.onclose = () => {
-    const client = connectedClients.get(senderId.id)!;
+    const client = connectedClients.get(senderId.id);
+    if (client === undefined) return;
     client.sockets.splice(client.sockets.indexOf(socket), 1);
   };
 

@@ -20,27 +20,24 @@ function eventKeyInputPong(event: KeyboardEvent) {
   return ws.send(JSON.stringify({ type: "input", input: message }));
 }
 
-export function connect_remote_play(game_id: string) {
+export function join_party(game_id: string) {
   ws_connect(game_id);
-
-  self.addEventListener(
-    "popstate",
-    (ev) => {
-      if (location.pathname !== "/netplay") ws_delete();
-    },
-    { once: true }
-  );
   document.addEventListener("keydown", eventKeyInputPong);
   document.addEventListener("keyup", eventKeyInputPong);
 }
 
 function ws_delete() {
+  clearTimeout(pingTimeout);
+  pingTimeout = null;
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
-  if (ws) ws.close();
+  ws_disconnect();
 }
 
-export function ws_connect(game_id: string) {
+self["join_party"] = join_party;
+
+function ws_connect(game_id: string) {
+  if (ws) ws.close();
   console.log("Connecting to remote pong websocket...");
   ws = new WebSocket("/api/remote");
   ws.onopen = () => {
@@ -58,15 +55,8 @@ export function ws_connect(game_id: string) {
   };
   ws.addEventListener("close", (event) => {
     console.log(event.code, event.reason);
+    ws_delete();
   });
-  ws.onclose = (event) => {
-    console.log("WebSocket connection closed");
-    ws = null;
-    clearTimeout(pingTimeout);
-    pingTimeout = null;
-    document.removeEventListener("keydown", eventKeyInputPong);
-    document.removeEventListener("keyup", eventKeyInputPong);
-  };
   ws.onerror = (error) => {
     console.error("WebSocket error:", error);
   };
@@ -77,6 +67,7 @@ export function ws_connect(game_id: string) {
   ws.addEventListener("message", (event) => {
     ws_message_pong(event.target as WebSocket, event.data.toString());
   });
+  ws.addEventListener("message", ws_join);
 }
 
 self["ws_connect"] = ws_connect;
@@ -94,30 +85,43 @@ function ws_message_pong(ws: WebSocket, message: string) {
   pingTimeout = setTimeout(() => ws_ping(), ping_time);
 }
 
+function ws_join(event: MessageEvent) {
+  const message = JSON.parse(event.data) as MessageType;
+
+  if (message.type !== "join") return;
+
+  if (message.status === true) {
+    if (goToURL("netplay", true) === false) return;
+    function if_netplay(ev: PopStateEvent) {
+      (ev) => {
+        if (location.pathname !== "/netplay") ws_delete();
+        else self.addEventListener("popstate", if_netplay, { once: true });
+      };
+    }
+
+    self.addEventListener("popstate", if_netplay, { once: true });
+    try {
+      display = new PongDisplay();
+    } catch {}
+  }
+  ws.addEventListener("message", (event) => {
+    ws_message_update(event.target as WebSocket, event.data.toString());
+  });
+  event.target.removeEventListener("message", ws_join);
+}
+
 function ws_message_update(ws: WebSocket, message: string) {
   const messageObject = JSON.parse(message) as MessageType;
   if (messageObject.type !== "update") return;
-
-  if (display === undefined) display = new PongDisplay();
-  display.update(messageObject.payload);
+  try {
+    if (display === undefined) display = new PongDisplay();
+    display.update(messageObject.payload);
+  } catch {}
 }
 
 function ws_message(event) {
   let message = JSON.parse(event.data.toString()) as MessageType;
-
-  switch (message.type) {
-    case "join":
-      {
-        // if (message.message == "ok")
-        //   goToURL("netplay").then(() => display = new PongDisplay());
-        ws.addEventListener("message", (event) => {
-          ws_message_update(event.target as WebSocket, event.data.toString());
-        });
-        console.log(message);
-      }
-      break;
-      break;
-  }
+  console.log("message:", message);
 }
 
 function ws_ping() {
@@ -133,5 +137,3 @@ function ws_disconnect() {
     ws = null;
   }
 }
-
-connect_remote_play("000");

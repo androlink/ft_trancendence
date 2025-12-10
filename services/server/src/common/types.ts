@@ -29,6 +29,7 @@ export enum TypeMessage {
   serverMessage = "serverMessage",
   connection = "connection",
   invite = "invite",
+  replyInvite = "replyInvite",
   ping = "ping",
   pong = "pong",
 }
@@ -41,10 +42,31 @@ export enum TypeMessage {
  * @param content Content of the message if is necessary [optional]
  * @param msgId Id of the message (for direct message)
  */
-export interface WSmessage {
-  type: TypeMessage;
-  user: string;
-  target?: string;
-  content?: string;
-  msgId: string;
-}
+export type WSmessage =
+  | {
+      type: TypeMessage;
+      user: string;
+      target?: string;
+      content?: string;
+      msgId: string;
+    }
+  | {
+      type: TypeMessage.replyInvite;
+      status: true;
+      room_id: string;
+      sender: string;
+      target: string;
+    }
+  | {
+      type: TypeMessage.replyInvite;
+      status: false;
+      reason: string;
+    };
+
+export type InternalCreateRequestBody = {
+  player1: Id;
+  player2: Id;
+};
+export type InternalCreateResponse =
+  | { status: false; reason: string }
+  | { status: true; room_id: string; player1: string; player2: string };

@@ -11,20 +11,26 @@ export default async function createRoute(fastify: FastifyInstance) {
   fastify.post<{ Body: { player1: Id; player2: Id } }>(
     "/create",
     async (req, reply) => {
-      if (req.body === undefined) return reply.code(400).send("");
+      if (req.body === undefined)
+        return reply.send({ status: false, reason: "body not found" });
       const body = JSON.parse(req.body as unknown as string);
       console.log(body);
       console.log(body.player1);
       console.log(body.player2);
       const ids = [body.player1, body.player2];
       console.log("ids", ids);
-      if (body.player1 === body.player2) return reply.code(400).send("");
+      if (body.player1 === body.player2)
+        return reply.send({
+          status: false,
+          reason: "you cannot play with yourself",
+        });
       let party = pong_party_create(ids);
-      if (party === null) return reply.code(500).send("");
-      console.log(`new party id: ${party.getId()}`);
-      return reply.code(200).send(
+      if (party.status === false) return reply.send(party);
+      console.log(`new party id: ${party.room_id}`);
+      return reply.send(
         JSON.stringify({
-          game_id: party.getId(),
+          status: true,
+          room_id: party.room_id,
           player1: body.player1,
           player2: body.player2,
         })

@@ -1,3 +1,4 @@
+import { join_party, ws_connect } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
 // WEBSOCKET
@@ -12,6 +13,7 @@ enum TypeMessage {
   serverMessage = "serverMessage",
   connection = "connection",
   invite = "invite",
+  replyInvite = "replyInvite",
   ping = "ping",
   pong = "pong",
 }
@@ -24,13 +26,27 @@ enum TypeMessage {
  * @param content Content of the message if is necessary [optional]
  * @param msgId Id of the message (for direct message)
  */
-interface WSmessage {
-  type: TypeMessage;
-  user: string;
-  target?: string;
-  content?: string;
-  msgId: string;
-}
+type WSmessage =
+  | {
+      type: TypeMessage.replyInvite;
+      status: true;
+      room_id: string;
+      sender: string;
+      target: string;
+    }
+  | {
+      type: TypeMessage.replyInvite;
+      status: false;
+      reason: string;
+    }
+  | {
+      type: TypeMessage;
+      user: string;
+      target?: string;
+      content?: string;
+      msgId: string;
+    };
+
 let lastPong: number;
 
 function GenerateRandomId(): string {
@@ -45,6 +61,37 @@ function retryConnection(): void {
   console.log("Retry chat connection");
   setTimeout(WSconnect, reconnectTimeout);
   reconnectTimeout = Math.min(reconnectTimeout * 2, 10000);
+}
+
+function invite_message(event: MessageEvent) {
+  const message = JSON.parse(event.data) as WSmessage;
+
+  if (message.type !== TypeMessage.replyInvite) return;
+
+  const chat = document.getElementById("chat-content");
+  if (!chat) {
+    console.error(
+      `message '${message}' not sent to the chat because the chat is not found`
+    );
+    return false;
+  }
+  const para = document.createElement("p");
+  if (message.status === false) {
+    const node = document.createTextNode(message.reason);
+    para.appendChild(node);
+  } else {
+    const userLink = document.createElement("span");
+    userLink.textContent = `${message.sender}:`;
+    const playButton = document.createElement("button");
+    playButton.textContent = "join party";
+    playButton.onclick = () => {
+      join_party(message.room_id);
+    };
+    para.appendChild(userLink);
+    para.appendChild(playButton);
+  }
+
+  chat.appendChild(para);
 }
 
 /**
@@ -66,6 +113,8 @@ function WSconnect(): void {
   ws.onclose = retryConnection;
 
   ws.onerror = () => ws.close();
+
+  ws.addEventListener("message", (event) => invite_message(event));
 
   //receive msg from back and show on chat
   ws.addEventListener("message", (event) => {

@@ -32,6 +32,7 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
   if (!room_id) return ws.close(3001, `room ${payload.room_id} not found`);
   if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false)
     return ws.close(3002, "cannot join game");
+  return ws.send(JSON.stringify({ type: "join", status: true }));
 }
 
 async function ws_message_join(ws: WebSocket, message: string) {

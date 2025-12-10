@@ -13,10 +13,10 @@ import { InitConnectionChat, sendStatusMessage } from "./chat.js";
  * @param force go to the page even if already on it, default to false
  * @returns true if main() is triggered, meaning the function was used
  */
-export async function goToURL(
+export function goToURL(
   nextURL: string = "profile",
   force: boolean = false
-): Promise<boolean> {
+): boolean {
   if (arguments.length > 2) {
     throw new SyntaxError("expected 0 to 2 argument");
   }
