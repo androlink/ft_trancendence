@@ -153,18 +153,18 @@ const htmlSnippetsTemplate:  {
     </div>
     <div class="w-full flex justify-center">
       <div class="bg-center w-175 h-25 rounded-2xl shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
-        <div class="size-full grid grid-cols-3 justify-items-stretch">
-          <div class="flex grid-cols-3 my-auto justify-self-auto">
-            <div class="text-2xl text-white font-bold ">RATIO<br>Victoire</div>
-            <div class="text-shadow-amber-200 font-bold">100%</div>
+        <div class="size-full grid grid-cols-3 mx-1 justify-items-stretch">
+          <div class="grid grid-cols-3 border-r-2 *:my-auto">
+            <div class="text-white font-bold text-2xl text-center">RATIO<br>Victoire</div>
+            <div class="text-amber-200 font-bold text-5xl text-center col-start-2 col-span-2">100%</div>
           </div>
-          <div class="flex grid-cols-3 border-x border-white my-auto justify-self-auto">
-            <div class="text-white font-bold text-2xl text-center">PARTIE<br>Gagner</div>
-            <div class="text-shadow-amber-200 text-5xl font-bold">6969</div>
+          <div class="grid grid-cols-3 *:my-auto">
+            <div class="text-white font-bold text-2xl text-center">PARTIE<br>Gagne</div>
+            <div class="text-[#96DF9F] font-bold text-5xl text-center col-start-2 col-span-2">6969</div>
           </div>
-          <div class="flex grid-cols-3 my-auto justify-self-auto">
+          <div class="grid grid-cols-3 border-l-2 *:my-auto">
             <div class="text-white font-bold text-2xl text-center">PARTIE<br>Perdue</div>
-            <div class="text-shadow-amber-200 font-bold">100%</div>
+            <div class="text-[#DF9696] font-bold text-5xl text-center col-start-2 col-span-2 ">-1</div>
           </div>
         </div>
       </div>
