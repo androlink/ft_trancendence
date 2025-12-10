@@ -86,7 +86,9 @@ class PongEngine extends EventTarget {
   }
 
   private start() {
-    this.players.forEach((p) => {});
+    this.players.forEach((p) => {
+      if (p.ws) p.ws.onclose = null;
+    });
     if (this.intervalId !== undefined) this.stop();
     this.intervalId = setInterval(() => {
       this.tick();
@@ -148,7 +150,7 @@ class PongEngine extends EventTarget {
       }
 
     if (
-      this.players.every((p) => {
+      !this.players.every((p) => {
         return p.ready === "HERE";
       })
     ) {
@@ -267,6 +269,9 @@ class PongEngine extends EventTarget {
     this.addEventListener("abort", () => {
       ws.close();
     });
+    ws.onclose = () => {
+      this.abort();
+    };
     this.resetStartTimeout();
     if (this.players.every((p) => p.ready === "HERE")) this.start();
     return true;
@@ -288,10 +293,10 @@ function set_player_event(ws: GameWebSocket, player: PlayerEntity): void {
     const messageObject = JSON.parse(event.data.toString()) as MessageType;
     if (messageObject.type !== "input") return;
 
-    if (messageObject.payload == "pressDown") player.down = true;
-    if (messageObject.payload == "releaseDown") player.down = false;
-    if (messageObject.payload == "pressUp") player.up = true;
-    if (messageObject.payload == "releaseUp") player.up = false;
+    if (messageObject.input == "pressDown") player.down = true;
+    if (messageObject.input == "releaseDown") player.down = false;
+    if (messageObject.input == "pressUp") player.up = true;
+    if (messageObject.input == "releaseUp") player.up = false;
   });
 
   ws.addEventListener("close", () => {
