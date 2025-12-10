@@ -40,7 +40,7 @@ const htmlSnippetsTemplate:  {
   <div class="transform-none">
     <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
   </div>
-  <span id="inner-buttons" class="flex gap-x-2 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded *:data-checked:text-white *:data-checked:bg-gray-500 *:bg-gray-700 *:text-gray-300">
+  <span id="inner-buttons" class="flex gap-x-0.5 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded-t *:data-checked:text-white *:data-checked:bg-[#1E244E] *:bg-[#1b1e38] *:text-gray-300">
     <div onclick="goToURL( )" name="">pdf</div>
     <div onclick="goToURL('game')" name="game">[[game]]</div>    
     <div onclick="goToURL('blank')" name="blank">debug</div>
@@ -48,7 +48,7 @@ const htmlSnippetsTemplate:  {
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
   </span>
-  <span class=" flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 mt-4 select-none drop-shadow-xl/50">
+  <span class=" flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 select-none drop-shadow-xl/50">
     <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
     <div class="h-full flex flex-col overflow-hidden">
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
@@ -59,13 +59,13 @@ const htmlSnippetsTemplate:  {
         <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[login page]]</button>
       </div>
       <div class="rounded-md size-full bg-[#E9E9E9] flex flex-col">
-        <div id="chat-content" class="overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
+        <div id="chat-content" class=" overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
         <div class="mx-4 mb-4 flex bg-white rounded ">
-          <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 resize-none" maxlength="280"></textarea>
+          <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="Envoyer un message" maxlength="280"></textarea>
           <img
             src="${assetsPath}/send-icon.png"
             onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
-            class="mx-2 justify-items-end self-center select-none invert-50 hover:invert-0 size-10 cursor-pointer"
+            class="mx-2 justify-items-end self-center select-none hover: size-10 cursor-pointer"
             draggable="false"
           ></img>
         </div>
@@ -130,7 +130,7 @@ const htmlSnippetsTemplate:  {
       <div class="flex flex-col justify-start h-60">
         <h1 class="text-white text-6xl mt-10 mb-4 select-text font-Hammer" id="username-p2"></h1>
         <p class="text-white mb-1">[[biography]]:</p>
-        <p class="w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text" id="biography-p2"></p>
+        <p class=" flex w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text" id="biography-p2"></p>
       </div>
       <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin" onclick="main(true)"/>
     </header>
@@ -152,27 +152,28 @@ const htmlSnippetsTemplate:  {
       <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
     </div>
     <div class="w-full flex justify-center">
-      <div class="bg-center w-175 h-25 rounded-2xl shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
+      <div class="bg-center w-175 h-25 rounded-2xl py-3 shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
         <div class="size-full grid grid-cols-3 mx-1 justify-items-stretch">
-          <div class="grid grid-cols-3 border-r-2 *:my-auto">
+          <div class="grid grid-cols-3 px-3 border-r-2 border-gray-200 *:my-auto">
             <div class="text-white font-bold text-2xl text-center">RATIO<br>Victoire</div>
-            <div class="text-amber-200 font-bold text-5xl text-center col-start-2 col-span-2">100%</div>
+            <div id="ratio" class="text-amber-200 font-bold text-4xl text-center col-start-2 col-span-2"></div>
           </div>
-          <div class="grid grid-cols-3 *:my-auto">
+          <div class="grid grid-cols-3 px-3 *:my-auto">
             <div class="text-white font-bold text-2xl text-center">PARTIE<br>Gagne</div>
-            <div class="text-[#96DF9F] font-bold text-5xl text-center col-start-2 col-span-2">6969</div>
+            <div id="wins" class="text-[#96DF9F] font-bold text-4xl text-center col-start-2 col-span-2"></div>
           </div>
-          <div class="grid grid-cols-3 border-l-2 *:my-auto">
+          <div class="grid grid-cols-3 px-3  border-l-2 border-gray-200 *:my-auto">
             <div class="text-white font-bold text-2xl text-center">PARTIE<br>Perdue</div>
-            <div class="text-[#DF9696] font-bold text-5xl text-center col-start-2 col-span-2 ">-1</div>
+            <div id="loses" class="text-[#DF9696] font-bold text-4xl text-center col-start-2 col-span-2 "></div>
           </div>
         </div>
       </div>
     </div>
     <!--
     <p class="text-white -ml-2">[[biography]]:</p>
-    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-1 overflow-y-auto" id="biography-p2"></p>
+    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-3 overflow-y-auto" id="biography-p2"></p>
     -->
+    <!--
     <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
       <caption class="caption-bottom">[[remote counter]]</caption>
       <thead>
@@ -190,6 +191,7 @@ const htmlSnippetsTemplate:  {
         </tr>
       </tbody>
     </table>
+    -->
     <script>
       loadGameHistory();
       document.currentScript?.remove();

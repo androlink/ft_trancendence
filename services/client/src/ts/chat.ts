@@ -144,7 +144,7 @@ function showMessageToChat(message: WSmessage): boolean {
   const para = document.createElement("p");
   const userLink = document.createElement("span");
   const node = document.createTextNode(message.content);
-  para.className = "";
+  para.className = "**:text-justify";
 
   switch (message.type) {
     case TypeMessage.message:
@@ -154,7 +154,7 @@ function showMessageToChat(message: WSmessage): boolean {
       };
       userLink.textContent = `${message.user}:`;
       userLink.className +=
-        "text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ";
+        "text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer break-keep ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -166,7 +166,7 @@ function showMessageToChat(message: WSmessage): boolean {
       };
       userLink.textContent = `${message.user}:`;
       userLink.className +=
-        "text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ";
+        "text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer break-keep ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -178,7 +178,7 @@ function showMessageToChat(message: WSmessage): boolean {
       };
       userLink.textContent = `${message.user}:`;
       userLink.className +=
-        "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ";
+        "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer break-keep  ";
       para.appendChild(userLink);
       para.appendChild(node);
 
