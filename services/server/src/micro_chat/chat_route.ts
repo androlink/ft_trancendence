@@ -1,10 +1,10 @@
-import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import { WebSocket, WebsocketHandler } from "@fastify/websocket";
-import db from "./database";
 import Database from "better-sqlite3";
-import { Id, WSmessage, TypeMessage } from "./types";
-import { Data } from "ws";
+
+import { Id, WSmessage, TypeMessage } from "../common/types";
+import db from "../common/database";
+import { fastify } from "./main";
 
 /**
  * Class client
@@ -429,7 +429,7 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
 }
 
 // "main" live chat
-export default function liveChat(fastify: FastifyInstance) {
+export default async function apiChat(fastify: FastifyInstance) {
   dbQuery = {
     getUserById: db.prepare<{ userId: Id }, { username: string }>(
       "SELECT username FROM users WHERE id = :userId"
@@ -446,7 +446,7 @@ export default function liveChat(fastify: FastifyInstance) {
     waitingConnections.push(ws);
   });
 
-  fastify.get("/api/chat", { websocket: true }, (connection: WebSocket) => {
+  fastify.get("/chat", { websocket: true }, (connection: WebSocket) => {
     connection.on("close", (client: WebSocket) => {
       waitingConnections.splice(waitingConnections.indexOf(client), 1);
     });

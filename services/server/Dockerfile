@@ -6,8 +6,8 @@ RUN npm install
 EXPOSE 3000
 
 FROM base AS dev
-CMD ["npm", "run", "dev"]
+ENTRYPOINT ["npm", "run"]
 
 FROM base AS prod
 COPY src/.  src
-CMD ["npm", "run", "prod"]
+ENTRYPOINT ["npm", "run"]
