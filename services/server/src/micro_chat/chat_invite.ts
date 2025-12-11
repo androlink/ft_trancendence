@@ -35,7 +35,7 @@ function get_player(
       { user1: Id; user2: Id },
       { blocker_id: Id; blocked_id: Id }
     >(
-      "SELECT * FROM user_blocks WHERE blocker_id = :user1 AND blocked_id = :user2;"
+      "SELECT * FROM user_blocks WHERE blocker_id = :user2 AND blocked_id = :user1;"
     );
     const sender: { id: Id } | null = fastify.jwt.decode(token);
     if (sender === null) return { status: false, reason: "not connected" };
@@ -47,7 +47,7 @@ function get_player(
       user1: player1.id,
       user2: player2.id,
     });
-    if (is_blocked === undefined)
+    if (is_blocked !== undefined)
       return { status: false, reason: "can't find players" };
     return { status: true, player1, player2 };
   } catch (e) {

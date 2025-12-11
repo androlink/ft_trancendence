@@ -74,7 +74,7 @@ function pong_party_finish(game_id: string) {
       : p
           .getPlayerId()
           .map((_) => {
-            _;
+            return _;
           })
           .reverse();
   if (winner === undefined || loser === undefined) return;
