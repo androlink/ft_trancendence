@@ -43,6 +43,7 @@
   "right": "on the right",
   "difficulty": "difficulty 1 to 4",
   "wall": "wall",
+  "error occured": "Error [[0]] occured. Try again or contact geymat, gcros or sjean",
   "launch game": "launch the game",
   "tournament": "tournament",
   "congrats": "congrats to [[0]], who won the tournament",

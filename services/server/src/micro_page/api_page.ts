@@ -127,16 +127,24 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
     const statement1 = db.prepare<
       { username: string },
       {
-        bio: string;
-        pfp: string;
         id: Id;
         username: string;
+        bio: string;
+        pfp: string;
         wins: number;
         losses: number;
+        draws: number;
       }
-    >(
-      "SELECT u.bio, u.pfp, u.username, u.id, (SELECT COUNT(*) FROM history_game WHERE winner = u.id) AS wins, (SELECT COUNT(*) FROM history_game WHERE loser = u.id) AS losses FROM users u WHERE lower(username) = lower(:username)"
-    );
+    >(`SELECT
+          u.id,
+          u.username,
+          u.bio,
+          u.pfp,
+          (SELECT COUNT(*) FROM history_game WHERE player_one = u.id AND result_type = 'win' OR player_two = u.id AND result_type = 'loss') AS wins,
+          (SELECT COUNT(*) FROM history_game WHERE player_two = u.id AND result_type = 'win' OR player_one = u.id AND result_type = 'loss') as losses,
+          (SELECT COUNT(*) FROM history_game WHERE (player_one = u.id OR player_two = u.id) AND result_type = 'draw') AS draws 
+        FROM users u 
+        WHERE lower(username) = lower(:username)`);
     /** see if they are blocked */
     const statement2 = db.prepare<{ requesterId: Id; targetId: Id }, { 1: 1 }>(
       "SELECT 1 FROM user_blocks WHERE blocker_id = :requesterId AND blocked_id = :targetId"
@@ -212,7 +220,8 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
             "friend request": friend,
             "blocking request": block,
             wins: String(row.wins),
-            loses: String(row.losses),
+            losses: String(row.losses),
+            draws: String(row.draws),
             ratio: row.losses
               ? String((row.wins / row.losses).toFixed(2))
               : "¯\\_(ツ)_/¯",

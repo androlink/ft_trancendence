@@ -84,8 +84,9 @@ export async function initDB() {
       CREATE TABLE history_game (
         game INTEGER PRIMARY KEY AUTOINCREMENT,
         time DATETIME NOT NULL DEFAULT(DATETIME('now')),
-        winner INTEGER NOT NULL,
-        loser INTEGER NOT NULL
+        player_one INTEGER NOT NULL,
+        player_two INTEGER NOT NULL,
+        result_type TEXT NOT NULL DEFAULT 'win' CHECK (result_type IN ('win', 'loss', 'draw'))
       );
       `);
     db.prepare(

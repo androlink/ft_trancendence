@@ -3,7 +3,7 @@
 
 import { resetNextInner } from "../app.js";
 import { encodeURIUsername, goToURL } from "../utils.js";
-import { assetsPath, findLanguage } from "./templates.js";
+import { assetsPath, findLanguage, selectLanguage } from "./templates.js";
 
 /**
  * will try to load a game history if a player when whatching their profile
@@ -88,6 +88,12 @@ async function loadFriendsDisplay(): Promise<void> {
     const res = await fetch(`/api/misc/friends${location.search}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
+    if (res.status != 200) {
+      if (grid) {
+        if (grid.firstElementChild) grid.firstElementChild.textContent = selectLanguage(["error occured", String(res.status)]);
+      }
+      return ;
+    }
     const json = await res.json();
     if (json[0] <= 16 * (page - 1)) {
       page = Math.floor(json[0] / 16) + 1;

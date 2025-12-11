@@ -44,6 +44,7 @@
   "left": "de gauche",
   "right": "de droite",
   "difficulty": "difficulté de 1 à 4",
+  "error occured": "Une erreur [[0]] s'est produite. Recommencez ou contactez geymat, sjean ou gcros",
   "wall": "mur",
   "launch game": "lancer la partie",
   "tournament": "tournoi",

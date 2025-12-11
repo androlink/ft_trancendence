@@ -47,6 +47,7 @@
   "tournament": "torneo",
   "game winner": "triunfador: [[0]], Perdedor: [[1]]",
   "game winner tournament": "triunfador: [[0]], Perdedor: [[1]].\n[[0]] se quedará en el torneo",
+  "error occured": "Se ha producido un error [[0]]. Inténtalo de nuevo o contacta con geymat, sjean o gcros",
   "congrats": "¡Felicitaciones a [[0]] que ganó el torneo!",
   "sarcastic": "¡Guau! ¡Cero victorias [[0]], qué ganador!",
   "classic": "clásico juego",
