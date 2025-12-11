@@ -14,13 +14,7 @@ import {
   paddle_width,
 } from "./engine_variables";
 import { containsBetween } from "./engine_utils";
-import { pong_party_delete } from "../pong_party";
-import { get } from "http";
-import { GameWebSocket, MessageType } from "../local_type";
-
-interface GlobalEventHandlersEventMap {
-  build: CustomEvent<number>;
-}
+import { GameWebSocket, PongMessageType } from "../local_type";
 
 export { PongEngine };
 /**
@@ -28,7 +22,7 @@ export { PongEngine };
  *
  */
 
-export const abortTime = 1000 * 60 * 0.5; // 3 minutes
+export const abortTime = 1000 * 60 * 3; // 3 minutes
 
 class PongEngine extends EventTarget {
   private id: string;
@@ -294,7 +288,7 @@ class PongEngine extends EventTarget {
 
 function set_player_event(ws: GameWebSocket, player: PlayerEntity): void {
   ws.addEventListener("message", (event) => {
-    const messageObject = JSON.parse(event.data.toString()) as MessageType;
+    const messageObject = JSON.parse(event.data.toString()) as PongMessageType;
     if (messageObject.type !== "input") return;
 
     if (messageObject.input == "pressDown") player.down = true;

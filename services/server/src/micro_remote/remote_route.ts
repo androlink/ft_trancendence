@@ -6,7 +6,7 @@ import "@fastify/websocket";
 import WebSocket from "ws";
 
 import { Id } from "../common/types.ts";
-import { GameWebSocket, JoinType, MessageType } from "./local_type.ts";
+import { GameWebSocket, JoinType, PongMessageType } from "./local_type.ts";
 
 import {
   pong_party_add_player,
@@ -37,7 +37,7 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
 
 async function ws_message_join(ws: WebSocket, message: string) {
   try {
-    const messageObject = JSON.parse(message) as MessageType;
+    const messageObject = JSON.parse(message) as PongMessageType;
     if (messageObject.type !== "join") return;
 
     await ws_join(ws, messageObject.payload);
@@ -47,7 +47,7 @@ async function ws_message_join(ws: WebSocket, message: string) {
 }
 
 async function ws_message_ping(ws: WebSocket, message: string) {
-  const messageObject = JSON.parse(message) as MessageType;
+  const messageObject = JSON.parse(message) as PongMessageType;
   if (messageObject.type !== "ping") return;
 
   return ws.send(

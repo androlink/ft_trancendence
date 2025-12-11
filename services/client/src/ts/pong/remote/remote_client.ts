@@ -1,10 +1,14 @@
 import { PongDisplay } from "../display.js";
 import { goToURL } from "../../utils.js";
+import { DataFrame } from "../engine/engine_interfaces.js";
 
 let pingTimeout: ReturnType<typeof setTimeout> | null = null;
 const ping_time = 5000;
 
-export type MessageType = { type: string; payload: any };
+export type PongMessageType =
+  | { type: "pong"; payload: number }
+  | { type: "join"; status: boolean }
+  | { type: "update"; payload: DataFrame };
 
 let ws: WebSocket;
 let display: PongDisplay;
@@ -73,7 +77,7 @@ function ws_connect(game_id: string) {
 self["ws_connect"] = ws_connect;
 
 function ws_message_pong(ws: WebSocket, message: string) {
-  const messageObject = JSON.parse(message) as MessageType;
+  const messageObject = JSON.parse(message) as PongMessageType;
   if (messageObject.type !== "pong") return;
 
   let ping_id: number = messageObject.payload;
@@ -86,7 +90,7 @@ function ws_message_pong(ws: WebSocket, message: string) {
 }
 
 function ws_join(event: MessageEvent) {
-  const message = JSON.parse(event.data) as MessageType;
+  const message = JSON.parse(event.data) as PongMessageType;
 
   if (message.type !== "join") return;
 
@@ -111,7 +115,7 @@ function ws_join(event: MessageEvent) {
 }
 
 function ws_message_update(ws: WebSocket, message: string) {
-  const messageObject = JSON.parse(message) as MessageType;
+  const messageObject = JSON.parse(message) as PongMessageType;
   if (messageObject.type !== "update") return;
   try {
     if (display === undefined) display = new PongDisplay();
@@ -120,7 +124,7 @@ function ws_message_update(ws: WebSocket, message: string) {
 }
 
 function ws_message(event) {
-  let message = JSON.parse(event.data.toString()) as MessageType;
+  let message = JSON.parse(event.data.toString()) as PongMessageType;
   console.log("message:", message);
 }
 

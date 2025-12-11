@@ -1,4 +1,4 @@
-import { GameWebSocket, MessageType } from "./local_type";
+import { GameWebSocket, PongMessageType } from "./local_type";
 import { Id, UserRow } from "../common/types";
 import db from "../common/database";
 import { WebSocket } from "ws";
