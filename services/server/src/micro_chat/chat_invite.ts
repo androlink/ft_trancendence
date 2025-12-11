@@ -25,7 +25,7 @@ function get_player(
   | { status: false; reason: string } {
   try {
     const get_user_from_name = db.prepare<{ username: string }, UserRow>(
-      "SELECT * FROM users WHERE username = :username"
+      "SELECT * FROM users WHERE lower(username) = lower(:username)"
     );
     const get_user_from_id = db.prepare<{ id: Id }, UserRow>(
       "SELECT * FROM users WHERE id = :id"

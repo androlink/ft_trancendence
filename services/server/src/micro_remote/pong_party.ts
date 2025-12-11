@@ -70,19 +70,15 @@ function pong_party_finish(game_id: string) {
 
   const [winner, loser] =
     scores[0] > scores[1]
-      ? p.getPlayerId()
-      : p
-          .getPlayerId()
-          .map((_) => {
-            return _;
-          })
-          .reverse();
-  if (winner === undefined || loser === undefined) return;
-  //const loser = 0;
-  let statement = db.prepare(
-    "INSERT INTO history_game (winner, loser) VALUES (?,?);"
-  );
-  statement.run(winner, loser);
+      ? p.getPlayerId().slice(0)
+      : p.getPlayerId().slice(0).reverse();
+  if (!(winner === undefined || loser === undefined)) {
+    //const loser = 0;
+    let statement = db.prepare(
+      "INSERT INTO history_game (winner, loser) VALUES (?,?);"
+    );
+    statement.run(winner, loser);
+  }
   pong_party_delete(game_id);
 }
 
