@@ -40,7 +40,7 @@ const htmlSnippetsTemplate:  {
   <div class="transform-none">
     <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
   </div>
-  <span id="inner-buttons" class="flex gap-x-0.5 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded-t *:data-checked:text-white *:data-checked:bg-[#1E244E] *:bg-[#1b1e38] *:text-gray-300">
+  <span id="inner-buttons" class="flex gap-x-0.5 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded-t *:data-checked:text-white *:data-checked:bg-[#262d5f] *:bg-[#1b1e38] *:text-gray-300">
     <div onclick="goToURL( )" name="">pdf</div>
     <div onclick="goToURL('game')" name="game">[[game]]</div>    
     <div onclick="goToURL('blank')" name="blank">debug</div>
@@ -63,9 +63,9 @@ const htmlSnippetsTemplate:  {
         <div class="mx-4 mb-4 flex bg-white rounded ">
           <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="Envoyer un message" maxlength="280"></textarea>
           <img
-            src="${assetsPath}/send-icon.png"
+            src="${assetsPath}/send-icon.svg"
             onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
-            class="mx-2 justify-items-end self-center select-none hover: size-10 cursor-pointer"
+            class="mx-2 justify-items-end self-center select-none hover:fill-blue-500 size-10 cursor-pointer"
             draggable="false"
           ></img>
         </div>
@@ -121,33 +121,37 @@ const htmlSnippetsTemplate:  {
   `,
   Profile2:
     `
-  <div class="bg-[#1E244E] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
+  <div class="bg-[#262d5f] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
     <header class="w-full flex items-start gap-4">
       <img
         id="profile-picture"
         class="ws-60 h-60 rounded-full aspect-square" src="${assetsPath}/default-avatar.jpg"
       >
       <div class="flex flex-col justify-start h-60">
-        <h1 class="text-white text-6xl mt-10 mb-4 select-text font-Hammer" id="username-p2"></h1>
+        <div class ="flex flex-row *:mt-10 *:mb-4">
+          <h1 class="text-white select-text font-Hammer text-6xl" id="username-p2"></h1>
+          <div class="dropdown px-1">    
+            <style>
+              .dropdown:hover .dropdown-content {display: flex;}
+            </style>
+            <img src="${assetsPath}/menu-vertical.png" class="size-10 cursor-pointer"></img>
+            <div class="dropdown-content rounded-md flex-col absolute z-1 *:whitespace-nowrap hidden size-fit m-2 bg-[#1b1e38] border border-white">
+              <ul class ="*:hover:bg-gray-400 *:rounded-md *:px-1 *:text-gray-200 *:hover:text-white">
+                <li>
+                  <a id="friend request">friend request</a>
+                </li>
+                <li>
+                  <a id="blocking request">block !</a>
+                </li>             
+              </ul>
+            </div>
+          </div>
+        </div>
         <p class="text-white mb-1">[[biography]]:</p>
         <p class=" flex w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text" id="biography-p2"></p>
       </div>
       <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin" onclick="main(true)"/>
     </header>
-    <!--
-    <span class="flex justify-around place-items-center">
-      <style>
-        .dropdown:hover .dropdown-content {display: flex;}
-      </style>
-      <div class="dropdown relative border px-1 rounded">
-        <h1 class="text-white" id="username-p2"></h1>
-        <div class="dropdown-content flex-col absolute z-1 *:whitespace-nowrap hidden size-fit *:px-1 bg-white *:hover:bg-gray-400">
-          <a id="friend request">friend request</a>
-          <a id="blocking request">block !</a>
-        </div>
-      </div>
-    </span>
-    -->
     <div class="transform-none">
       <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
     </div>
