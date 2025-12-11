@@ -24,17 +24,30 @@ function get_player(
   | { status: true; player1: UserRow; player2: UserRow }
   | { status: false; reason: string } {
   try {
-    const get_user_from_name = db?.prepare<{ username: string }, UserRow>(
+    const get_user_from_name = db.prepare<{ username: string }, UserRow>(
       "SELECT * FROM users WHERE username = :username"
     );
-    const get_user_from_id = db?.prepare<{ id: Id }, UserRow>(
+    const get_user_from_id = db.prepare<{ id: Id }, UserRow>(
       "SELECT * FROM users WHERE id = :id"
+    );
+
+    const get_is_user_blocked = db.prepare<
+      { user1: Id; user2: Id },
+      { blocker_id: Id; blocked_id: Id }
+    >(
+      "SELECT * FROM user_blocks WHERE blocker_id = :user1 AND blocked_id = :user2;"
     );
     const sender: { id: Id } | null = fastify.jwt.decode(token);
     if (sender === null) return { status: false, reason: "not connected" };
     const player1 = get_user_from_id.get({ id: sender.id });
     const player2 = get_user_from_name.get({ username: target! });
     if (player2 === undefined || player1 === undefined)
+      return { status: false, reason: "can't find players" };
+    const is_blocked = get_is_user_blocked.get({
+      user1: player1.id,
+      user2: player2.id,
+    });
+    if (is_blocked === undefined)
       return { status: false, reason: "can't find players" };
     return { status: true, player1, player2 };
   } catch (e) {

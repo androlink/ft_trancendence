@@ -79,10 +79,10 @@ function pong_party_finish(game_id: string) {
           .reverse();
   if (winner === undefined || loser === undefined) return;
   //const loser = 0;
-  let statement = db.prepare<{ winner: Id; loser: Id }>(
-    "INSERT INTO history_game winner, loser VALUES :winner,:loser;"
+  let statement = db.prepare(
+    "INSERT INTO history_game (winner, loser) VALUES (?,?);"
   );
-  statement.run({ winner, loser });
+  statement.run(winner, loser);
   pong_party_delete(game_id);
 }
 
