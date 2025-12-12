@@ -1,6 +1,6 @@
-import { PongDisplay } from "../display.js";
 import { goToURL } from "../../utils.js";
 import { DataFrame } from "../engine/engine_interfaces.js";
+import { FrameManager } from "./frameManager.js";
 
 let pingTimeout: ReturnType<typeof setTimeout> | null = null;
 const ping_time = 5000;
@@ -11,7 +11,7 @@ export type PongMessageType =
   | { type: "update"; payload: DataFrame };
 
 let ws: WebSocket;
-let display: PongDisplay;
+let display: FrameManager;
 let last_ping: { id: number; time } = { id: 0, time: 0 };
 let ping_count: number = 0;
 
@@ -35,6 +35,7 @@ function ws_delete() {
   pingTimeout = null;
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
+  display = undefined;
   ws_disconnect();
 }
 
@@ -95,15 +96,15 @@ function ws_join(event: MessageEvent) {
   if (message.type !== "join") return;
 
   if (message.status === true) {
+    goToURL("netplay", true);
     console.log("popstate added");
     self.addEventListener("popstate", ws_delete, { once: true });
-    try {
-      display = new PongDisplay();
-    } catch {}
+
+    ws.addEventListener("message", (event) => {
+      ws_message_update(event.target as WebSocket, event.data.toString());
+    });
+    display = new FrameManager();
   }
-  ws.addEventListener("message", (event) => {
-    ws_message_update(event.target as WebSocket, event.data.toString());
-  });
   event.target.removeEventListener("message", ws_join);
 }
 
@@ -111,7 +112,6 @@ function ws_message_update(ws: WebSocket, message: string) {
   const messageObject = JSON.parse(message) as PongMessageType;
   if (messageObject.type !== "update") return;
   try {
-    if (display === undefined) display = new PongDisplay();
     display.update(messageObject.payload);
   } catch {}
 }

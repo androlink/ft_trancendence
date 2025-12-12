@@ -68,16 +68,15 @@ function pong_party_finish(game_id: string) {
 
   const scores = p.getPlayers().map((p) => p.view.score);
 
-  const [winner, loser] =
-    scores[0] > scores[1]
-      ? p.getPlayerId().slice(0)
-      : p.getPlayerId().slice(0).reverse();
-  if (!(winner === undefined || loser === undefined)) {
+  const [player_one, player_two] = p.getPlayerId().slice(0);
+  const result: "win" | "loss" | "draw" =
+    scores[0] > scores[1] ? "win" : scores[0] < scores[1] ? "loss" : "draw";
+  if (!(player_one === undefined || player_two === undefined)) {
     //const loser = 0;
     let statement = db.prepare(
-      "INSERT INTO history_game (winner, loser) VALUES (?,?);"
+      "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
     );
-    statement.run(winner, loser);
+    statement.run(player_one, player_two, result);
   }
   pong_party_delete(game_id);
 }

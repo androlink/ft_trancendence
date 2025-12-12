@@ -287,7 +287,7 @@ class PongEngine extends EventTarget {
 }
 
 function set_player_event(ws: GameWebSocket, player: PlayerEntity): void {
-  ws.addEventListener("message", (event) => {
+  ws.addEventListener("message", async (event) => {
     const messageObject = JSON.parse(event.data.toString()) as PongMessageType;
     if (messageObject.type !== "input") return;
 
