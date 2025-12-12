@@ -26,12 +26,38 @@ async function authenticate(token: string): Promise<Id | null> {
 
 async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
   const id = await authenticate(payload.token || "");
-  if (id === null) return ws.close(3000, "token not found");
+  if (id === null) {
+    ws.send(
+      JSON.stringify({
+        type: "join",
+        status: false,
+        reason: "you are not connected",
+      })
+    );
+    return ws.close(3000, "you are not connected");
+  }
   (ws as GameWebSocket).id = id;
   const room_id = payload.room_id;
-  if (!room_id) return ws.close(3001, `room ${payload.room_id} not found`);
-  if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false)
+  if (!room_id) {
+    ws.send(
+      JSON.stringify({
+        type: "join",
+        status: false,
+        reason: `room ${payload.room_id} not found`,
+      })
+    );
+    return ws.close(3001, `room ${payload.room_id} not found`);
+  }
+  if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false) {
+    ws.send(
+      JSON.stringify({
+        type: "join",
+        status: false,
+        reason: "cannot join game",
+      })
+    );
     return ws.close(3002, "cannot join game");
+  }
   return ws.send(JSON.stringify({ type: "join", status: true }));
 }
 

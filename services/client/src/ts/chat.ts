@@ -92,6 +92,8 @@ function invite_message(event: MessageEvent) {
   }
 
   chat.appendChild(para);
+  if (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1)
+    chat.scrollTop = chat.scrollHeight;
 }
 
 /**
@@ -191,6 +193,8 @@ function showMessageToChat(message: WSmessage): boolean {
   }
   // true if at the end of the chat
   let scroll = chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1;
+
+  if (message.type === TypeMessage.replyInvite) return;
 
   const para = document.createElement("p");
   const userLink = document.createElement("span");

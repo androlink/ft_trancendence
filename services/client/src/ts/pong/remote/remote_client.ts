@@ -7,7 +7,8 @@ const ping_time = 5000;
 
 export type PongMessageType =
   | { type: "pong"; payload: number }
-  | { type: "join"; status: boolean }
+  | { type: "join"; status: true }
+  | { type: "join"; status: false; reason: string }
   | { type: "update"; payload: DataFrame };
 
 let ws: WebSocket;
@@ -104,8 +105,24 @@ function ws_join(event: MessageEvent) {
       ws_message_update(event.target as WebSocket, event.data.toString());
     });
     display = new FrameManager();
+  } else {
+    show_join_message_error(message.reason);
   }
   event.target.removeEventListener("message", ws_join);
+}
+
+function show_join_message_error(message: string) {
+  const chat = document.getElementById("chat-content");
+  if (!chat) {
+    console.error(
+      `message '${message}' not sent to the chat because the chat is not found`
+    );
+    return false;
+  }
+  const para = document.createElement("p");
+  const node = document.createTextNode(message);
+  para.appendChild(node);
+  chat.appendChild(para);
 }
 
 function ws_message_update(ws: WebSocket, message: string) {
