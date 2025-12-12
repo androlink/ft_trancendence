@@ -1,4 +1,4 @@
-import { join_party, ws_connect } from "./pong/remote/remote_client.js";
+import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
 // WEBSOCKET
@@ -40,7 +40,7 @@ type WSmessage =
       reason: string;
     }
   | {
-      type: TypeMessage;
+      type: Exclude<TypeMessage, TypeMessage.replyInvite>;
       user: string;
       target?: string;
       content?: string;
