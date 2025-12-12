@@ -95,15 +95,8 @@ function ws_join(event: MessageEvent) {
   if (message.type !== "join") return;
 
   if (message.status === true) {
-    if (goToURL("netplay", true) === false) return;
-    function if_netplay(ev: PopStateEvent) {
-      (ev) => {
-        if (location.pathname !== "/netplay") ws_delete();
-        else self.addEventListener("popstate", if_netplay, { once: true });
-      };
-    }
-
-    self.addEventListener("popstate", if_netplay, { once: true });
+    console.log("popstate added");
+    self.addEventListener("popstate", ws_delete, { once: true });
     try {
       display = new PongDisplay();
     } catch {}

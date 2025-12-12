@@ -49,6 +49,7 @@ export async function initDB() {
     if (tableExists.get("users")) {
       return;
     }
+    console.log("DataBase not found");
     fs.unlink(dbLogFile, () => {});
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (
@@ -92,6 +93,7 @@ export async function initDB() {
     db.prepare(
       "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
     ).run("AllMighty", AllMightyPasswordHashed, "ADMIN", 1);
+    console.log("DataBase created");
   });
   try {
     createDB.exclusive();

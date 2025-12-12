@@ -38,7 +38,8 @@ function get_player(
       "SELECT * FROM user_blocks WHERE blocker_id = :user2 AND blocked_id = :user1;"
     );
     const sender: { id: Id } | null = fastify.jwt.decode(token);
-    if (sender === null) return { status: false, reason: "not connected" };
+    if (sender === null)
+      return { status: false, reason: "you are not connected" };
     const player1 = get_user_from_id.get({ id: sender.id });
     const player2 = get_user_from_name.get({ username: target! });
     if (player2 === undefined || player1 === undefined)
@@ -51,7 +52,7 @@ function get_player(
       return { status: false, reason: "can't find players" };
     return { status: true, player1, player2 };
   } catch (e) {
-    return { status: false, reason: "invalid token" };
+    return { status: false, reason: "you are not connected" };
   }
 }
 
@@ -76,6 +77,7 @@ async function get_party(players: {
 
     return result;
   } catch (e) {
+    console.error("get_party:", e);
     return null;
   }
 }
