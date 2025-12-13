@@ -32,28 +32,20 @@ function loadGameHistory(): void {
           "rounded-2xl border border-gray-200 p-3 bg-[#1E244F] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
         for (let result of ["winner", "loser"]) {
           const d = document.createElement("div");
-          const span = document.createElement("span");
-          const img = document.createElement("img");
-          img.className = "size-8 aspect-square rounded-full";
-          fetch(`/misc/users?start=${game[result]}`)
-            .then((res) => res.json())
-            .then((json) => {
-              console.log(json);
-              if (!json.length) return (img.src = "/resources/pfp/default.jpg");
-              img.src = "/resources/pfp/" + json[0].pfp;
-              console.log(img.src);
-            });
-          d.append(img);
           d.className =
             "cursor-pointer flex flex-row items-center justify-center gap-2 hover:text-bold";
+          const span = document.createElement("span");
           if (game[result] === null) {
             span.textContent = findLanguage("deleted");
             span.className = "text-red-300 cursor-not-allowed";
             d.append(span);
             div.append(d);
-            fragment.appendChild(div);
             continue;
           }
+          const img = document.createElement("img");
+          img.className = "size-8 aspect-square rounded-full";
+          img.src = `/resources/pfp/${game[result + "_pfp"]}`;
+          d.append(img);
           if (game[result] !== username) {
             span.className = "text-white hover:text-bold";
             span.addEventListener("click", () =>
@@ -71,10 +63,10 @@ function loadGameHistory(): void {
         d.className = "flex items-center justify-center";
         span.className = "text-white";
         const time = new Date(game.time);
-        span.textContent = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${time.getDate()}/${
+        span.textContent = `${time.getHours()}:${time.getMinutes()} ${time.getDate()}/${
           time.getMonth() + 1
         }/${time.getFullYear()}`;
-        d.title = "HH:MM:SS DD/MM/YYYY";
+        d.title = "HH:MM DD/MM/YYYY";
         d.append(span);
         div.append(d);
         fragment.appendChild(div);

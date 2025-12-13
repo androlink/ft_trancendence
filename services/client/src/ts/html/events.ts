@@ -361,7 +361,7 @@ function setClickEventBlockRequest(text: HTMLElement): void {
   if (
     ["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)
   ) {
-    text.className = "";
+    text.className = "px-1";
     return;
   }
   text.className = "cursor-pointer";
@@ -405,7 +405,7 @@ function setClickEventFriendRequest(text: HTMLElement): void {
       .map(findLanguage)
       .includes(text.innerText)
   ) {
-    text.className = "";
+    text.className = "px-1";
     return;
   }
   text.className = "cursor-pointer";
@@ -574,7 +574,7 @@ function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
   select.addEventListener("change", (e) => {
     localStorage.setItem("language", select.value);
     setLanguage();
-    main(true, false);
+    main({force: true, requests: false});
   });
 }
 
