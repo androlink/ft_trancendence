@@ -1,8 +1,8 @@
-import db, { hashPassword, comparePassword } from "./database";
+import db, { hashPassword, comparePassword } from "../common/database";
 import fs from "fs";
 import { fileTypeFromBuffer } from "file-type";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Id, UserRow } from "./types";
+import { Id, UserRow } from "../common/types";
 
 // response format for that page :
 // {
@@ -12,7 +12,7 @@ import { Id, UserRow } from "./types";
 // setting message as a plain string will set have all the language display the same
 // if you reuse code for other page, take it into consideration
 
-export async function loginRoutes(fastifyInstance: FastifyInstance) {
+export default async function apiAccount(fastifyInstance: FastifyInstance) {
   /**
    * treat the element you want based on a collection of requirements decided arbitrary in the scope
    * @param requiredFields ex : ["username", "biography", "password"]
@@ -29,13 +29,23 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       },
       biography: { maxLength: 3000 },
       password: { minLength: 4, maxByteLength: 42 },
+    } as {
+      [key: string]: {
+        minLength?: number;
+        maxLength?: number;
+        alphanumeric_?: boolean;
+        forbidden?: string[];
+        maxByteLength?: number;
+      };
     };
     return async function (
       req: FastifyRequest<{ Body: { [key: string]: string } }>,
       reply: FastifyReply
     ) {
       for (const field of requiredFields) {
-        if (!Object.hasOwn(req.body, field))
+        // 'in' used so don't set a field to have the name of a function, like
+        // toString or something, don't be dumb
+        if (!(field in req.body))
           return reply
             .code(401)
             .send({ success: false, message: `query ${field} missing` });
@@ -45,7 +55,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
             .code(401)
             .send({ success: false, message: ["MUST_BE_STR", field] });
         if (
-          conditions[field].minLength &&
+          conditions[field]!.minLength &&
           req.body[field].length < conditions[field].minLength
         )
           return reply.code(401).send({
@@ -53,7 +63,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
             message: ["MIN_STR_LENGTH", [field], conditions[field].minLength],
           });
         if (
-          conditions[field].maxLength &&
+          conditions[field]!.maxLength &&
           req.body[field].length > conditions[field].maxLength
         )
           return reply.code(401).send({
@@ -61,7 +71,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
             message: ["MAX_STR_LENGTH", [field], conditions[field].maxLength],
           });
         if (
-          conditions[field].maxByteLength &&
+          conditions[field]!.maxByteLength &&
           Buffer.byteLength(req.body[field]) > conditions[field].maxByteLength
         )
           return reply.code(401).send({
@@ -73,8 +83,8 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
             ],
           });
         if (
-          conditions[field].alphanumeric_ &&
-          !req.body[field].match("^[a-zA-Z0-9_-]*$")
+          conditions[field]!.alphanumeric_ &&
+          !req.body[field].match("^[a-zA-Z0-9_]*$")
         )
           return reply
             .code(401)
@@ -94,7 +104,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
       });
     }
     if (
-      !req.headers["content-type"].startsWith(
+      !req.headers["content-type"]!.startsWith(
         "application/x-www-form-urlencoded"
       )
     ) {
@@ -112,10 +122,7 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
    *
    * WARNING: it will send 401 Unauthorized and stop treating request on error.
    */
-  let identifyUser: (
-    req: FastifyRequest,
-    reply: FastifyReply
-  ) => Promise<never>;
+  let identifyUser: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   {
     const statement1 = db.prepare<{ id: Id }, UserRow>(
       "SELECT * FROM users WHERE id = :id"
@@ -155,7 +162,6 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
     fastifyInstance.post<{ Body: { username: string; password: string } }>(
       "/register",
       {
-        onRequest: [needFormBody],
         preValidation: checkBodyInput(["username", "password"]),
       },
       async (req, reply) => {
@@ -173,6 +179,13 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
             { id: res.lastInsertRowid },
             { expiresIn: "15m" }
           );
+          const cookiesOptions = {
+            path: "/",
+            httpOnly: true,
+            secure: true,
+            sameSite: "Strict",
+            maxAge: 15 * 60,
+          };
           return reply
             .header("x-authenticated", token)
             .send({ success: true, message: ["WELCOME_USERNAME", username] });
@@ -224,6 +237,13 @@ export async function loginRoutes(fastifyInstance: FastifyInstance) {
           { id: row.id },
           { expiresIn: "15m" }
         );
+        const cookiesOptions = {
+          path: "/",
+          httpOnly: true,
+          secure: true,
+          sameSite: "Strict",
+          maxAge: 15 * 60,
+        };
         return reply
           .header("x-authenticated", token)
           .send({ success: true, message: ["WELCOME_USERNAME", username] });

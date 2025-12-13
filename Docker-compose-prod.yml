@@ -1,6 +1,4 @@
-
 services:
-
   #----------------------------------------------------------------------------#
   #                                    NGINX                                   #
   #----------------------------------------------------------------------------#
@@ -20,7 +18,22 @@ services:
       timeout: 5s
       retries: 10
     depends_on:
-      server:
+      resources_microservice:
+        condition: service_started
+        restart: true
+      error_microservice:
+        condition: service_started
+        restart: true
+      page_microservice:
+        condition: service_started
+        restart: true
+      misc_microservice:
+        condition: service_started
+        restart: true
+      account_microservice:
+        condition: service_started
+        restart: true
+      chat_microservice:
         condition: service_started
         restart: true
     restart: "always"
@@ -42,9 +55,10 @@ services:
   #----------------------------------------------------------------------------#
   #                                    SERVER                                  #
   #----------------------------------------------------------------------------#
-  server:
-    container_name: server
-    image: server
+
+  resources_microservice:
+    container_name: resources_microservice
+    image: resources_microservice
     build:
       context: services/server/
       target: prod
@@ -55,7 +69,102 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://server:3000/"]
+      test: ["Entrypoint", "curl", "http://resources_microservice:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
+
+  error_microservice:
+    container_name: error_microservice
+    image: error_microservice
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["Entrypoint", "curl", "http://error_microservice:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
+
+  page_microservice:
+    container_name: page_microservice
+    image: page_microservice
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["Entrypoint", "curl", "http://servepage_microservicer:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
+
+  misc_microservice:
+    container_name: misc_microservice
+    image: misc_microservice
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["Entrypoint", "curl", "http://servmisc_microserviceer:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
+
+  account_microservice:
+    container_name: account_microservice
+    image: account_microservice
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["Entrypoint", "curl", "http://account_microservice:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
+
+  chat_microservice:
+    container_name: chat_microservice
+    image: chat_microservice
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["Entrypoint", "curl", "http://servchat_microserviceer:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -66,7 +175,7 @@ services:
   #----------------------------------------------------------------------------#
   client:
     container_name: client
-    image: client 
+    image: client
     build:
       context: services/client/
       target: prod
@@ -84,7 +193,7 @@ volumes:
       o: bind
       type: none
   www:
-    # still need to be a volume in prod 
+    # still need to be a volume in prod
     # (for instance if we keep pfp in it)
     name: www
     driver: local

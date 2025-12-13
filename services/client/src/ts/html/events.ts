@@ -17,6 +17,7 @@ import {
   InitConnectionChat,
   sendStatusMessage,
 } from "../chat.js";
+import { toASCII } from "punycode";
 
 /**
  * set all the events that the page need to work properly
@@ -91,7 +92,7 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
     event.preventDefault();
     const formData = new FormData(form);
     try {
-      const response = await fetch("/pfp", {
+      const response = await fetch("/api/account/pfp", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -127,7 +128,7 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
     try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
-      const response = await fetch("/login", {
+      const response = await fetch("api/account/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -176,7 +177,7 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
         displayErrorOrAlert(form, findLanguage("passwords don't match"));
         return;
       }
-      const response = await fetch("/register", {
+      const response = await fetch("/api/account/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -221,7 +222,7 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
     const formData = new FormData(form);
     try {
       const username = formData.get("username") as string;
-      const response = await fetch("/update", {
+      const response = await fetch("/api/account/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -270,7 +271,7 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
         return;
       }
 
-      const response = await fetch("/password", {
+      const response = await fetch("/api/account/password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -311,7 +312,7 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
     if (needConnection(form) === false) return;
     const formData = new FormData(form);
     try {
-      const response = await fetch("/delete", {
+      const response = await fetch("/api/account/delete", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -370,7 +371,7 @@ function setClickEventBlockRequest(text: HTMLElement): void {
   );
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/block?user=${username}`, {
+      const response = await fetch(`/api/account/block?user=${username}`, {
         method: "post",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -413,7 +414,7 @@ function setClickEventFriendRequest(text: HTMLElement): void {
   );
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/friend?user=${username}`, {
+      const response = await fetch(`/api/account/friend?user=${username}`, {
         method: "post",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -527,13 +528,13 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
   let searchController: AbortController | null = null;
   textarea.addEventListener("input", async (e) => {
     textarea.value = Array.from(
-      textarea.value.matchAll(/[0-9a-zA-Z_-]/g),
+      textarea.value.matchAll(/[0-9a-zA-Z_:]/g),
       (m) => m[0]
     ).join("");
     try {
       if (searchController) searchController.abort(); // cancel previous request
       searchController = new AbortController();
-      const res = await fetch(`/misc/users?start=${textarea.value}`, {
+      const res = await fetch(`/api/misc/users?start=${textarea.value}`, {
         signal: searchController.signal,
       });
       const json = await res.json();
@@ -639,7 +640,7 @@ export function setCtrlEventUsername(): void {
     if ((e.ctrlKey || e.metaKey) && e.key === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
-        fetch("/logout", { method: "POST" })
+        fetch("api/account/logout", { method: "POST" })
           .then((res) => {
             resetReconnectTimer(res.headers.get("x-authenticated"));
             sendStatusMessage();

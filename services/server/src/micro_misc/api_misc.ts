@@ -1,6 +1,6 @@
-import db from "./database.js";
+import db from "../common/database.js";
 import { FastifyInstance } from "fastify";
-import { Id } from "./types";
+import { Id } from "../common/types.js";
 
 // response format for that page :
 // whatever you need.
@@ -9,7 +9,7 @@ import { Id } from "./types";
 //
 // if you reuse code for other page, take it into consideration
 
-export async function miscRoutes(fastifyInstance: FastifyInstance) {
+export default async function apiMisc(fastifyInstance: FastifyInstance) {
   fastifyInstance.setNotFoundHandler((req, reply) => {
     return reply
       .code(404)
@@ -47,9 +47,32 @@ export async function miscRoutes(fastifyInstance: FastifyInstance) {
     const statement2 = db.prepare<
       { targetId: Id },
       { time: string; winner: string; loser: string }
-    >(
-      "SELECT strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time, (SELECT username FROM users WHERE id = h.winner) AS winner, (SELECT username FROM users WHERE id = h.loser) AS loser FROM history_game h WHERE winner = :targetId OR loser = :targetId"
-    );
+    >(`SELECT
+  strftime('%Y-%m-%dT%H:%M:%fZ', h.time) AS time,
+
+  winner.username AS winner,
+  winner.pfp      AS winner_pfp,
+
+  loser.username  AS loser,
+  loser.pfp       AS loser_pfp
+
+FROM history_game h
+
+JOIN users AS winner
+  ON (
+       (h.result_type = 'win'  AND winner.id = h.player_one)
+    OR (h.result_type = 'loss' AND winner.id = h.player_two)
+     )
+
+JOIN users AS loser
+  ON (
+       (h.result_type = 'win'  AND loser.id = h.player_two)
+    OR (h.result_type = 'loss' AND loser.id = h.player_one)
+     )
+
+WHERE h.player_one = :targetId
+   OR h.player_two = :targetId;
+`);
     fastifyInstance.get<{ Querystring: { user: string } }>(
       "/history",
       (req, reply) => {

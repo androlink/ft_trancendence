@@ -1,7 +1,7 @@
 import { main } from "./app.js";
 import { sendMessage, setCtrlEventUsername } from "./html/events.js";
 import { InitConnectionChat, sendStatusMessage } from "./chat.js";
-import { selectLanguage } from "./html/templates.js";
+
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
 //----------------------------------------------------------------------------#

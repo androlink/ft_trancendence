@@ -2,7 +2,6 @@
 // events.ts was too full when the top function was not acting as an index
 
 import { encodeURIUsername, goToURL } from "../utils.js";
-import { sendMessage } from "./events.js";
 import { assetsPath, findLanguage } from "./templates.js";
 
 /**
@@ -15,7 +14,7 @@ function loadGameHistory(): void {
     pathname.substring(pathname.lastIndexOf("/") + 1)
   );
   if (!tbody) return;
-  fetch(`/misc/history?user=${encodeURIComponent(username)}`)
+  fetch(`/api/misc/history?user=${encodeURIComponent(username)}`)
     .then((res) => res.json())
     .then((json) => {
       if (!json.length) {
@@ -105,7 +104,7 @@ async function loadFriendsDisplay(): Promise<void> {
     }
   }
   try {
-    const res = await fetch(`/misc/friends${location.search}`, {
+    const res = await fetch(`/api/misc/friends${location.search}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     const json = await res.json();
@@ -145,7 +144,7 @@ async function loadFriendsDisplay(): Promise<void> {
       grid.appendChild(fragment);
     }
   } catch (err) {
-    sendMessage(String(err));
+    console.error(err);
   }
 }
 self["loadFriendsDisplay"] = loadFriendsDisplay;

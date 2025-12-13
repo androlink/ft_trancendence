@@ -1,9 +1,9 @@
-import db from "./database";
-import { dbLogFile } from "./database";
+import db from "../common/database.js";
+import { dbLogFile } from "../common/database.js";
 import fs from "fs";
-import { assetsPath } from "./config.js";
+import { assetsPath } from "../config.js";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Id, LanguageObject, UserRow } from "./types.js";
+import { Id, LanguageObject, UserRow } from "../common/types.js";
 
 // response format for that page :
 // {
@@ -14,7 +14,7 @@ import { Id, LanguageObject, UserRow } from "./types.js";
 // }
 // if you reuse code for other page, take it into consideration
 
-export async function apiRoutes(fastifyInstance: FastifyInstance) {
+export default async function apiPage(fastifyInstance: FastifyInstance) {
   fastifyInstance.setNotFoundHandler((req, reply) => {
     return reply.code(404).send({
       template: "Error",
@@ -223,7 +223,7 @@ export async function apiRoutes(fastifyInstance: FastifyInstance) {
             loses: String(row.losses),
             ratio: row.losses
               ? String((row.wins / row.losses).toFixed(2))
-              : "N/A",
+              : "¯\\_(ツ)_/¯",
           },
           title: row.username,
           inner: "Profile2",
