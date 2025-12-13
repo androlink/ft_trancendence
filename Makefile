@@ -39,6 +39,10 @@ rm: stop
 prune: stop
 	docker system prune --all --force
 
+.PHONY: static
+static:
+	@docker run -v ./services/client/src:/var/project/src -v www:/var/www client npm run build:statics
+
 .PHONY: repair_vscode
 repair_vscode:
 	-docker exec resources_microservice cp -r node_modules src

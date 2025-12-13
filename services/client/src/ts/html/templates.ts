@@ -1,33 +1,30 @@
-
 export const assetsPath = `/resources`;
 
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
  */
-const htmlSnippetsTemplate:  {
+const htmlSnippetsTemplate: {
   readonly Home: string;
-  readonly Game: string;
   readonly Pong: string;
   readonly Profile1: string;
   readonly Profile2: string;
   readonly Friend: string;
-  readonly Pdf: string;
   readonly Login: string;
   readonly Blank: string;
   readonly Error: string;
   readonly Ouch: string;
   readonly PopUp: string;
   readonly ErrorMessageHandler: string;
+  RemotePong: string;
 } = {
-  Home:
-    `
+  Home: `
   <span class="grid grid-cols-3 mx-8 my-2">
     <div class="relative justify-self-start">
       <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <p class=" text-3xl font-mono text-white font-semibold select-none">ft_transcendence</p>
+    <input type="text" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -41,12 +38,11 @@ const htmlSnippetsTemplate:  {
     <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
   </div>
   <span id="inner-buttons" class="flex gap-x-0.5 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded-t *:data-checked:text-white *:data-checked:bg-[#262d5f] *:bg-[#1b1e38] *:text-gray-300">
-    <div onclick="goToURL( )" name="">pdf</div>
-    <div onclick="goToURL('game')" name="game">[[game]]</div>    
-    <div onclick="goToURL('blank')" name="blank">debug</div>
-    <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
+    <div onclick="goToURL('')" name="">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
+    <div onclick="goToURL('blank')" name="blank">debug</div>
+    <div onclick="goToURL('netplay')" name="netplay">[[netplay]]</div>
   </span>
   <span class=" flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 select-none drop-shadow-xl/50">
     <div id="inner" class="h-full col-span-3 overflow-hidden"></div>
@@ -73,12 +69,7 @@ const htmlSnippetsTemplate:  {
     </div>
   </span>
   `,
-  Game:
-    ` 
-  <iframe src="https://ivark.github.io/AntimatterDimensions/" class="size-full border-transparent outline" id="game" allowfullscreen="yes" allow="clipboard-read; clipboard-write; autoplay; execution-while-not-rendered; execution-while-out-of-viewport; gamepad" sandbox="allow-modals allow-pointer-lock allow-scripts allow-downloads allow-orientation-lock allow-popups allow-same-origin allow-forms" class="svelte-1qgtsbq game-filtered"></iframe>
-  `,
-  Profile1:
-    `
+  Profile1: `
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
@@ -168,7 +159,7 @@ const htmlSnippetsTemplate:  {
           </div>
           <div class="grid grid-cols-3 px-3  border-l-2 border-gray-200 *:my-auto">
             <div class="text-white font-bold text-2xl text-center">PARTIE<br>Perdue</div>
-            <div id="loses" class="text-[#DF9696] font-bold text-4xl text-center col-start-2 col-span-2 "></div>
+            <div id="losses" class="text-[#DF9696] font-bold text-4xl text-center col-start-2 col-span-2 "></div>
           </div>
         </div>
       </div>
@@ -247,12 +238,7 @@ const htmlSnippetsTemplate:  {
       </span>
     </div>
   `,
-  Pdf:
-    `
-  <iframe src="${assetsPath}/sample.pdf" class="size-full border-transparent" title="Embedded PDF Viewer"></iframe>
-  `,
-  Login:
-    `
+  Login: `
   <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col gap-y-1">
   <span class="grid grid-cols-2 grid-rows-2 place-items-center size-full *:border-3 *:bg-gray-600 *:border-gray-500 *:p-2 *:rounded *:gap-1 *:flex *:flex-col *:relative">
     <form id="login-form">
@@ -282,11 +268,9 @@ const htmlSnippetsTemplate:  {
   </span>
   </div>
   `,
-  Blank:
-    `
+  Blank: `
   `,
-  Error:
-    `
+  Error: `
   <div class="flex flex-col items-center size-1/2 m-40 place-self-center">
     <h1 id=status class="text-white font-bold"></h1>
     <h2 id=message class="text-white"></h2>
@@ -295,25 +279,31 @@ const htmlSnippetsTemplate:  {
   </div>
   `,
 
-  Ouch:
-    `
+  Ouch: `
   <iframe id="container-iframe" class="size-full bg-gray-200" srcdoc="">
   </iframe>
   `,
-  PopUp:
-    `
+  PopUp: `
   <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
   </div>
     `,
   Pong: `
-  <div class="size-full flex flex-col">
-  		<script  type="module" src="${assetsPath}/pong/main.js"></script>
-		<button class="bg-gray-600 text-red-500 border place-self-start border-gray-400 px-1 rounded" onclick="newGame()">test</button>
-		<canvas class="border border-white aspect-auto" id="canvas"></canvas>
+  <div class="relative size-full flex flex-col overflow-scroll">
+    <script id="local config">
+      loadLocalConfig();
+    </script>
+    <canvas class="border border-white size-full" id="canvas"></canvas>
 	</div>
   `,
-  ErrorMessageHandler:
-    `
+  RemotePong: `
+  <div class="relative size-full flex flex-col overflow-scroll">
+    <script>
+    document.currentScript?.remove();
+    </script>
+    <canvas class="border border-white size-full" id="canvas"></canvas>
+	</div>
+  `,
+  ErrorMessageHandler: `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `,
 } as const;
@@ -324,31 +314,33 @@ const htmlSnippetsTemplate:  {
 export let htmlSnippets = {} as typeof htmlSnippetsTemplate;
 
 // @ts-ignore
-import en from '../languages/en.json' with { type: 'json' };
+import en from "../languages/en.json" with { type: "json" };
 // @ts-ignore
-import fr from '../languages/fr.json' with { type: 'json' };
+import fr from "../languages/fr.json" with { type: "json" };
 // @ts-ignore
-import es from '../languages/es.json' with { type: 'json' };
+import es from "../languages/es.json" with { type: "json" };
 
 setLanguage();
 
 /**
  * that function will set the var htmlSnippets to the language in the localStorage
  * If language not recognized or not set, will do english
-*/
-export function setLanguage(): void{
-  let handled = {'en': en, 'fr': fr, 'es': es}
+ */
+export function setLanguage(): void {
+  let handled = { en: en, fr: fr, es: es };
   let language = localStorage.getItem("language");
-  if (language === null || !Object.hasOwn(handled, language)){
-    language = 'en';
+  if (language === null || !Object.hasOwn(handled, language)) {
+    language = "en";
   }
   const translations = handled[language];
 
   Object.entries(htmlSnippetsTemplate).forEach(([name, snippet]) => {
     htmlSnippets[name] = snippet;
     for (let pattern in translations) {
-      htmlSnippets[name] = htmlSnippets[name]
-      .replaceAll(`[[${pattern}]]`, translations[pattern]);
+      htmlSnippets[name] = htmlSnippets[name].replaceAll(
+        `[[${pattern}]]`,
+        translations[pattern]
+      );
     }
   });
 }
@@ -357,15 +349,15 @@ export type languageString = [string, ...(string | languageString)[]] | string;
 /**
  * select a string (or techinically anything) that correspond to localStorage["language"],
  * or the arg given if it's a string
- * 
- * @param strs examples: {'en': 'hello', 'fr': 'bonjour', 'es': 'hola'}, 'hey'
- * @returns the right string; else if localStorage["language"] not corresponding => str['en']; else if no str['en'] "language not found"
+ *
+ * @param strs examples: ["hello user", 'geymat']
+ * @returns the right string; else if localStorage["language"] not corresponding => str['en']; else if no str['en'] "translation not found"
  */
 export function selectLanguage(strs: languageString): string {
-  if (typeof strs !== 'object') return String(strs);
+  if (!Array.isArray(strs)) return String(strs);
   let res = findLanguage(strs[0]);
   for (let i = 1; i < strs.length; i++) {
-    res = res.replaceAll(`[[${i - 1}]]`, selectLanguage(strs[i]))
+    res = res.replaceAll(`[[${i - 1}]]`, selectLanguage(strs[i]));
   }
   return res;
 }
@@ -376,10 +368,10 @@ export function selectLanguage(strs: languageString): string {
  * @param name the key for the jsons
  * @returns the string if found, "translation not found" if not
  */
-export function findLanguage(name: string) {
-  let handled = {'en': en, 'fr': fr, 'es': es}
-  let language = localStorage.getItem('language');
-  if (language === null || !Object.hasOwn(handled, language)) language = 'en';
+export function findLanguage(name: string): string {
+  const handled = { en, fr, es };
+  let language = localStorage.getItem("language");
+  if (language === null || !Object.hasOwn(handled, language)) language = "en";
   if (Object.hasOwn(handled[language], name)) return handled[language][name];
   return `translation not found => "${name}"`;
 }

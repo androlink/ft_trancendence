@@ -3,16 +3,17 @@
     "outDir": "/var/www",
     "target": "esnext",
     "noEmit": true,
-    "module": "esnext",
+    "module": "NodeNext",
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strict": true,
     "skipLibCheck": true,
-    "lib": []
+    "lib": ["esnext", "dom"],
+    "types": ["node"]
   },
-    "watchOptions": {
+  "watchOptions": {
     "watchFile": "fixedpollinginterval"
   },
-    "include": ["**/*.ts"]
+  "include": ["**.ts"]
 }

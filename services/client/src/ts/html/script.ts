@@ -1,13 +1,15 @@
 // This file is like events.ts except it's about <script>function()<script>
 // events.ts was too full when the top function was not acting as an index
 
+import { resetNextInner } from "../app.js";
 import { encodeURIUsername, goToURL } from "../utils.js";
-import { assetsPath, findLanguage } from "./templates.js";
+import { assetsPath, findLanguage, selectLanguage } from "./templates.js";
 
 /**
  * will try to load a game history if a player when whatching their profile
  */
 function loadGameHistory(): void {
+  resetNextInner();
   const tbody = document.getElementById("history-tbody");
   const pathname = location.pathname.replace(/\/$/, "");
   let username = decodeURIComponent(
@@ -18,9 +20,9 @@ function loadGameHistory(): void {
     .then((res) => res.json())
     .then((json) => {
       if (!json.length) {
-        tbody.innerHTML = `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td></td></tr>`;
-        tbody.firstElementChild.lastElementChild.textContent =
-          findLanguage("never played");
+        // tbody.innerHTML = `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td></td></tr>`;
+        // tbody.firstElementChild.lastElementChild.textContent =
+        //   findLanguage("never played");
         return;
       }
       const fragment = document.createDocumentFragment();
@@ -107,6 +109,16 @@ async function loadFriendsDisplay(): Promise<void> {
     const res = await fetch(`/api/misc/friends${location.search}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
+    if (res.status != 200) {
+      if (grid) {
+        if (grid.firstElementChild)
+          grid.firstElementChild.textContent = selectLanguage([
+            "error occured",
+            String(res.status),
+          ]);
+      }
+      return;
+    }
     const json = await res.json();
     if (json[0] <= 16 * (page - 1)) {
       page = Math.floor(json[0] / 16) + 1;

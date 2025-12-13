@@ -10,8 +10,8 @@ import {
   launchSinglePageApp,
   resetReconnectTimer,
 } from "./utils.js";
-import { setEvents } from "./html/events.js";
-import { loginWithGithub } from "./github_auth.js";
+import { sendMessage, setEvents } from "./html/events.js";
+
 /**
  * the infos we consider important that we get from a fetch to the server
  */
@@ -25,12 +25,18 @@ interface ServerResponse {
 
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
+/**
+ * will cause a reload of the inner even without setting main with force to true
+ */
+export function resetNextInner() {
+  mainInner = null;
+}
 let last: ServerResponse | null = null;
 /**
  * The main function of the Single-Page-Application:
  *  - fetch the website infos
  *  - set the UI accordingly
- * @param force if true change the app even if same as before, default as false
+ * @param force if true change the app even if same as before, default as false. Prefer using resetNextInner
  * @param requests if false uses the last response received without fetching, default as true (better with force set to true)
  */
 // btw no Syntax Errow throwed if params bad due to function working with 1 and 0 too, as well as "yay" and ""
@@ -49,10 +55,6 @@ export async function main(force = false, requests = true): Promise<void> {
     // if you want to have headers, make a new fetch -geymat
     let { headers, ...rest } = data;
     last = rest;
-  }
-  let chatElement: HTMLElement | null | undefined;
-  if (force) {
-    chatElement = document.getElementById("chat-content");
   }
   if (keyExist(data, "title")) {
     document.title = selectLanguage(data.title);
@@ -79,10 +81,8 @@ export async function main(force = false, requests = true): Promise<void> {
   } else if (!localStorage.getItem("token")) {
     resetReconnectTimer("false");
   }
-  if (force && chatElement)
-    document.getElementById("chat-content")?.replaceWith(chatElement);
   setEvents();
-  (window as any).loginWithGithub = loginWithGithub;
+  //(window as any).loginWithGithub = loginWithGithub;
 }
 self["main"] = main;
 
@@ -92,11 +92,14 @@ self["main"] = main;
  */
 async function fetchApi(): Promise<ServerResponse> {
   try {
-    const response = await fetch(`/api/page${encodeURI(self.location.pathname)}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    const response = await fetch(
+      `/api/page${encodeURI(self.location.pathname)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
     if (
       (response.status >= 500 && response.status < 600) ||
       !response.headers.has("content-type") ||
@@ -114,7 +117,7 @@ async function fetchApi(): Promise<ServerResponse> {
     data.headers = response.headers;
     return data;
   } catch (error) {
-    alert(error instanceof Error ? error.message : String(error));
+    sendMessage(error instanceof Error ? error.message : String(error));
     return {};
   }
 }
@@ -128,8 +131,7 @@ async function fetchApi(): Promise<ServerResponse> {
 function changeSnippet(elem: HTMLElement, template: string): boolean {
   if (!keyExist(htmlSnippets, template)) {
     elem.innerHTML = "";
-    if (elem.className.indexOf("text-white") === -1)
-      elem.className += " text-white";
+    elem.classList.add("text-white");
     elem.innerText = `Snippet ${template} not Found in template.js\nIf you didn't traficate your front-end files, consider refreshing and then calling @geymat, @gcros or @sjean`;
     return false;
   }

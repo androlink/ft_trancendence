@@ -13,10 +13,10 @@ import { InitConnectionChat, sendStatusMessage } from "./chat.js";
  * @param force go to the page even if already on it, default to false
  * @returns true if main() is triggered, meaning the function was used
  */
-export async function goToURL(
-  nextURL: string = "",
+export function goToURL(
+  nextURL: string = "profile",
   force: boolean = false
-): Promise<boolean> {
+): boolean {
   if (arguments.length > 2) {
     throw new SyntaxError("expected 0 to 2 argument");
   }
@@ -33,8 +33,8 @@ export async function goToURL(
 
   if (!nextURL.startsWith("/")) nextURL = `/${nextURL}`;
   if (!force && location.pathname + location.search === nextURL) return false;
-  history.pushState({ page: "" }, "", nextURL);
-  await main();
+  history.pushState({}, "", nextURL);
+  window.dispatchEvent(new PopStateEvent("popstate"));
   return true;
 }
 self["goToURL"] = goToURL;
@@ -82,15 +82,16 @@ export function resetReconnectTimer(auth: string | null): boolean {
   }
   localStorage.setItem("token", auth);
   setVisibility("account-disconnected", false);
-  reconnectTimer = setTimeout(() => {
-    fetch("/api", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then((res) => {
-        if (resetReconnectTimer(res.headers.get("x-authenticated")))
-          setVisibility("account-reconnected", true);
-      })
-      .catch(() => {}); //if it fails don't bother
+  reconnectTimer = setTimeout(async () => {
+    try {
+      const res = await fetch("/api", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (resetReconnectTimer(res.headers.get("x-authenticated")))
+        setVisibility("account-reconnected", true);
+    } catch (err) {
+      console.error("reconnect threw exception: ", err);
+    }
   }, 14 * 60 * 1000);
   return true;
 }
@@ -139,7 +140,7 @@ export async function accountLogOut(): Promise<void> {
   const token = localStorage.getItem("token");
   if (token === null) return;
   try {
-    const res = await fetch("/logout", { method: "POST" });
+    const res = await fetch("/api/account/logout", { method: "POST" });
     const json = await res.json();
     if (json.success && res.headers.get("x-authenticated") === "false") {
       localStorage.removeItem("token");

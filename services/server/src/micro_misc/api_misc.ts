@@ -48,31 +48,27 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
       { targetId: Id },
       { time: string; winner: string; loser: string }
     >(`SELECT
-  strftime('%Y-%m-%dT%H:%M:%fZ', h.time) AS time,
+        strftime('%Y-%m-%dT%H:%M:%fZ', h.time) AS time,
+        winner.username AS winner,
+        winner.pfp      AS winner_pfp,
+        loser.username  AS loser,
+        loser.pfp       AS loser_pfp
 
-  winner.username AS winner,
-  winner.pfp      AS winner_pfp,
+      FROM history_game h
 
-  loser.username  AS loser,
-  loser.pfp       AS loser_pfp
-
-FROM history_game h
-
-JOIN users AS winner
-  ON (
-       (h.result_type = 'win'  AND winner.id = h.player_one)
-    OR (h.result_type = 'loss' AND winner.id = h.player_two)
-     )
-
-JOIN users AS loser
-  ON (
-       (h.result_type = 'win'  AND loser.id = h.player_two)
-    OR (h.result_type = 'loss' AND loser.id = h.player_one)
-     )
-
-WHERE h.player_one = :targetId
-   OR h.player_two = :targetId;
-`);
+      JOIN users AS winner
+        ON (
+          (h.result_type = 'win'  AND winner.id = h.player_one)
+          OR (h.result_type = 'loss' AND winner.id = h.player_two)
+        )
+      JOIN users AS loser
+        ON (
+          (h.result_type = 'win'  AND loser.id = h.player_two)
+          OR (h.result_type = 'loss' AND loser.id = h.player_one)
+        )
+      WHERE h.player_one = :targetId
+        OR h.player_two = :targetId;
+      `);
     fastifyInstance.get<{ Querystring: { user: string } }>(
       "/history",
       (req, reply) => {
@@ -124,7 +120,8 @@ WHERE h.player_one = :targetId
      */
     /** insert a game according to the winner and loser */
     const statement1 = db.prepare<[Id, Id], undefined>(
-      "INSERT INTO history_game (winner, loser) VALUES (?, ?)"
+      // below, default is 'win' for player one
+      "INSERT INTO history_game (player_one, player_two) VALUES (?, ?)"
     );
     fastifyInstance.post<{ Querystring: { winner: string; loser: string } }>(
       "/win",

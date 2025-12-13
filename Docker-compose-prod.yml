@@ -107,7 +107,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://servepage_microservicer:3000/"]
+      test: ["Entrypoint", "curl", "http://page_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -126,7 +126,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://servmisc_microserviceer:3000/"]
+      test: ["Entrypoint", "curl", "http://misc_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -164,12 +164,30 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://servchat_microserviceer:3000/"]
+      test: ["Entrypoint", "curl", "http://chat_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
     restart: "always"
 
+  remote_microservice:
+    container_name: remote_microservice
+    image: remote_microservice
+    build:
+      context: services/server/
+      target: prod
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["Entrypoint", "curl", "http://remote_microservice:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "always"
   #----------------------------------------------------------------------------#
   #                                    CLIENT                                  #
   #----------------------------------------------------------------------------#

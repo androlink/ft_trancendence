@@ -11,19 +11,17 @@ import {
   assetsPath,
   setLanguage,
 } from "./templates.js";
-import { main } from "../app.js";
+import { main, resetNextInner } from "../app.js";
 import {
   sendChatMessage,
   InitConnectionChat,
   sendStatusMessage,
 } from "../chat.js";
-import { toASCII } from "punycode";
 
 /**
  * set all the events that the page need to work properly
  */
 export function setEvents(): void {
-  let elem: any;
   const events = {
     "chat-input": setEnterEventChat,
     "user-search": setMultipleEventUsername,
@@ -114,7 +112,8 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
         );
         return;
       }
-      main(true);
+      resetNextInner();
+      main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
     }
@@ -392,7 +391,8 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     } catch (error) {
       console.error(String(error));
     }
-    main(true);
+    resetNextInner();
+    main();
   });
 }
 //  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
@@ -435,7 +435,8 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     } catch (error) {
       console.error(String(error));
     }
-    main(true);
+    resetNextInner();
+    main();
   });
 }
 
@@ -595,6 +596,7 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
     const img = window.URL.createObjectURL(input.files[0]);
     const preview = document.getElementById("pfp-preview") as HTMLImageElement;
     if (preview && img) preview.src = img;
+    resetNextInner();
     document.getElementById("pfp-preview-div")?.removeAttribute("hidden");
   });
 }
@@ -608,7 +610,7 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
  */
 export function setCtrlEventUsername(): void {
   document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       const elem = document.getElementById(
         "user-search"
       ) as HTMLTextAreaElement;
@@ -627,7 +629,11 @@ export function setCtrlEventUsername(): void {
       }
     }
 
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "p") {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      !e.shiftKey &&
+      e.key.toLowerCase() === "p"
+    ) {
       e.preventDefault();
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value")) {
@@ -637,7 +643,7 @@ export function setCtrlEventUsername(): void {
       goToURL("profile");
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.key === "e") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
         fetch("api/account/logout", { method: "POST" })

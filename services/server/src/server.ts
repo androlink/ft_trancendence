@@ -1,7 +1,17 @@
 import fastifyConf from "./config";
 
+<<<<<<< HEAD
+import { apiRoutes } from "./api_routes";
+import { loginRoutes } from "./accounts_routes";
+import { launchDB } from "./database";
+import { assetsPath } from "./config";
+import liveChat from "./live_chat";
+import { errorRoutes } from "./error_routes";
+import { miscRoutes } from "./misc_routes";
+=======
 import { initDB } from "./common/database";
 import { assetsPath } from "./config";
+>>>>>>> micro_service
 
 export default fastifyConf();
 import fastify from "./server";

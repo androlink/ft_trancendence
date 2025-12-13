@@ -144,6 +144,22 @@ services:
       - database:/var/db/
     restart: "always"
 
+  remote_microservice:
+    command: dev-remote
+    container_name: remote_microservice
+    image: remote_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    restart: "always"
+
   #----------------------------------------------------------------------------#
   #                                    CLIENT                                  #
   #----------------------------------------------------------------------------#

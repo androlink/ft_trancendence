@@ -5,6 +5,7 @@ import Database from "better-sqlite3";
 import { Id, WSmessage, TypeMessage } from "../common/types";
 import db from "../common/database";
 import { fastify } from "./main";
+import { invite_message } from "./chat_invite";
 
 /**
  * Class client
@@ -30,7 +31,7 @@ class WSClient {
   }
 }
 
-const connectedClients: Map<Id, WSClient> = new Map();
+export const connectedClients: Map<Id, WSClient> = new Map();
 
 const waitingConnections: WebSocket[] = [];
 
@@ -190,7 +191,7 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
  * @param message message from the target
  * @param TargetSocket Websocket from the target
  */
-function DirectMessage(TargetRespondMsg: WSmessage) {
+export function DirectMessage(TargetRespondMsg: WSmessage) {
   for (let msg of listOfMsg) {
     if (TargetRespondMsg.msgId !== msg.msgId) {
       continue;
@@ -450,6 +451,8 @@ export default async function apiChat(fastify: FastifyInstance) {
     connection.on("close", (client: WebSocket) => {
       waitingConnections.splice(waitingConnections.indexOf(client), 1);
     });
+
+    connection.addEventListener("message", invite_message);
     connection.on("message", (event) => {
       try {
         const msg: WSmessage = JSON.parse(event.toString());
