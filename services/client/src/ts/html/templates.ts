@@ -156,7 +156,7 @@ const htmlSnippetsTemplate:  {
       <div class="w-full h-px my-6 bg-gray-100 transform-[translateZ(0)]"></div>
     </div>
     <div class="w-full flex justify-center">
-      <div class="bg-center w-175 h-25 rounded-2xl py-3 shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
+      <div class="bg-center w-175 h-25 rounded-2xl border border-gray-200 py-3 shadow-md" style="background: linear-gradient(79deg, #353C73, #424E9F);">
         <div class="size-full grid grid-cols-3 mx-1 justify-items-stretch">
           <div class="grid grid-cols-3 px-3 border-r-2 border-gray-200 *:my-auto">
             <div class="text-white font-bold text-2xl text-center">RATIO<br>Victoire</div>
@@ -173,45 +173,62 @@ const htmlSnippetsTemplate:  {
         </div>
       </div>
     </div>
-    <!--
-    <p class="text-white -ml-2">[[biography]]:</p>
-    <p class="text-white wrap-break-word min-h-8 h-fit min-w-1/4 w-fit max-w-full select-text bg-gray-700 rounded p-3 overflow-y-auto" id="biography-p2"></p>
-    -->
-    <!--
-    <table class="w-1/2 table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
-      <caption class="caption-bottom">[[remote counter]]</caption>
-      <thead>
-        <tr class="*:border *:border-gray-300 *:text-center">
-          <th class="border border-gray-300" scope="col">[[wins]]</th>
-          <th class="border border-gray-300" scope="col">[[loses]]</th>
-          <th class="border border-gray-300" scope="col">[[w/l ratio]]</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="*:border *:border-gray-300 *:text-center">
-          <td id="wins"></td>
-          <td id="loses"></td>
-          <td id="ratio"></td>
-        </tr>
-      </tbody>
-    </table>
-    -->
+  <!--
+    <div
+      class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col"
+    >
+      <div class="grid grid-cols-10 text-white items-center text-center mb-2">
+        <span class="col-span-3">Vainqueur</span>
+        <span class="col-span-3">Perdant</span>
+        <span class="col-span-4">Date</span>
+      </div>
+
+      <div class="rounded-2xl border border-gray-200 p-3 bg-[#1E244F] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2">
+        <div class="flex flex-row items-center justify-center gap-2">
+          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
+          <span class="text-white">joueur1</span>
+        </div>
+        <div class="flex flex-row items-center justify-center gap-2">
+          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
+          <span class="text-white">joueur2</span>
+        </div>
+        <div class="flex items-center justify-center">
+          <span class="text-white">06.03.2003</span>
+        </div>
+      </div>
+      <div
+        class="rounded-2xl border border-gray-200 p-3 bg-[#1E244F] 
+              grid grid-cols-1 sm:grid-cols-3 gap-4 my-2"
+      >
+        <div class="flex flex-row items-center justify-center gap-2">
+          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
+          <span class="text-white">joueur1</span>
+        </div>
+        <div class="flex flex-row items-center justify-center gap-2">
+          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
+          <span class="text-white">joueur2</span>
+        </div>
+        <div class="flex items-center justify-center">
+          <span class="text-white">06.03.2003</span>
+        </div>
+      </div>
+      
+    </div>
+  -->
+
     <script>
       loadGameHistory();
       document.currentScript?.remove();
     </script>
-    <table class="overflow-y-scroll w-1/2 h-full table-auto text-white bg-gray-700 border-collapse border border-gray-400 mt-10 mx-auto">
-      <caption class="caption-bottom">[[remote counter]]</caption>
-      <thead>
-        <tr class="*:border *:border-gray-300 *:text-center">
-          <th scope="col">[[winner]]</th>
-          <th scope="col">[[loser]]</th>
-          <th scope="col">[[date]]</th>
-        </tr>
-      </thead>
-      <tbody id="history-tbody">
-      </tbody>
-    </table>
+    <div class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col">
+      <div class="grid grid-cols-10 text-white items-center text-center mb-2">
+        <span class="col-span-3">Vainqueur</span>
+        <span class="col-span-3">Perdant</span>
+        <span class="col-span-4">Date</span>
+      </div>
+      <div id="history-tbody">
+      </div>
+    </div>
   </div>
   `,
   Friend: `

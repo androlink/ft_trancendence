@@ -93,4 +93,14 @@ export async function launchDB() {
       "ADMIN",
       1
     );
+
+  db.prepare(
+    "INSERT INTO history_game (time, winner, loser) VALUES (?, ?, ?)"
+  ).run("CURRENT_TIMESTAMP", "1", "1");
+  db.prepare(
+    "INSERT INTO history_game (time, winner, loser) VALUES (?, ?, ?)"
+  ).run("CURRENT_TIMESTAMP", "1", "1");
+  db.prepare(
+    "INSERT INTO history_game (time, winner, loser) VALUES (?, ?, ?)"
+  ).run("CURRENT_TIMESTAMP", "1", "1");
 }
