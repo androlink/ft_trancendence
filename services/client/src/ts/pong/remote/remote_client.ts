@@ -1,8 +1,9 @@
 import { goToURL } from "../../utils.js";
-import { DataFrame } from "../engine/engine_interfaces.js";
+import { getKeyConfig } from "../config/local_settings.js";
+import { DataFrame, keyControl } from "../engine/engine_interfaces.js";
 import { FrameManager } from "./frameManager.js";
 
-let pingTimeout: ReturnType<typeof setTimeout> | null = null;
+let pingTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 const ping_time = 5000;
 
 export type PongMessageType =
@@ -13,16 +14,33 @@ export type PongMessageType =
 
 let ws: WebSocket;
 let display: FrameManager;
-let last_ping: { id: number; time } = { id: 0, time: 0 };
+let last_ping: { id: number; time: ReturnType<typeof performance.now> } = {
+  id: 0,
+  time: 0,
+};
 let ping_count: number = 0;
 
+let config: [keyControl, keyControl];
+
 function eventKeyInputPong(event: KeyboardEvent) {
-  let message = null;
-  if (event.key !== "w" && event.key !== "s") return;
-  message = event.type === "keydown" ? "press" : "release";
-  message += event.key === "w" ? "Up" : "Down";
-  console.log("input:" + event.key);
-  return ws.send(JSON.stringify({ type: "input", input: message }));
+  if (!config) return;
+
+  if (event.repeat) return;
+  config.forEach((control, i) => {
+    if (
+      control.code !== undefined
+        ? control.code === event.code
+        : control.key.toLowerCase() === event.key.toLowerCase()
+    ) {
+      control.pressed = event.type === "keydown";
+      event.preventDefault();
+      let message;
+      message = control.pressed ? "press" : "release";
+      message += i === 0 ? "Up" : "Down";
+      console.log("input:" + control.key);
+      ws.send(JSON.stringify({ type: "input", input: message }));
+    }
+  });
 }
 
 export function join_party(game_id: string) {
@@ -33,7 +51,7 @@ export function join_party(game_id: string) {
 
 function ws_delete() {
   clearTimeout(pingTimeout);
-  pingTimeout = null;
+  pingTimeout = undefined;
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
   display = undefined;
@@ -42,21 +60,27 @@ function ws_delete() {
 
 self["join_party"] = join_party;
 
+function sendJoinMessage(game_id: string) {
+  ws.send(
+    JSON.stringify({
+      type: "join",
+      payload: {
+        token: localStorage.getItem("token"),
+        room_id: game_id,
+      },
+    })
+  );
+}
+
 function ws_connect(game_id: string) {
-  if (ws) ws.close();
+  if (ws) {
+    ws.close();
+  }
   console.log("Connecting to remote pong websocket...");
   ws = new WebSocket("/api/remote");
   ws.onopen = () => {
     console.log("WebSocket connection established");
-    ws.send(
-      JSON.stringify({
-        type: "join",
-        payload: {
-          token: localStorage.getItem("token"),
-          room_id: game_id,
-        },
-      })
-    );
+    sendJoinMessage(game_id);
     pingTimeout = setTimeout(() => ws_ping(), ping_time);
   };
   ws.addEventListener("close", (event) => {
@@ -65,20 +89,21 @@ function ws_connect(game_id: string) {
   });
   ws.onerror = (error) => {
     console.error("WebSocket error:", error);
+    ws_delete();
   };
   ws.onmessage = (event) => {
-    console.log("WebSocket message received:", event.data);
     ws_message(event);
   };
   ws.addEventListener("message", (event) => {
-    ws_message_pong(event.target as WebSocket, event.data.toString());
+    console.log(event);
+    ws_message_pong(event.data.toString());
   });
   ws.addEventListener("message", ws_join);
 }
 
 self["ws_connect"] = ws_connect;
 
-function ws_message_pong(ws: WebSocket, message: string) {
+function ws_message_pong(message: string) {
   const messageObject = JSON.parse(message) as PongMessageType;
   if (messageObject.type !== "pong") return;
 
@@ -105,6 +130,7 @@ function ws_join(event: MessageEvent) {
       ws_message_update(event.target as WebSocket, event.data.toString());
     });
     display = new FrameManager();
+    config = getKeyConfig("player_one");
   } else {
     show_join_message_error(message.reason);
   }
@@ -148,6 +174,5 @@ function ws_ping() {
 function ws_disconnect() {
   if (ws) {
     ws.close();
-    ws = null;
   }
 }

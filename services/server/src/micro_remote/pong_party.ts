@@ -68,11 +68,10 @@ function pong_party_finish(game_id: string) {
 
   const scores = p.getPlayers().map((p) => p.view.score);
 
-  const [player_one, player_two] = p.getPlayerId().slice(0);
+  const [player_one, player_two] = p.getPlayerId();
   const result: "win" | "loss" | "draw" =
     scores[0] > scores[1] ? "win" : scores[0] < scores[1] ? "loss" : "draw";
   if (!(player_one === undefined || player_two === undefined)) {
-    //const loser = 0;
     let statement = db.prepare(
       "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
     );

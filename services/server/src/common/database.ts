@@ -39,12 +39,10 @@ import db from "./database.js";
  * init the db if not exists already
  */
 export async function initDB() {
-  let AllMightyPasswordHashed = await hashPassword(
-    process.env.ADMIN_PASSWORD || "password"
-  );
   const tableExists = db.prepare(
     "SELECT name FROM sqlite_master WHERE type='table' AND name = ?"
   );
+
   const createDB = db.transaction(() => {
     if (tableExists.get("users")) {
       return;
@@ -90,9 +88,16 @@ export async function initDB() {
         result_type TEXT NOT NULL DEFAULT 'win' CHECK (result_type IN ('win', 'loss', 'draw'))
       );
       `);
-    db.prepare(
-      "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
-    ).run("AllMighty", AllMightyPasswordHashed, "ADMIN", 1);
+
+    hashPassword(process.env.ADMIN_PASSWORD || "password")
+      .then((pass) =>
+        db
+          .prepare(
+            "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
+          )
+          .run("AllMighty", pass, "ADMIN", 1)
+      )
+      .catch(console.error);
     console.log("DataBase created");
   });
   try {
