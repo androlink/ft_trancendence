@@ -34,7 +34,7 @@ function eventKeyInputPong(event: KeyboardEvent) {
     ) {
       control.pressed = event.type === "keydown";
       event.preventDefault();
-      let message;
+      let message: string = "";
       message = control.pressed ? "press" : "release";
       message += i === 0 ? "Up" : "Down";
       console.log("input:" + control.key);
@@ -74,7 +74,7 @@ function sendJoinMessage(game_id: string) {
 
 function ws_connect(game_id: string) {
   if (ws) {
-    ws.close();
+    return;
   }
   console.log("Connecting to remote pong websocket...");
   ws = new WebSocket("/api/remote");
@@ -174,5 +174,6 @@ function ws_ping() {
 function ws_disconnect() {
   if (ws) {
     ws.close();
+    ws = undefined;
   }
 }
