@@ -164,48 +164,6 @@ const htmlSnippetsTemplate: {
         </div>
       </div>
     </div>
-  <!--
-    <div
-      class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col"
-    >
-      <div class="grid grid-cols-10 text-white items-center text-center mb-2">
-        <span class="col-span-3">[[winner]]</span>
-        <span class="col-span-3">[[loser]]</span>
-        <span class="col-span-4">[[date]]</span>
-      </div>
-
-      <div class="rounded-2xl border border-gray-200 p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2">
-        <div class="flex flex-row items-center justify-center gap-2">
-          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
-          <span class="text-white">joueur1</span>
-        </div>
-        <div class="flex flex-row items-center justify-center gap-2">
-          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
-          <span class="text-white">joueur2</span>
-        </div>
-        <div class="flex items-center justify-center">
-          <span class="text-white">06.03.2003</span>
-        </div>
-      </div>
-      <div
-        class="rounded-2xl border border-gray-200 p-3 bg-[#1E244F]
-              grid grid-cols-1 sm:grid-cols-3 gap-4 my-2"
-      >
-        <div class="flex flex-row items-center justify-center gap-2">
-          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
-          <span class="text-white">joueur1</span>
-        </div>
-        <div class="flex flex-row items-center justify-center gap-2">
-          <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
-          <span class="text-white">joueur2</span>
-        </div>
-        <div class="flex items-center justify-center">
-          <span class="text-white">06.03.2003</span>
-        </div>
-      </div>
-
-    </div>
-  -->
 
     <script>
       loadGameHistory();
@@ -239,60 +197,50 @@ const htmlSnippetsTemplate: {
     </div>
   `,
   Login: `
-  <!--
-    <div id="app" class="h-dvh w-dvw">
   <div class="flex size-full flex-col items-center gap-y-1 rounded-2xl bg-[#262d5f] p-3">
-    <div class="m-auto h-120 w-100 flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
-      <form id="login-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white **:text-white">
-        <div class="my-5 mb-10 text-center text-4xl font-extrabold">Login</div>
+    <div class="m-auto h-130 w-100 flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
+      <form id="login-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white" hidden>
+        <div class="my-5 mb-10 text-center text-4xl font-bold">Login</div>
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="Username" />
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="Password" />
-        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-extrabold">Login</button>
 
-        <button id="goToGithub" onClick="loginWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] font-bold hover:bg-linear-to-r">
-          <svg class="me-4 inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
+        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">Login</button>
+
+        <button id="goToGithub" onClick="loginWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5">
+          <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
           Login with Github
         </button>
-        pas de compte ? <span onclick="document.getElementById('chat-input').hidden = false; document.getElementById('chat-input').hidden = true">nique ta mere </span>
+        <span>
+          pas de compte ?
+          <span onclick="document.getElementById('register-form').hidden = false; document.getElementById('login-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">nique ta mere </span>
+        </span>
+      </form>
+      <form id="register-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white">
+        <div class="mt-5 text-center text-4xl font-bold">Sign in</div>
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="Username" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="Password" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password-confirm" placeholder="Confirm Password" />
+
+        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">Sign in</button>
+
+        <button id="goToGithub" onClick="loginWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl">
+          <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
+          </svg>
+          Sign in with Github
+        </button>
+        <span>
+          deja un compte ?
+          <span onclick="document.getElementById('login-form').hidden = false; document.getElementById('register-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">nique ta mere </span>
+        </span>
       </form>
     </div>
   </div>
-</div>
-  -->
-  <div class="bg-gray-800 rounded-2xl p-3 size-full flex flex-col gap-y-1">
-  <span class="grid grid-cols-2 grid-rows-2 place-items-center size-full *:border-3 *:bg-gray-600 *:border-gray-500 *:p-2 *:rounded *:gap-1 *:flex *:flex-col *:relative">
-    <form id="login-form">
-      <label class="text-white size-fit" for="username">[[username]]:</label>
-      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="text" name="username">
-      <label class="text-white size-fit" for="password">[[password]]:</label>
-      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit px-1" type="password" name="password">
-      <button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">[[login]]</button>
-    </form>
-    <form id="register-form">
-      <label class="text-white size-fit" for="username">[[username]]:</label>
-      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="text" name="username">
-      <label class="text-white size-fit" for="password">[[password]]:</label>
-      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password">
-      <label class="text-white size-fit" for="password">[[confirm password]]:</label>
-      <input spellcheck="false" class="text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
-      <button class="absolute left-3/4 bottom-0 -translate-x-1/2 translate-y-1/2 bg-gray-600 ring-3 ring-gray-500 text-white rounded px-1 hover:cursor-pointer" type="submit">[[register]]</button>
-    </form>
-    <button id="goToGithub" onClick="loginWithGithub()" type="button" class="text-white bg-[#0f1419] hover:bg-linear-to- from-green-400 via-green-500 to-green-600
-      focus:ring-4 focus:outline-none focus:ring-[#0f1419]/50 box-border border border-transparent font-medium leading-5 rounded-b text-sm px-4 py-2.5 text-center inline-flex items-center>
-      <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"> <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd">
-      /></svg> >
-      Sign in with Github
-    </button>
-    <div>
-      <p class="text-white size-fit">[[Welcome]]</p>
-    </div>
-  </span>
-  </div>
   `,
   Blank: `
-  
+
   `,
   Error: `
   <div class="flex flex-col items-center size-1/2 m-40 place-self-center">
