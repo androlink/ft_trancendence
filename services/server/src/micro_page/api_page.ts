@@ -224,7 +224,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
             draws: String(row.draws),
             ratio: row.losses
               ? String((row.wins / row.losses).toFixed(2))
-              : "¯\\_(ツ)_/¯",
+              : "N/A",
           },
           title: row.username,
           inner: "Profile2",

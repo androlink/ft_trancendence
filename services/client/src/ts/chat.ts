@@ -122,10 +122,9 @@ function WSconnect(): void {
   ws.addEventListener("message", (event) => {
     try {
       const receivemsg: WSmessage = JSON.parse(event.data);
-      console.log("[incoming message]:", receivemsg);
+      // console.log("[incoming message]:", receivemsg);
       // check type
       if (receivemsg.type === TypeMessage.pong) {
-        console.log("pong");
         lastPong = Date.now();
       } else if (receivemsg.type === TypeMessage.readyForDirectMessage) {
         sendOrQueue(
@@ -199,6 +198,7 @@ function showMessageToChat(message: WSmessage): boolean {
   const para = document.createElement("p");
   const userLink = document.createElement("span");
   const node = document.createTextNode(message.content);
+  para.className = "**:text-justify";
 
   switch (message.type) {
     case TypeMessage.message:
@@ -207,8 +207,8 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `${message.user}:`;
-      userLink.className =
-        "text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ";
+      userLink.className +=
+        "text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer break-keep ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -219,8 +219,8 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `${message.user}:`;
-      userLink.className =
-        "text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ";
+      userLink.className +=
+        "text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer break-keep ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -231,8 +231,8 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `${message.user}:`;
-      userLink.className =
-        "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ";
+      userLink.className +=
+        "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer break-keep  ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -243,7 +243,7 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `[Me] ${message.user}:`;
-      userLink.className =
+      userLink.className +=
         "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ";
       para.appendChild(userLink);
       para.appendChild(node);

@@ -1,5 +1,5 @@
 import { main } from "./app.js";
-import { setCtrlEventUsername } from "./html/events.js";
+import { sendMessage, setCtrlEventUsername } from "./html/events.js";
 import { InitConnectionChat, sendStatusMessage } from "./chat.js";
 
 //----------------------------------------------------------------------------#

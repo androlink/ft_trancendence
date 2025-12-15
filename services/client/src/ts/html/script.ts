@@ -20,43 +20,59 @@ function loadGameHistory(): void {
     .then((res) => res.json())
     .then((json) => {
       if (!json.length) {
-        tbody.innerHTML = `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td></td></tr>`;
-        tbody.firstElementChild.lastElementChild.textContent =
-          findLanguage("never played");
+        // tbody.innerHTML = `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td></td></tr>`;
+        // tbody.firstElementChild.lastElementChild.textContent =
+        //   findLanguage("never played");
         return;
       }
       const fragment = document.createDocumentFragment();
       for (let game of json) {
-        const tr = document.createElement("tr");
-        tr.className = "*:border *:border-gray-300 *:text-center";
+        const div = document.createElement("div");
+        div.className =
+          "rounded-2xl border border-gray-200 p-3 bg-[#1E244F] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
         for (let result of ["winner", "loser"]) {
-          const td = document.createElement("td");
+          if (result === "winner" && game[result] === username)
+            div.className =
+          "rounded-2xl border border-[#96DF9F] p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
+          const d = document.createElement("div");
+          d.className =
+            "cursor-pointer flex flex-row items-center justify-center gap-2 hover:text-bold";
+          const span = document.createElement("span");
           if (game[result] === null) {
-            td.textContent = findLanguage("deleted");
-            td.className = "text-red-300 cursor-not-allowed";
-            tr.append(td);
-            fragment.appendChild(tr);
+            span.textContent = findLanguage("deleted");
+            span.className = "text-red-300 cursor-not-allowed";
+            d.append(span);
+            div.append(d);
             continue;
           }
+          const img = document.createElement("img");
+          img.className = "size-8 aspect-square rounded-full";
+          img.src = `/resources/pfp/${game[result + "_pfp"]}`;
+          d.append(img);
           if (game[result] !== username) {
-            td.className = "cursor-pointer hover:bg-gray-500";
-            td.addEventListener("click", () =>
+            span.className = "text-white hover:text-bold";
+            span.addEventListener("click", () =>
               goToURL(`/profile/${encodeURIUsername(game[result])}`)
             );
           } else {
-            td.className = "text-gray-300";
+            span.className = "text-white";
           }
-          td.textContent = game[result];
-          tr.append(td);
+          span.textContent = game[result];
+          d.append(span);
+          div.append(d);
         }
-        const td = document.createElement("td");
+        const d = document.createElement("div");
+        const span = document.createElement("span");
+        d.className = "flex items-center justify-center";
+        span.className = "text-white";
         const time = new Date(game.time);
-        td.textContent = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${time.getDate()}/${
+        span.textContent = `${time.getHours()}:${time.getMinutes()} ${time.getDate()}/${
           time.getMonth() + 1
         }/${time.getFullYear()}`;
-        td.title = "HH:MM:SS DD/MM/YYYY";
-        tr.append(td);
-        fragment.appendChild(tr);
+        d.title = "HH:MM DD/MM/YYYY";
+        d.append(span);
+        div.append(d);
+        fragment.appendChild(div);
       }
       tbody.innerHTML = "";
       tbody.appendChild(fragment);
@@ -90,9 +106,13 @@ async function loadFriendsDisplay(): Promise<void> {
     });
     if (res.status != 200) {
       if (grid) {
-        if (grid.firstElementChild) grid.firstElementChild.textContent = selectLanguage(["error occured", String(res.status)]);
+        if (grid.firstElementChild)
+          grid.firstElementChild.textContent = selectLanguage([
+            "error occured",
+            String(res.status),
+          ]);
       }
-      return ;
+      return;
     }
     const json = await res.json();
     if (json[0] <= 16 * (page - 1)) {

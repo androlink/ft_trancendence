@@ -144,7 +144,7 @@ export function prepareNextGame(lastWinner: 0 | 1): void {
       ])
     );
     resetNextInner();
-    main(false, false);
+    main({requests: false});
     return;
   }
   remainingPlayers.push(players[lastWinner].view.name);
@@ -155,7 +155,7 @@ export function prepareNextGame(lastWinner: 0 | 1): void {
     sendMessage(selectLanguage(["congrats", players[lastWinner].view.name]));
     abortTournament();
     resetNextInner();
-    main(false, false);
+    main({requests: false});
     return;
   }
   sendMessage(

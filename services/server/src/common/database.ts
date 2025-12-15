@@ -98,6 +98,10 @@ export async function initDB() {
           .run("AllMighty", pass, "ADMIN", 1)
       )
       .catch(console.error);
+    db.prepare(
+      "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+    ).run(1, 2, "win");
+
     console.log("DataBase created");
   });
   try {

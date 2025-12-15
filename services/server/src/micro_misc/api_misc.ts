@@ -47,12 +47,17 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
     const statement2 = db.prepare<
       { targetId: Id },
       { time: string; winner: string; loser: string }
-    >(`SELECT 
-          strftime('%Y-%m-%dT%H:%M:%fZ', time) AS time,
-          (SELECT username FROM users WHERE id = h.player_one AND h.result_type = 'win' OR id = h.player_two AND h.result_type = 'loss') AS winner,
-          (SELECT username FROM users WHERE id = h.player_two AND h.result_type = 'win' OR id = h.player_one AND h.result_type = 'loss') AS loser
-        FROM history_game h 
-        WHERE player_one = :targetId OR player_two = :targetId`);
+    >(`SELECT
+        strftime('%Y-%m-%dT%H:%M:%fZ', h.time) AS time,
+        winner.username AS winner,
+        winner.pfp      AS winner_pfp,
+        loser.username  AS loser,
+        loser.pfp       AS loser_pfp
+      FROM history_game h
+      LEFT JOIN users AS winner ON ((h.result_type = 'win' AND winner.id = h.player_one) OR (h.result_type = 'loss' AND winner.id = h.player_two))
+      LEFT JOIN users AS loser ON ((h.result_type = 'win' AND loser.id = h.player_two) OR (h.result_type = 'loss' AND loser.id = h.player_one))
+      WHERE h.player_one = :targetId OR h.player_two = :targetId;
+    `);
     fastifyInstance.get<{ Querystring: { user: string } }>(
       "/history",
       (req, reply) => {

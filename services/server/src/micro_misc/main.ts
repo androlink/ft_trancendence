@@ -3,7 +3,6 @@ import fastifyJWT from "@fastify/jwt";
 
 import miscRoute from "./api_misc";
 import { initDB } from "../common/database";
-import { err } from "pino-std-serializers";
 import { Id, JwtUserPayload } from "../common/types";
 
 // if changed for better naming convention
@@ -32,6 +31,9 @@ fastify.register(fastifyJWT, {
 });
 
 fastify.register(miscRoute, { prefix: "/api/misc" });
+fastify.register(fastifyJWT, {
+  secret: process.env.JWT_SECURITY_KEY || "",
+});
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
