@@ -315,6 +315,29 @@ function sendOrQueue(message: string) {
   }
 }
 
+const histrory: string[] = [];
+let line = -1;
+
+function getHistory(line: number): string | null {
+  if (line < 0 || line >= histrory.length) return null;
+  return histrory[line];
+}
+
+export function ChatHistoryAdd(message: string) {
+  if (histrory[0] !== message) histrory.unshift(message);
+  ChatResetHistoryLine();
+}
+
+export function ChatHistoryRequest(req: "up" | "down"): string | null {
+  if (req === "up" && line < histrory.length - 1) line++;
+  else if (req === "down" && line >= 0) line--;
+  return getHistory(line);
+}
+
+export function ChatResetHistoryLine() {
+  line = -1;
+}
+
 /**
  * Send message to the chat
  * - can send Direct messgage with /msg commands
@@ -324,6 +347,7 @@ function sendOrQueue(message: string) {
 export function sendChatMessage() {
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
   if (!textarea || !textarea.value) return;
+  ChatHistoryAdd(textarea.value);
   if (textarea.value.length > 280) {
     const err: WSmessage = {
       user: null,

@@ -16,6 +16,8 @@ import {
   sendChatMessage,
   InitConnectionChat,
   sendStatusMessage,
+  ChatHistoryRequest,
+  ChatResetHistoryLine,
 } from "../chat.js";
 
 /**
@@ -23,7 +25,7 @@ import {
  */
 export function setEvents(): void {
   const events = {
-    "chat-input": setEnterEventChat,
+    "chat-input": setEventChat,
     "user-search": setMultipleEventUsername,
     "pfp-form": setSubmitEventPfp,
     "login-form": setSubmitEventLogin,
@@ -444,12 +446,17 @@ function setClickEventFriendRequest(text: HTMLElement): void {
  * used by the chat input, send message on enter
  * @param textarea the said chat input element
  */
-function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+function setEventChat(textarea: HTMLTextAreaElement): void {
   InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendChatMessage();
+      ChatResetHistoryLine();
+    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      const msg = ChatHistoryRequest(event.key === "ArrowDown" ? "down" : "up");
+      textarea.value = msg ? msg : "";
     }
   });
 }
@@ -574,7 +581,7 @@ function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
   select.addEventListener("change", (e) => {
     localStorage.setItem("language", select.value);
     setLanguage();
-    main({force: true, requests: false});
+    main({ force: true, requests: false });
   });
 }
 
