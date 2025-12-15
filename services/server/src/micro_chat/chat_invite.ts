@@ -6,12 +6,11 @@ import {
   Id,
   InternalCreateResponse,
   InternalCreateRequestBody,
+  RemotePongReasonCode,
 } from "../common/types";
 
 import db from "../common/database";
 import { fastify } from "./main";
-import { send } from "process";
-import { req, res } from "pino-std-serializers";
 
 import { DirectMessage, connectedClients } from "./chat_route";
 
@@ -39,20 +38,20 @@ function get_player(
     );
     const sender: { id: Id } | null = fastify.jwt.decode(token);
     if (sender === null)
-      return { status: false, reason: "you are not connected" };
+      return { status: false, reason: RemotePongReasonCode.NOT_CONNECTED };
     const player1 = get_user_from_id.get({ id: sender.id });
     const player2 = get_user_from_name.get({ username: target! });
     if (player2 === undefined || player1 === undefined)
-      return { status: false, reason: "can't find players" };
+      return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
     const is_blocked = get_is_user_blocked.get({
       user1: player1.id,
       user2: player2.id,
     });
     if (is_blocked !== undefined)
-      return { status: false, reason: "can't find players" };
+      return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
     return { status: true, player1, player2 };
   } catch (e) {
-    return { status: false, reason: "you are not connected" };
+    return { status: false, reason: RemotePongReasonCode.NOT_CONNECTED };
   }
 }
 
@@ -111,7 +110,7 @@ export async function invite_message(event: WebSocket.MessageEvent) {
       JSON.stringify({
         type: TypeMessage.replyInvite,
         status: false,
-        reason: "internal error",
+        reason: "INTERNAL_SERVER_ERROR",
       } as WSmessage)
     );
     return;

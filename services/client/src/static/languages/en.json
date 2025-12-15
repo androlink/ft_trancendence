@@ -94,5 +94,13 @@
   "ERR_400": "Bad Request",
   "ERR_404": "are you lost by any chance ?",
   "ERR_409": "409 conflict",
-  "ERR_413": "Payload too large"
+  "ERR_413": "Payload too large",
+  "R_NOT_CONNECTED" : "you are not connected",
+  "USER_NOT_FOUND" : "the user was not found",
+  "GAME_NOT_FOUND" : "the game was not found",
+  "CANNOT_JOIN_GAME" : "you cannot join this game",
+  "GAME_ALREADY_STARTED" : "game already started",
+  "CANNOT_PLAY_WITH_YOURSELF" : "you cannot play with yourself",
+  "INVALID_REQUEST" : "invalid request",
+  "INTERNAL_SERVER_ERROR" : "something went wrong on our side, sorry UwU"
 }

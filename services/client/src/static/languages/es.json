@@ -94,5 +94,13 @@
   "ERR_400": "solicitud incorrecta",
   "ERR_404": "¿Estás perdido por alguna razón?",
   "ERR_409": "409 conflicto",
-  "ERR_413": "carga útil demasiado grande"
+  "ERR_413": "carga útil demasiado grande",
+    "R_NOT_CONNECTED" : "no estás conectada",
+  "USER_NOT_FOUND" : "el usuario no fue encontrado",
+  "GAME_NOT_FOUND" : "el juego no fue encontrado",
+  "CANNOT_JOIN_GAME" : "no puedes unirte a este juego",
+  "GAME_ALREADY_STARTED" : "el juego ya ha comenzado",
+  "CANNOT_PLAY_WITH_YOURSELF" : "no puedes jugar contigo misma",
+  "INVALID_REQUEST" : "solicitud inválida",
+  "INTERNAL_SERVER_ERROR" : "algo salió mal de nuestro lado, lo siento UwU"
 }

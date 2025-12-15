@@ -1,3 +1,4 @@
+import { findLanguage } from "./html/templates.js";
 import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
@@ -16,6 +17,17 @@ enum TypeMessage {
   replyInvite = "replyInvite",
   ping = "ping",
   pong = "pong",
+}
+
+export enum RemotePongReasonCode {
+  NOT_CONNECTED = "R_NOT_CONNECTED",
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  GAME_NOT_FOUND = "GAME_NOT_FOUND",
+  CANNOT_JOIN_GAME = "CANNOT_JOIN_GAME",
+  GAME_ALREADY_STARTED = "GAME_ALREADY_STARTED",
+  CANNOT_PLAY_WITH_YOURSELF = "CANNOT_PLAY_WITH_YOURSELF",
+  INVALID_REQUEST = "INVALID_REQUEST",
+  INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
 }
 
 /**
@@ -38,6 +50,7 @@ type WSmessage =
       type: TypeMessage.replyInvite;
       status: false;
       reason: string;
+      info?: string;
     }
   | {
       type: Exclude<TypeMessage, TypeMessage.replyInvite>;
@@ -77,7 +90,8 @@ function invite_message(event: MessageEvent) {
   }
   const para = document.createElement("p");
   if (message.status === false) {
-    const node = document.createTextNode(message.reason);
+    const reason = findLanguage(message.reason);
+    const node = document.createTextNode(reason);
     para.appendChild(node);
   } else {
     const userLink = document.createElement("span");

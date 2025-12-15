@@ -5,7 +5,7 @@ import { fastify } from "./main.ts";
 import "@fastify/websocket";
 import WebSocket from "ws";
 
-import { Id } from "../common/types.ts";
+import { Id, RemotePongReasonCode } from "../common/types.ts";
 import { GameWebSocket, JoinType, PongMessageType } from "./local_type.ts";
 
 import { pong_party_add_player } from "./pong_party.ts";
@@ -27,10 +27,10 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
       JSON.stringify({
         type: "join",
         status: false,
-        reason: "you are not connected",
+        reason: RemotePongReasonCode.NOT_CONNECTED,
       })
     );
-    return ws.close(3000, "you are not connected");
+    return ws.close(3000, RemotePongReasonCode.NOT_CONNECTED);
   }
   (ws as GameWebSocket).id = id;
   const room_id = payload.room_id;
@@ -39,20 +39,20 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
       JSON.stringify({
         type: "join",
         status: false,
-        reason: `room ${payload.room_id} not found`,
+        reason: RemotePongReasonCode.GAME_NOT_FOUND,
       })
     );
-    return ws.close(3001, `room ${payload.room_id} not found`);
+    return ws.close(3001, RemotePongReasonCode.GAME_NOT_FOUND);
   }
   if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false) {
     ws.send(
       JSON.stringify({
         type: "join",
         status: false,
-        reason: "cannot join game",
+        reason: RemotePongReasonCode.CANNOT_JOIN_GAME,
       })
     );
-    return ws.close(3002, "cannot join game");
+    return ws.close(3002, RemotePongReasonCode.CANNOT_JOIN_GAME);
   }
   return ws.send(JSON.stringify({ type: "join", status: true }));
 }

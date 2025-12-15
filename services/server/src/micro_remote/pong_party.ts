@@ -1,8 +1,6 @@
 import { GameWebSocket, PongMessageType } from "./local_type";
-import { Id, UserRow } from "../common/types";
+import { Id, RemotePongReasonCode, UserRow } from "../common/types";
 import db from "../common/database";
-import { WebSocket } from "ws";
-import { PlayerEntity } from "./engine/engine_interfaces";
 import { PongEngine } from "./engine/Engine";
 import { randomUUID } from "crypto";
 
@@ -43,7 +41,7 @@ export function pong_party_create(
 ): { status: false; reason: string } | { status: true; room_id: string } {
   const players_name = players_id.map((id) => get_username(id));
   if (!players_name.every((pn) => pn !== undefined))
-    return { status: false, reason: "one of player is not found" };
+    return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
   let game_id = randomUUID();
   while (games.has(game_id) === true) game_id = randomUUID();
   let game = new PongEngine(players_name as string[], players_id, 5);

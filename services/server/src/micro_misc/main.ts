@@ -31,9 +31,6 @@ fastify.register(fastifyJWT, {
 });
 
 fastify.register(miscRoute, { prefix: "/api/misc" });
-fastify.register(fastifyJWT, {
-  secret: process.env.JWT_SECURITY_KEY || "",
-});
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
