@@ -93,7 +93,69 @@ export async function initDB() {
     db.prepare(
       "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
     ).run("AllMighty", AllMightyPasswordHashed, "ADMIN", 1);
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "loss");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "loss");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "loss");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "loss");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "win");
+	db.prepare(
+		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+	).run(1, 2, "loss");
+
     console.log("DataBase created");
+
   });
   try {
     createDB.exclusive();

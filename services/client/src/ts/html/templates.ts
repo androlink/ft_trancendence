@@ -122,7 +122,7 @@ const htmlSnippetsTemplate: {
       <div class="flex flex-col justify-start h-60">
         <div class ="flex flex-row *:mt-10 *:mb-4">
           <h1 class="text-white select-text font-Hammer text-6xl" id="username-p2"></h1>
-          <div class="dropdown px-1">    
+          <div class="dropdown px-1">
             <style>
               .dropdown:hover .dropdown-content {display: flex;}
             </style>
@@ -134,7 +134,7 @@ const htmlSnippetsTemplate: {
                 </li>
                 <li>
                   <a id="blocking request">block !</a>
-                </li>             
+                </li>
               </ul>
             </div>
           </div>
@@ -169,12 +169,12 @@ const htmlSnippetsTemplate: {
       class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col"
     >
       <div class="grid grid-cols-10 text-white items-center text-center mb-2">
-        <span class="col-span-3">Vainqueur</span>
-        <span class="col-span-3">Perdant</span>
-        <span class="col-span-4">Date</span>
+        <span class="col-span-3">[[winner]]</span>
+        <span class="col-span-3">[[loser]]</span>
+        <span class="col-span-4">[[date]]</span>
       </div>
 
-      <div class="rounded-2xl border border-gray-200 p-3 bg-[#1E244F] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2">
+      <div class="rounded-2xl border border-gray-200 p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2">
         <div class="flex flex-row items-center justify-center gap-2">
           <img src="/resources/pfp/default.jpg" class="size-8 aspect-square rounded-full" />
           <span class="text-white">joueur1</span>
@@ -188,7 +188,7 @@ const htmlSnippetsTemplate: {
         </div>
       </div>
       <div
-        class="rounded-2xl border border-gray-200 p-3 bg-[#1E244F] 
+        class="rounded-2xl border border-gray-200 p-3 bg-[#1E244F]
               grid grid-cols-1 sm:grid-cols-3 gap-4 my-2"
       >
         <div class="flex flex-row items-center justify-center gap-2">
@@ -203,7 +203,7 @@ const htmlSnippetsTemplate: {
           <span class="text-white">06.03.2003</span>
         </div>
       </div>
-      
+
     </div>
   -->
 
@@ -213,9 +213,9 @@ const htmlSnippetsTemplate: {
     </script>
     <div class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col">
       <div class="grid grid-cols-10 text-white items-center text-center mb-2">
-        <span class="col-span-3">Vainqueur</span>
-        <span class="col-span-3">Perdant</span>
-        <span class="col-span-4">Date</span>
+        <span class="col-span-3">[[winner]]</span>
+        <span class="col-span-3">[[loser]]</span>
+        <span class="col-span-4">[[date]]</span>
       </div>
       <div id="history-tbody">
       </div>

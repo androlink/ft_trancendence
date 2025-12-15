@@ -31,6 +31,9 @@ function loadGameHistory(): void {
         div.className =
           "rounded-2xl border border-gray-200 p-3 bg-[#1E244F] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
         for (let result of ["winner", "loser"]) {
+          if (result === "winner" && game[result] === username)
+            div.className =
+          "rounded-2xl border border-[#96DF9F] p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
           const d = document.createElement("div");
           d.className =
             "cursor-pointer flex flex-row items-center justify-center gap-2 hover:text-bold";
