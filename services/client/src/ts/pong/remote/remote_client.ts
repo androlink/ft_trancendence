@@ -37,7 +37,6 @@ function eventKeyInputPong(event: KeyboardEvent) {
       let message: string = "";
       message = control.pressed ? "press" : "release";
       message += i === 0 ? "Up" : "Down";
-      console.log("input:" + control.key);
       ws.send(JSON.stringify({ type: "input", input: message }));
     }
   });
@@ -76,35 +75,24 @@ function ws_connect(game_id: string) {
   if (ws) {
     return;
   }
-  console.log("Connecting to remote pong websocket...");
   ws = new WebSocket("/api/remote");
   ws.onopen = () => {
-    console.log("WebSocket connection established");
     sendJoinMessage(game_id);
     pingTimeout = setTimeout(() => ws_ping(), ping_time);
   };
   ws.addEventListener("close", (event) => {
-    console.log(event.code, event.reason);
     ws_delete();
   });
   ws.onerror = (error) => {
     console.error("WebSocket error:", error);
     ws_delete();
   };
-  ws.onmessage = (event) => {
-    ws_message(event);
-  };
-  ws.addEventListener("message", (event) => {
-    console.log(event);
-    ws_message_pong(event.data.toString());
-  });
+  ws.addEventListener("message", ws_message_pong);
   ws.addEventListener("message", ws_join);
 }
 
-self["ws_connect"] = ws_connect;
-
-function ws_message_pong(message: string) {
-  const messageObject = JSON.parse(message) as PongMessageType;
+function ws_message_pong(event: MessageEvent) {
+  const messageObject = JSON.parse(event.data) as PongMessageType;
   if (messageObject.type !== "pong") return;
 
   let ping_id: number = messageObject.payload;
@@ -123,7 +111,6 @@ function ws_join(event: MessageEvent) {
 
   if (message.status === true) {
     goToURL("netplay", true);
-    console.log("popstate added");
     self.addEventListener("popstate", ws_delete, { once: true });
 
     ws.addEventListener("message", (event) => {
@@ -157,11 +144,6 @@ function ws_message_update(ws: WebSocket, message: string) {
   try {
     display.update(messageObject.payload);
   } catch {}
-}
-
-function ws_message(event) {
-  let message = JSON.parse(event.data.toString()) as PongMessageType;
-  console.log("message:", message);
 }
 
 function ws_ping() {

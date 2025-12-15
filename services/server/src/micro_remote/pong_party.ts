@@ -5,7 +5,6 @@ import { WebSocket } from "ws";
 import { PlayerEntity } from "./engine/engine_interfaces";
 import { PongEngine } from "./engine/Engine";
 import { randomUUID } from "crypto";
-import { info } from "console";
 
 let games: Map<string, PongEngine> = new Map();
 
@@ -22,6 +21,7 @@ let get_username: (id: Id) => string | undefined;
 }
 
 function pong_party_log() {
+  if (games.size === 0) return;
   let infos: string[] = [];
   infos.push("============= game log =============");
   infos.push(`game found: ${games.size}`);
@@ -41,9 +41,7 @@ setInterval(pong_party_log, 30000);
 export function pong_party_create(
   players_id: Id[]
 ): { status: false; reason: string } | { status: true; room_id: string } {
-  console.log("players_id", players_id);
   const players_name = players_id.map((id) => get_username(id));
-  console.log("players_name", players_name);
   if (!players_name.every((pn) => pn !== undefined))
     return { status: false, reason: "one of player is not found" };
   let game_id = randomUUID();
@@ -51,13 +49,13 @@ export function pong_party_create(
   let game = new PongEngine(players_name as string[], players_id, 5);
   game.setId(game_id);
   games.set(game_id, game);
-  console.log(game);
   game.addEventListener("abort", () => {
     pong_party_abort(game_id);
   });
   game.addEventListener("finish", () => {
     pong_party_finish(game_id);
   });
+  console.info(`new game created with id ${game_id}`);
   return { status: true, room_id: game.getId() };
 }
 

@@ -8,11 +8,7 @@ import WebSocket from "ws";
 import { Id } from "../common/types.ts";
 import { GameWebSocket, JoinType, PongMessageType } from "./local_type.ts";
 
-import {
-  pong_party_add_player,
-  pong_party_create,
-  pong_party_exists,
-} from "./pong_party.ts";
+import { pong_party_add_player } from "./pong_party.ts";
 
 async function authenticate(token: string): Promise<Id | null> {
   try {
@@ -82,15 +78,29 @@ async function ws_message_ping(ws: WebSocket, message: string) {
 }
 
 function client_entrypoint(ws: WebSocket, req: FastifyRequest) {
-  ws.addEventListener("open", (event) => {
-    event.target;
-  });
-  ws.addEventListener("open", (event) => {
-    console.log("new client");
-  });
-  ws.addEventListener("error", (event) => {
-    console.log("websocket error:", event.message);
-  });
+  ws.addEventListener(
+    "open",
+    (event) => {
+      console.log("new client");
+    },
+    { once: true }
+  );
+  ws.addEventListener(
+    "error",
+    (event) => {
+      console.log("websocket error:", event.message);
+      ws.close();
+    },
+    { once: true }
+  );
+  ws.addEventListener(
+    "close",
+    (event) => {
+      console.log("websocket close:", event.reason);
+      ws.close();
+    },
+    { once: true }
+  );
   ws.addEventListener("message", (event) => {
     ws_message_join(event.target, event.data.toString());
   });
