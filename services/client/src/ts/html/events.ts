@@ -536,7 +536,7 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
   let searchController: AbortController | null = null;
   textarea.addEventListener("input", async (e) => {
     textarea.value = Array.from(
-      textarea.value.matchAll(/[0-9a-zA-Z_:]/g),
+      textarea.value.matchAll(/[0-9a-zA-Z_-]/g),
       (m) => m[0]
     ).join("");
     try {

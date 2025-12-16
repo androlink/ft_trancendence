@@ -9,7 +9,7 @@ async function githubLogin() {
     return;
   }
   try {
-    const res = await fetch("/api/github/getUserData", {
+    const res = await fetch("/api/account/github/getUserData", {
       method: "GET",
       headers: {
         Authorization: "Bearer " + localStorage.getItem("access_token"),
@@ -19,7 +19,7 @@ async function githubLogin() {
     console.log(userData);
     if (!userData) return;
 
-    const response = await fetch("/api/github/connection", {
+    const response = await fetch("/api/account/github/connection", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -46,6 +46,7 @@ async function githubLogin() {
   // window.location.search = "";
   main();
 }
+self["loginWithGithub"] = loginWithGithub;
 
 window.addEventListener("DOMContentLoaded", async () => {
   const url = new URL(window.location.href);
@@ -54,7 +55,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (code) {
-      const res = await fetch(`/api/github/getAccessToken?code=${code}`, {
+      const res = await fetch(`/api/account/github/getAccessToken?code=${code}`, {
         method: "GET",
       });
       const data = await res.json();
