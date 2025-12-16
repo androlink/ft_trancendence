@@ -62,6 +62,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://resources_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   error_microservice:
@@ -78,6 +83,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://error_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   page_microservice:
@@ -94,6 +104,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://page_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   misc_microservice:
@@ -110,6 +125,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://misc_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   account_microservice:
@@ -126,6 +146,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://account_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   chat_microservice:
@@ -142,6 +167,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://chat_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   remote_microservice:
@@ -158,6 +188,11 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://remote_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   #----------------------------------------------------------------------------#
