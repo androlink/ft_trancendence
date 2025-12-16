@@ -182,7 +182,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
   up.className = "text-white border border-black rounded px-1 cursor-pointer";
   up.onclick = (e) => changeInput(e, "up", playerId);
   div.append(up);
-  const down = document.createElement("p");
+  const down = document.createElement("button");
   down.textContent = players[playerId].down.key;
   down.className = "text-white border border-black rounded px-1 cursor-pointer";
   down.onclick = (e) => changeInput(e, "down", playerId);

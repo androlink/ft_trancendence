@@ -18,13 +18,13 @@ const htmlSnippetsTemplate: {
   RemotePong: string;
 } = {
   Home: `
-  <span class="grid grid-cols-3 mx-8 my-2">
-    <div class="relative justify-self-start">
+  <span class="flex justify-between grid-cols-3 mx-8 my-2">
+    <div class="relative">
       <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <input type="text" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
+    <input type="text" maxlength="30" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none w-140"/>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -70,6 +70,34 @@ const htmlSnippetsTemplate: {
   </span>
   `,
   Profile1: `
+  <!-- <div class="h-dvh w-dvw">
+  <!-- <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin absolute top-0 right-0" onclick="resetNextInner(); main()"/> -->
+  <div class="flex size-full flex-col justify-items-center overflow-y-scroll rounded-md bg-[#262d5f]">
+    <div class="mx-auto h-full w-2/4 flex-col gap-4 border-x border-white bg-[#171C3D]">
+      <form class="flex flex-col p-5">
+        <span class="mx-auto text-2xl text-white select-text">Public info</span>
+
+        <img id="profile-picture" class="m-8 mx-auto aspect-square h-40 w-40 rounded-full bg-amber-50" src="${assetsPath}/default-avatar.jpg" />
+
+        <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
+          <div class="flex flex-col justify-items-center rounded border border-gray-400">
+            <p class="mb-1 text-white">[[username]]:</p>
+            <input id="username-p1" value="FEUR" class="font-Hammer rounded text-white select-text focus:bg-[#171c3d71]" type="text" name="username" />
+          </div>
+          <div class="w-full rounded border border-gray-400 focus:border-blue-400">
+            <p class="mb-1 text-white">[[biography]]:</p>
+            <textarea id="biography-p1" class="flex w-full resize-none overflow-auto rounded-md p-1 text-[#D8D8D8] select-text" maxlength="400" id="biography-p2"> </textarea>
+          </div>
+        </div>
+        <button class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-500" type="submit">[[update]]</button>
+      </form>
+      <div class="transform-none">
+        <div class="mx-auto my-3 h-px w-9/12 transform-[translateZ(0)] bg-gray-100"></div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
@@ -158,7 +186,7 @@ const htmlSnippetsTemplate: {
             <h2 id="wins" class="text-[#96DF9F] font-bold text-4xl text-center col-start-2 col-span-2"></h2>
           </div>
           <div class="grid grid-cols-3 px-3  border-l-2 border-gray-200 *:my-auto">
-            <h2 class="text-white font-bold text-2xl text-center"><span class="block">[[losses]]</h2>
+            <h2 class="text-white font-bold text-2xl texIt-center"><span class="block">[[losses]]</h2>
             <h2 id="losses" class="text-[#DF9696] font-bold text-4xl text-center col-start-2 col-span-2 "></h2>
           </div>
         </div>
