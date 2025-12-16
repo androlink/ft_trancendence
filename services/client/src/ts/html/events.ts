@@ -26,7 +26,7 @@ export function setEvents(): void {
     "chat-input": setEnterEventChat,
     "user-search": setMultipleEventUsername,
     "pfp-form": setSubmitEventPfp,
-    "login-form": setSubmitEventLogin,
+    "log-in-form": setSubmitEventLogIn,
     "register-form": setSubmitEventRegister,
     "blocking request": setClickEventBlockRequest,
     "friend request": setClickEventFriendRequest,
@@ -82,7 +82,7 @@ function needConnection(form: HTMLFormElement): boolean {
 }
 
 /**
- * used by the login form, the default event can't be used in SPA (redirect)
+ * used by the log in form, the default event can't be used in SPA (redirect)
  * @param form the said form element
  */
 function setSubmitEventPfp(form: HTMLFormElement): void {
@@ -120,7 +120,7 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
   });
 }
 
-function setSubmitEventLogin(form: HTMLFormElement): void {
+function setSubmitEventLogIn(form: HTMLFormElement): void {
   form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);

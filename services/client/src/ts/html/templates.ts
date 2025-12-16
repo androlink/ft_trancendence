@@ -9,7 +9,7 @@ const htmlSnippetsTemplate: {
   readonly Profile1: string;
   readonly Profile2: string;
   readonly Friend: string;
-  readonly Login: string;
+  readonly LogIn: string;
   readonly Blank: string;
   readonly Error: string;
   readonly Ouch: string;
@@ -52,7 +52,7 @@ const htmlSnippetsTemplate: {
       </div>
       <div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[not connected]]</p>
-        <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[login page]]</button>
+        <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[log in page]]</button>
       </div>
       <div class="rounded-md size-full bg-[#E9E9E9] flex flex-col">
         <div id="chat-content" class=" overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
@@ -196,44 +196,44 @@ const htmlSnippetsTemplate: {
       </span>
     </div>
   `,
-  Login: `
+  LogIn: `
   <div class="flex size-full flex-col items-center gap-y-1 rounded-2xl bg-[#262d5f] p-3">
     <div class="m-auto h-130 w-100 flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
-      <form id="login-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white" hidden>
-        <div class="my-5 mb-10 text-center text-4xl font-bold">Login</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="Username" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="Password" />
+      <form id="log-in-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white" hidden>
+        <div class="my-5 mb-10 text-center text-4xl font-bold">[[log in]]</div>
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="[[password]]" />
 
-        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">Login</button>
+        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">[[log in]]</button>
 
-        <button id="goToGithub" onClick="loginWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5">
+        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5">
           <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
-          Login with Github
+          [[log in github]]
         </button>
         <span>
           pas de compte ?
-          <span onclick="document.getElementById('register-form').hidden = false; document.getElementById('login-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">nique ta mere </span>
+          <span onclick="document.getElementById('register-form').hidden = false; document.getElementById('log-in-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[register]]</span>
         </span>
       </form>
       <form id="register-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white">
-        <div class="mt-5 text-center text-4xl font-bold">Sign in</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="Username" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="Password" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password-confirm" placeholder="Confirm Password" />
+        <div class="mt-5 text-center text-4xl font-bold">[[register]]</div>
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="[[password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password-confirm" placeholder="[[confirm password]]" />
 
-        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">Sign in</button>
+        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">[[register]]</button>
 
-        <button id="goToGithub" onClick="loginWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl">
+        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl">
           <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
-          Sign in with Github
+          [[register github]]
         </button>
         <span>
-          deja un compte ?
-          <span onclick="document.getElementById('login-form').hidden = false; document.getElementById('register-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">nique ta mere </span>
+          [[already an account]]
+          <span onclick="document.getElementById('log-in-form').hidden = false; document.getElementById('register-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[log in]]</span>
         </span>
       </form>
     </div>

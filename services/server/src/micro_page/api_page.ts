@@ -51,7 +51,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
         return void reply.code(403).send({
           template: "Home",
           title: ["LOGIN"],
-          inner: "Login",
+          inner: "LogIn",
         });
       }
       const row = statement1.get({ id: req.user.id });
@@ -61,7 +61,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
         return void reply.send({
           template: "Home",
           title: ["LOGIN"],
-          inner: "Login",
+          inner: "LogIn",
         });
       }
       req.user.username = row.username;

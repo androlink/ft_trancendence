@@ -72,7 +72,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-export function loginWithGithub() {
+export function logInWithGithub() {
   window.location.assign(
     `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=read:user%20user:email`
   );

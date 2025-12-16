@@ -176,7 +176,7 @@ export default function authentification(fastify: FastifyInstance) {
   }
 
   /**
-   * create a account or login if a user use Github
+   * create a account or log in if a user use Github
    */
   fastify.post<{
     Body: { username: string; githubId: number; pdp: URL; bio: string };
