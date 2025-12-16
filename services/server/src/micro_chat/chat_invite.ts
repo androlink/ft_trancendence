@@ -16,43 +16,46 @@ import { DirectMessage, connectedClients } from "./chat_route";
 
 const request_url = "http://remote_microservice:3000/api/create";
 
-function get_player(
-  token: string,
+let getPlayer: (
+  tocken: string,
   target: string
-):
+) =>
   | { status: true; player1: UserRow; player2: UserRow }
-  | { status: false; reason: string } {
-  try {
-    const get_user_from_name = db.prepare<{ username: string }, UserRow>(
-      "SELECT * FROM users WHERE lower(username) = lower(:username)"
-    );
-    const get_user_from_id = db.prepare<{ id: Id }, UserRow>(
-      "SELECT * FROM users WHERE id = :id"
-    );
+  | { status: false; reason: string };
+{
+  const get_user_from_name = db.prepare<{ username: string }, UserRow>(
+    "SELECT * FROM users WHERE lower(username) = lower(:username)"
+  );
+  const get_user_from_id = db.prepare<{ id: Id }, UserRow>(
+    "SELECT * FROM users WHERE id = :id"
+  );
+  const get_is_user_blocked = db.prepare<
+    { user1: Id; user2: Id },
+    { blocker_id: Id; blocked_id: Id }
+  >(
+    "SELECT * FROM user_blocks WHERE blocker_id = :user2 AND blocked_id = :user1;"
+  );
 
-    const get_is_user_blocked = db.prepare<
-      { user1: Id; user2: Id },
-      { blocker_id: Id; blocked_id: Id }
-    >(
-      "SELECT * FROM user_blocks WHERE blocker_id = :user2 AND blocked_id = :user1;"
-    );
-    const sender: { id: Id } | null = fastify.jwt.decode(token);
-    if (sender === null)
+  getPlayer = function (token: string, target: string) {
+    try {
+      const sender: { id: Id } | null = fastify.jwt.decode(token);
+      if (sender === null)
+        return { status: false, reason: RemotePongReasonCode.NOT_CONNECTED };
+      const player1 = get_user_from_id.get({ id: sender.id });
+      const player2 = get_user_from_name.get({ username: target! });
+      if (player2 === undefined || player1 === undefined)
+        return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
+      const is_blocked = get_is_user_blocked.get({
+        user1: player1.id,
+        user2: player2.id,
+      });
+      if (is_blocked !== undefined)
+        return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
+      return { status: true, player1, player2 };
+    } catch (e) {
       return { status: false, reason: RemotePongReasonCode.NOT_CONNECTED };
-    const player1 = get_user_from_id.get({ id: sender.id });
-    const player2 = get_user_from_name.get({ username: target! });
-    if (player2 === undefined || player1 === undefined)
-      return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
-    const is_blocked = get_is_user_blocked.get({
-      user1: player1.id,
-      user2: player2.id,
-    });
-    if (is_blocked !== undefined)
-      return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
-    return { status: true, player1, player2 };
-  } catch (e) {
-    return { status: false, reason: RemotePongReasonCode.NOT_CONNECTED };
-  }
+    }
+  };
 }
 
 async function get_party(players: {
@@ -88,7 +91,7 @@ export async function invite_message(event: WebSocket.MessageEvent) {
 
   console.log(msg);
 
-  const players = get_player(msg.user, msg.target!);
+  const players = getPlayer(msg.user, msg.target!);
   if (players.status === false) {
     event.target.send(
       JSON.stringify({

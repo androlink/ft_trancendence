@@ -57,23 +57,26 @@ export function pong_party_create(
   return { status: true, room_id: game.getId() };
 }
 
-function pong_party_finish(game_id: string) {
-  let p = pong_party_get(game_id);
-  if (!p) return;
-  console.info(`game ${game_id} has been finished`);
+let pong_party_finish: (game_id: string) => void;
+{
+  let statement = db.prepare(
+    "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+  );
+  pong_party_finish = (game_id: string) => {
+    let p = pong_party_get(game_id);
+    if (!p) return;
+    console.info(`game ${game_id} has been finished`);
 
-  const scores = p.getPlayers().map((p) => p.view.score);
+    const scores = p.getPlayers().map((p) => p.view.score);
 
-  const [player_one, player_two] = p.getPlayerId();
-  const result: "win" | "loss" | "draw" =
-    scores[0] > scores[1] ? "win" : scores[0] < scores[1] ? "loss" : "draw";
-  if (!(player_one === undefined || player_two === undefined)) {
-    let statement = db.prepare(
-      "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-    );
-    statement.run(player_one, player_two, result);
-  }
-  pong_party_delete(game_id);
+    const [player_one, player_two] = p.getPlayerId();
+    const result: "win" | "loss" | "draw" =
+      scores[0] > scores[1] ? "win" : scores[0] < scores[1] ? "loss" : "draw";
+    if (!(player_one === undefined || player_two === undefined)) {
+      statement.run(player_one, player_two, result);
+    }
+    pong_party_delete(game_id);
+  };
 }
 
 function pong_party_abort(game_id: string) {
