@@ -1,5 +1,6 @@
 export const assetsPath = `/resources`;
 
+
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
  */
@@ -25,6 +26,14 @@ const htmlSnippetsTemplate: {
       </div>
     </div>
     <input type="text" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
+    <script>
+    {
+      const ft_title = document.currentScript.previousElementSibling;
+      ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯";
+      ft_title.onchange = () => self.localStorage.setItem("ft_title", ft_title.value);
+      document.currentScript.remove();
+    }
+    </script>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
