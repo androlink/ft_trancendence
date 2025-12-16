@@ -99,7 +99,8 @@ function invite_message(event: MessageEvent) {
     const playButton = document.createElement("button");
     playButton.textContent = "join party";
     playButton.onclick = () => {
-      join_party(message.room_id);
+      let room_id = message.room_id;
+      join_party(room_id);
     };
     para.appendChild(userLink);
     para.appendChild(playButton);

@@ -17,12 +17,11 @@ import { DirectMessage, connectedClients } from "./chat_route";
 const request_url = "http://remote_microservice:3000/api/create";
 
 let getPlayer: (
-  tocken: string,
+  token: string,
   target: string
 ) =>
   | { status: true; player1: UserRow; player2: UserRow }
-  | { status: false; reason: string };
-{
+  | { status: false; reason: string } = (token, target) => {
   const get_user_from_name = db.prepare<{ username: string }, UserRow>(
     "SELECT * FROM users WHERE lower(username) = lower(:username)"
   );
@@ -56,7 +55,8 @@ let getPlayer: (
       return { status: false, reason: RemotePongReasonCode.NOT_CONNECTED };
     }
   };
-}
+  return getPlayer(token, target);
+};
 
 async function get_party(players: {
   player1: Id;

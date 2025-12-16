@@ -6,8 +6,7 @@ import { randomUUID } from "crypto";
 
 let games: Map<string, PongEngine> = new Map();
 
-let get_username: (id: Id) => string | undefined;
-{
+let get_username: (id: Id) => string | undefined = (id) => {
   const statement = db.prepare<{ id: Id }, { username: string }>(
     "SELECT username FROM users WHERE id = :id"
   );
@@ -16,7 +15,16 @@ let get_username: (id: Id) => string | undefined;
     const username = statement.get({ id: id })?.username;
     return username;
   };
-}
+  return get_username(id);
+};
+
+const foo = (() => {
+  const statement = () =>
+    db.prepare<{ id: Id }, { username: string }>(
+      "SELECT username FROM users WHERE id = :id"
+    );
+  return (id: Id) => statement().get({ id: id })?.username;
+})();
 
 function pong_party_log() {
   if (games.size === 0) return;
@@ -57,8 +65,7 @@ export function pong_party_create(
   return { status: true, room_id: game.getId() };
 }
 
-let pong_party_finish: (game_id: string) => void;
-{
+let pong_party_finish: (game_id: string) => void = (game_id) => {
   let statement = db.prepare(
     "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
   );
@@ -77,7 +84,8 @@ let pong_party_finish: (game_id: string) => void;
     }
     pong_party_delete(game_id);
   };
-}
+  return pong_party_finish(game_id);
+};
 
 function pong_party_abort(game_id: string) {
   console.info(`game ${game_id} has been aborted`);

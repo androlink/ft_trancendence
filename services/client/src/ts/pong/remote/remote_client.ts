@@ -1,3 +1,4 @@
+import { findLanguage } from "../../html/templates.js";
 import { goToURL } from "../../utils.js";
 import { getKeyConfig } from "../config/local_settings.js";
 import { DataFrame, keyControl } from "../engine/engine_interfaces.js";
@@ -12,7 +13,8 @@ export type PongMessageType =
   | { type: "join"; status: false; reason: string }
   | { type: "update"; payload: DataFrame };
 
-let ws: WebSocket;
+let ws: WebSocket | undefined = undefined;
+
 let display: FrameManager;
 let last_ping: { id: number; time: ReturnType<typeof performance.now> } = {
   id: 0,
@@ -51,6 +53,7 @@ export function join_party(game_id: string) {
 function ws_delete() {
   clearTimeout(pingTimeout);
   pingTimeout = undefined;
+  self.removeEventListener("popstate", ws_delete);
   document.removeEventListener("keydown", eventKeyInputPong);
   document.removeEventListener("keyup", eventKeyInputPong);
   display = undefined;
@@ -59,7 +62,7 @@ function ws_delete() {
 
 self["join_party"] = join_party;
 
-function sendJoinMessage(game_id: string) {
+function sendJoinMessage(ws: WebSocket, game_id: string) {
   ws.send(
     JSON.stringify({
       type: "join",
@@ -72,17 +75,19 @@ function sendJoinMessage(game_id: string) {
 }
 
 function ws_connect(game_id: string) {
+  console.log(ws);
   if (ws) {
     return;
   }
   ws = new WebSocket("/api/remote");
   ws.onopen = () => {
-    sendJoinMessage(game_id);
-    pingTimeout = setTimeout(() => ws_ping(), ping_time);
+    sendJoinMessage(ws, game_id);
+    pingTimeout = setTimeout(() => ws_ping(ws), ping_time);
   };
-  ws.addEventListener("close", (event) => {
+  ws.onclose = (event) => {
+    console.info("WebSocket close:", event.reason);
     ws_delete();
-  });
+  };
   ws.onerror = (error) => {
     console.error("WebSocket error:", error);
     ws_delete();
@@ -101,7 +106,7 @@ function ws_message_pong(event: MessageEvent) {
   let send_time = last_ping.time;
   let rtt = performance.now() - send_time;
   console.log(`Ping time: ${rtt} ms`);
-  pingTimeout = setTimeout(() => ws_ping(), ping_time);
+  pingTimeout = setTimeout(() => ws_ping(ws), ping_time);
 }
 
 function ws_join(event: MessageEvent) {
@@ -113,9 +118,7 @@ function ws_join(event: MessageEvent) {
     goToURL("netplay", true);
     self.addEventListener("popstate", ws_delete, { once: true });
 
-    ws.addEventListener("message", (event) => {
-      ws_message_update(event.target as WebSocket, event.data.toString());
-    });
+    event.target.addEventListener("message", ws_message_update);
     display = new FrameManager();
     config = getKeyConfig("player_one");
   } else {
@@ -133,20 +136,20 @@ function show_join_message_error(message: string) {
     return false;
   }
   const para = document.createElement("p");
-  const node = document.createTextNode(message);
+  const node = document.createTextNode(findLanguage(message));
   para.appendChild(node);
   chat.appendChild(para);
 }
 
-function ws_message_update(ws: WebSocket, message: string) {
-  const messageObject = JSON.parse(message) as PongMessageType;
-  if (messageObject.type !== "update") return;
+function ws_message_update(event: MessageEvent) {
+  const messageObject = JSON.parse(event.data) as PongMessageType;
   try {
+    if (messageObject.type !== "update") return;
     display.update(messageObject.payload);
   } catch {}
 }
 
-function ws_ping() {
+function ws_ping(ws: WebSocket) {
   let ping_id = ping_count++;
   let performance_now = performance.now();
   last_ping = { id: ping_id, time: performance_now };
@@ -154,8 +157,12 @@ function ws_ping() {
 }
 
 function ws_disconnect() {
-  if (ws) {
-    ws.close();
-    ws = undefined;
+  if (!ws) {
+    return;
   }
+  ws.removeEventListener("message", ws_message_pong);
+  ws.removeEventListener("message", ws_message_update);
+  ws.removeEventListener("message", ws_join);
+  ws.close();
+  ws = undefined;
 }
