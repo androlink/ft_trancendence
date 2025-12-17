@@ -59,7 +59,7 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
     return ws.close(3002, RemotePongReasonCode.CANNOT_JOIN_GAME);
   }
 
-  let names = party.getPlayers().map((p) => p.view.name.toString());
+  const names = party.getPlayers().map((p) => p.view.name);
   return ws.send(
     JSON.stringify({ type: "join", status: true, players: names })
   );

@@ -34,9 +34,9 @@ function pong_party_log() {
   for (let game of games) {
     const players = game[1].getPlayers();
     infos.push(
-      `  {${game[1].getId()}}: [${players[0].view.name}(${
+      `\t"${game[1].getId()}": {${players[0].view.name}(${
         players[0].view.score
-      }), ${players[1].view.name}(${players[1].view.score})]`
+      }), ${players[1].view.name}(${players[1].view.score})}`
     );
   }
   console.info(infos.join("\n"));

@@ -123,7 +123,6 @@ function ws_join(event: MessageEvent) {
     event.target.addEventListener("message", ws_message_update);
     display = new FrameManager();
     config = getKeyConfig("player_one");
-    console.log(message.players);
     sendMessage(selectLanguage(["game presentation", ...message.players]));
   } else {
     show_join_message_error(message.reason);
