@@ -8,7 +8,7 @@ import WebSocket from "ws";
 import { Id, RemotePongReasonCode } from "../common/types.ts";
 import { GameWebSocket, JoinType, PongMessageType } from "./local_type.ts";
 
-import { pong_party_add_player } from "./pong_party.ts";
+import { pong_party_add_player, pong_party_get } from "./pong_party.ts";
 
 async function authenticate(token: string): Promise<Id | null> {
   try {
@@ -44,7 +44,11 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
     );
     return ws.close(3001, RemotePongReasonCode.GAME_NOT_FOUND);
   }
-  if (pong_party_add_player(room_id, id, ws as GameWebSocket) === false) {
+  const party = pong_party_get(room_id);
+  if (
+    party === null ||
+    pong_party_add_player(room_id, id, ws as GameWebSocket) === false
+  ) {
     ws.send(
       JSON.stringify({
         type: "join",
@@ -54,7 +58,11 @@ async function ws_join(ws: WebSocket, payload: JoinType): Promise<void> {
     );
     return ws.close(3002, RemotePongReasonCode.CANNOT_JOIN_GAME);
   }
-  return ws.send(JSON.stringify({ type: "join", status: true }));
+
+  let names = party.getPlayers().map((p) => p.view.name.toString());
+  return ws.send(
+    JSON.stringify({ type: "join", status: true, players: names })
+  );
 }
 
 async function ws_message_join(ws: WebSocket, message: string) {

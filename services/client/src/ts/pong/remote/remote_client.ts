@@ -1,7 +1,9 @@
-import { findLanguage } from "../../html/templates.js";
+import { sendMessage } from "../../html/events.js";
+import { findLanguage, selectLanguage } from "../../html/templates.js";
 import { goToURL } from "../../utils.js";
 import { getKeyConfig } from "../config/local_settings.js";
 import { DataFrame, keyControl } from "../engine/engine_interfaces.js";
+import { players } from "../engine/engine_variables.js";
 import { FrameManager } from "./frameManager.js";
 
 let pingTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
@@ -9,7 +11,7 @@ const ping_time = 5000;
 
 export type PongMessageType =
   | { type: "pong"; payload: number }
-  | { type: "join"; status: true }
+  | { type: "join"; status: true; players: string[] }
   | { type: "join"; status: false; reason: string }
   | { type: "update"; payload: DataFrame };
 
@@ -121,6 +123,8 @@ function ws_join(event: MessageEvent) {
     event.target.addEventListener("message", ws_message_update);
     display = new FrameManager();
     config = getKeyConfig("player_one");
+    console.log(message.players);
+    sendMessage(selectLanguage(["game presentation", ...message.players]));
   } else {
     show_join_message_error(message.reason);
   }
