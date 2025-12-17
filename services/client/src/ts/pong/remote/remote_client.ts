@@ -77,7 +77,6 @@ function sendJoinMessage(ws: WebSocket, game_id: string) {
 }
 
 function ws_connect(game_id: string) {
-  console.log(ws);
   if (ws) {
     return;
   }

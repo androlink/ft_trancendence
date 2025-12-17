@@ -102,5 +102,7 @@
   "GAME_ALREADY_STARTED" : "el juego ya ha comenzado",
   "CANNOT_PLAY_WITH_YOURSELF" : "no puedes jugar contigo misma",
   "INVALID_REQUEST" : "solicitud inválida",
-  "INTERNAL_SERVER_ERROR" : "algo salió mal de nuestro lado, lo siento UwU"
+  "INTERNAL_SERVER_ERROR" : "algo salió mal de nuestro lado, lo siento UwU",
+  "JOIN_GAME" : "Únete al juego, [[0]] vs [[1]]",
+  "": ""
 }

@@ -1,4 +1,4 @@
-import { findLanguage } from "./html/templates.js";
+import { findLanguage, selectLanguage } from "./html/templates.js";
 import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
@@ -90,19 +90,27 @@ function invite_message(event: MessageEvent) {
   }
   const para = document.createElement("p");
   if (message.status === false) {
+    para.className = "text-red-500 font-bold text-center";
     const reason = findLanguage(message.reason);
     const node = document.createTextNode(reason);
     para.appendChild(node);
   } else {
-    const userLink = document.createElement("span");
-    userLink.textContent = `${message.sender}:`;
+    para.className = "text-green-500 font-bold text-center ";
     const playButton = document.createElement("button");
-    playButton.textContent = "join party";
+    playButton.type = "button";
+    playButton.className = "cursor-pointer hover:text-purple-500 mx-2";
+    playButton.textContent = selectLanguage([
+      "JOIN_GAME",
+      message.sender,
+      message.target,
+    ]);
     playButton.onclick = () => {
+      playButton.className = "disable";
+      para.className = "text-gray-500 text-center";
       let room_id = message.room_id;
       join_party(room_id);
+      playButton.onclick = null;
     };
-    para.appendChild(userLink);
     para.appendChild(playButton);
   }
 
