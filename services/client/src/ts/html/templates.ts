@@ -69,7 +69,7 @@ const htmlSnippetsTemplate: {
     </div>
   </span>
   `,
-  Profile1: `
+  Profile1: /**
   <!-- <div class="h-dvh w-dvw">
   <!-- <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin absolute top-0 right-0" onclick="resetNextInner(); main()"/> -->
   <div class="flex size-full flex-col justify-items-center overflow-y-scroll rounded-md bg-[#262d5f]">
@@ -96,13 +96,13 @@ const htmlSnippetsTemplate: {
       </div>
     </div>
   </div>
-</div> -->
+</div> --> */`
 
   <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
       <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
-        <img id="profile-picture" class="pointer-events-auto aspect-square size-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
+        <img id="profile-picture" class="pointer-events-auto aspect-square h-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
         <div id="pfp-preview-div" hidden class="relative">
           <p class="bg-gray-400 border px-1 top-2 rounded absolute">[[preview]]</p>
           <img id="pfp-preview" class="rounded-full aspect-square size-40" />
