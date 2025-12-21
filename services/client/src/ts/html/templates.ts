@@ -70,35 +70,159 @@ const htmlSnippetsTemplate: {
   </span>
   `,
   Profile1: /**
-  <!-- <div class="h-dvh w-dvw">
+  <div class="h-dvh w-dvw">
   <!-- <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin absolute top-0 right-0" onclick="resetNextInner(); main()"/> -->
   <div class="flex size-full flex-col justify-items-center overflow-y-scroll rounded-md bg-[#262d5f]">
-    <div class="mx-auto h-full w-2/4 flex-col gap-4 border-x border-white bg-[#171C3D]">
-      <form class="flex flex-col p-5">
-        <span class="mx-auto text-2xl text-white select-text">Public info</span>
+    <div class="mx-auto h-full w-2/4 flex-col gap-4 border-x border-white bg-[#171C3D] shadow-2xl">
 
-        <img id="profile-picture" class="m-8 mx-auto aspect-square h-40 w-40 rounded-full bg-amber-50" src="${assetsPath}/default-avatar.jpg" />
+      <div class="text-4xl text-white px-3">Public Infos</div>
+      <div class="transform-none">
+        <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
+      </div>
 
-        <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
-          <div class="flex flex-col justify-items-center rounded border border-gray-400">
-            <p class="mb-1 text-white">[[username]]:</p>
-            <input id="username-p1" value="FEUR" class="font-Hammer rounded text-white select-text focus:bg-[#171c3d71]" type="text" name="username" />
+      <form id="pfp-form" class"flex flex-col">
+        <div class="relative flex flex-col">
+          <div class="relative m-1 w-40 h-40 mx-auto">
+            <div class=" rounded-full overflow-hidden w-full h-full">
+              <img id="profile-picture" class="object-center object-cover bg-amber-50 w-full h-full" src="${assetsPath}/default-avatar.jpg" />
+            </div>
+            <label for="pfp-input" class="absolute bottom-0 right-0 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-purple-500 border-2 border-[#171C3D] hover:bg-purple-600 transition">
+
+            </label>
+            <div class="hidden">
+              <div id="pfp-preview-div" class="absolute top-0 rounded-full overflow-hidden w-full h-full">
+                <img id="pfp-preview" class="w-full h-full object-center object-cover bg-amber-300" />
+              </div>
+              <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
+            </div>
           </div>
-          <div class="w-full rounded border border-gray-400 focus:border-blue-400">
-            <p class="mb-1 text-white">[[biography]]:</p>
-            <textarea id="biography-p1" class="flex w-full resize-none overflow-auto rounded-md p-1 text-[#D8D8D8] select-text" maxlength="400" id="biography-p2"> </textarea>
+          <button class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">update</button>
+        </div>
+      </form>
+
+      <form class="flex flex-col p-5">
+        <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
+          <div class="group flex flex-col justify-items-center rounded border border-gray-400 focus-within:border-blue-400 p-1">
+            <p class="mb-1 text-white group-focus-within:text-blue-400">username:</p>
+            <input id="username-p1" value="FEUR" class="p-1 rounded text-white select-text focus:bg-[#171c3d71] outline-none" type="text" name="username" />
+          </div>
+          <div class=" group w-full rounded border border-gray-400 focus-within:border-blue-400 p-1 ">
+            <p class="mb-1 text-white  group-focus-within:text-blue-400">biography:</p>
+            <textarea id="biography-p1" class="flex w-full resize-none overflow-auto rounded-md p-1 outline-none text-[#D8D8D8] select-text" maxlength="400" id="biography-p2"> </textarea>
           </div>
         </div>
-        <button class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-500" type="submit">[[update]]</button>
+        <button class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">update</button>
       </form>
+
+      <div class="text-4xl text-white px-3">Private Infos</div>
       <div class="transform-none">
-        <div class="mx-auto my-3 h-px w-9/12 transform-[translateZ(0)] bg-gray-100"></div>
+        <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <form id="change-password-form" class="mt-5">
+          <div class="text-white text-2xl">Change Password</div>
+          <div class="flex gap-5 mb-6">
+            <div class="flex gap-2 flex-col p-1">
+              <input placeholder="[[new password]]" class=" h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password">
+              <input placeholder="[[confirm password]]" class="h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password" type="password" name="password-confirm">
+            </div>
+            <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-blue-400 rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[change password]]</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="text-4xl text-red-500 px-3">Delete account</div>
+      <div class="transform-none">
+        <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <form id="delete-account-form" class="mt-5 flex flex-col items-center gap-2">
+          <input placeholder="[[confirm username]]" class="h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="text" name="username">
+          <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-red-500 hover:font-bold rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
+        </form>
       </div>
     </div>
   </div>
-</div> --> */`
+</div> */`
+  <div class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
+    <div class="mx-auto overflow-y-auto h-full w-2/4 flex-col gap-4 border-x border-white bg-[#171C3D] shadow-2xl">
 
-  <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
+      <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
+      <div class="transform-none">
+          <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
+      </div>
+
+      <form id="pfp-form" class="flex flex-col">
+          <div class="relative flex flex-col">
+          <div class="relative m-1 w-40 h-40 mx-auto">
+              <div class=" rounded-full overflow-hidden w-full h-full">
+              <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg" />
+              </div>
+              <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
+
+              <div id="pfp-preview-div" hidden>
+              <div class="absolute top-0 rounded-full overflow-hidden w-full h-full">
+                  <img id="pfp-preview" class="w-full h-full object-center object-cover " />
+              </div>
+              <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
+              </div>
+              <label for="pfp-input" class="absolute bottom-0 right-0 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-purple-500 border-2 border-[#171C3D] hover:bg-blue-400 transition">
+                  <img src="${assetsPath}/Pencil.svg" class="fill-white px-2"/>
+              </label>
+          </div>
+          <button class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
+          </div>
+      </form>
+
+      <form class="flex flex-col p-5">
+          <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
+          <div class="group flex flex-col justify-items-center rounded border border-gray-400 focus-within:border-blue-400 p-1">
+              <p class="mb-1 text-white group-focus-within:text-blue-400">[[username]]:</p>
+              <input id="username-p1" value="" class="p-1 rounded text-white select-text focus:bg-[#171c3d71] outline-none" type="text" name="username" maxlength="20" />
+          </div>
+          <div class=" group w-full rounded border border-gray-400 focus-within:border-blue-400 p-1 ">
+              <p class="mb-1 text-white  group-focus-within:text-blue-400">[[biography]]:</p>
+              <textarea id="biography-p1" class="flex w-full resize-none overflow-auto rounded-md p-1 outline-none text-[#D8D8D8] select-text" maxlength="400" id="biography-p2"> </textarea>
+          </div>
+          </div>
+          <button class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
+      </form>
+
+      <div class="text-4xl text-white px-3">Private Infos</div>
+      <div class="transform-none">
+          <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
+      </div>
+
+      <div class="flex flex-col items-center">
+          <form id="change-password-form" class="mt-5">
+          <div class="text-white text-2xl">Change Password</div>
+          <div class="flex gap-5 mb-6">
+            <div class="flex gap-2 flex-col p-1">
+              <input placeholder="[[new password]]" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password">
+              <input placeholder="[[confirm password]]"px-1 class="h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password-confirm">
+            </div>
+            <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-blue-400 rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[change password]]</button>
+          </div>
+          </form>
+      </div>
+
+      <div class="text-4xl text-red-500 px-3">Delete account</div>
+      <div class="transform-none">
+          <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
+      </div>
+
+      <div class="flex flex-col items-center my-4">
+        <form id="delete-account-form" class="mt-2 flex flex-col items-center gap-2">
+          <input placeholder="[[confirm username]]" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="text" name="username">
+          <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-red-500 hover:font-bold rounded size-fit p-1 my-1 hover:cursor-pointer transition-colors" type="submit">[[erase account]]</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
       <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
@@ -136,7 +260,7 @@ const htmlSnippetsTemplate: {
         <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
       </form>
     </span>
-  </div>
+  </div> -->
   `,
   Profile2:
     `
@@ -293,7 +417,7 @@ const htmlSnippetsTemplate: {
       loadLocalConfig();
     </script>
     <canvas class="border border-white size-full" id="canvas"></canvas>
-	</div>
+  </div>
   `,
   RemotePong: `
   <div class="relative size-full flex flex-col overflow-scroll">
@@ -301,7 +425,7 @@ const htmlSnippetsTemplate: {
     document.currentScript?.remove();
     </script>
     <canvas class="border border-white size-full" id="canvas"></canvas>
-	</div>
+  </div>
   `,
   ErrorMessageHandler: `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
