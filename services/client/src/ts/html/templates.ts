@@ -15,6 +15,7 @@ const htmlSnippetsTemplate: {
   readonly Ouch: string;
   readonly PopUp: string;
   readonly ErrorMessageHandler: string;
+  readonly Home2:string;
   RemotePong: string;
 } = {
   Home: `
@@ -103,15 +104,21 @@ const htmlSnippetsTemplate: {
       <form id="profile-form" class="flex flex-col p-5">
           <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
           <div class="group flex flex-col justify-items-center rounded border border-gray-400 focus-within:border-blue-400 p-1">
-              <p class="mb-1 text-white group-focus-within:text-blue-400">[[username]]:</p>
+              <div class="flex items-center justify-between">
+                <p class="mb-1 text-white group-focus-within:text-blue-400">[[username]]:</p>
+                <p id="usernameCount" class="px-1 text-gray-500 opacity-0 group-focus-within:opacity-100">0/20</p>
+              </div>
               <input id="username-p1" value="" class="p-1 rounded text-white select-text focus:bg-[#171c3d71] outline-none" type="text" name="username" maxlength="20" />
           </div>
           <div class=" group w-full rounded border border-gray-400 focus-within:border-blue-400 p-1 ">
-              <p class="mb-1 text-white  group-focus-within:text-blue-400">[[biography]]:</p>
-              <textarea id="biography-p1" class="flex w-full resize-none overflow-auto rounded-md p-1 outline-none text-[#D8D8D8] select-text" maxlength="400" name="biography"> </textarea>
+              <div class="flex items-center justify-between">
+                <p class="mb-1 text-white  group-focus-within:text-blue-400">[[biography]]:</p>
+                <p id="bioCount" class="px-1 text-gray-500 opacity-0 group-focus-within:opacity-100">0/400</p>
+              </div>
+              <textarea id="biography-p1" class="flex w-full resize-y overflow-auto rounded-md p-1 outline-none min-h-10 max-h-50 text-[#D8D8D8] select-text" maxlength="400" name="biography"> </textarea>
           </div>
           </div>
-          <button id="update-infos" hidden class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
+          <button id="update-infos" class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
       </form>
 
       <div class="text-4xl text-white px-3">Private Infos</div>
@@ -273,8 +280,8 @@ const htmlSnippetsTemplate: {
     </div>
   `,
   LogIn: `
-  <div class="flex size-full flex-col items-center gap-y-1 rounded-2xl bg-[#262d5f] p-3">
-    <div class="m-auto h-130 w-100 flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
+  <div class="flex size-full flex-col min-h-[120svh] overflow-y-auto items-center gap-y-1 rounded-2xl bg-[#262d5f] p-3">
+    <div class="mx-auto my-30 h-130 w-100 flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
       <form id="log-in-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white" hidden>
         <div class="my-5 mb-10 text-center text-4xl font-bold">[[log in]]</div>
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="[[username]]" />
@@ -354,6 +361,13 @@ const htmlSnippetsTemplate: {
   ErrorMessageHandler: `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `,
+  Home2:`
+  <div class="h-svh w-full">
+    <div class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
+      <DIV class="text-white mx-auto mt-20 text-9xl text-center">welcome to <br>¯\_(ツ)_/¯</DIV>
+    </div>
+  </div>
+  `
 } as const;
 
 /**
@@ -423,6 +437,7 @@ export function findLanguage(name: string): string {
   if (Object.hasOwn(handled[language], name)) return handled[language][name];
   return `translation not found => "${name}"`;
 }
+
 
 
 // window.addEventListener("DOMContentLoaded", () => {
