@@ -98,6 +98,7 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
         body: formData,
       });
 
+      document.getElementById("update-pfp")?.toggleAttribute("hidden", true);
       resetReconnectTimer(response.headers.get("x-authenticated"));
       const result: { success?: boolean; message?: string } =
         await response.json();
@@ -598,6 +599,7 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
     if (preview && img) preview.src = img;
     resetNextInner();
     document.getElementById("pfp-preview-div")?.removeAttribute("hidden");
+    document.getElementById("update-pfp")?.removeAttribute("hidden");
   });
 }
 
