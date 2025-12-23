@@ -82,44 +82,44 @@ const htmlSnippetsTemplate: {
 
       <form id="pfp-form" class="flex flex-col">
           <div class="relative flex flex-col">
-          <div class="relative m-1 w-40 h-40 mx-auto">
+            <div class="relative m-1 w-40 h-40 mx-auto">
               <div class=" rounded-full overflow-hidden w-full h-full">
-              <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg" />
+                <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg" />
               </div>
               <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
 
               <div id="pfp-preview-div" hidden>
-              <div class="absolute top-0 rounded-full overflow-hidden w-full h-full">
+                <div class="absolute top-0 rounded-full overflow-hidden w-full h-full">
                   <img id="pfp-preview" class="w-full h-full object-center object-cover " />
-              </div>
-              <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
+                </div>
+                <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
               </div>
               <label for="pfp-input" class="absolute bottom-0 right-0 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-purple-500 border-2 border-[#171C3D] hover:bg-blue-400 transition">
-                  <img src="${assetsPath}/Pencil.svg" class="fill-white px-2"/>
+                <img src="${assetsPath}/Pencil.svg" class="fill-white px-2"/>
               </label>
-          </div>
-          <button id="update-pfp" hidden class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
+            </div>
+            <button id="update-pfp" hidden class=" mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
           </div>
       </form>
 
       <form id="profile-form" class="flex flex-col p-5">
           <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
-          <div class="group flex flex-col justify-items-center rounded border border-gray-400 focus-within:border-blue-400 p-1">
-              <div class="flex items-center justify-between">
-                <p class="mb-1 text-white group-focus-within:text-blue-400">[[username]]:</p>
-                <p id="usernameCount" class="px-1 text-gray-500 opacity-0 group-focus-within:opacity-100">0/20</p>
-              </div>
-              <input id="username-p1" value="" class="p-1 rounded text-white select-text focus:bg-[#171c3d71] outline-none" type="text" name="username" maxlength="20" />
+            <div class="group flex flex-col justify-items-center rounded border border-gray-400 focus-within:border-blue-400 p-1 transition-colors duration-250">
+                <div class="flex items-center justify-between">
+                  <p class="mb-1 text-white group-focus-within:text-blue-400">[[username]]:</p>
+                  <p id="usernameCount" class="px-1 text-gray-500 opacity-0 group-focus-within:opacity-100">0/20</p>
+                </div>
+                <input id="username-p1" value="" class="p-1 rounded text-white select-text focus:bg-[#171c3d71] outline-none" type="text" name="username" maxlength="20" />
+            </div>
+            <div class="group w-full rounded border border-gray-400 focus-within:border-blue-400 p-1 transition-colors duration-150">
+                <div class="flex items-center justify-between">
+                  <p class="mb-1 text-white  group-focus-within:text-blue-400">[[biography]]:</p>
+                  <p id="bioCount" class="px-1 text-gray-500 opacity-0 group-focus-within:opacity-100">0/400</p>
+                </div>
+                <textarea id="biography-p1" class="flex w-full resize-y overflow-auto rounded-md p-1 outline-none min-h-10 max-h-50 text-[#D8D8D8] select-text" maxlength="400" name="biography"> </textarea>
+            </div>
           </div>
-          <div class=" group w-full rounded border border-gray-400 focus-within:border-blue-400 p-1 ">
-              <div class="flex items-center justify-between">
-                <p class="mb-1 text-white  group-focus-within:text-blue-400">[[biography]]:</p>
-                <p id="bioCount" class="px-1 text-gray-500 opacity-0 group-focus-within:opacity-100">0/400</p>
-              </div>
-              <textarea id="biography-p1" class="flex w-full resize-y overflow-auto rounded-md p-1 outline-none min-h-10 max-h-50 text-[#D8D8D8] select-text" maxlength="400" name="biography"> </textarea>
-          </div>
-          </div>
-          <button id="update-infos" class="mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
+          <button id="update-infos" class="hidden mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
       </form>
 
       <div class="text-4xl text-white px-3">Private Infos</div>
@@ -439,27 +439,61 @@ export function findLanguage(name: string): string {
 }
 
 
+export function countCharacter(){
 
-// window.addEventListener("DOMContentLoaded", () => {
-//   const usernameInput = document.getElementById("username-p1") as HTMLInputElement;
-//   const bioInput = document.getElementById("biography-p1") as HTMLTextAreaElement;
-//   const updateButton = document.getElementById("update-infos");
+  const userContent = document.getElementById("username-p1") as HTMLInputElement;
+  const bioContent = document.getElementById("biography-p1") as HTMLTextAreaElement;
+  const userCount = document.getElementById("usernameCount") as HTMLParagraphElement;
+  const bioCount = document.getElementById("bioCount") as HTMLParagraphElement;
 
-//   const initialUsernameValue = usernameInput.value;
-//   const initialBioValue = bioInput.value;
+  if (!userContent || !bioContent || !userCount || !bioCount) return;
 
-//   if (!updateButton) return;
+  userCount.textContent = `${userContent.value.length}/20`;
+  bioCount.textContent = `${bioContent.value.length}/400`;
+
+  userContent.addEventListener('input', () =>{
+    const parentDiv = userContent.parentNode as HTMLDivElement;
+    if (userContent.value.length >= 20){
+      parentDiv.classList.add("focus-within:border-red-500");
+      setTimeout(() => {
+        parentDiv.classList.remove("focus-within:border-red-500");
+      }, 150);
+    }
+    userCount.textContent = `${userContent.value.length}/20`;
+  });
+  bioContent.addEventListener('input', () =>{
+    const parentDiv = bioContent.parentNode as HTMLDivElement;
+    if (bioContent.value.length >= 400){
+      parentDiv.classList.add("focus-within:border-red-500");
+      setTimeout(() => {
+        parentDiv.classList.remove("focus-within:border-red-500");
+      }, 150);
+    }
+    bioCount.textContent = `${bioContent.value.length}/400`;
+  });
+}
 
 
-//   const checkChanges = () => {
-//     const changed =
-//       usernameInput.value !== initialUsernameValue ||
-//       bioInput.value !== initialBioValue;
+export function updateInfos(){
+  const usernameInput = document.getElementById("username-p1") as HTMLInputElement;
+  const bioInput = document.getElementById("biography-p1") as HTMLTextAreaElement;
+  const updateButton = document.getElementById("update-infos");
 
-//     updateButton.classList.toggle("hidden", !changed);
-//   };
-//   usernameInput.addEventListener("input", checkChanges);
-//   bioInput.addEventListener("input", checkChanges);
-// });
+  const initialUsernameValue = usernameInput.value;
+  const initialBioValue = bioInput.value;
+
+  if (!updateButton) return;
+
+
+  const checkChanges = () => {
+    const changed =
+      usernameInput.value !== initialUsernameValue ||
+      bioInput.value !== initialBioValue;
+
+    updateButton.classList.toggle("hidden", !changed);
+  };
+  usernameInput.addEventListener("input", checkChanges);
+  bioInput.addEventListener("input", checkChanges);
+};
 
 

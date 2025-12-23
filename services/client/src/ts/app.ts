@@ -1,8 +1,10 @@
 var exports = {};
 import {
+  countCharacter,
   htmlSnippets,
   languageString,
   selectLanguage,
+  updateInfos,
 } from "./html/templates.js";
 import {
   goToURL,
@@ -96,6 +98,8 @@ export async function main(params?: {
     resetReconnectTimer("false");
   }
   setEvents();
+  countCharacter();
+  updateInfos();
   // (window as any).loginWithGithub = loginWithGithub;
   // initPhysics();
 }
