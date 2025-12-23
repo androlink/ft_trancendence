@@ -2,21 +2,23 @@
   "name": "client",
   "private": true,
   "scripts": {
-    "build:statics": "cp -r src/static/* /var/www",
+    "build:statics": "cp -r src/static/* /var/www; cp -r src/css/font /var/www/",
     "dev": "npm run build:statics ; npx concurrently --kill-others \"npm run watch:ts\" \"npm run watch:css\"",
     "watch:ts": "npx tsc --watch -p src/ts",
-    "watch:css": "npx @tailwindcss/cli -i src/css/input.css -o /var/www/styles.css --watch=always",
+    "watch:css": "npx @tailwindcss/cli -c src/css/tailwind.config.js -i src/css/input.css -o /var/www/styles.css --watch=always",
     "prod": "npm run build:statics ; npm run build:ts ; npm run build:css",
     "build:ts": "npx tsc -p src/ts",
-    "build:css": "npx @tailwindcss/cli -i src/css/input.css -o /var/www/styles.css"
+    "build:css": "npx @tailwindcss/cli -c src/css/tailwind.config.js -i src/css/input.css -o /var/www/styles.css"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.16",
     "typescript": "^5.6.3",
     "@types/node": "^24.10.1",
-    "undici-types": "^7.16.0"
+    "undici-types": "^7.16.0",
+    "matter-js": "^0.20.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "@types/matter-js": "^0.20.0"
   }
 }

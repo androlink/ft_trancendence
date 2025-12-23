@@ -76,7 +76,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
     return reply.send({
       template: "Home",
       title: "ft_transcendence",
-      inner: "Pong",
+      inner: "Acceuil",
     });
   });
 
@@ -142,8 +142,8 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
           u.pfp,
           (SELECT COUNT(*) FROM history_game WHERE player_one = u.id AND result_type = 'win' OR player_two = u.id AND result_type = 'loss') AS wins,
           (SELECT COUNT(*) FROM history_game WHERE player_two = u.id AND result_type = 'win' OR player_one = u.id AND result_type = 'loss') as losses,
-          (SELECT COUNT(*) FROM history_game WHERE (player_one = u.id OR player_two = u.id) AND result_type = 'draw') AS draws 
-        FROM users u 
+          (SELECT COUNT(*) FROM history_game WHERE (player_one = u.id OR player_two = u.id) AND result_type = 'draw') AS draws
+        FROM users u
         WHERE lower(username) = lower(:username)`);
     /** see if they are blocked */
     const statement2 = db.prepare<{ requesterId: Id; targetId: Id }, { 1: 1 }>(
@@ -240,6 +240,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
       inner: "Blank",
     });
   });
+
 
   fastifyInstance.get("/netplay", (req, reply) => {
     return reply.send({

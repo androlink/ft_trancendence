@@ -15,7 +15,7 @@ const htmlSnippetsTemplate: {
   readonly Ouch: string;
   readonly PopUp: string;
   readonly ErrorMessageHandler: string;
-  readonly Home2:string;
+  readonly Acceuil:string;
   RemotePong: string;
 } = {
   Home: `
@@ -39,7 +39,8 @@ const htmlSnippetsTemplate: {
     <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
   </div>
   <span id="inner-buttons" class="flex gap-x-0.5 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded-t *:data-checked:text-white *:data-checked:bg-[#262d5f] *:bg-[#1b1e38] *:text-gray-300">
-    <div onclick="goToURL('')" name="">[[pong]]</div>
+    <div onclick="goToURL('')" name="">acceuil</div>
+    <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
     <div onclick="goToURL('blank')" name="blank">debug</div>
@@ -205,12 +206,12 @@ const htmlSnippetsTemplate: {
       <div class="flex flex-col justify-start h-60">
         <div class ="flex flex-row *:mt-10 *:mb-4">
           <h1 class="text-white select-text font-Hammer text-6xl" id="username-p2"></h1>
-          <div class="dropdown px-1">
+          <div class="relative dropdown px-1">
             <style>
               .dropdown:hover .dropdown-content {display: flex;}
             </style>
-            <img src="${assetsPath}/menu-vertical.png" class="size-10 cursor-pointer"></img>
-            <div class="dropdown-content rounded-md flex-col absolute z-1 *:whitespace-nowrap hidden size-fit m-2 bg-[#1b1e38] border border-white">
+            <img src="${assetsPath}/menu-vertical.png" class="mt-5 size-10 cursor-pointer"></img>
+            <div class="dropdown-content rounded-md flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 bg-[#1b1e38] border border-white">
               <ul class ="*:hover:bg-gray-400 *:rounded-md *:px-1 *:text-gray-200 *:hover:text-white">
                 <li>
                   <a id="friend request">friend request</a>
@@ -280,8 +281,8 @@ const htmlSnippetsTemplate: {
     </div>
   `,
   LogIn: `
-  <div class="flex size-full flex-col min-h-[120svh] overflow-y-auto items-center gap-y-1 rounded-2xl bg-[#262d5f] p-3">
-    <div class="mx-auto my-30 h-130 w-100 flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
+  <div class="flex size-full flex-col min-h-full overflow-y-auto items-center gap-y-1 rounded-md bg-[#262d5f] p-3">
+    <div class="mx-auto mt-30 h-130 w-100 flex-col rounded-md border overflow-y-auto border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
       <form id="log-in-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white" hidden>
         <div class="my-5 mb-10 text-center text-4xl font-bold">[[log in]]</div>
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="[[username]]" />
@@ -361,15 +362,14 @@ const htmlSnippetsTemplate: {
   ErrorMessageHandler: `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `,
-  Home2:`
-  <div class="h-svh w-full">
-    <div class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
-      <DIV class="text-white mx-auto mt-20 text-9xl text-center">welcome to <br>¯\_(ツ)_/¯</DIV>
+  Acceuil:`
+    <div id="physics-zone" class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
+      <h1 id="Title" data-physics  class="text-white mx-auto my-20 text-9xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
+      <button class="text-white font-semibold text-2xl rounded-[20px] size-fit px-4 py-2 bg-purple-600 mx-auto hover:bg-blue-500"
+        onclick="let token = localStorage.getItem('token'); token ? goToURL('pong') : goToURL('profile')">Start</button>
     </div>
-  </div>
   `
 } as const;
-
 /**
  * all the HTML (and CSS) of the Single-Page-Application (translated)
  */

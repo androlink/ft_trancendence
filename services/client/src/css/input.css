@@ -2,5 +2,7 @@
 
 @font-face {
   font-family: Hammer;
-  src: url("services/client/src/css/font/HammersmithOne-Regular.ttf");
+  src: url("var/www/font/HammersmithOne-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
 }

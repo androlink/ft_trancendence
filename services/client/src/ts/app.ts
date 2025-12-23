@@ -11,6 +11,7 @@ import {
   resetReconnectTimer,
 } from "./utils.js";
 import { sendMessage, setEvents } from "./html/events.js";
+import { initPhysics } from "./physicsAcceuil.js";
 
 /**
  * the infos we consider important that we get from a fetch to the server
@@ -96,6 +97,7 @@ export async function main(params?: {
   }
   setEvents();
   // (window as any).loginWithGithub = loginWithGithub;
+  // initPhysics();
 }
 self["main"] = main;
 
