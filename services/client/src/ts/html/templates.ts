@@ -72,25 +72,33 @@ const htmlSnippetsTemplate: {
   </span>
   `,
   Profile1: `
-  <div class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
-    <div class="mx-auto overflow-y-auto h-full w-2/4 flex-col gap-4 border-x border-white bg-[#171C3D] shadow-2xl">
+  <div class="h-full flex justify-center rounded-md bg-[#262d5f]">
+    <div class="w-full overflow-y-auto max-w-4xl px-4 sm:px-8 border-x border-white bg-[#171C3D] shadow-2xl">
 
+    <div class="flex">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
+      <img
+            src="${assetsPath}/goTo.svg"
+            id="go-to-profile"
+            class=" p-1 mt-1 justify-items-end self-center select-none hover:fill-blue-500 size-10 cursor-pointer"
+            draggable="false"
+          ></img>
+    </div>  
       <div class="transform-none">
           <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
       </div>
 
-      <form id="pfp-form" class="flex flex-col">
+      <form id="pfp-form" class="flex flex-col ">
           <div class="relative flex flex-col">
-            <div class="relative m-1 w-40 h-40 mx-auto">
+            <div class="relative my-6 w-40 h-40 mx-auto">
               <div class=" rounded-full overflow-hidden w-full h-full">
                 <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg" />
               </div>
               <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
 
               <div id="pfp-preview-div" hidden>
-                <div class="absolute top-0 rounded-full overflow-hidden w-full h-full">
-                  <img id="pfp-preview" class="w-full h-full object-center object-cover " />
+                <div class="absolute inset-0 rounded-full overflow-hidden w-full h-full">
+                  <img id="pfp-preview" class="w-full h-full object-center object-cover bg-[#171C3D]" />
                 </div>
                 <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
               </div>
@@ -98,12 +106,12 @@ const htmlSnippetsTemplate: {
                 <img src="${assetsPath}/Pencil.svg" class="fill-white px-2"/>
               </label>
             </div>
-            <button id="update-pfp" hidden class=" mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
+            <button id="update-pfp" hidden class=" mx-auto size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
           </div>
       </form>
 
-      <form id="profile-form" class="flex flex-col p-5">
-          <div class="mx-auto flex size-fit w-2/4 flex-col justify-items-center gap-5">
+      <form id="profile-form" class="flex flex-col gap-5 px-6 py-4">
+          <div class="mx-auto flex size-fit w-full max-w-4xl  flex-col justify-items-center gap-5">
             <div class="group flex flex-col justify-items-center rounded border border-gray-400 focus-within:border-blue-400 p-1 transition-colors duration-250">
                 <div class="flex items-center justify-between">
                   <p class="mb-1 text-white group-focus-within:text-blue-400">[[username]]:</p>
@@ -122,7 +130,7 @@ const htmlSnippetsTemplate: {
           <button id="update-infos" class="hidden mx-auto my-4 size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
       </form>
 
-      <div class="text-4xl text-white px-3">Private Infos</div>
+      <div class="text-4xl text-white px-3">[[private infos]]</div>
       <div class="transform-none">
           <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
       </div>
@@ -130,7 +138,7 @@ const htmlSnippetsTemplate: {
       <div class="flex flex-col items-center">
           <form id="change-password-form" class="mt-5">
           <div class="text-white text-2xl">Change Password</div>
-          <div class="flex gap-5 mb-6">
+          <div class="flex flex-col sm:flex-row gap-5 mb-6">
             <div class="flex gap-2 flex-col p-1">
               <input placeholder="[[new password]]" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password">
               <input placeholder="[[confirm password]]"px-1 class="h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password-confirm">
@@ -281,12 +289,12 @@ const htmlSnippetsTemplate: {
     </div>
   `,
   LogIn: `
-  <div class="flex size-full flex-col min-h-full overflow-y-auto items-center gap-y-1 rounded-md bg-[#262d5f] p-3">
-    <div class="mx-auto mt-30 h-130 w-100 flex-col rounded-md border overflow-y-auto border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
-      <form id="log-in-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white" hidden>
+  <div class="flex min-h-full items-center justify-center rounded-md bg-[#262d5f] p-3">
+    <div class="w-full max-w-md sm:max-w-lg md:max-w-xl max-h-[90vh] flex flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
+      <form id="log-in-form" class="mx-8 my-6 flex flex-col gap-3 rounded-md text-white" hidden>
         <div class="my-5 mb-10 text-center text-4xl font-bold">[[log in]]</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="[[username]]" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="[[password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">[[log in]]</button>
 
@@ -301,11 +309,11 @@ const htmlSnippetsTemplate: {
           <span onclick="document.getElementById('register-form').hidden = false; document.getElementById('log-in-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[register]]</span>
         </span>
       </form>
-      <form id="register-form" class="mx-8 my-6 flex h-10 flex-col gap-3 rounded-md text-white">
+      <form id="register-form" class="mx-8 my-6 flex flex-col gap-3 rounded-md text-white">
         <div class="mt-5 text-center text-4xl font-bold">[[register]]</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="text" name="username" placeholder="[[username]]" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password" placeholder="[[password]]" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-2xl" type="password" name="password-confirm" placeholder="[[confirm password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password-confirm" placeholder="[[confirm password]]" />
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">[[register]]</button>
 
@@ -366,7 +374,7 @@ const htmlSnippetsTemplate: {
     <div id="physics-zone" class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
       <h1 id="Title" data-physics  class="text-white mx-auto my-20 text-9xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
       <button class="text-white font-semibold text-2xl rounded-[20px] size-fit px-4 py-2 bg-purple-600 mx-auto hover:bg-blue-500"
-        onclick="let token = localStorage.getItem('token'); token ? goToURL('pong') : goToURL('profile')">Start</button>
+        onclick="goToURL(localStorage.getItem('token') ? 'pong' : 'profile')">Start</button>
     </div>
   `
 } as const;
@@ -478,6 +486,8 @@ export function updateInfos(){
   const usernameInput = document.getElementById("username-p1") as HTMLInputElement;
   const bioInput = document.getElementById("biography-p1") as HTMLTextAreaElement;
   const updateButton = document.getElementById("update-infos");
+
+  if (!usernameInput || !bioInput || !updateButton) return;
 
   const initialUsernameValue = usernameInput.value;
   const initialBioValue = bioInput.value;
