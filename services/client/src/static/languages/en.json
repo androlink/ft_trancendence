@@ -104,5 +104,6 @@
   "INVALID_REQUEST" : "invalid request",
   "INTERNAL_SERVER_ERROR" : "something went wrong on our side, sorry UwU",
   "JOIN_GAME" : "join the game, [[0]] vs [[1]]",
+  "CREATE PASSWORD": "create a new password",
   "": ""
 }

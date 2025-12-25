@@ -109,7 +109,7 @@ const htmlSnippetsTemplate: {
             <input placeholder="[[new password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
             <input placeholder="[[confirm password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
           </div>
-          <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[change password]]</button>
+          <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" id="label-change-password" type="submit">[[change password]]</button>
         </span>
       </form>
       <form id="delete-account-form" class="mt-5 flex flex-col items-center">

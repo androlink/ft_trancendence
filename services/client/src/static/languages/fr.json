@@ -106,5 +106,6 @@
   "INVALID_REQUEST" : "requête invalide",
   "INTERNAL_SERVER_ERROR" : "quelque chose a mal tourné de notre côté, désolé UwU",
   "JOIN_GAME" : "rejoindre la partie, [[0]] contre [[1]]",
+  "CREATE PASSWORD": "créer un nouveau mot de passe",
   "": ""
 }
