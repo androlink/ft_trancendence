@@ -95,11 +95,9 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
       return reply.send({
         template: "Home",
         replace: {
-          ...{
-            "username-p1": req.user.username,
-            "biography-p1": req.user.bio,
-            "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`,
-          },
+          "username-p1": req.user.username,
+          "biography-p1": req.user.bio,
+          "profile-picture": `${assetsPath}/pfp/${req.user.pfp}`,
           ...(req.user.password === ""
             ? { "label-change-password": ["CREATE PASSWORD"] }
             : {}),
