@@ -33,7 +33,7 @@ function loadGameHistory(): void {
         for (let result of ["winner", "loser"]) {
           if (result === "winner" && game[result] === username)
             div.className =
-          "rounded-2xl border border-[#96DF9F] p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
+              "rounded-2xl border border-[#96DF9F] p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
           const d = document.createElement("div");
           d.className =
             "cursor-pointer flex flex-row items-center justify-center gap-2 hover:text-bold";
@@ -134,17 +134,20 @@ async function loadFriendsDisplay(): Promise<void> {
       for (let i = 0; i < json[1].length && i < 16; i++) {
         const div = document.createElement("div");
         div.className =
-          "size-full border-3 hover:bg-gray-700 border-gray-950 flex items-center overflow-hidden justify-around cursor-pointer";
+          "size-full border hover:bg-blue-200/10 border-gray-200 rounded-xl shadow-xl flex items-center overflow-hidden justify-around cursor-pointer gap-4 px-4";
         div.addEventListener("click", () =>
           goToURL(`/profile/${encodeURIUsername(json[1][i].username)}`)
         );
         const p = document.createElement("p");
-        p.className = "text-gray-300";
+        const d = document.createElement("div");
+        p.className = "text-gray-300 truncate flex-grow";
         p.textContent = json[1][i].username;
         const img = document.createElement("img");
         img.src = `${assetsPath}/pfp/${json[1][i].pfp}`;
-        img.className = "h-10 aspect-square rounded-full";
-        div.append(p, img);
+        d.className = "rounded-full overflow-hidden h-15 flex-shrink-0";
+        img.className = "object-center object-cover w-full h-full";
+        d.append(img);
+        div.append(d, p);
         fragment.append(div);
       }
       grid.innerHTML = "";

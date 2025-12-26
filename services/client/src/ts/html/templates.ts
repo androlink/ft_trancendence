@@ -273,15 +273,17 @@ const htmlSnippetsTemplate: {
   </div>
   `,
   Friend: `
-    <div class="bg-gray-800 rounded-2xl size-full overflow-hidden flex flex-col">
-      <div id="friends-grid" class="grow grid grid-cols-4 grid-rows-4">
+    <div class="bg-[#262d5f] rounded-md size-full overflow-hidden flex flex-col">
+      <div id="friends-grid" class="grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 grid-rows-8 p-2
       <p class="col-span-full row-span-full m-auto text-white">it should load soon</p>
       </div>
       <script>
         loadFriendsDisplay();
         document.currentScript?.remove();
       </script>
-      <span id="friends-span" class="px-3 h-15 py-2 relative border-3 border-y-gray-950">
+      <div class="transform-none">
+      <div class="w-full h-px justify-center my-6 bg-gray-100 transform-[translateZ(0)]"></div>
+      <span id="friends-span" class="flex px-3 h-15 relative justify-center *:text-white">
         <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute left-0 rotate-180 cursor-pointer" onclick="moveFriendsDisplay(-1)"/>
         <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
         <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
