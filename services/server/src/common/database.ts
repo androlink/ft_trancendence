@@ -42,6 +42,7 @@ export async function initDB() {
   let AllMightyPasswordHashed = await hashPassword(
     process.env.ADMIN_PASSWORD || "password"
   );
+  let pass = await hashPassword("1234");
   const tableExists = db.prepare(
     "SELECT name FROM sqlite_master WHERE type='table' AND name = ?"
   );
@@ -93,66 +94,28 @@ export async function initDB() {
     db.prepare(
       "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
     ).run("AllMighty", AllMightyPasswordHashed, "ADMIN", 1);
-	db.prepare(
+    const fake_scores = db.prepare(
 		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "loss");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "loss");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "loss");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "loss");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "win");
-	db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-	).run(1, 2, "loss");
+  	);
+
+    const fake_friends = db.prepare(
+      "INSERT INTO friends (friend_one, friend_two) VALUES (?, ?)"
+    );
+
+    const fake_accounts = db.prepare(
+      "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
+    );
+
+
+    for (let index = 0; index < 50; index++) {
+        let rand = Math.random() > .5;
+        fake_scores.run(1, 2,  rand ? "win" : "loss");
+        if (index)
+        {
+          fake_accounts.run("David" + index, pass, "feur", 0);
+          fake_friends.run(1, index);
+        }
+    }
 
     console.log("DataBase created");
 

@@ -115,13 +115,14 @@ async function loadFriendsDisplay(): Promise<void> {
       return;
     }
     const json = await res.json();
-    if (json[0] <= 16 * (page - 1)) {
-      page = Math.floor(json[0] / 16) + 1;
+    if (json[0] <= 32 * (page - 1)) {
+      page = Math.floor(json[0] / 32) + 1;
     }
+    console.log(page , "ici");
     if (span !== null && span.childElementCount === 3) {
       span.children[0].toggleAttribute("hidden", page === 1);
       span.children[1].textContent = String(page);
-      span.children[2].toggleAttribute("hidden", json[0] <= page * 16);
+      span.children[2].toggleAttribute("hidden", json[0] <= page * 32);
     }
     if (grid !== null) {
       if (json[0] === 0) {
@@ -131,10 +132,10 @@ async function loadFriendsDisplay(): Promise<void> {
         return;
       }
       const fragment = document.createDocumentFragment();
-      for (let i = 0; i < json[1].length && i < 16; i++) {
+      for (let i = 0; i < json[1].length && i < 32; i++) {
         const div = document.createElement("div");
         div.className =
-          "size-full border hover:bg-blue-200/10 border-gray-200 rounded-xl shadow-xl flex items-center overflow-hidden justify-around cursor-pointer gap-4 px-4";
+          "size-full border hover:bg-blue-200/10 border-gray-200 rounded-xl shadow-xl flex items-center overflow-hidden justify-around cursor-pointer gap-4 px-4 py-2";
         div.addEventListener("click", () =>
           goToURL(`/profile/${encodeURIUsername(json[1][i].username)}`)
         );
@@ -168,6 +169,7 @@ function moveFriendsDisplay(direction: number): void {
     throw new TypeError('"direction" must be a Finite number');
   if (direction === 0) return;
   page = page + Math.max(direction, 1 - page);
+  console.log(page, direction, Math.max(direction, 1 - page));
   history.pushState(
     { page: "" },
     "",

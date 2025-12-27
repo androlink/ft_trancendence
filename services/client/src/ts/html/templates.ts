@@ -83,7 +83,7 @@ const htmlSnippetsTemplate: {
             class=" p-1 mt-1 justify-items-end self-center select-none hover:fill-blue-500 size-10 cursor-pointer"
             draggable="false"
           ></img>
-    </div>  
+    </div>
       <div class="transform-none">
           <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
       </div>
@@ -273,21 +273,23 @@ const htmlSnippetsTemplate: {
   </div>
   `,
   Friend: `
-    <div class="bg-[#262d5f] rounded-md size-full overflow-hidden flex flex-col">
-      <div id="friends-grid" class="grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 grid-rows-8 p-2
-      <p class="col-span-full row-span-full m-auto text-white">it should load soon</p>
+    <div class="bg-[#262d5f] rounded-md size-full flex flex-col">
+      <div class=" flex-1 max-h-[125] overflow-y-auto">
+        <div id="friends-grid" class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-2 grid-auto-rows-[60px]">
+          <p class="col-span-full row-span-full m-auto text-white">it should load soon</p>
+        </div>
       </div>
+
+      <span id="friends-span" class="flex h-16 px-4 justify-center items-center bg-[#262d5f] border-t border-white *:text-white rounded-b-md ">
+        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute px-2 left-0 rotate-180 cursor-pointer" onclick="moveFriendsDisplay(-1)"/>
+        <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
+        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute px-2 right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
+      </span>
+
       <script>
         loadFriendsDisplay();
         document.currentScript?.remove();
       </script>
-      <div class="transform-none">
-      <div class="w-full h-px justify-center my-6 bg-gray-100 transform-[translateZ(0)]"></div>
-      <span id="friends-span" class="flex px-3 h-15 relative justify-center *:text-white">
-        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute left-0 rotate-180 cursor-pointer" onclick="moveFriendsDisplay(-1)"/>
-        <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
-        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
-      </span>
     </div>
   `,
   LogIn: `
