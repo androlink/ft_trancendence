@@ -15,5 +15,5 @@
   "watchOptions": {
     "watchFile": "fixedpollinginterval"
   },
-  "include": ["**.ts"]
+  "include": ["**.ts", "micro_account/github_routes.ts"]
 }

@@ -4,6 +4,7 @@ import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 
 import apiAccount from "./accounts_routes";
+import apiAccountGithub from "./github_routes"
 import { Id, JwtUserPayload } from "../common/types";
 import { initDB } from "../common/database";
 
@@ -34,6 +35,7 @@ fastify.register(fastifyJWT, {
 await initDB();
 
 fastify.register(apiAccount, { prefix: "/api/account" });
+fastify.register(apiAccountGithub, { prefix: "/api/account/github" });
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

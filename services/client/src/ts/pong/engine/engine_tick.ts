@@ -103,11 +103,11 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
         nspeed = ball.view.size + player.view.width;
       if (player.view.direction === "E") {
         ball.speed.x = nspeed;
-        // ball.view.x = player.view.TL.x + player.view.width;
+        ball.view.x = player.view.TL.x + player.view.width;
         ball.speed.y = Math.tan(angle) * ball.speed.x;
       } else if (player.view.direction === "W") {
         ball.speed.x = -nspeed;
-        // ball.view.x = player.view.TL.x - ball.view.size;
+        ball.view.x = player.view.TL.x - ball.view.size;
         ball.speed.y = Math.tan(-angle) * ball.speed.x;
       }
       ball.speed.y += Math.random() * 0.01 - 0.005;

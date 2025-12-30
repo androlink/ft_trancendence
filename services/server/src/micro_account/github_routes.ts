@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply } from "fastify";
-import db from "./database";
+import db from "../common/database";
 import Database from "better-sqlite3";
-import { Id } from "./types";
+import { Id } from "../common/types";
 import fs, { realpath } from "fs";
 import { fileTypeFromBuffer } from "file-type";
 
@@ -181,7 +181,7 @@ export default function authentification(fastify: FastifyInstance) {
   fastify.post<{
     Body: { username: string; githubId: number; pdp: URL; bio: string };
   }>(
-    "/github/connection",
+    "/connection",
     {
       // preValidation: checkBodyInput(["username"], true),
     },
@@ -204,7 +204,7 @@ export default function authentification(fastify: FastifyInstance) {
   /**
    * creates an access_token with a code provided after connecting to GitHub
    */
-  fastify.get("/github/getAccessToken", async (req, res) => {
+  fastify.get("/getAccessToken", async (req, res) => {
     const { code } = req.query as { code: string };
 
     const url = new URL("https://github.com/login/oauth/access_token");
@@ -218,18 +218,19 @@ export default function authentification(fastify: FastifyInstance) {
     });
 
     const data = await response.json();
+    console.log(data);
     res.send(data);
   });
   /**
    * get user data like: 'username', 'bio', 'id', 'profile picture' from github
    */
-  fastify.get("/github/getUserData", async (req, res) => {
+  fastify.get("/getUserData", async (req, res) => {
     const authHeader = req.headers["authorization"];
     console.log("Authorization =>", authHeader);
     const response = await fetch("https://api.github.com/user", {
       method: "GET",
       headers: {
-        Authorization: authHeader,
+        Authorization: authHeader || "",
       },
     });
 

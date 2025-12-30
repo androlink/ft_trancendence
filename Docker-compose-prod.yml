@@ -69,7 +69,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://resources_microservice:3000/"]
+      test: ["CMD", "curl", "http://resources_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -88,7 +88,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://error_microservice:3000/"]
+      test: ["CMD", "curl", "http://error_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -107,7 +107,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://page_microservice:3000/"]
+      test: ["CMD", "curl", "http://page_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -126,7 +126,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://misc_microservice:3000/"]
+      test: ["CMD", "curl", "http://misc_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -145,7 +145,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://account_microservice:3000/"]
+      test: ["CMD", "curl", "http://account_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -164,7 +164,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://chat_microservice:3000/"]
+      test: ["CMD", "curl", "http://chat_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -183,7 +183,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["Entrypoint", "curl", "http://remote_microservice:3000/"]
+      test: ["CMD", "curl", "http://remote_microservice:3000/"]
       interval: 5s
       timeout: 5s
       retries: 10

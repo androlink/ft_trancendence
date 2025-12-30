@@ -1,5 +1,6 @@
 export const assetsPath = `/resources`;
 
+
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
  */
@@ -25,7 +26,15 @@ const htmlSnippetsTemplate: {
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <input type="text" maxlength="30" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none w-140"/>
+    <input type="text" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
+    <script>
+    {
+      const ft_title = document.currentScript.previousElementSibling;
+      ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯";
+      ft_title.onchange = () => self.localStorage.setItem("ft_title", ft_title.value);
+      document.currentScript.remove();
+    }
+    </script>
     <span class="justify-self-end flex gap-x-2">
       <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
@@ -192,7 +201,7 @@ const htmlSnippetsTemplate: {
             <input placeholder="[[new password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
             <input placeholder="[[confirm password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
           </div>
-          <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[change password]]</button>
+          <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" id="label-change-password" type="submit">[[change password]]</button>
         </span>
       </form>
       <form id="delete-account-form" class="mt-5 flex flex-col items-center">

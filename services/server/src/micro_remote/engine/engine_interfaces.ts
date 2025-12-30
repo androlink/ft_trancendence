@@ -4,7 +4,7 @@ import WebSocket from "ws";
  * for a player, what is needed to be displayed
  */
 export interface PlayerView {
-  name: string | [string, ...string[]];
+  name: string;
   score: number;
   TL: { x: number; y: number };
   width: number;

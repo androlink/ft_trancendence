@@ -25,7 +25,6 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
         minLength: 3,
         maxLength: 20,
         alphanumeric_: true,
-        forbidden: ["server", "You"],
       },
       biography: { maxLength: 3000 },
       password: { minLength: 4, maxByteLength: 42 },
@@ -34,7 +33,6 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
         minLength?: number;
         maxLength?: number;
         alphanumeric_?: boolean;
-        forbidden?: string[];
         maxByteLength?: number;
       };
     };
@@ -84,7 +82,7 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
           });
         if (
           conditions[field]!.alphanumeric_ &&
-          !req.body[field].match("^[a-zA-Z0-9_]*$")
+          !req.body[field].match("^[a-zA-Z0-9_-]*$")
         )
           return reply
             .code(401)

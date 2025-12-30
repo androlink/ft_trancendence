@@ -52,13 +52,13 @@ class PongEngine extends EventTarget {
 
     this.players = [
       generatePLayerEntity(
-        [players_name[0]],
+        players_name[0],
         { x: 5, y: 50 - paddle_height / 2 },
         "E",
         2
       ),
       generatePLayerEntity(
-        [players_name[1]],
+        players_name[1],
         { x: 100 - 5 - paddle_width, y: 50 - paddle_height / 2 },
         "W",
         2

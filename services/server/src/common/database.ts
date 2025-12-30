@@ -39,13 +39,10 @@ import db from "./database.js";
  * init the db if not exists already
  */
 export async function initDB() {
-  let AllMightyPasswordHashed = await hashPassword(
-    process.env.ADMIN_PASSWORD || "password"
-  );
-  let pass = await hashPassword("1234");
   const tableExists = db.prepare(
     "SELECT name FROM sqlite_master WHERE type='table' AND name = ?"
   );
+
   const createDB = db.transaction(() => {
     if (tableExists.get("users")) {
       return;
@@ -58,8 +55,9 @@ export async function initDB() {
         username TEXT NOT NULL UNIQUE,
         bio TEXT NOT NULL DEFAULT 'Damn is that the default bio ?',
         pfp TEXT NOT NULL DEFAULT 'default.jpg',
-        password TEXT NOT NULL,
-        admin INTEGER DEFAULT 0
+        password TEXT NOT NULL DEFAULT "",
+        admin INTEGER DEFAULT 0,
+        githubId INTEGER DEFAULT -1
       );
       CREATE UNIQUE INDEX idx_username_lower ON users (lower(username));
       CREATE TABLE user_blocks (
@@ -91,35 +89,41 @@ export async function initDB() {
         result_type TEXT NOT NULL DEFAULT 'win' CHECK (result_type IN ('win', 'loss', 'draw'))
       );
       `);
-    db.prepare(
-      "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
-    ).run("AllMighty", AllMightyPasswordHashed, "ADMIN", 1);
-    const fake_scores = db.prepare(
-		"INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-  	);
 
-    const fake_friends = db.prepare(
-      "INSERT INTO friends (friend_one, friend_two) VALUES (?, ?)"
-    );
-
-    const fake_accounts = db.prepare(
-      "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
-    );
-
-
-    for (let index = 0; index < 50; index++) {
-        let rand = Math.random() > .5;
-        fake_scores.run(1, 2,  rand ? "win" : "loss");
-        if (index)
-        {
-          fake_accounts.run("David" + index, pass, "feur", 0);
-          fake_friends.run(1, index);
-        }
-    }
+    hashPassword(process.env.ADMIN_PASSWORD || "password")
+      .then((pass) =>
+        db
+          .prepare(
+            "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
+          )
+          .run("AllMighty", pass, "ADMIN", 1)
+      )
+      .catch(console.error);
 
     console.log("DataBase created");
-
   });
+
+  // const pass = await hashPassword(process.env.ADMIN_PASSWORD || "password");
+  // const fake_scores = db.prepare(
+  //   "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+  // );
+
+  // const fake_friends = db.prepare(
+  //   "INSERT INTO friends (friend_one, friend_two) VALUES (?, ?)"
+  // );
+
+  // const fake_accounts = db.prepare(
+  //   "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
+  // );
+
+  // for (let index = 0; index < 50; index++) {
+  //   let rand = Math.random() > 0.5;
+  //   fake_scores.run(1, 2, rand ? "win" : "loss");
+  //   if (index) {
+  //     fake_accounts.run("David" + index, pass, "feur", 0);
+  //     fake_friends.run(1, index);
+  //   }
+  // }
   try {
     createDB.exclusive();
   } catch (e) {

@@ -38,7 +38,7 @@ export function resetBall(
  * @returns the new PlayerEntity
  */
 export function generatePLayerEntity(
-  name: string | [string, ...string[]],
+  name: string,
   TL: { x: number; y: number },
   direction: PlayerView["direction"],
   speedHere = paddle_speed

@@ -1,3 +1,4 @@
+import { findLanguage, selectLanguage } from "./html/templates.js";
 import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
@@ -16,6 +17,17 @@ enum TypeMessage {
   replyInvite = "replyInvite",
   ping = "ping",
   pong = "pong",
+}
+
+export enum RemotePongReasonCode {
+  NOT_CONNECTED = "R_NOT_CONNECTED",
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  GAME_NOT_FOUND = "GAME_NOT_FOUND",
+  CANNOT_JOIN_GAME = "CANNOT_JOIN_GAME",
+  GAME_ALREADY_STARTED = "GAME_ALREADY_STARTED",
+  CANNOT_PLAY_WITH_YOURSELF = "CANNOT_PLAY_WITH_YOURSELF",
+  INVALID_REQUEST = "INVALID_REQUEST",
+  INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
 }
 
 /**
@@ -38,6 +50,7 @@ type WSmessage =
       type: TypeMessage.replyInvite;
       status: false;
       reason: string;
+      info?: string;
     }
   | {
       type: Exclude<TypeMessage, TypeMessage.replyInvite>;
@@ -77,17 +90,27 @@ function invite_message(event: MessageEvent) {
   }
   const para = document.createElement("p");
   if (message.status === false) {
-    const node = document.createTextNode(message.reason);
+    para.className = "text-red-500 font-bold text-center";
+    const reason = findLanguage(message.reason);
+    const node = document.createTextNode(reason);
     para.appendChild(node);
   } else {
-    const userLink = document.createElement("span");
-    userLink.textContent = `${message.sender}:`;
+    para.className = "text-green-500 font-bold text-center ";
     const playButton = document.createElement("button");
-    playButton.textContent = "join party";
+    playButton.type = "button";
+    playButton.className = "cursor-pointer hover:text-purple-500 mx-2";
+    playButton.textContent = selectLanguage([
+      "JOIN_GAME",
+      message.sender,
+      message.target,
+    ]);
     playButton.onclick = () => {
-      join_party(message.room_id);
+      playButton.className = "disable";
+      para.className = "text-gray-500 text-center";
+      let room_id = message.room_id;
+      join_party(room_id);
+      playButton.onclick = null;
     };
-    para.appendChild(userLink);
     para.appendChild(playButton);
   }
 
@@ -301,6 +324,29 @@ function sendOrQueue(message: string) {
   }
 }
 
+const histrory: string[] = [];
+let line = -1;
+
+function getHistory(line: number): string | null {
+  if (line < 0 || line >= histrory.length) return null;
+  return histrory[line];
+}
+
+export function ChatHistoryAdd(message: string) {
+  if (histrory[0] !== message) histrory.unshift(message);
+  ChatResetHistoryLine();
+}
+
+export function ChatHistoryRequest(req: "up" | "down"): string | null {
+  if (req === "up" && line < histrory.length - 1) line++;
+  else if (req === "down" && line >= 0) line--;
+  return getHistory(line);
+}
+
+export function ChatResetHistoryLine() {
+  line = -1;
+}
+
 /**
  * Send message to the chat
  * - can send Direct messgage with /msg commands
@@ -310,6 +356,7 @@ function sendOrQueue(message: string) {
 export function sendChatMessage() {
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
   if (!textarea || !textarea.value) return;
+  ChatHistoryAdd(textarea.value);
   if (textarea.value.length > 280) {
     const err: WSmessage = {
       user: null,
