@@ -76,7 +76,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
     return reply.send({
       template: "Home",
       title: "ft_transcendence",
-      inner: "Acceuil",
+      inner: "Welcome",
     });
   });
 
@@ -236,14 +236,13 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
     );
   }
 
-  fastifyInstance.get("/blank", (req, reply) => {
+  fastifyInstance.get("/help", (req, reply) => {
     return reply.send({
       template: "Home",
       title: ["BORING"],
-      inner: "Blank",
+      inner: "PopUp",
     });
   });
-
 
   fastifyInstance.get("/netplay", (req, reply) => {
     return reply.send({
@@ -264,14 +263,26 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
           replace: { status: "403 NUH UH", message: ["NEED_ADMIN"] },
         });
       }
-      const file = fs
-        .readFileSync(dbLogFile, { encoding: "utf8", flag: "r" })
-        .replace(/(?:\r\n|\r|\n)/g, "<br>");
-      // will need to be replaced soon if we wanna be clean.
-      // Here it reads the whole file to send last 10Mo, waste of time if many Go long
-      return reply.type("text/html")
-        .send(`<!DOCTYPE html><html><head><title>db logs</title></head>
-      <body>${file.substring(file.length - 10 * 1024 * 1024)}</body></html>`);
+      const start = Math.max(fs.statSync(dbLogFile).size - 10 * 1024 * 1024, 0);
+      reply.type("text/html");
+      reply.raw.write(
+        "<!DOCTYPE html><html><head><title>db logs</title></head><body>"
+      );
+      const stream = fs.createReadStream(dbLogFile, {
+        encoding: "utf8",
+        start,
+      });
+      stream.on("data", (chunk) => {
+        // chunk is a string due to encoding utf8 above
+        reply.raw.write((chunk as string).replace(/(?:\r\n|\r|\n)/g, "<br>"));
+      });
+      stream.on("end", () => {
+        reply.raw.end("</body></html>");
+      });
+      stream.on("error", (err) => {
+        reply.raw.statusCode = 500;
+        reply.raw.end("Error reading log file");
+      });
     }
   );
 }

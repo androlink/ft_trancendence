@@ -1,6 +1,5 @@
 export const assetsPath = `/resources`;
 
-
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
  */
@@ -11,12 +10,11 @@ const htmlSnippetsTemplate: {
   readonly Profile2: string;
   readonly Friend: string;
   readonly LogIn: string;
-  readonly Blank: string;
   readonly Error: string;
   readonly Ouch: string;
   readonly PopUp: string;
   readonly ErrorMessageHandler: string;
-  readonly Acceuil:string;
+  readonly Welcome: string;
   RemotePong: string;
 } = {
   Home: `
@@ -26,7 +24,7 @@ const htmlSnippetsTemplate: {
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <input type="text" value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
+    <input type="text" maxLength=20 value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
     <script>
     {
       const ft_title = document.currentScript.previousElementSibling;
@@ -48,12 +46,11 @@ const htmlSnippetsTemplate: {
     <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
   </div>
   <span id="inner-buttons" class="flex gap-x-0.5 mx-8 *:px-1 *:cursor-pointer *:data-checked:cursor-default *:select-none *:rounded-t *:data-checked:text-white *:data-checked:bg-[#262d5f] *:bg-[#1b1e38] *:text-gray-300">
-    <div onclick="goToURL('')" name="">acceuil</div>
+    <div onclick="goToURL( )" name="">🏠</div>
     <div onclick="goToURL('pong')" name="pong">[[pong]]</div>
     <div onclick="goToURL('profile')" name="profile">[[your profile]]</div>
     <div onclick="goToURL('friends')" name="friends">[[your friends]]</div>
-    <div onclick="goToURL('blank')" name="blank">debug</div>
-    <div onclick="goToURL('netplay')" name="netplay">[[netplay]]</div>
+    <div onclick="goToURL('help')" name="help">?</div>
   </span>
   <span class=" flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 select-none drop-shadow-xl/50">
     <div id="inner" class="h-full col-span-3 overflow-hidden relative"></div>
@@ -171,7 +168,7 @@ const htmlSnippetsTemplate: {
     </div>
   </div>
 
-  `/** <!-- <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
+  ` /** <!-- <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
     <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
       <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
       <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
@@ -211,8 +208,7 @@ const htmlSnippetsTemplate: {
     </span>
   </div> -->
   */,
-  Profile2:
-    `
+  Profile2: `
   <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin absolute top-0 right-0" onclick="resetNextInner(); main()"/>
   <div class="bg-[#262d5f] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
     <header class="w-full flex items-start gap-4">
@@ -344,9 +340,6 @@ const htmlSnippetsTemplate: {
     </div>
   </div>
   `,
-  Blank: `
-
-  `,
   Error: `
   <div class="flex flex-col items-center size-1/2 m-40 place-self-center">
     <h1 id=status class="text-white font-bold"></h1>
@@ -362,6 +355,7 @@ const htmlSnippetsTemplate: {
   `,
   PopUp: `
   <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
+  <p>[[pop up]]</p>
   </div>
     `,
   Pong: `
@@ -383,13 +377,20 @@ const htmlSnippetsTemplate: {
   ErrorMessageHandler: `
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `,
-  Acceuil:`
+  Welcome: `
     <div id="physics-zone" class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
-      <h1 id="Title" data-physics  class="text-white mx-auto my-20 text-9xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
+      <h1 id="Title" data-physics  class="text-white wrap-break-word whitespace-pre mx-auto my-20 text-9xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
+      <script>
+      {
+        const ft_title = document.currentScript.previousElementSibling;
+        ft_title.textContent = selectLanguage(["Welcome to", self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯"]);
+        document.currentScript.remove();
+      }
+      </script>
       <button class="text-white font-semibold text-2xl rounded-[20px] size-fit px-4 py-2 bg-purple-600 mx-auto hover:bg-blue-500"
         onclick="goToURL(localStorage.getItem('token') ? 'pong' : 'profile')">Start</button>
     </div>
-  `
+  `,
 } as const;
 /**
  * all the HTML (and CSS) of the Single-Page-Application (translated)
@@ -444,6 +445,7 @@ export function selectLanguage(strs: languageString): string {
   }
   return res;
 }
+self["selectLanguage"] = selectLanguage;
 
 /**
  * gives the string corresponding to name from the language jsons,
@@ -459,12 +461,16 @@ export function findLanguage(name: string): string {
   return `translation not found => "${name}"`;
 }
 
-
-export function countCharacter(){
-
-  const userContent = document.getElementById("username-p1") as HTMLInputElement;
-  const bioContent = document.getElementById("biography-p1") as HTMLTextAreaElement;
-  const userCount = document.getElementById("usernameCount") as HTMLParagraphElement;
+export function countCharacter() {
+  const userContent = document.getElementById(
+    "username-p1"
+  ) as HTMLInputElement;
+  const bioContent = document.getElementById(
+    "biography-p1"
+  ) as HTMLTextAreaElement;
+  const userCount = document.getElementById(
+    "usernameCount"
+  ) as HTMLParagraphElement;
   const bioCount = document.getElementById("bioCount") as HTMLParagraphElement;
 
   if (!userContent || !bioContent || !userCount || !bioCount) return;
@@ -472,9 +478,9 @@ export function countCharacter(){
   userCount.textContent = `${userContent.value.length}/20`;
   bioCount.textContent = `${bioContent.value.length}/400`;
 
-  userContent.addEventListener('input', () =>{
+  userContent.addEventListener("input", () => {
     const parentDiv = userContent.parentNode as HTMLDivElement;
-    if (userContent.value.length >= 20){
+    if (userContent.value.length >= 20) {
       parentDiv.classList.add("focus-within:border-red-500");
       setTimeout(() => {
         parentDiv.classList.remove("focus-within:border-red-500");
@@ -482,9 +488,9 @@ export function countCharacter(){
     }
     userCount.textContent = `${userContent.value.length}/20`;
   });
-  bioContent.addEventListener('input', () =>{
+  bioContent.addEventListener("input", () => {
     const parentDiv = bioContent.parentNode as HTMLDivElement;
-    if (bioContent.value.length >= 400){
+    if (bioContent.value.length >= 400) {
       parentDiv.classList.add("focus-within:border-red-500");
       setTimeout(() => {
         parentDiv.classList.remove("focus-within:border-red-500");
@@ -494,10 +500,13 @@ export function countCharacter(){
   });
 }
 
-
-export function updateInfos(){
-  const usernameInput = document.getElementById("username-p1") as HTMLInputElement;
-  const bioInput = document.getElementById("biography-p1") as HTMLTextAreaElement;
+export function updateInfos() {
+  const usernameInput = document.getElementById(
+    "username-p1"
+  ) as HTMLInputElement;
+  const bioInput = document.getElementById(
+    "biography-p1"
+  ) as HTMLTextAreaElement;
   const updateButton = document.getElementById("update-infos");
 
   if (!usernameInput || !bioInput || !updateButton) return;
@@ -506,7 +515,6 @@ export function updateInfos(){
   const initialBioValue = bioInput.value;
 
   if (!updateButton) return;
-
 
   const checkChanges = () => {
     const changed =
@@ -517,6 +525,4 @@ export function updateInfos(){
   };
   usernameInput.addEventListener("input", checkChanges);
   bioInput.addEventListener("input", checkChanges);
-};
-
-
+}

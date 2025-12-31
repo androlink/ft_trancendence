@@ -26,8 +26,8 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
         maxLength: 20,
         alphanumeric_: true,
       },
-      biography: { maxLength: 3000 },
-      password: { minLength: 4, maxByteLength: 42 },
+      biography: { maxLength: 400 },
+      password: { minLength: 4, maxByteLength: 70 },
     } as {
       [key: string]: {
         minLength?: number;
