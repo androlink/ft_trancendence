@@ -239,7 +239,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
   fastifyInstance.get("/help", (req, reply) => {
     return reply.send({
       template: "Home",
-      title: ["BORING"],
+      title: "?",
       inner: "PopUp",
     });
   });
