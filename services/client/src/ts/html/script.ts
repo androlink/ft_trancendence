@@ -126,9 +126,13 @@ async function loadFriendsDisplay(): Promise<void> {
     }
     if (grid !== null) {
       if (json[0] === 0) {
-        grid.innerHTML =
-          '<p class="col-span-full row-span-full m-auto text-white"></p>';
-        grid.firstElementChild.textContent = findLanguage("get friends");
+        const div = grid.parentElement;
+          div.classList.add("m-auto", "text-white");
+          div.classList.remove("flex-1");
+        // div.innerHTML =
+        //   '<p class="col-span-full row-span-full items-center m-auto text-white"></p>';
+          div.textContent = findLanguage("get friends");
+          grid.classList.add("hidden");
         return;
       }
       const fragment = document.createDocumentFragment();
