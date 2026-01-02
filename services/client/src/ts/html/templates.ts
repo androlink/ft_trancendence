@@ -20,15 +20,15 @@ const htmlSnippetsTemplate: {
   Home: `
   <span class="flex justify-between grid-cols-3 mx-8 my-2">
     <div class="relative">
-      <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-lg block p-2.5 bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:outline focus:ring-blue-500 focus:border-blue-500"/>
+      <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-md block p-2.5 bg-[#1b1e38] border border-white placeholder-gray-400 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
-    <input type="text" maxLength=20 value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-white font-semibold select-none"/>
+    <input type="text" maxLength=20 value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-center text-white font-semibold select-none"/>
     <script>
     {
       const ft_title = document.currentScript.previousElementSibling;
-      ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯";
+      ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\_(ツ)_/¯";
       ft_title.onchange = () => self.localStorage.setItem("ft_title", ft_title.value);
       document.currentScript.remove();
     }
@@ -66,12 +66,24 @@ const htmlSnippetsTemplate: {
         <div id="chat-content" class=" overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
         <div class="mx-4 mb-4 flex bg-white rounded ">
           <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="[[send a message]]" maxlength="280"></textarea>
-          <img
-            src="${assetsPath}/send-icon.svg"
-            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
-            class="mx-2 justify-items-end self-center select-none hover:fill-blue-500 size-10 cursor-pointer"
-            draggable="false"
-          ></img>
+          <svg class="mx-2 justify-items-end self-center select-none text-blue-500 hover:fill-blue-500 size-10 cursor-pointer"
+            width="44" height="46" viewBox="0 0 44 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            
+            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"            
+            draggable="false">
+            <rect width="44" height="45.7255" fill="url(#pattern0_28_31)"/>
+            <defs>
+            <pattern id="pattern0_28_31" patternContentUnits="objectBoundingBox" width="1" height="1" >
+            <use xlink:href="#image0_28_31" transform="matrix(0.01 0 0 0.00962264 0 0.0188679)"/>
+            </pattern>
+            <image class="text-blue-500" id="image0_28_31" width="100" height="100" preserveAspectRatio="none" xlink:href="data:image/png;base64,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"/>
+            </defs>
+          </svg>
+          <svg class="mx-2 justify-items-end self-center select-none fill-blue-500 hover:fill-blue-900 size-10 cursor-pointer" width="200" height="200" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
+  <path class="paper-plane" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+</svg>
+
         </div>
       </div>
     </div>
@@ -224,8 +236,8 @@ const htmlSnippetsTemplate: {
               .dropdown:hover .dropdown-content {display: flex;}
             </style>
             <img src="${assetsPath}/menu-vertical.png" class="mt-5 size-10 cursor-pointer"></img>
-            <div class="dropdown-content rounded-md flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 bg-[#1b1e38] border border-white">
-              <ul class ="*:hover:bg-gray-400 *:rounded-md *:px-1 *:text-gray-200 *:hover:text-white">
+            <div class="dropdown-content rounded-md flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
+              <ul class ="*:hover:bg-[#ffffff7c] *:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0] backdrop-blur-2xl">
                 <li>
                   <a id="friend request">friend request</a>
                 </li>
@@ -378,8 +390,8 @@ const htmlSnippetsTemplate: {
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `,
   Welcome: `
-    <div id="physics-zone" class="flex flex-col justify-items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
-      <h1 id="Title" data-physics  class="text-white wrap-break-word whitespace-pre mx-auto my-20 text-9xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
+    <div id="physics-zone" class="flex flex-col items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
+      <h1 id="Title" data-physics  class="text-white wrap-break-word whitespace-pre mx-auto my-20 2xl:text-10xl xl:text-9xl md:text-7xl sm:text-6xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
       <script>
       {
         const ft_title = document.currentScript.previousElementSibling;
