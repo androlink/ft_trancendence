@@ -55,15 +55,19 @@ function usernameFormator(username: string): string {
     username = username.substring(0, 20);
   }
   const rows = dbQuery.getUsername.all({ username });
-  if (rows.every((row) => row.username != username)) return username;
+  console.log(rows);
+  console.log(username);
+  if (rows.find((row) => row.username != username) === undefined)
+    return username;
 
-  let nb = 0;
+  let nb = 1;
   while (
-    rows.every((row) => {
-      let newUsername = InsertNumberInUsername(username, nb++);
-      row.username != newUsername;
-    })
-  );
+    rows.find((row) => row.username === InsertNumberInUsername(username, nb)) !=
+    undefined
+  ) {
+    nb++;
+  }
+  console.log(InsertNumberInUsername(username, nb));
   return InsertNumberInUsername(username, nb);
 }
 /**
