@@ -20,7 +20,30 @@ const htmlSnippetsTemplate: {
   Home: `
   <span class="flex justify-between grid-cols-3 mx-8 my-2">
     <div class="relative">
-      <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="placeholder:italic text-sm select-none rounded-md block p-2.5 bg-[#1b1e38] border border-white placeholder-gray-400 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+      <div class="gap-1 flex group rounded-md p-2.5 bg-[#1b1e38] border border-white placeholder-gray-400 text-white  focus-within:border-blue-500">
+        <svg version="1.0" class="flex size-5 fill-current group-focus-within:text-blue-500 text-white "
+        xmlns="http://www.w3.org/2000/svg"
+        width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000"
+        preserveAspectRatio="xMidYMid meet">
+          <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
+            fill="currentColor" stroke="none">
+            <path d="M1535 3485 c-133 -18 -207 -41 -343 -107 -192 -92 -338 -211 -455
+            -371 -45 -62 -64 -93 -118 -197 -69 -131 -120 -356 -119 -529 1 -164 45 -352
+            120 -506 206 -427 620 -688 1090 -688 273 0 486 72 738 250 23 16 26 13 440
+            -399 229 -229 427 -421 439 -427 93 -47 209 69 162 162 -6 12 -198 209 -426
+            438 -293 294 -413 421 -408 430 5 8 21 30 37 50 15 20 28 40 28 45 0 4 6 15
+            14 23 22 24 82 149 111 229 90 250 92 545 5 797 -95 275 -302 519 -565 666
+            -222 124 -484 171 -750 134z m437 -274 c301 -90 509 -285 642 -603 27 -64 49
+            -209 49 -318 1 -317 -154 -610 -415 -787 -164 -112 -332 -164 -533 -166 -114
+            0 -256 21 -323 50 -167 70 -253 125 -356 227 -122 120 -201 253 -252 426 -25
+            86 -28 110 -28 250 0 136 4 166 26 246 80 283 263 501 521 623 142 68 274 92
+            454 85 95 -4 144 -11 215 -33z"/>
+          </g>
+        </svg>
+
+        <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="flex placeholder:italic text-sm select-none focus:outline-none w-2/3"/>
+      
+      </div>
       <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
       </div>
     </div>
@@ -62,27 +85,22 @@ const htmlSnippetsTemplate: {
         <p class="m-2 font-bold">[[not connected]]</p>
         <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[log in page]]</button>
       </div>
-      <div class="rounded-md size-full bg-[#E9E9E9] flex flex-col">
+      <div class="rounded-md overflow-hidden size-full bg-[#E9E9E9] flex flex-col">
         <div id="chat-content" class=" overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
         <div class="mx-4 mb-4 flex bg-white rounded ">
           <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="[[send a message]]" maxlength="280"></textarea>
-          <svg class="mx-2 justify-items-end self-center select-none text-blue-500 hover:fill-blue-500 size-10 cursor-pointer"
-            width="44" height="46" viewBox="0 0 44 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-            
-            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"            
-            draggable="false">
-            <rect width="44" height="45.7255" fill="url(#pattern0_28_31)"/>
-            <defs>
-            <pattern id="pattern0_28_31" patternContentUnits="objectBoundingBox" width="1" height="1" >
-            <use xlink:href="#image0_28_31" transform="matrix(0.01 0 0 0.00962264 0 0.0188679)"/>
-            </pattern>
-            <image class="text-blue-500" id="image0_28_31" width="100" height="100" preserveAspectRatio="none" xlink:href="data:image/png;base64,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"/>
-            </defs>
-          </svg>
-          <svg class="mx-2 justify-items-end self-center select-none fill-blue-500 hover:fill-blue-900 size-10 cursor-pointer" width="200" height="200" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 
-  <path class="paper-plane" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-</svg>
+          <svg class="mx-2 justify-items-end self-center select-none fill-current text-[#8B2CF5] hover:text-blue-500 size-10 cursor-pointer" 
+            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"            
+            draggable="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="44.000000pt" height="46.000000pt" viewBox="0 0 44.000000 46.000000"
+            preserveAspectRatio="xMidYMid meet">
+            <g transform="translate(0.000000,46.000000) scale(0.100000,-0.100000)"
+              fill="currentColor" stroke="none">
+              <path d="M210 332 c-102 -26 -187 -47 -189 -48 -1 -2 11 -21 29 -43 22 -27 34 -54 37 -86 6 -45 6 -45 38 -39 27 5 41 -1 82 -29 l49 -36 86 165 c63 120 81 164 69 163 -9 -1 -99 -22 -201 -47z m129 -18 c-25 -27 -211 -164 -223 -164 -3 0 -6 15 -6 33 0 31 3 34 123 94 67 34 124 62 126 62 3 1 -6 -11 -20 -25z"/>
+            </g>
+          </svg>
 
         </div>
       </div>
@@ -95,12 +113,25 @@ const htmlSnippetsTemplate: {
 
     <div class="flex">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
-      <img
-            src="${assetsPath}/goTo.svg"
-            id="go-to-profile"
-            class=" p-1 mt-1 justify-items-end self-center select-none hover:fill-blue-500 size-10 cursor-pointer"
-            draggable="false"
-          ></img>
+      <svg version="1.0"
+        id="go-to-profile"
+        class="p-1.5 mt-2 justify-items-end self-center select-none fill-current text-white hover:text-blue-500 size-10 cursor-pointer"
+        draggable="false"
+        xmlns="http://www.w3.org/2000/svg"
+        width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000"
+        preserveAspectRatio="xMidYMid meet">
+          <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
+            fill="currentColor" stroke="none">
+              <path d="M639 3737 c-79 -53 -102 -142 -55 -215 13 -20 355 -368 760 -772 405
+              -404 736 -742 736 -750 0 -8 -329 -344 -731 -745 -402 -402 -744 -748 -760
+              -769 -54 -73 -33 -167 50 -223 41 -28 109 -31 149 -6 43 26 1742 1726 1742
+              1743 0 17 -1699 1717 -1742 1743 -40 25 -108 22 -149 -6z"/>
+              <path d="M1679 3737 c-79 -53 -102 -142 -55 -215 13 -20 355 -368 760 -772
+              405 -404 736 -742 736 -750 0 -8 -329 -344 -731 -745 -402 -402 -744 -748
+              -760 -769 -54 -73 -33 -167 50 -223 41 -28 109 -31 149 -6 43 26 1742 1726
+              1742 1743 0 17 -1699 1717 -1742 1743 -40 25 -108 22 -149 -6z"/>
+          </g>
+      </svg>
     </div>
       <div class="transform-none">
           <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
@@ -180,46 +211,7 @@ const htmlSnippetsTemplate: {
     </div>
   </div>
 
-  ` /** <!-- <div class="bg-gray-800 rounded-2xl p-2 size-full flex flex-col">
-    <div class="relative border-4 border-gray-900 rounded-2xl w-full grow overflow-hidden">
-      <p id="go-to-profile" class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-blue-950 underline decoration-dashed decoration-gray-400 hover:cursor-pointer">[[public infos]]</p>
-      <form id="pfp-form" class="pointer-events-none absolute border-4 border-gray-900 right-0 *:mx-auto rounded-2xl p-3 h-fit w-1/4 flex flex-col overflow-x-hidden">
-        <img id="profile-picture" class="pointer-events-auto aspect-square h-40 rounded-full" src="${assetsPath}/pfp/default.jpg">
-        <div id="pfp-preview-div" hidden class="relative">
-          <p class="bg-gray-400 border px-1 top-2 rounded absolute">[[preview]]</p>
-          <img id="pfp-preview" class="rounded-full aspect-square size-40" />
-        </div>
-        <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
-        <label for="pfp-input" class="pointer-events-auto cursor-pointer bg-white rounded border border-gray-600 size-fit px-1" >[[upload image]]</label>
-        <button title="[[will cause a reload]]"  class="pointer-events-auto bg-white rounded size-fit px-1 my-1 cursor-pointer" type="submit">[[update]]</button>
-      </form>
-      <form id="profile-form" class="p-3 flex flex-col justify-around size-full overflow-scroll">
-        <input id="username-p1" value="" class="mt-auto ml-[15%] px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-        <div class="my-auto">
-          <p class="text-white -ml-2">[[biography]]:</p>
-          <textarea id="biography-p1" class="resize min-w-1/4 min-h-1/8 max-w-full max-h-full w-1/2 whitespace-pre-line px-1 text-white rounded bg-gray-500 wrap-break-word" name="biography"></textarea>
-        </div>
-        <button class="ml-[20%] bg-white rounded size-fit p-1 my-1 cursor-pointer" type="submit">[[update]]</button>
-      </form>
-    </div>
-    <span class="relative border-4 border-gray-900 rounded-2xl p-3 w-full h-fit min-h-fit grid grid-flow-col overflow-hidden flex-none">
-      <p class="absolute -top-1 -left-1 text-white size-fit px-2 py-1 rounded bg-amber-900">[[private infos]]</p>
-      <form id="change-password-form" class="mt-5">
-        <span class="flex gap-5 w-1/2">
-          <div class="flex gap-2 flex-col p-1">
-            <input placeholder="[[new password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password">
-            <input placeholder="[[confirm password]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="password" name="password-confirm">
-          </div>
-          <button class="self-center whitespace-nowrap bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" id="label-change-password" type="submit">[[change password]]</button>
-        </span>
-      </form>
-      <form id="delete-account-form" class="mt-5 flex flex-col items-center">
-        <input placeholder="[[confirm username]]" class="px-1 text-white rounded bg-gray-500 size-fit" type="text" name="username">
-        <button class="bg-white rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[erase account]]</button>
-      </form>
-    </span>
-  </div> -->
-  */,
+  `,
   Profile2: `
   <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin absolute top-0 right-0" onclick="resetNextInner(); main()"/>
   <div class="bg-[#262d5f] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
@@ -298,9 +290,40 @@ const htmlSnippetsTemplate: {
       </div>
 
       <span id="friends-span" class="flex h-16 px-4 justify-center items-center bg-[#262d5f] border-t border-white *:text-white rounded-b-md ">
-        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute px-2 left-0 rotate-180 cursor-pointer" onclick="moveFriendsDisplay(-1)"/>
+        <svg xmlns="http://www.w3.org/2000/svg"
+          class="h-10 absolute px-2 left-0 rotate-180 cursor-pointer text-white fill-current"
+          onclick="moveFriendsDisplay(-1)"
+          viewBox="0 0 400 400"
+          preserveAspectRatio="xMidYMid meet">
+
+            <g transform="translate(400,0) scale(-0.1,0.1)"
+            fill="currentColor" stroke="none">
+            <path d="M2440 3484 c-39 -16 -1401 -1370 -1426 -1416 -22 -42 -18 -103 10
+            -146 13 -20 334 -346 713 -724 616 -614 692 -687 726 -694 50 -9 109 9 148 44
+            33 30 59 106 51 150 -3 13 -146 307 -318 652 -173 345 -314 638 -314 650 0 12
+            141 305 314 650 172 345 315 639 318 652 7 35 -15 114 -38 139 -24 27 -91 59
+            -124 58 -14 0 -41 -7 -60 -15z"/>
+            </g>
+        </svg>
+
+
         <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
-        <img hidden src="${assetsPath}/arrow-right.png" class="h-10 absolute px-2 right-0 cursor-pointer" onclick="moveFriendsDisplay(1)"/>
+        
+        <svg xmlns="http://www.w3.org/2000/svg"
+          class="h-10 absolute px-2 right-0 rotate-180 cursor-pointer text-white fill-current"
+          onclick="moveFriendsDisplay(1)"
+          viewBox="0 0 400 400"
+          preserveAspectRatio="xMidYMid meet">
+
+            <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
+            fill="currentColor" stroke="none">
+            <path d="M2440 3484 c-39 -16 -1401 -1370 -1426 -1416 -22 -42 -18 -103 10
+            -146 13 -20 334 -346 713 -724 616 -614 692 -687 726 -694 50 -9 109 9 148 44
+            33 30 59 106 51 150 -3 13 -146 307 -318 652 -173 345 -314 638 -314 650 0 12
+            141 305 314 650 172 345 315 639 318 652 7 35 -15 114 -38 139 -24 27 -91 59
+            -124 58 -14 0 -41 -7 -60 -15z"/>
+            </g>
+        </svg>
       </span>
 
       <script>
