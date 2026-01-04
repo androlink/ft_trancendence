@@ -154,7 +154,7 @@ export default function authentification(fastify: FastifyInstance) {
       if (res.changes === 0) {
         // not normal
         return reply
-          .code(403)
+          .code(409)
           .send({ success: false, message: ["DB_REFUSED"] });
       }
 

@@ -15,8 +15,9 @@
   "confirm password": "confirmar contraseña",
   "confirm username": "confirmar apodo",
   "public infos": "información pública",
-  "private infos": "información privada",
-  "erase account": "cerrar una cuenta",
+  "private infos": "Información privada",
+  "erase account": "Cerrar una cuenta",
+  "submit": "entregar",
   "log in": "conexión",
   "log in github": "conexión con GitHub",
   "already an account": "¿Ya tienes una cuenta?",
@@ -61,7 +62,7 @@
   "add bot": "¿Configurar un robot en su lugar?",
   "pop up": "Hola. He creado algunos atajos y me resultaron muy útiles, así que...<br><br>CTRL + P => te lleva al editor de tu perfil<br>CTRL + P en el editor de tu perfil => te lleva a tu perfil público<br>CTRL + E => te desconecta<br>CTRL + Intro => selecciona el chat<br>CTRL + K => selecciona el perfil... investigación... en la esquina superior izquierda<br>CTRL + (left || right) arrow => se mueve entre los botones de navegación<br>? => muestra este menú<br><br>¡Mención especial a los atajos predeterminados!<br>Alt + flecha (izquierda || derecha) => navegar por el historial<br>Tab && Shift + Tab => seleccionar elementos",
   "USERNAME_TAKEN": "\"[[0]]\" ya está tomado",
-  "DB_REFUSED": "la base de datos se negó",
+  "DB_REFUSED": "la base de datos se negó debido al conflicto",
   "REFUSED_ADMIN": "¡Detente! Eres un administrador",
   "NOT_RECOGNIZED": "El glorioso servidor dijo que no estás conectado, que lástima",
   "USERNAME_NOT_FOUND": "No hay cuenta con el apodo \"[[0]]\"",
@@ -107,6 +108,6 @@
   "INVALID_REQUEST" : "solicitud inválida",
   "INTERNAL_SERVER_ERROR" : "algo salió mal de nuestro lado, lo siento UwU",
   "JOIN_GAME" : "Únete al juego, [[0]] vs [[1]]",
-  "CREATE PASSWORD": "crear una nueva contraseña",
+  "CREATE PASSWORD": "establecer una contraseña",
   "": ""
 }

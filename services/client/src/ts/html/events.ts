@@ -407,10 +407,8 @@ function setClickEventFriendRequest(text: HTMLElement): void {
     ["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"]
       .map(findLanguage)
       .includes(text.innerText)
-  ) {
-    text.className = "px-1";
+  )
     return;
-  }
   text.className = "cursor-pointer";
   let username = location.pathname.substring(
     location.pathname.lastIndexOf("/") + 1
@@ -655,7 +653,7 @@ export function setCtrlEventUsername(): void {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
-        fetch("api/account/logout", { method: "POST" })
+        fetch("/api/account/logout", { method: "POST" })
           .then((res) => {
             resetReconnectTimer(res.headers.get("x-authenticated"));
             sendStatusMessage();

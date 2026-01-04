@@ -15,8 +15,9 @@
   "confirm password": "confirm password",
   "confirm username": "confirm username",
   "public infos": "public infos",
-  "private infos": "private infos",
-  "erase account": "erase account",
+  "private infos": "Private infos",
+  "erase account": "Erase account",
+  "submit": "submit",
   "log in": "log in",
   "log in github": "log in with GitHub",
   "register": "Sign up",
@@ -61,7 +62,7 @@
   "add bot": "set a bot instead ?",
   "pop up": "Hello. I've made some shortcuts, and found them really useful so...<br><br>CTRL + P => goes to your profile editor<br>CTRL + P at your profile editor => goes to your public profile<br>CTRL + E => disconnect you<br>CTRL + Enter => selects the Chat<br>CTRL + K => selects the profile... reasearch... thing... at the top left<br>CTRL + (left || right) arrow => move between navigation buttons<br>? => shows this menu <br><br>Shoutout to the default shortcuts<br>alt + (left || right) arrow => navigate history<br>tab && shift + tab => select elements",
   "USERNAME_TAKEN": "\"[[0]]\" is already taken",
-  "DB_REFUSED": "The db said no",
+  "DB_REFUSED": "The db said no due to conflicts",
   "REFUSED_ADMIN": "Noo Stop You're admin",
   "NOT_RECOGNIZED": "The glorious backend said you are not connected, sorry",
   "USERNAME_NOT_FOUND": "no account with username \"[[0]]\"",
@@ -107,6 +108,6 @@
   "INVALID_REQUEST" : "invalid request",
   "INTERNAL_SERVER_ERROR" : "something went wrong on our side, sorry UwU",
   "JOIN_GAME" : "join the game, [[0]] vs [[1]]",
-  "CREATE PASSWORD": "create a new password",
+  "CREATE PASSWORD": "set a password",
   "": ""
 }

@@ -42,16 +42,16 @@ const htmlSnippetsTemplate: {
         </svg>
 
         <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="flex placeholder:italic text-sm select-none focus:outline-none w-2/3"/>
-      
-      </div>
-      <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col">
+        <!-- div below must stay right after the input above, even empty, or we have to change the way the predictions display --> 
+        <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col top-10 -left-0.5">
+        </div>
       </div>
     </div>
-    <input type="text" maxLength=20 value="ft_ ¯\\_(ツ)_/¯" class="text-3xl font-mono text-center text-white font-semibold select-none"/>
+    <input type="text" maxLength=20 value="ft_ ¯\\\\_(ツ)_/¯" class="text-3xl font-mono text-center text-white font-semibold select-none"/>
     <script>
     {
       const ft_title = document.currentScript.previousElementSibling;
-      ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\_(ツ)_/¯";
+      ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯";
       ft_title.onchange = () => self.localStorage.setItem("ft_title", ft_title.value);
       document.currentScript.remove();
     }
@@ -186,18 +186,18 @@ const htmlSnippetsTemplate: {
 
       <div class="flex flex-col items-center">
           <form id="change-password-form" class="mt-5">
-          <div class="text-white text-2xl">Change Password</div>
+          <div class="text-white text-2xl" id="label-change-password">[[change password]]</div>
           <div class="flex flex-col sm:flex-row gap-5 mb-6">
             <div class="flex gap-2 flex-col p-1">
               <input placeholder="[[new password]]" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password">
               <input placeholder="[[confirm password]]"px-1 class="h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password-confirm">
             </div>
-            <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-blue-400 rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[change password]]</button>
+            <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-blue-400 rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[submit]]</button>
           </div>
           </form>
       </div>
 
-      <div class="text-4xl text-red-500 px-3">Delete account</div>
+      <div class="text-4xl text-red-500 px-3">[[erase account]]</div>
       <div class="transform-none">
           <div class="mx-auto my-3 h-px transform-[translateZ(0)] bg-gray-600"></div>
       </div>
@@ -205,7 +205,7 @@ const htmlSnippetsTemplate: {
       <div class="flex flex-col items-center my-4">
         <form id="delete-account-form" class="mt-2 flex flex-col items-center gap-2">
           <input placeholder="[[confirm username]]" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="text" name="username">
-          <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-red-500 hover:font-bold rounded size-fit p-1 my-1 hover:cursor-pointer transition-colors" type="submit">[[erase account]]</button>
+          <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-red-500 hover:font-bold rounded size-fit p-1 my-1 hover:cursor-pointer transition-colors" type="submit">[[submit]]</button>
         </form>
       </div>
     </div>
@@ -228,8 +228,8 @@ const htmlSnippetsTemplate: {
               .dropdown:hover .dropdown-content {display: flex;}
             </style>
             <img src="${assetsPath}/menu-vertical.png" class="mt-5 size-10 cursor-pointer"></img>
-            <div class="dropdown-content rounded-md flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
-              <ul class ="*:hover:bg-[#ffffff7c] *:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0] backdrop-blur-2xl">
+            <div class="dropdown-content flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
+              <ul class ="*:hover:bg-[#ffffff7c] *:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0]">
                 <li>
                   <a id="friend request">friend request</a>
                 </li>
@@ -414,7 +414,7 @@ const htmlSnippetsTemplate: {
     `,
   Welcome: `
     <div id="physics-zone" class="flex flex-col items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
-      <h1 id="Title" data-physics  class="text-white wrap-break-word whitespace-pre mx-auto my-20 2xl:text-10xl xl:text-9xl md:text-7xl sm:text-6xl text-center">welcome to <br>¯\\_(ツ)_/¯</h1>
+      <h1 id="Title" data-physics  class="text-white wrap-break-word whitespace-pre mx-auto my-20 2xl:text-10xl xl:text-9xl md:text-7xl sm:text-6xl text-center">welcome to <br>¯\\\\_(ツ)_/¯</h1>
       <script>
       {
         const ft_title = document.currentScript.previousElementSibling;

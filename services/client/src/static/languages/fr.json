@@ -15,8 +15,9 @@
   "confirm password": "confirmer le mot de passe",
   "confirm username": "confirmer le pseudo",
   "public infos": "infos publiques",
-  "private infos": "infos privées",
-  "erase account": "supprimer le compte",
+  "private infos": "Infos privées",
+  "erase account": "Supprimer le compte",
+  "submit": "soumettre",
   "log in": "connexion",
   "log in github": "conexion par GitHub",
   "already an account": "déjà un compte ?",
@@ -63,7 +64,7 @@
   "add bot": "plutôt un bot ?",
   "pop up": "Bonjour. J'ai créé des raccourcis et je les ai trouvés très utiles, alors…<br><br>Ctrl + P => Accès à l'éditeur de profil<br>Ctrl + P dans l'éditeur de profil => Accès à votre profil public<br>Ctrl + E => Déconnexion<br>Ctrl + Entrée => Sélection du chat<br>Ctrl + K => Sélection de la recherche de profil en haut à gauche<br> CTRL + (left || right) arrow => se deplace entre les boutons de navigation<br>? => Affichage de ce menu<br><br>Un grand merci aux raccourcis par défaut<br>Alt + flèche (gauche || droite) => Navigation dans l'historique<br>Tab & Maj + Tab => Sélection des éléments",
   "USERNAME_TAKEN": "\"[[0]]\" est deja pris",
-  "DB_REFUSED": "La base de données refuse",
+  "DB_REFUSED": "La base de données refuse en raison d'un conflit",
   "REFUSED_ADMIN": "STP t'es admin arrête",
   "NOT_RECOGNIZED": "Le glorieux serveur a dit que vous etes pas connecté, déso",
   "USERNAME_NOT_FOUND": "pas de compte avec le pseudo \"[[0]]\"",
@@ -109,6 +110,6 @@
   "INVALID_REQUEST" : "requête invalide",
   "INTERNAL_SERVER_ERROR" : "quelque chose a mal tourné de notre côté, désolé UwU",
   "JOIN_GAME" : "rejoindre la partie, [[0]] contre [[1]]",
-  "CREATE PASSWORD": "créer un nouveau mot de passe",
+  "CREATE PASSWORD": "mettre un mot de passe",
   "": ""
 }

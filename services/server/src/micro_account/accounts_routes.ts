@@ -170,7 +170,7 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
           if (res.changes === 0) {
             // not normal
             return reply
-              .code(403)
+              .code(409)
               .send({ success: false, message: ["DB_REFUSED"] });
           }
           const token = fastifyInstance.jwt.sign(
@@ -370,7 +370,7 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
         const res = statement1.run({ password, id: req.user.id });
         if (!res.changes)
           return reply
-            .code(403)
+            .code(409)
             .send({ success: false, message: ["DB_REFUSED"] });
         return reply.send({ success: true, message: ":D" });
       }
