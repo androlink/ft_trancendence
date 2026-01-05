@@ -27,12 +27,13 @@ export class PongDisplay implements IPongDisplay {
       ball: "red",
       score: "green",
     };
-    this.ratio = {
-      // the text height is hard coded (usually h = 10 or h = 20)
-      // so better leave the height at 100, change the ratio by changing width
+    this.ratio = this.getRatio();
+  }
+
+  private getRatio()
+  {
+    return {
       height: 100,
-      // Any DOM related information needs the browser to load the dom to know what the size is
-      // meaning, using .clientWidth to reload the ratio on each frame would be WAY to heavy
       width:
         (this.canvas.parentElement.clientWidth /
           this.canvas.parentElement.clientHeight) *
@@ -45,6 +46,8 @@ export class PongDisplay implements IPongDisplay {
       this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (!this.canvas) return;
     let context = this.canvas.getContext("2d");
+
+    this.ratio = this.getRatio();
 
     this.canvas.height = this.ratio.height * this.scale_factor;
     this.canvas.width = this.ratio.width * this.scale_factor;
