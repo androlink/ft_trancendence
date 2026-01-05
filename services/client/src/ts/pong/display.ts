@@ -30,8 +30,7 @@ export class PongDisplay implements IPongDisplay {
     this.ratio = this.getRatio();
   }
 
-  private getRatio()
-  {
+  private getRatio() {
     return {
       height: 100,
       width:
@@ -52,12 +51,11 @@ export class PongDisplay implements IPongDisplay {
     this.canvas.height = this.ratio.height * this.scale_factor;
     this.canvas.width = this.ratio.width * this.scale_factor;
     context.reset();
+    context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     context.scale(this.scale_factor, this.scale_factor);
 
     context.fillStyle = this.color.bg;
-    context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    context.save();
     context.beginPath();
     {
       context.moveTo(this.ratio.width / 2, 0);
@@ -68,7 +66,6 @@ export class PongDisplay implements IPongDisplay {
     }
     context.closePath();
     context.restore();
-
     // display scores
     this.displayScore(context, data_frame.players[0].score, 25, 50);
     this.displayScore(context, data_frame.players[1].score, 75, 50);
