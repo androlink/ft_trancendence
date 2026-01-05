@@ -18,7 +18,9 @@ const htmlSnippetsTemplate: {
   RemotePong: string;
 } = {
   Home: `
-  <span class="flex justify-between grid-cols-3 mx-8 my-2">
+  
+  <span class="relative flex justify-between grid-cols-3 mx-8 my-2">
+    
     <div class="relative">
       <div class="gap-1 flex group rounded-md p-2.5 bg-[#1b1e38] border border-white placeholder-gray-400 text-white  focus-within:border-blue-500">
         <svg version="1.0" class="flex size-5 fill-current group-focus-within:text-blue-500 text-white "
@@ -62,8 +64,36 @@ const htmlSnippetsTemplate: {
         <option value="fr">Francais 🇫🇷</option>
         <option value="es">Español 🇪🇸</option>
       </select>
-      <img src="${assetsPath}/exit-icon.png" onclick="accountLogOut()" class="invert-50 select-none hover:animate-spin hover:invert-75 size-10 cursor-pointer" draggable="false">
+      <svg version="1.0"
+        class="fill-current text-white hover:text-blue-500 select-none size-10 cursor-pointer"
+        onclick="accountLogOut()"
+        draggable="false"
+        xmlns="http://www.w3.org/2000/svg"
+        width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000"
+        preserveAspectRatio="xMidYMid meet">
+
+        <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+          fill="currentColor" stroke="none">
+          <path d="M751 4796 c-53 -29 -50 72 -51 -1837 0 -1678 1 -1778 18 -1797 25
+          -31 1603 -852 1635 -852 15 0 41 12 59 29 l33 29 3 376 3 376 382 0 c361 0
+          384 1 414 20 21 13 35 31 42 57 16 57 14 1347 -2 1393 -17 48 -67 76 -115 64
+          -20 -5 -44 -21 -56 -37 -21 -28 -21 -37 -24 -663 l-3 -634 -319 0 -320 0 -2
+          1310 -3 1310 -25 24 c-14 13 -286 160 -605 326 -319 167 -584 307 -589 311 -6
+          5 409 9 927 9 l936 0 3 -619 3 -620 29 -30 c41 -42 92 -43 138 -2 l33 29 3
+          661 c2 453 -1 674 -8 702 -8 28 -21 46 -43 59 -31 19 -60 20 -1252 20 -994 -1
+          -1224 -3 -1244 -14z"/>
+          <path d="M3709 3811 c-41 -42 -39 -83 9 -157 21 -32 120 -175 220 -317 100
+          -142 182 -260 182 -262 0 -3 -331 -6 -736 -7 l-736 -3 -29 -33 c-39 -43 -39
+          -90 -1 -132 l27 -31 738 1 c507 0 737 -3 737 -10 0 -6 -99 -152 -220 -324
+          -191 -272 -220 -318 -220 -350 0 -28 7 -45 29 -67 42 -41 90 -40 135 3 18 18
+          156 207 305 420 235 334 271 391 271 423 0 32 -36 89 -271 423 -149 213 -287
+          402 -305 420 -45 43 -93 44 -135 3z"/>
+        </g>
+        </svg>
     </span>
+    <div class="p-4 text-lg text-white z-50 text-center flex absolute top-0 left-1/2 self-center-safe justify-center rounded bg-green-500">[[auto reconnected]]</div>
+    <div class="p-4 text-lg text-white z-50 text-center flex absolute top-0 left-1/2 self-center-safe justify-center rounded bg-red-500">[[not connected]]</div>
+
   </span>
   <div class="transform-none">
     <div class="w-full h-px my-2 bg-gray-100 transform-[translateZ(0)]"></div>
@@ -81,27 +111,32 @@ const htmlSnippetsTemplate: {
       <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[auto reconnected]]</p>
       </div>
+      <!--
       <div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
         <p class="m-2 font-bold">[[not connected]]</p>
         <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[log in page]]</button>
       </div>
+      -->
       <div class="rounded-md overflow-hidden size-full bg-[#E9E9E9] flex flex-col">
         <div id="chat-content" class=" overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
-        <div class="mx-4 mb-4 flex bg-white rounded ">
-          <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="[[send a message]]" maxlength="280"></textarea>
-
-          <svg class="mx-2 justify-items-end self-center select-none fill-current text-[#8B2CF5] hover:text-blue-500 size-10 cursor-pointer"
-            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
-            draggable="false"
-            xmlns="http://www.w3.org/2000/svg"
-            width="44.000000pt" height="46.000000pt" viewBox="0 0 44.000000 46.000000"
-            preserveAspectRatio="xMidYMid meet">
-            <g transform="translate(0.000000,46.000000) scale(0.100000,-0.100000)"
-              fill="currentColor" stroke="none">
-              <path d="M210 332 c-102 -26 -187 -47 -189 -48 -1 -2 11 -21 29 -43 22 -27 34 -54 37 -86 6 -45 6 -45 38 -39 27 5 41 -1 82 -29 l49 -36 86 165 c63 120 81 164 69 163 -9 -1 -99 -22 -201 -47z m129 -18 c-25 -27 -211 -164 -223 -164 -3 0 -6 15 -6 33 0 31 3 34 123 94 67 34 124 62 126 62 3 1 -6 -11 -20 -25z"/>
-            </g>
-          </svg>
-
+        <div class=" relative mx-4 mb-4 flex bg-white rounded ">
+        <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="[[send a message]]" maxlength="280"></textarea>
+        
+        <svg class="mx-2 justify-items-end self-center select-none fill-current text-[#8B2CF5] hover:text-blue-500 size-10 cursor-pointer"
+        onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
+        draggable="false"
+        xmlns="http://www.w3.org/2000/svg"
+        width="44.000000pt" height="46.000000pt" viewBox="0 0 44.000000 46.000000"
+        preserveAspectRatio="xMidYMid meet">
+        <g transform="translate(0.000000,46.000000) scale(0.100000,-0.100000)"
+        fill="currentColor" stroke="none">
+        <path d="M210 332 c-102 -26 -187 -47 -189 -48 -1 -2 11 -21 29 -43 22 -27 34 -54 37 -86 6 -45 6 -45 38 -39 27 5 41 -1 82 -29 l49 -36 86 165 c63 120 81 164 69 163 -9 -1 -99 -22 -201 -47z m129 -18 c-25 -27 -211 -164 -223 -164 -3 0 -6 15 -6 33 0 31 3 34 123 94 67 34 124 62 126 62 3 1 -6 -11 -20 -25z"/>
+        </g>
+        </svg>
+        
+        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-black/50 opacity-0 hover:opacity-100 cursor-pointer" onclick="goToURL('profile')">
+          <div class="m-auto text-white text-center font-bold text-xl">[[not connected]]</div>
+        </div>
         </div>
       </div>
     </div>
@@ -109,7 +144,7 @@ const htmlSnippetsTemplate: {
   `,
   Profile1: `
   <div class="h-full flex justify-center rounded-md bg-[#262d5f]">
-    <div class="w-full overflow-y-auto max-w-4xl px-4 sm:px-8 border-x border-white bg-[#171C3D] shadow-2xl">
+    <div class="w-full mt-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border-x border-t border-white bg-[#171C3D] shadow-2xl rounded-t-lg">
 
     <div class="flex">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
@@ -413,7 +448,7 @@ const htmlSnippetsTemplate: {
   <p name="error-handler" class="text-red-500 font-bold mb-2 pointer-events-auto select-text wrap-break-word"></p>
     `,
   Welcome: `
-    <div id="physics-zone" class="flex flex-col items-center overflow-y-scroll h-full rounded-md bg-[#262d5f]">
+    <div id="physics-zone" class="flex flex-col items-center overflow-y-scroll h-full rounded-b-md rounded-tr-md bg-[#262d5f]">
       <h1 id="Title" data-physics  class="text-white wrap-break-word whitespace-pre mx-auto my-20 2xl:text-10xl xl:text-9xl md:text-7xl sm:text-6xl text-center">welcome to <br>¯\\\\_(ツ)_/¯</h1>
       <script>
       {
