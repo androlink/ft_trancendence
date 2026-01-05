@@ -551,12 +551,13 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
       const fragment = document.createDocumentFragment();
       for (let user of json) {
         const span = document.createElement("span");
-        span.className ="flex flex-row cursor-pointer my-auto py-2 h-fit w-full gap-3 bg-[#1b1e38d0] hover:bg-[#ffffff7c] hover:text-white";
+        span.className =
+          "flex flex-row cursor-pointer my-auto px-5 py-2 h-fit w-full gap-3 bg-[#1b1e38d0] hover:bg-[#ffffff7c] hover:text-white";
         span.addEventListener("pointerdown", () =>
           goToURL(`/profile/${encodeURIUsername(user.username)}`, true)
         );
         const img = document.createElement("img");
-        img.className = "size-5 rounded-full gap-5";
+        img.className = "size-5 rounded-full my-auto";
         img.src = `${assetsPath}/pfp/${user.pfp}`;
         const p = document.createElement("p");
         p.textContent = user.username;
