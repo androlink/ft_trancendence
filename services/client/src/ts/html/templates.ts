@@ -22,28 +22,28 @@ const htmlSnippetsTemplate: {
     <div class="relative">
       <div class="gap-1 flex group rounded-md p-2.5 bg-[#1b1e38] border border-white placeholder-gray-400 text-white  focus-within:border-blue-500">
         <svg version="1.0" class="flex size-5 fill-current group-focus-within:text-blue-500 text-white "
-        xmlns="http://www.w3.org/2000/svg"
-        width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000"
-        preserveAspectRatio="xMidYMid meet">
-          <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
-            fill="currentColor" stroke="none">
-            <path d="M1535 3485 c-133 -18 -207 -41 -343 -107 -192 -92 -338 -211 -455
-            -371 -45 -62 -64 -93 -118 -197 -69 -131 -120 -356 -119 -529 1 -164 45 -352
-            120 -506 206 -427 620 -688 1090 -688 273 0 486 72 738 250 23 16 26 13 440
-            -399 229 -229 427 -421 439 -427 93 -47 209 69 162 162 -6 12 -198 209 -426
-            438 -293 294 -413 421 -408 430 5 8 21 30 37 50 15 20 28 40 28 45 0 4 6 15
-            14 23 22 24 82 149 111 229 90 250 92 545 5 797 -95 275 -302 519 -565 666
-            -222 124 -484 171 -750 134z m437 -274 c301 -90 509 -285 642 -603 27 -64 49
-            -209 49 -318 1 -317 -154 -610 -415 -787 -164 -112 -332 -164 -533 -166 -114
-            0 -256 21 -323 50 -167 70 -253 125 -356 227 -122 120 -201 253 -252 426 -25
-            86 -28 110 -28 250 0 136 4 166 26 246 80 283 263 501 521 623 142 68 274 92
-            454 85 95 -4 144 -11 215 -33z"/>
-          </g>
+          xmlns="http://www.w3.org/2000/svg"
+          width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000"
+          preserveAspectRatio="xMidYMid meet">
+            <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
+              fill="currentColor" stroke="none">
+              <path d="M1535 3485 c-133 -18 -207 -41 -343 -107 -192 -92 -338 -211 -455
+              -371 -45 -62 -64 -93 -118 -197 -69 -131 -120 -356 -119 -529 1 -164 45 -352
+              120 -506 206 -427 620 -688 1090 -688 273 0 486 72 738 250 23 16 26 13 440
+              -399 229 -229 427 -421 439 -427 93 -47 209 69 162 162 -6 12 -198 209 -426
+              438 -293 294 -413 421 -408 430 5 8 21 30 37 50 15 20 28 40 28 45 0 4 6 15
+              14 23 22 24 82 149 111 229 90 250 92 545 5 797 -95 275 -302 519 -565 666
+              -222 124 -484 171 -750 134z m437 -274 c301 -90 509 -285 642 -603 27 -64 49
+              -209 49 -318 1 -317 -154 -610 -415 -787 -164 -112 -332 -164 -533 -166 -114
+              0 -256 21 -323 50 -167 70 -253 125 -356 227 -122 120 -201 253 -252 426 -25
+              86 -28 110 -28 250 0 136 4 166 26 246 80 283 263 501 521 623 142 68 274 92
+              454 85 95 -4 144 -11 215 -33z"/>
+            </g>
         </svg>
 
         <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="flex placeholder:italic text-sm select-none focus:outline-none w-2/3"/>
-        <!-- div below must stay right after the input above, even empty, or we have to change the way the predictions display --> 
-        <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col top-10 -left-0.5">
+        <!-- div below must stay right after the input above, even empty, or we have to change the way the predictions display -->
+        <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col top-10 -left-0.5 border border-white rounded empty:border-none empty:border-[#fff0]">
         </div>
       </div>
     </div>
@@ -90,8 +90,8 @@ const htmlSnippetsTemplate: {
         <div class="mx-4 mb-4 flex bg-white rounded ">
           <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="[[send a message]]" maxlength="280"></textarea>
 
-          <svg class="mx-2 justify-items-end self-center select-none fill-current text-[#8B2CF5] hover:text-blue-500 size-10 cursor-pointer" 
-            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"            
+          <svg class="mx-2 justify-items-end self-center select-none fill-current text-[#8B2CF5] hover:text-blue-500 size-10 cursor-pointer"
+            onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
             draggable="false"
             xmlns="http://www.w3.org/2000/svg"
             width="44.000000pt" height="46.000000pt" viewBox="0 0 44.000000 46.000000"
@@ -308,7 +308,7 @@ const htmlSnippetsTemplate: {
 
 
         <p class="absolute text-align-center my-auto left-1/2 -translate-x-1/2 text-3xl"></p>
-        
+
         <svg xmlns="http://www.w3.org/2000/svg"
           class="h-10 absolute px-2 right-0 rotate-180 cursor-pointer text-white fill-current"
           onclick="moveFriendsDisplay(1)"
@@ -394,7 +394,7 @@ const htmlSnippetsTemplate: {
   </div>
     `,
   Pong: `
-  <div class="relative size-full flex flex-col overflow-scroll">
+  <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
     <script id="local config">
       loadLocalConfig();
     </script>
@@ -402,11 +402,11 @@ const htmlSnippetsTemplate: {
   </div>
   `,
   RemotePong: `
-  <div class="relative size-full flex flex-col overflow-scroll">
+  <div class="relative size-full flex flex-col overflow-scroll bg-">
     <script>
     document.currentScript?.remove();
     </script>
-    <canvas class="border border-white size-full" id="canvas"></canvas>
+    <canvas class="size-full" id="canvas"></canvas>
   </div>
   `,
   ErrorMessageHandler: `
