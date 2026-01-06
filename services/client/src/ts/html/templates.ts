@@ -92,7 +92,7 @@ const htmlSnippetsTemplate: {
         </svg>
     </span>
     <div id="account-reconnected" class=" p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-green-500">[[auto reconnected]]</div>
-    <div id="notif-disconnected" class="p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-red-500">[[not connected]]</div>
+    <div id="notif-disconnected"  class="hidden p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-red-500">[[not connected]]</div>
 
   </span>
   <div class="transform-none">
@@ -125,8 +125,8 @@ const htmlSnippetsTemplate: {
         </g>
         </svg>
 
-        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-black/50 opacity-0 hover:opacity-100 cursor-pointer" onclick="goToURL('profile'); showNotification();">
-          <div class="m-auto text-white text-center font-bold text-xl">[[not connected]]</div>
+        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('notif-disconnected');">
+          <div class="m-auto text-gray-500 text-center text-lg">[[not connected]]</div>
         </div>
         </div>
       </div>
@@ -365,9 +365,9 @@ const htmlSnippetsTemplate: {
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
 
-        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">[[log in]]</button>
+        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[log in]]</button>
 
-        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5">
+        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5 cursor-pointer">
           <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
@@ -384,9 +384,9 @@ const htmlSnippetsTemplate: {
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password-confirm" placeholder="[[confirm password]]" />
 
-        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500">[[register]]</button>
+        <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[register]]</button>
 
-        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl">
+        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl cursor-pointer">
           <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
@@ -414,9 +414,9 @@ const htmlSnippetsTemplate: {
   </iframe>
   `,
   PopUp: `
-  <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit bg-gray-300 rounded shadow-xl/50 *:text-black p-1 *:text-center">
-  <p>[[pop up]]</p>
-  </div>
+    <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit border border-white bg-[#171C3D] rounded shadow-xl/50 *:text-white p-1 *:text-center">
+      <p>[[pop up]]</p>
+    </div>
     `,
   Pong: `
   <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
@@ -587,8 +587,8 @@ export function updateInfos() {
   bioInput.addEventListener("input", checkChanges);
 }
 
-function showNotification() {
-  const notif = document.getElementById("notif-disconnected");
+function showNotification(id: string) {
+  const notif = document.getElementById(id);
   if (!notif) return;
 
   notif.classList.remove("hidden");

@@ -5,10 +5,6 @@ import { Id } from "../common/types";
 import fs, { realpath } from "fs";
 import { fileTypeFromBuffer } from "file-type";
 
-const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
-// je peu en régénérer une au besoin
-const CLIENT_SECRET = "003530775d960f318554c656cc1e80c404e8cf52";
-
 /**
  * statement for database
  */
@@ -212,8 +208,8 @@ export default function authentification(fastify: FastifyInstance) {
     const { code } = req.query as { code: string };
 
     const url = new URL("https://github.com/login/oauth/access_token");
-    url.searchParams.set("client_id", CLIENT_ID);
-    url.searchParams.set("client_secret", CLIENT_SECRET);
+    url.searchParams.set("client_id", process.env.CLIENT_ID!);
+    url.searchParams.set("client_secret", process.env.CLIENT_SECRET!);
     url.searchParams.set("code", code);
 
     const response = await fetch(url, {
