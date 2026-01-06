@@ -6,3 +6,28 @@
   font-weight: normal;
   font-style: normal;
 }
+
+@layer utilities {
+  @keyframes notification {
+    0% {
+      transform: translate(-50%, -100%);
+      opacity: 0;
+    }
+    10% {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+    80% {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -100%);
+      opacity: 0;
+    }
+  }
+
+  .animate-notification {
+    animation: notification 4s ease-in-out forwards;
+  }
+}

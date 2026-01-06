@@ -18,9 +18,9 @@ const htmlSnippetsTemplate: {
   RemotePong: string;
 } = {
   Home: `
-  
+
   <span class="relative flex justify-between grid-cols-3 mx-8 my-2">
-    
+
     <div class="relative">
       <div class="gap-1 flex group rounded-md p-2.5 bg-[#1b1e38] border border-white placeholder-gray-400 text-white  focus-within:border-blue-500">
         <svg version="1.0" class="flex size-5 fill-current group-focus-within:text-blue-500 text-white "
@@ -59,13 +59,13 @@ const htmlSnippetsTemplate: {
     }
     </script>
     <span class="justify-self-end flex gap-x-2">
-      <select id="language-selector" title="[[will cause a reload]]" class="bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
+      <select id="language-selector" title="[[will cause a reload]]" class="my-auto bg-gray-100 h-2/3 rounded px-1 cursor-pointer">
         <option value="en">English 🇬🇧</option>
         <option value="fr">Francais 🇫🇷</option>
         <option value="es">Español 🇪🇸</option>
       </select>
       <svg version="1.0"
-        class="fill-current text-white hover:text-blue-500 select-none size-10 cursor-pointer"
+        class=" mt-1.5 fill-current text-white hover:text-blue-500 select-none size-9 cursor-pointer"
         onclick="accountLogOut()"
         draggable="false"
         xmlns="http://www.w3.org/2000/svg"
@@ -91,8 +91,8 @@ const htmlSnippetsTemplate: {
         </g>
         </svg>
     </span>
-    <div class="p-4 text-lg text-white z-50 text-center flex absolute top-0 left-1/2 self-center-safe justify-center rounded bg-green-500">[[auto reconnected]]</div>
-    <div class="p-4 text-lg text-white z-50 text-center flex absolute top-0 left-1/2 self-center-safe justify-center rounded bg-red-500">[[not connected]]</div>
+    <div id="account-reconnected" class=" p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-green-500">[[auto reconnected]]</div>
+    <div id="notif-disconnected" class="p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-red-500">[[not connected]]</div>
 
   </span>
   <div class="transform-none">
@@ -108,20 +108,11 @@ const htmlSnippetsTemplate: {
   <span class=" flex-1 min-h-0 grid grid-cols-4 h-full gap-x-2 mx-8 mb-8 select-none drop-shadow-xl/50">
     <div id="inner" class="h-full col-span-3 overflow-hidden relative"></div>
     <div class="h-full flex flex-col overflow-hidden">
-      <div id="account-reconnected" hidden="" class="mb-2 rounded border bg-green-100 border-green-400 w-full h-fit flex justify-around flex-col items-center overflow-scroll">
-        <p class="m-2 font-bold">[[auto reconnected]]</p>
-      </div>
-      <!--
-      <div id="account-disconnected" hidden="" class="mb-2 rounded border bg-red-200 border-red-400 w-full h-1/2 flex justify-around flex-col items-center overflow-scroll">
-        <p class="m-2 font-bold">[[not connected]]</p>
-        <button class="bg-white rounded size-fit p-1 cursor-pointer border border-red-400" onclick="goToURL('profile');">[[log in page]]</button>
-      </div>
-      -->
       <div class="rounded-md overflow-hidden size-full bg-[#E9E9E9] flex flex-col">
         <div id="chat-content" class=" overflow-y-scroll w-full h-0 grow *:px-1 *:wrap-break-word *:select-text *:whitespace-pre-line *:even:bg-gray-300 *:odd:bg-gray-100"></div>
         <div class=" relative mx-4 mb-4 flex bg-white rounded ">
         <textarea id="chat-input" class="w-full justify-items-stretch my-0.5 px-1 resize-none" placeholder="[[send a message]]" maxlength="280"></textarea>
-        
+
         <svg class="mx-2 justify-items-end self-center select-none fill-current text-[#8B2CF5] hover:text-blue-500 size-10 cursor-pointer"
         onclick="let d = document.getElementById('chat-input'); if (d && d.value) {sendChatMessage(d.value);}"
         draggable="false"
@@ -133,8 +124,8 @@ const htmlSnippetsTemplate: {
         <path d="M210 332 c-102 -26 -187 -47 -189 -48 -1 -2 11 -21 29 -43 22 -27 34 -54 37 -86 6 -45 6 -45 38 -39 27 5 41 -1 82 -29 l49 -36 86 165 c63 120 81 164 69 163 -9 -1 -99 -22 -201 -47z m129 -18 c-25 -27 -211 -164 -223 -164 -3 0 -6 15 -6 33 0 31 3 34 123 94 67 34 124 62 126 62 3 1 -6 -11 -20 -25z"/>
         </g>
         </svg>
-        
-        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-black/50 opacity-0 hover:opacity-100 cursor-pointer" onclick="goToURL('profile')">
+
+        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-black/50 opacity-0 hover:opacity-100 cursor-pointer" onclick="goToURL('profile'); showNotification();">
           <div class="m-auto text-white text-center font-bold text-xl">[[not connected]]</div>
         </div>
         </div>
@@ -248,12 +239,11 @@ const htmlSnippetsTemplate: {
 
   `,
   Profile2: `
-  <img src="${assetsPath}/arrow-refresh.png" class=" size-10 cursor-pointer hover:animate-spin absolute top-0 right-0" onclick="resetNextInner(); main()"/>
   <div class="bg-[#262d5f] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
     <header class="w-full flex items-start gap-4">
       <img
         id="profile-picture"
-        class="ws-60 h-60 rounded-full aspect-square" src="${assetsPath}/default-avatar.jpg"
+        class="ws-60 h-60 rounded-full border-2 border-gray-600 aspect-square" src="${assetsPath}/default-avatar.jpg"
       >
       <div class="flex flex-col justify-start h-60">
         <div class ="flex flex-row *:mt-10 *:mb-4">
@@ -275,8 +265,8 @@ const htmlSnippetsTemplate: {
             </div>
           </div>
         </div>
-        <p class="text-white mb-1">[[biography]]:</p>
-        <p class=" flex w-150 h-full rounded-md p-1 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text" id="biography-p2"></p>
+        <p class="text-white mb-1">[[biography]]</p>
+        <p class=" flex w-[250] h-full rounded-md p-1 border-2 border-gray-900 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text resize-y min-h-10 max-h-[40vh]" id="biography-p2"></p>
       </div>
     </header>
     <div class="transform-none">
@@ -433,7 +423,7 @@ const htmlSnippetsTemplate: {
     <script id="local config">
       loadLocalConfig();
     </script>
-    <canvas class="border border-white size-full" id="canvas"></canvas>
+    <canvas class=" size-full" id="canvas"></canvas>
   </div>
   `,
   RemotePong: `
@@ -596,3 +586,20 @@ export function updateInfos() {
   usernameInput.addEventListener("input", checkChanges);
   bioInput.addEventListener("input", checkChanges);
 }
+
+function showNotification() {
+  const notif = document.getElementById("notif-disconnected");
+  if (!notif) return;
+
+  notif.classList.remove("hidden");
+  notif.classList.remove("animate-notification");
+  void notif.offsetWidth;
+  notif.classList.add("animate-notification");
+
+  notif.addEventListener(
+    "animationend",
+    () => notif.classList.add("hidden"),
+    { once: true }
+  );
+}
+self["showNotification"] = showNotification;
