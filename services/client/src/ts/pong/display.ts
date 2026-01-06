@@ -1,3 +1,4 @@
+import { findLanguage, selectLanguage } from "../html/templates.js";
 import { BallView, DataFrame, PlayerView } from "./engine/engine_interfaces.js";
 
 export interface IPongDisplay {
@@ -17,6 +18,11 @@ export class PongDisplay implements IPongDisplay {
     height: number;
     width: number;
   };
+  messages = {
+    ended: "Game ended",
+    paused: "Game paused",
+    waiting: "Press any key to start the game...",
+  };
 
   constructor() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -28,6 +34,13 @@ export class PongDisplay implements IPongDisplay {
       score: "green",
     };
     this.ratio = this.getRatio();
+    this.initMessages();
+  }
+
+  private initMessages() {
+    this.messages.waiting = findLanguage("PONG_WAIT_MESSAGE");
+    this.messages.paused = findLanguage("PONG_PAUSE_MESSAGE");
+    this.messages.ended = findLanguage("PONG_ENDED_MESSAGE");
   }
 
   private getRatio() {
@@ -54,8 +67,8 @@ export class PongDisplay implements IPongDisplay {
     context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     context.scale(this.scale_factor, this.scale_factor);
 
+    context.save();
     context.fillStyle = this.color.bg;
-
     context.beginPath();
     {
       context.moveTo(this.ratio.width / 2, 0);
@@ -79,7 +92,7 @@ export class PongDisplay implements IPongDisplay {
     if (data_frame.state === "paused")
       displayText(
         context,
-        data_frame.state.toUpperCase(),
+        this.messages.paused,
         this.ratio.width / 2,
         this.ratio.height / 2,
         "white"
@@ -87,35 +100,18 @@ export class PongDisplay implements IPongDisplay {
     else if (data_frame.state === "ended")
       displayText(
         context,
-        data_frame.state.toUpperCase(),
+        this.messages.ended,
         this.ratio.width / 2,
         this.ratio.height / 2 + 20,
         "white"
       );
     else if (data_frame.state === "waiting") {
+      context.measureText(this.messages.waiting);
       displayText(
         context,
-        "click on",
+        this.messages.waiting,
         this.ratio.width / 2,
         this.ratio.height / 2 - 10,
-        "white",
-        10,
-        "grey"
-      );
-      displayText(
-        context,
-        "screen",
-        this.ratio.width / 2,
-        this.ratio.height / 2,
-        "white",
-        10,
-        "grey"
-      );
-      displayText(
-        context,
-        "to start",
-        this.ratio.width / 2,
-        this.ratio.height / 2 + 10,
         "white",
         10,
         "grey"
@@ -193,19 +189,25 @@ function displayText(
   size: number = 20,
   border: string = undefined
 ) {
+  let message = text.split("\n");
+  let globalsize = message.length;
+
   context.save();
   context.beginPath();
   {
-    context.translate(x, y);
+    context.translate(x, y - ((globalsize) * size) / 2);
     context.textAlign = "center";
     context.font = size + "px monospace";
     context.textBaseline = "middle";
-    if (border) {
-      context.strokeStyle = border;
-      context.strokeText(text, 0, 0);
+    for (let i = 0; i < message.length; i++) {
+      context.translate(0, size);
+      if (border) {
+        context.strokeStyle = border;
+        context.strokeText(message[i], 0, 0);
+      }
+      context.fillStyle = color;
+      context.fillText(message[i], 0, 0);
     }
-    context.fillStyle = color;
-    context.fillText(text, 0, 0);
   }
   context.closePath();
   context.restore();

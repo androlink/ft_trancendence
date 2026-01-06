@@ -109,5 +109,8 @@
   "INTERNAL_SERVER_ERROR" : "something went wrong on our side, sorry UwU",
   "JOIN_GAME" : "join the game, [[0]] vs [[1]]",
   "CREATE PASSWORD": "set a password",
+  "PONG_WAIT_MESSAGE":"Press any key\nto start the game...",
+  "PONG_PAUSE_MESSAGE":"Pause",
+  "PONG_ENDED_MESSAGE":"Game\nended",
   "": ""
 }

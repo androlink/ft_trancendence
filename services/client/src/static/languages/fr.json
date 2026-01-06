@@ -111,5 +111,8 @@
   "INTERNAL_SERVER_ERROR" : "quelque chose a mal tourné de notre côté, désolé UwU",
   "JOIN_GAME" : "rejoindre la partie, [[0]] contre [[1]]",
   "CREATE PASSWORD": "mettre un mot de passe",
+  "PONG_WAIT_MESSAGE":"Appuyez sur\nune touche pour\ncommencer la partie...",
+  "PONG_PAUSE_MESSAGE":"Pause",
+  "PONG_ENDED_MESSAGE":"Partie\nterminée",
   "": ""
 }
