@@ -8,7 +8,8 @@ services:
     build:
       context: services/nginx/
     ports:
-      - 8443:443
+      - 8443:8443
+      - 8080:8080
     networks:
       - trancendence
     volumes:

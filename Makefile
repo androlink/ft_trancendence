@@ -14,6 +14,7 @@ build:
 .PHONY: start
 start: build
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
+	$(MAKE) static
 
 .PHONY: restart
 restart:
