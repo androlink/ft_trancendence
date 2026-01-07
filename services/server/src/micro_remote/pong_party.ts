@@ -1,0 +1,121 @@
+import { GameWebSocket, PongMessageType } from "./local_type";
+import { Id, RemotePongReasonCode, UserRow } from "../common/types";
+import db from "../common/database";
+import { PongEngine } from "./engine/Engine";
+import { randomUUID } from "crypto";
+
+let games: Map<string, PongEngine> = new Map();
+
+let get_username: (id: Id) => string | undefined = (id) => {
+  const statement = db.prepare<{ id: Id }, { username: string }>(
+    "SELECT username FROM users WHERE id = :id"
+  );
+
+  get_username = (id) => {
+    const username = statement.get({ id: id })?.username;
+    return username;
+  };
+  return get_username(id);
+};
+
+const foo = (() => {
+  const statement = () =>
+    db.prepare<{ id: Id }, { username: string }>(
+      "SELECT username FROM users WHERE id = :id"
+    );
+  return (id: Id) => statement().get({ id: id })?.username;
+})();
+
+function pong_party_log() {
+  if (games.size === 0) return;
+  let infos: string[] = [];
+  infos.push("============= game log =============");
+  infos.push(`game found: ${games.size}`);
+  for (let game of games) {
+    const players = game[1].getPlayers();
+    infos.push(
+      `\t"${game[1].getId()}": {${players[0].view.name}(${
+        players[0].view.score
+      }), ${players[1].view.name}(${players[1].view.score})}`
+    );
+  }
+  console.info(infos.join("\n"));
+}
+
+setInterval(pong_party_log, 30000);
+
+export function pong_party_create(
+  players_id: Id[]
+): { status: false; reason: string } | { status: true; room_id: string } {
+  const players_name = players_id.map((id) => get_username(id));
+  if (!players_name.every((pn) => pn !== undefined))
+    return { status: false, reason: RemotePongReasonCode.USER_NOT_FOUND };
+  let game_id = randomUUID();
+  while (games.has(game_id) === true) game_id = randomUUID();
+  let game = new PongEngine(players_name as string[], players_id, 5);
+  game.setId(game_id);
+  games.set(game_id, game);
+  game.addEventListener("abort", () => {
+    pong_party_abort(game_id);
+  });
+  game.addEventListener("finish", () => {
+    pong_party_finish(game_id);
+  });
+  console.info(`new game created with id ${game_id}`);
+  return { status: true, room_id: game.getId() };
+}
+
+let pong_party_finish: (game_id: string) => void = (game_id) => {
+  let statement = db.prepare(
+    "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
+  );
+  pong_party_finish = (game_id: string) => {
+    let p = pong_party_get(game_id);
+    if (!p) return;
+    console.info(`game ${game_id} has been finished`);
+
+    const scores = p.getPlayers().map((p) => p.view.score);
+
+    const [player_one, player_two] = p.getPlayerId();
+    const result: "win" | "loss" | "draw" =
+      scores[0] > scores[1] ? "win" : scores[0] < scores[1] ? "loss" : "draw";
+    if (!(player_one === undefined || player_two === undefined)) {
+      statement.run(player_one, player_two, result);
+    }
+    pong_party_delete(game_id);
+  };
+  return pong_party_finish(game_id);
+};
+
+function pong_party_abort(game_id: string) {
+  console.info(`game ${game_id} has been aborted`);
+  pong_party_delete(game_id);
+}
+
+export function pong_party_delete(game_id: string): void {
+  let p = pong_party_get(game_id);
+  if (!p) return;
+  games.delete(game_id);
+  console.info(`game ${game_id} has been removed`);
+}
+
+export function pong_party_add_player(
+  game_id: string,
+  id: Id,
+  ws: GameWebSocket
+): boolean {
+  let party = pong_party_get(game_id);
+  if (!party) return false;
+  return party.setPlayer(id, ws);
+}
+
+export function pong_party_get(game_id: string): PongEngine | null {
+  if (pong_party_exists(game_id)) {
+    return games.get(game_id) as PongEngine;
+  }
+  return null;
+}
+
+export function pong_party_exists(game_id: string): boolean {
+  return games.has(game_id);
+}

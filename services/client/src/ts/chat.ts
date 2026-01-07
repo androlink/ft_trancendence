@@ -1,3 +1,5 @@
+import { findLanguage, selectLanguage } from "./html/templates.js";
+import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
 // WEBSOCKET
@@ -11,8 +13,21 @@ enum TypeMessage {
   readyForDirectMessage = "readyForDirectMessage",
   serverMessage = "serverMessage",
   connection = "connection",
+  invite = "invite",
+  replyInvite = "replyInvite",
   ping = "ping",
   pong = "pong",
+}
+
+export enum RemotePongReasonCode {
+  NOT_CONNECTED = "R_NOT_CONNECTED",
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  GAME_NOT_FOUND = "GAME_NOT_FOUND",
+  CANNOT_JOIN_GAME = "CANNOT_JOIN_GAME",
+  GAME_ALREADY_STARTED = "GAME_ALREADY_STARTED",
+  CANNOT_PLAY_WITH_YOURSELF = "CANNOT_PLAY_WITH_YOURSELF",
+  INVALID_REQUEST = "INVALID_REQUEST",
+  INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
 }
 
 /**
@@ -23,13 +38,28 @@ enum TypeMessage {
  * @param content Content of the message if is necessary [optional]
  * @param msgId Id of the message (for direct message)
  */
-interface WSmessage {
-  type: TypeMessage;
-  user: string;
-  target?: string;
-  content?: string;
-  msgId: string;
-}
+type WSmessage =
+  | {
+      type: TypeMessage.replyInvite;
+      status: true;
+      room_id: string;
+      sender: string;
+      target: string;
+    }
+  | {
+      type: TypeMessage.replyInvite;
+      status: false;
+      reason: string;
+      info?: string;
+    }
+  | {
+      type: Exclude<TypeMessage, TypeMessage.replyInvite>;
+      user: string;
+      target?: string;
+      content?: string;
+      msgId: string;
+    };
+
 let lastPong: number;
 
 function GenerateRandomId(): string {
@@ -44,6 +74,49 @@ function retryConnection(): void {
   console.log("Retry chat connection");
   setTimeout(WSconnect, reconnectTimeout);
   reconnectTimeout = Math.min(reconnectTimeout * 2, 10000);
+}
+
+function invite_message(event: MessageEvent) {
+  const message = JSON.parse(event.data) as WSmessage;
+
+  if (message.type !== TypeMessage.replyInvite) return;
+
+  const chat = document.getElementById("chat-content");
+  if (!chat) {
+    console.error(
+      `message '${message}' not sent to the chat because the chat is not found`
+    );
+    return false;
+  }
+  const para = document.createElement("p");
+  if (message.status === false) {
+    para.className = "text-red-500 font-bold text-center";
+    const reason = findLanguage(message.reason);
+    const node = document.createTextNode(reason);
+    para.appendChild(node);
+  } else {
+    para.className = "text-green-500 font-bold text-center ";
+    const playButton = document.createElement("button");
+    playButton.type = "button";
+    playButton.className = "cursor-pointer hover:text-purple-500 mx-2";
+    playButton.textContent = selectLanguage([
+      "JOIN_GAME",
+      message.sender,
+      message.target,
+    ]);
+    playButton.onclick = () => {
+      playButton.className = "disable";
+      para.className = "text-gray-500 text-center";
+      let room_id = message.room_id;
+      join_party(room_id);
+      playButton.onclick = null;
+    };
+    para.appendChild(playButton);
+  }
+
+  chat.appendChild(para);
+  if (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1)
+    chat.scrollTop = chat.scrollHeight;
 }
 
 /**
@@ -66,14 +139,15 @@ function WSconnect(): void {
 
   ws.onerror = () => ws.close();
 
+  ws.addEventListener("message", (event) => invite_message(event));
+
   //receive msg from back and show on chat
   ws.addEventListener("message", (event) => {
     try {
       const receivemsg: WSmessage = JSON.parse(event.data);
-      console.log("[incoming message]:", receivemsg);
+      // console.log("[incoming message]:", receivemsg);
       // check type
       if (receivemsg.type === TypeMessage.pong) {
-        console.log("pong");
         lastPong = Date.now();
       } else if (receivemsg.type === TypeMessage.readyForDirectMessage) {
         sendOrQueue(
@@ -142,9 +216,12 @@ function showMessageToChat(message: WSmessage): boolean {
   // true if at the end of the chat
   let scroll = chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1;
 
+  if (message.type === TypeMessage.replyInvite) return;
+
   const para = document.createElement("p");
   const userLink = document.createElement("span");
   const node = document.createTextNode(message.content);
+  para.className = "**:text-justify";
 
   switch (message.type) {
     case TypeMessage.message:
@@ -153,8 +230,8 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `${message.user}:`;
-      userLink.className =
-        "text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer ";
+      userLink.className +=
+        "text-indigo-500 hover:font-bold p-2 rounded-md cursor-pointer break-keep ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -165,8 +242,8 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `${message.user}:`;
-      userLink.className =
-        "text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer ";
+      userLink.className +=
+        "text-blue-600 hover:font-bold p-2 rounded-md cursor-pointer break-keep ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -177,8 +254,8 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `${message.user}:`;
-      userLink.className =
-        "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ";
+      userLink.className +=
+        "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer break-keep  ";
       para.appendChild(userLink);
       para.appendChild(node);
 
@@ -189,7 +266,7 @@ function showMessageToChat(message: WSmessage): boolean {
         goToURL(`profile/${message.user}`);
       };
       userLink.textContent = `[Me] ${message.user}:`;
-      userLink.className =
+      userLink.className +=
         "text-pink-400 hover:font-bold p-2 rounded-md cursor-pointer ";
       para.appendChild(userLink);
       para.appendChild(node);
@@ -247,6 +324,29 @@ function sendOrQueue(message: string) {
   }
 }
 
+const histrory: string[] = [];
+let line = -1;
+
+function getHistory(line: number): string | null {
+  if (line < 0 || line >= histrory.length) return null;
+  return histrory[line];
+}
+
+export function ChatHistoryAdd(message: string) {
+  if (histrory[0] !== message) histrory.unshift(message);
+  ChatResetHistoryLine();
+}
+
+export function ChatHistoryRequest(req: "up" | "down"): string | null {
+  if (req === "up" && line < histrory.length - 1) line++;
+  else if (req === "down" && line >= 0) line--;
+  return getHistory(line);
+}
+
+export function ChatResetHistoryLine() {
+  line = -1;
+}
+
 /**
  * Send message to the chat
  * - can send Direct messgage with /msg commands
@@ -256,6 +356,7 @@ function sendOrQueue(message: string) {
 export function sendChatMessage() {
   const textarea = document.getElementById("chat-input") as HTMLTextAreaElement;
   if (!textarea || !textarea.value) return;
+  ChatHistoryAdd(textarea.value);
   if (textarea.value.length > 280) {
     const err: WSmessage = {
       user: null,
@@ -288,6 +389,18 @@ export function sendChatMessage() {
         msg.target = client;
         sendOrQueue(JSON.stringify(msg));
       }
+    } else if (command === "invite") {
+      if (args.length !== 2) return;
+      const target = args[1];
+      const msg: WSmessage = {
+        user: localStorage.getItem("token") || "",
+        type: TypeMessage.invite,
+        target: target,
+        msgId: GenerateRandomId(),
+      };
+
+      textarea.value = "";
+      sendOrQueue(JSON.stringify(msg));
     }
     return;
   }

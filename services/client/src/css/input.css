@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: Hammer;
+  src: url("services/client/src/css/font/HammersmithOne-Regular.ttf");
+}

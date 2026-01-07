@@ -1,31 +1,44 @@
-
-
-import { encodeURIUsername, goToURL, keyExist, resetReconnectTimer } from "../utils.js";
-import { htmlSnippets, findLanguage, selectLanguage, assetsPath, setLanguage } from "./templates.js";
-import { main } from "../app.js";
-import { sendChatMessage, InitConnectionChat, sendStatusMessage } from "../chat.js";
-import { toASCII } from "punycode";
+import {
+  encodeURIUsername,
+  goToURL,
+  keyExist,
+  resetReconnectTimer,
+} from "../utils.js";
+import {
+  htmlSnippets,
+  findLanguage,
+  selectLanguage,
+  assetsPath,
+  setLanguage,
+} from "./templates.js";
+import { main, resetNextInner } from "../app.js";
+import {
+  sendChatMessage,
+  InitConnectionChat,
+  sendStatusMessage,
+  ChatHistoryRequest,
+  ChatResetHistoryLine,
+} from "../chat.js";
 
 /**
  * set all the events that the page need to work properly
  */
 export function setEvents(): void {
-  let elem: any;
   const events = {
-    "chat-input": setEnterEventChat,
+    "chat-input": setEventChat,
     "user-search": setMultipleEventUsername,
     "pfp-form": setSubmitEventPfp,
     "login-form": setSubmitEventLogin,
     "register-form": setSubmitEventRegister,
-    "blocking request" : setClickEventBlockRequest,
-    "friend request" : setClickEventFriendRequest,
+    "blocking request": setClickEventBlockRequest,
+    "friend request": setClickEventFriendRequest,
     "profile-form": setSubmitEventProfile,
     "pfp-input": setChangeEventPfpInput,
     "go-to-profile": setClickEventProfile,
     "change-password-form": setSubmitEventPassword,
     "delete-account-form": setSubmitEventDelete,
     "language-selector": setChangeEventLanguageSelector,
-  }
+  };
   for (const id in events) {
     const elem = document.getElementById(id);
     if (elem && !elem.hasAttribute("data-custom")) {
@@ -48,7 +61,7 @@ function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
       child.textContent = message;
       return;
     }
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = htmlSnippets["ErrorMessageHandler"];
     const handler = template.content.firstElementChild as HTMLParagraphElement;
     if (handler === null) {
@@ -62,7 +75,7 @@ function displayErrorOrAlert(form: HTMLFormElement, message: string): void {
   }
 }
 
-function needConnection(form: HTMLFormElement): boolean{
+function needConnection(form: HTMLFormElement): boolean {
   if (localStorage.getItem("token") === null) {
     displayErrorOrAlert(form, "You are not connected");
     return false;
@@ -75,26 +88,34 @@ function needConnection(form: HTMLFormElement): boolean{
  * @param form the said form element
  */
 function setSubmitEventPfp(form: HTMLFormElement): void {
-  form.addEventListener('submit', async (event: SubmitEvent) => {
+  form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
     try {
-      const response = await fetch('/pfp', {
+      const response = await fetch("/api/account/pfp", {
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        method: 'PUT',
+        method: "PUT",
         body: formData,
       });
 
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
+        displayErrorOrAlert(
+          form,
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
+        return;
       }
-      main(true);
+      resetNextInner();
+      main();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
     }
@@ -102,30 +123,37 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
 }
 
 function setSubmitEventLogin(form: HTMLFormElement): void {
-  form.addEventListener('submit', async (event: SubmitEvent) => {
+  form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
-        try {
+    try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
-      const response = await fetch('/login', {
-        method: 'POST',
+      const response = await fetch("api/account/login", {
+        method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: new URLSearchParams({
-          username: username, 
+          username: username,
           password: password,
         }),
       });
 
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
+        displayErrorOrAlert(
+          form,
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
+        return;
       }
       sendStatusMessage();
       main();
@@ -140,34 +168,41 @@ function setSubmitEventLogin(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventRegister(form: HTMLFormElement): void {
-  form.addEventListener('submit', async (event: SubmitEvent) => {
+  form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
-        try {
+    try {
       const username = formData.get("username") as string;
       const password = formData.get("password") as string;
-      if (password !== formData.get("password-confirm") as string) {
+      if (password !== (formData.get("password-confirm") as string)) {
         displayErrorOrAlert(form, findLanguage("passwords don't match"));
-        return ;
+        return;
       }
-      const response = await fetch('/register', {
-        method: 'POST',
+      const response = await fetch("/api/account/register", {
+        method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: new URLSearchParams({
           username: username,
           password: password,
         }),
       });
-      
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
+        displayErrorOrAlert(
+          form,
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
+        return;
       }
       sendStatusMessage();
       main();
@@ -182,31 +217,37 @@ function setSubmitEventRegister(form: HTMLFormElement): void {
  * @param form the said form element
  */
 function setSubmitEventProfile(form: HTMLFormElement): void {
-  form.addEventListener('submit', async (event: SubmitEvent) => {
+  form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
-    if (needConnection(form) === false)
-      return;
+    if (needConnection(form) === false) return;
     const formData = new FormData(form);
     try {
-      const username = formData.get('username') as string;
-      const response = await fetch('/update', {
-        method: 'PUT',
+      const username = formData.get("username") as string;
+      const response = await fetch("/api/account/update", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: new URLSearchParams({
           username: username,
-          biography: formData.get('biography') as string,
+          biography: formData.get("biography") as string,
         }),
       });
 
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
+        displayErrorOrAlert(
+          form,
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
+        return;
       }
       goToURL(`profile/${encodeURIUsername(username)}`);
     } catch (error) {
@@ -215,47 +256,51 @@ function setSubmitEventProfile(form: HTMLFormElement): void {
   });
 }
 
-
 /**
  * used by the Passwrd change form, the default event can't be used in SPA (redirect)
  * @param form the said form element
  */
 function setSubmitEventPassword(form: HTMLFormElement): void {
-  form.addEventListener('submit', async (event: SubmitEvent) => {
+  form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
-    if (needConnection(form) === false)
-      return;
+    if (needConnection(form) === false) return;
     const formData = new FormData(form);
-        try {
+    try {
       const password = formData.get("password") as string;
-      if (password !== formData.get("password-confirm") as string) {
+      if (password !== (formData.get("password-confirm") as string)) {
         displayErrorOrAlert(form, findLanguage("passwords don't match"));
-        return ;
+        return;
       }
 
-      const response = await fetch('/password', {
-        method: 'PUT',
+      const response = await fetch("/api/account/password", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: new URLSearchParams({
-          password: password, 
+          password: password,
         }),
       });
 
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
+        displayErrorOrAlert(
+          form,
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
+        return;
       }
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value"))
         goToURL(`profile/${encodeURIUsername(elem.getAttribute("value"))}`);
-      else
-        goToURL( );
+      else goToURL();
     } catch (error) {
       displayErrorOrAlert(form, String(error));
     }
@@ -263,29 +308,35 @@ function setSubmitEventPassword(form: HTMLFormElement): void {
 }
 
 function setSubmitEventDelete(form: HTMLFormElement): void {
-  form.addEventListener('submit', async (event: SubmitEvent) => {
+  form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
-    if (needConnection(form) === false)
-      return;
+    if (needConnection(form) === false) return;
     const formData = new FormData(form);
     try {
-      const response = await fetch('/delete', {
-        method: 'DELETE',
+      const response = await fetch("/api/account/delete", {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: new URLSearchParams({
-          username: formData.get("username") as string, 
+          username: formData.get("username") as string,
         }),
       });
 
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        displayErrorOrAlert(form, keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
-        return ;
+        displayErrorOrAlert(
+          form,
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
+        return;
       }
       sendStatusMessage();
       main();
@@ -301,39 +352,49 @@ function setSubmitEventDelete(form: HTMLFormElement): void {
  */
 function setClickEventProfile(text: HTMLElement): void {
   const usernameElem = document.getElementById("username-p1");
-  if (!usernameElem || !usernameElem.hasAttribute("value"))
-    return ;
+  if (!usernameElem || !usernameElem.hasAttribute("value")) return;
   const username: string = usernameElem.getAttribute("value");
-  text.addEventListener("click", (event: PointerEvent) => 
+  text.addEventListener("click", (event: PointerEvent) =>
     goToURL(`profile/${encodeURIUsername(username)}`)
   );
 }
 
 function setClickEventBlockRequest(text: HTMLElement): void {
-  if (["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)) {
-    text.className = "";
-    return ;
+  if (
+    ["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)
+  ) {
+    text.className = "px-1";
+    return;
   }
   text.className = "cursor-pointer";
-  let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+  let username = location.pathname.substring(
+    location.pathname.lastIndexOf("/") + 1
+  );
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/block?user=${username}`,{
-        method: 'post',
+      const response = await fetch(`/api/account/block?user=${username}`, {
+        method: "post",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-    });
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      });
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        console.error(keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
+        console.error(
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
       }
     } catch (error) {
       console.error(String(error));
     }
-    main(true);
+    resetNextInner();
+    main();
   });
 }
 //  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
@@ -341,30 +402,43 @@ function setClickEventBlockRequest(text: HTMLElement): void {
 // Stephane sjean
 
 function setClickEventFriendRequest(text: HTMLElement): void {
-  if (["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"].map(findLanguage).includes(text.innerText)) {
-    text.className = "";
-    return ;
+  if (
+    ["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"]
+      .map(findLanguage)
+      .includes(text.innerText)
+  ) {
+    text.className = "px-1";
+    return;
   }
   text.className = "cursor-pointer";
-  let username = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+  let username = location.pathname.substring(
+    location.pathname.lastIndexOf("/") + 1
+  );
   text.addEventListener("click", async (event: PointerEvent) => {
     try {
-      const response = await fetch(`/friend?user=${username}`, {
-        method: 'post',
+      const response = await fetch(`/api/account/friend?user=${username}`, {
+        method: "post",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      resetReconnectTimer(response.headers.get('x-authenticated'));
-      const result: {success?: boolean, message?: string} = await response.json();
+      resetReconnectTimer(response.headers.get("x-authenticated"));
+      const result: { success?: boolean; message?: string } =
+        await response.json();
       if (!result.success) {
-        console.error(keyExist(result, "message") ? selectLanguage(result.message) : 
-        `${findLanguage("server answered")} ${response.status} ${response.statusText}`);
+        console.error(
+          keyExist(result, "message")
+            ? selectLanguage(result.message)
+            : `${findLanguage("server answered")} ${response.status} ${
+                response.statusText
+              }`
+        );
       }
     } catch (error) {
       console.error(String(error));
     }
-    main(true);
+    resetNextInner();
+    main();
   });
 }
 
@@ -372,12 +446,17 @@ function setClickEventFriendRequest(text: HTMLElement): void {
  * used by the chat input, send message on enter
  * @param textarea the said chat input element
  */
-function setEnterEventChat(textarea: HTMLTextAreaElement): void {
+function setEventChat(textarea: HTMLTextAreaElement): void {
   InitConnectionChat();
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendChatMessage();
+      ChatResetHistoryLine();
+    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      const msg = ChatHistoryRequest(event.key === "ArrowDown" ? "down" : "up");
+      textarea.value = msg ? msg : "";
     }
   });
 }
@@ -385,7 +464,7 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
 /**
  * to add a new message to the chat.
  * Made it better than just taking one single string for debugging purpose (it sucks keep using console.log)
- * 
+ *
  * sent to the console, so no translation done
  *
  * NOT DEFINITIVE,
@@ -398,18 +477,20 @@ function setEnterEventChat(textarea: HTMLTextAreaElement): void {
  */
 export function sendMessage(...args: any[]): boolean {
   let message = args.join(", ");
-  if (!message){
+  if (!message) {
     console.error(`message not sent BECAUSE NOTHING TO SEND`);
-    return false
+    return false;
   }
   const chat = document.getElementById("chat-content");
   if (!chat) {
-    console.error(`message '${message}' not sent to the chat because the chat is not found`);
+    console.error(
+      `message '${message}' not sent to the chat because the chat is not found`
+    );
     return false;
   }
-  let scroll = (chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1);
+  let scroll = chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 1;
   // true if at the end of the chat
-  const para = document.createElement('p');
+  const para = document.createElement("p");
   const node = document.createTextNode(message);
   para.appendChild(node);
   chat.appendChild(para);
@@ -417,7 +498,7 @@ export function sendMessage(...args: any[]): boolean {
     chat.scrollTop = chat.scrollHeight;
   }
   if (chat.childElementCount > 1000) {
-    // we have to remove by an even (% 2) amount due to CSS even and odd colors 
+    // we have to remove by an even (% 2) amount due to CSS even and odd colors
     chat.firstElementChild?.remove();
     chat.firstElementChild?.remove();
   }
@@ -440,13 +521,13 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
   let first: string | null = null;
   textarea.toggleAttribute("data-custom", true);
   textarea.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && textarea.value) {
+    if (event.key === "Enter" && textarea.value) {
       event.preventDefault();
       goToURL(`profile/${encodeURIUsername(textarea.value)}`, true);
       textarea.value = "";
       clearSibling();
     }
-    if (event.key === 'Tab' && first !== null) {
+    if (event.key === "Tab" && first !== null) {
       event.preventDefault();
       textarea.value = first;
       clearSibling();
@@ -454,12 +535,15 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
   });
   let searchController: AbortController | null = null;
   textarea.addEventListener("input", async (e) => {
-    textarea.value = Array.from(textarea.value.matchAll(/[0-9a-zA-Z_:]/g), (m) => m[0]).join("");
+    textarea.value = Array.from(
+      textarea.value.matchAll(/[0-9a-zA-Z_-]/g),
+      (m) => m[0]
+    ).join("");
     try {
       if (searchController) searchController.abort(); // cancel previous request
       searchController = new AbortController();
-      const res = await fetch(`/misc/users?start=${textarea.value}`, {
-        signal: searchController.signal
+      const res = await fetch(`/api/misc/users?start=${textarea.value}`, {
+        signal: searchController.signal,
       });
       const json = await res.json();
       const div = clearSibling();
@@ -468,8 +552,11 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
       const fragment = document.createDocumentFragment();
       for (let user of json) {
         const span = document.createElement("span");
-        span.className = "flex flex-row cursor-pointer my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400";
-        span.addEventListener("pointerdown", () => goToURL(`/profile/${encodeURIUsername(user.username)}`, true));
+        span.className =
+          "flex flex-row cursor-pointer my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400";
+        span.addEventListener("pointerdown", () =>
+          goToURL(`/profile/${encodeURIUsername(user.username)}`, true)
+        );
         const img = document.createElement("img");
         img.className = "size-5 rounded-full";
         img.src = `${assetsPath}/pfp/${user.pfp}`;
@@ -480,8 +567,7 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
       }
       div.innerHTML = "";
       div.appendChild(fragment);
-    }
-    catch (err) {};
+    } catch (err) {}
   });
   textarea.addEventListener("blur", async () => {
     clearSibling();
@@ -489,13 +575,13 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
 }
 
 function setChangeEventLanguageSelector(select: HTMLSelectElement): void {
-  let lang = localStorage.getItem('language');
-  if (lang === null) lang = 'en';
+  let lang = localStorage.getItem("language");
+  if (lang === null) lang = "en";
   select.querySelector(`[value="${lang}"]`)?.toggleAttribute("selected", true);
   select.addEventListener("change", (e) => {
     localStorage.setItem("language", select.value);
     setLanguage();
-    main(true, false);
+    main({ force: true, requests: false });
   });
 }
 
@@ -503,11 +589,13 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
   input.addEventListener("change", (e) => {
     const file = input.files[0];
     if (!file) return;
-    
+
     // Check MIME type
-    if (!file.type.startsWith('image/')) {
-      input.value = '';
-      document.getElementById("pfp-preview-div").toggleAttribute('hidden', true);
+    if (!file.type.startsWith("image/")) {
+      input.value = "";
+      document
+        .getElementById("pfp-preview-div")
+        .toggleAttribute("hidden", true);
       const form = document.getElementById("pfp-form") as HTMLFormElement;
       if (form) displayErrorOrAlert(form, findLanguage("need image"));
       return;
@@ -515,7 +603,8 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
     const img = window.URL.createObjectURL(input.files[0]);
     const preview = document.getElementById("pfp-preview") as HTMLImageElement;
     if (preview && img) preview.src = img;
-    document.getElementById("pfp-preview-div")?.removeAttribute('hidden')
+    resetNextInner();
+    document.getElementById("pfp-preview-div")?.removeAttribute("hidden");
   });
 }
 
@@ -528,69 +617,92 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
  */
 export function setCtrlEventUsername(): void {
   document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      const elem = document.getElementById("user-search") as HTMLTextAreaElement;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      const elem = document.getElementById(
+        "user-search"
+      ) as HTMLTextAreaElement;
       if (elem) {
         e.preventDefault();
         elem.select();
       }
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
-      if (elem) { // might have to add if not hidden later
+      if (elem) {
+        // might have to add if not hidden later
         e.preventDefault();
         elem.select();
       }
     }
 
-    if ((e.ctrlKey || e.metaKey) && ! e.shiftKey && e.key === 'p') {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      !e.shiftKey &&
+      e.key.toLowerCase() === "p"
+    ) {
       e.preventDefault();
       const elem = document.getElementById("username-p1");
       if (elem && elem.hasAttribute("value")) {
         goToURL(`profile/${encodeURIUsername(elem.getAttribute("value"))}`);
-        return ;
+        return;
       }
-      goToURL('profile');
+      goToURL("profile");
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
-        fetch("/logout", {method: 'POST'}).then(
-          res => {
+        fetch("api/account/logout", { method: "POST" })
+          .then((res) => {
             resetReconnectTimer(res.headers.get("x-authenticated"));
             sendStatusMessage();
             if (document.activeElement.id !== "user-search") main();
-            else sendMessage("You found a debug option, won't force a reload if user-search is selected");
-          }
-        ).catch(err => alert('Caught: ' + err));
+            else
+              sendMessage(
+                "You found a debug option, won't force a reload if user-search is selected"
+              );
+          })
+          .catch((err) => alert("Caught: " + err));
       }
     }
-    
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !isPressed && document.activeElement === document.body) {
+
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      (e.key === "ArrowRight" || e.key === "ArrowLeft") &&
+      !isPressed &&
+      document.activeElement === document.body
+    ) {
       const buttons = document.getElementById("inner-buttons");
-      if (!buttons)
-        return;
+      if (!buttons) return;
       const checked = buttons.querySelector("[data-checked]");
       let target: Element;
       if (checked) {
-        target = e.key === 'ArrowLeft' ? checked.previousElementSibling : checked.nextElementSibling;
+        target =
+          e.key === "ArrowLeft"
+            ? checked.previousElementSibling
+            : checked.nextElementSibling;
         if (target === null)
-          target = e.key === 'ArrowLeft' ? buttons.lastElementChild : buttons.firstElementChild;
+          target =
+            e.key === "ArrowLeft"
+              ? buttons.lastElementChild
+              : buttons.firstElementChild;
       } else {
-        target = e.key === 'ArrowLeft' ? buttons.firstElementChild : buttons.lastElementChild;
+        target =
+          e.key === "ArrowLeft"
+            ? buttons.firstElementChild
+            : buttons.lastElementChild;
       }
-      if (target !== null && target instanceof HTMLElement){
+      if (target !== null && target instanceof HTMLElement) {
         target.click();
         e.preventDefault();
       }
       return;
     }
-  })
+  });
 
   const app = document.getElementById("app");
-  const template = document.createElement('template');
+  const template = document.createElement("template");
   template.innerHTML = htmlSnippets["PopUp"];
   const help = template.content.firstElementChild;
   let isPressed = null;
@@ -598,11 +710,14 @@ export function setCtrlEventUsername(): void {
     document.addEventListener("keydown", (e) => {
       e.stopPropagation();
       // document active is set to body to not activate while using chat
-      if (e.key === '?' && !isPressed && document.activeElement === document.body) {
+      if (
+        e.key === "?" &&
+        !isPressed &&
+        document.activeElement === document.body
+      ) {
         help.innerHTML = "<p>" + findLanguage("pop up") + "</p>";
         isPressed = e.code;
         app.appendChild(help);
-        
       }
     });
     document.addEventListener("blur", (e) => {

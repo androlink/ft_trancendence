@@ -39,10 +39,14 @@ rm: stop
 prune: stop
 	docker system prune --all --force
 
+.PHONY: static
+static:
+	@docker run -v ./services/client/src:/var/project/src -v www:/var/www client npm run build:statics
+
 .PHONY: repair_vscode
 repair_vscode:
-	@docker exec server cp -r node_modules src
-	@docker exec client cp -r node_modules src
+	-docker exec resources_microservice cp -r node_modules src
+	-docker exec client cp -r node_modules src
 .PHONY: prod
 prod: prune
 	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"

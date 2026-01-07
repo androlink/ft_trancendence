@@ -1,10 +1,11 @@
-import fastify from "./server";
 import { FastifyInstance } from "fastify";
 import { WebSocket, WebsocketHandler } from "@fastify/websocket";
-import db from "./database";
 import Database from "better-sqlite3";
-import { Id, WSmessage, TypeMessage } from "./types";
-import { Data } from "ws";
+
+import { Id, WSmessage, TypeMessage } from "../common/types";
+import db from "../common/database";
+import { fastify } from "./main";
+import { invite_message } from "./chat_invite";
 
 /**
  * Class client
@@ -30,7 +31,7 @@ class WSClient {
   }
 }
 
-const connectedClients: Map<Id, WSClient> = new Map();
+export const connectedClients: Map<Id, WSClient> = new Map();
 
 const waitingConnections: WebSocket[] = [];
 
@@ -190,7 +191,7 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
  * @param message message from the target
  * @param TargetSocket Websocket from the target
  */
-function DirectMessage(TargetRespondMsg: WSmessage) {
+export function DirectMessage(TargetRespondMsg: WSmessage) {
   for (let msg of listOfMsg) {
     if (TargetRespondMsg.msgId !== msg.msgId) {
       continue;
@@ -417,8 +418,8 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   socketToId.set(socket, senderId.id);
   waitingConnections.splice(waitingConnections.indexOf(socket), 1);
   socket.onclose = () => {
-    const client = connectedClients.get(senderId.id)!;
-    client.sockets.splice(client.sockets.indexOf(socket), 1);
+    const client = connectedClients.get(senderId!.id)!;
+    client?.removeSocket(socket);
   };
 
   if (connectedClients.get(senderId.id)) {
@@ -429,7 +430,7 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
 }
 
 // "main" live chat
-export default function liveChat(fastify: FastifyInstance) {
+export default async function apiChat(fastify: FastifyInstance) {
   dbQuery = {
     getUserById: db.prepare<{ userId: Id }, { username: string }>(
       "SELECT username FROM users WHERE id = :userId"
@@ -446,10 +447,12 @@ export default function liveChat(fastify: FastifyInstance) {
     waitingConnections.push(ws);
   });
 
-  fastify.get("/api/chat", { websocket: true }, (connection: WebSocket) => {
+  fastify.get("/chat", { websocket: true }, (connection: WebSocket) => {
     connection.on("close", (client: WebSocket) => {
       waitingConnections.splice(waitingConnections.indexOf(client), 1);
     });
+
+    connection.addEventListener("message", invite_message);
     connection.on("message", (event) => {
       try {
         const msg: WSmessage = JSON.parse(event.toString());

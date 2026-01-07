@@ -1,6 +1,4 @@
-
 services:
-
   #----------------------------------------------------------------------------#
   #                                    NGINX                                   #
   #----------------------------------------------------------------------------#
@@ -34,9 +32,26 @@ services:
   #----------------------------------------------------------------------------#
   #                                    SERVER                                  #
   #----------------------------------------------------------------------------#
-  server:
-    container_name: server
-    image: server
+
+  # server:
+  #   container_name: server
+  #   image: server
+  #   build:
+  #     context: services/server/
+  #     target: dev
+  #   env_file: "services/server/conf/secrets.env"
+  #   networks:
+  #     - trancendence
+  #   volumes:
+  #     - src_server:/var/project/src
+  #     - www:/var/www
+  #     - database:/var/db/
+  #   restart: "always"
+
+  resources_microservice:
+    command: dev-resources
+    container_name: resources_microservice
+    image: resources_microservice
     build:
       context: services/server/
       target: dev
@@ -47,6 +62,137 @@ services:
       - src_server:/var/project/src
       - www:/var/www
       - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://resources_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "always"
+
+  error_microservice:
+    command: dev-error
+    container_name: error_microservice
+    image: error_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://error_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "always"
+
+  page_microservice:
+    command: dev-page
+    container_name: page_microservice
+    image: page_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://page_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "always"
+
+  misc_microservice:
+    command: dev-misc
+    container_name: misc_microservice
+    image: misc_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://misc_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "always"
+
+  account_microservice:
+    command: dev-account
+    container_name: account_microservice
+    image: account_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://account_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "always"
+
+  chat_microservice:
+    command: dev-chat
+    container_name: chat_microservice
+    image: chat_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://chat_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: "always"
+
+  remote_microservice:
+    command: dev-remote
+    container_name: remote_microservice
+    image: remote_microservice
+    build:
+      context: services/server/
+      target: dev
+    env_file: "services/server/conf/secrets.env"
+    networks:
+      - trancendence
+    volumes:
+      - src_server:/var/project/src
+      - www:/var/www
+      - database:/var/db/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://remote_microservice:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -54,7 +200,7 @@ services:
   #----------------------------------------------------------------------------#
   client:
     container_name: client
-    image: client 
+    image: client
     build:
       context: services/client/
       target: dev

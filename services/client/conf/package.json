@@ -11,10 +11,9 @@
     "build:css": "npx @tailwindcss/cli -i src/css/input.css -o /var/www/styles.css"
   },
   "dependencies": {
-    "tailwindcss": "^4.1.16",
     "@tailwindcss/cli": "^4.1.16",
     "typescript": "^5.6.3",
-    "@types/node": "^22.7.4",
+    "@types/node": "^24.10.1",
     "undici-types": "^7.16.0"
   },
   "devDependencies": {

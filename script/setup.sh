@@ -10,4 +10,6 @@ mkdir -p data/www
 mkdir -p data/www/languages
 mkdir -p data/www/pfp
 mkdir -p data/www/pong
+mkdir -p data/www/pong/engine
+mkdir -p data/www/pong_old
 mkdir -p data/www/html

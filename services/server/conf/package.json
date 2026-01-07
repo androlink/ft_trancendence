@@ -2,8 +2,26 @@
   "name": "server",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch \"src/**\" --exec tsx src/server.ts",
-    "prod": "tsx src/server.ts"
+    "dev-chat": "nodemon --watch \"src/micro_chat/**\" --watch \"src/common/**\" --exec tsx src/micro_chat/main.ts",
+    "prod-chat": "tsx src/micro_chat/main.ts",
+
+    "dev-page": "nodemon --watch \"src/micro_page/**\" --watch \"src/common/**\" --exec tsx src/micro_page/main.ts",
+    "prod-page": "tsx src/micro_page/main.ts",
+
+    "dev-account": "nodemon --watch \"src/micro_account/**\" --watch \"src/common/**\" --exec tsx src/micro_account/main.ts",
+    "prod-account": "tsx src/micro_account/main.ts",
+
+    "dev-error": "nodemon --watch \"src/micro_error/**\" --watch \"src/common/**\" --exec tsx src/micro_error/main.ts",
+    "prod-error": "tsx src/micro_error/main.ts",
+
+    "dev-misc": "nodemon --watch \"src/micro_misc/**\" --watch \"src/common/**\" --exec tsx src/micro_misc/main.ts",
+    "prod-misc": "tsx src/micro_misc/main.ts",
+
+    "dev-resources": "nodemon --watch \"src/micro_resources/**\" --watch \"src/common/**\" --exec tsx src/micro_resources/main.ts",
+    "prod-resources": "tsx src/micro_resources/main.ts",
+
+    "dev-remote": "nodemon --watch \"src/micro_remote/**\" --watch \"src/common/**\" --exec tsx src/micro_remote/main.ts",
+    "prod-remote": "tsx src/micro_remote/main.ts"
   },
   "type": "module",
   "dependencies": {
