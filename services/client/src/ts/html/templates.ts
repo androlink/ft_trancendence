@@ -418,6 +418,7 @@ const htmlSnippetsTemplate: {
     `,
   Pong: `
   <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
+    <h2 class="text-white justify-center self-center-safe p-4 text-5xl font-bold">PONG</h2>
     <script id="local config">
       loadLocalConfig();
     </script>
