@@ -45,8 +45,7 @@ const htmlSnippetsTemplate: {
 
         <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="flex placeholder:italic text-sm select-none focus:outline-none w-2/3"/>
         <!-- div below must stay right after the input above, even empty, or we have to change the way the predictions display -->
-        <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col top-10 -left-0.5 border border-white rounded empty:border-none empty:border-[#fff0]">
-        </div>
+        <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col top-10 -left-0.5 border border-white rounded empty:border-none empty:border-[#fff0]"></div>
       </div>
     </div>
     <input type="text" maxLength=20 value="ft_ ¯\\\\_(ツ)_/¯" class="text-3xl font-mono text-center text-white font-semibold select-none"/>
@@ -91,8 +90,7 @@ const htmlSnippetsTemplate: {
         </g>
         </svg>
     </span>
-    <div id="account-reconnected" class=" p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-green-500">[[auto reconnected]]</div>
-    <div id="notif-disconnected"  class="hidden p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-red-500">[[not connected]]</div>
+    <div id="notif" class="hidden p-3 text-lg text-white z-50 text-center fixed top-0 left-1/2 opacity-0 self-center-safe justify-center rounded-md shadow-lg bg-red-500">[[not connected]]</div>
 
   </span>
   <div class="transform-none">
@@ -125,7 +123,7 @@ const htmlSnippetsTemplate: {
         </g>
         </svg>
 
-        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('notif-disconnected');">
+        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('[[not connected]]', 'red-500');">
           <div class="m-auto text-gray-500 text-center text-lg">[[not connected]]</div>
         </div>
         </div>
@@ -587,10 +585,12 @@ export function updateInfos() {
   bioInput.addEventListener("input", checkChanges);
 }
 
-function showNotification(id: string) {
-  const notif = document.getElementById(id);
+export function showNotification(content:string, color: string) {
+  const notif = document.getElementById("notif");
   if (!notif) return;
 
+  notif.classList.add("bg-"+color);
+  notif.textContent = content;
   notif.classList.remove("hidden");
   notif.classList.remove("animate-notification");
   void notif.offsetWidth;
@@ -598,7 +598,11 @@ function showNotification(id: string) {
 
   notif.addEventListener(
     "animationend",
-    () => notif.classList.add("hidden"),
+    () => {
+      notif.classList.add("hidden");
+      notif.classList.remove("bg-"+color);
+      notif.textContent = "";
+    },
     { once: true }
   );
 }

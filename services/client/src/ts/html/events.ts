@@ -398,9 +398,6 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     main();
   });
 }
-//  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
-//  "toi" -> "toi", et la c'est un autre type,
-// Stephane sjean
 
 function setClickEventFriendRequest(text: HTMLElement): void {
   if (
@@ -626,8 +623,13 @@ export function setCtrlEventUsername(): void {
         elem.select();
       }
     }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    const div = document.getElementById("account-disconnected");
+    if (!div) return;
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      e.key === "Enter" &&
+      !div.checkVisibility()
+    ) {
       const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
       if (elem) {
         // might have to add if not hidden later
