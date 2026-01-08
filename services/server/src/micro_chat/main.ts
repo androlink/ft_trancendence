@@ -5,6 +5,7 @@ import fastifyJWT from "@fastify/jwt";
 import { Id, JwtUserPayload } from "../common/types";
 import chatRoute from "./chat_route";
 import { initDB } from "../common/database";
+import HealthCheckRoutes from "../common/healthcheck";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -31,6 +32,8 @@ fastify.register(fastifyJWT, {
 await initDB();
 
 fastify.register(chatRoute, { prefix: "/api" });
+
+fastify.register(HealthCheckRoutes);
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

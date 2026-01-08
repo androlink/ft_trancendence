@@ -8,8 +8,8 @@ services:
     build:
       context: services/nginx/
     ports:
-      - 8443:8443
-      - 8080:8080
+      - 8443:443
+      - 8080:80
     networks:
       - trancendence
     volumes:
@@ -34,21 +34,6 @@ services:
   #                                    SERVER                                  #
   #----------------------------------------------------------------------------#
 
-  # server:
-  #   container_name: server
-  #   image: server
-  #   build:
-  #     context: services/server/
-  #     target: dev
-  #   env_file: "services/server/conf/secrets.env"
-  #   networks:
-  #     - trancendence
-  #   volumes:
-  #     - src_server:/var/project/src
-  #     - www:/var/www
-  #     - database:/var/db/
-  #   restart: "always"
-
   resources_microservice:
     command: dev-resources
     container_name: resources_microservice
@@ -64,7 +49,8 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://resources_microservice:3000/"]
+      test:
+        ["CMD", "curl", "-f", "http://resources_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -85,7 +71,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://error_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://error_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -106,7 +92,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://page_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://page_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -127,7 +113,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://misc_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://misc_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -148,7 +134,8 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://account_microservice:3000/"]
+      test:
+        ["CMD", "curl", "-f", "http://account_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -169,7 +156,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://chat_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://chat_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -190,7 +177,7 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://remote_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://remote_microservice:3000/healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -209,6 +196,10 @@ services:
       - src_client:/var/project/src
       - www:/var/www
     restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                    VOLUMES                                 #
+  #----------------------------------------------------------------------------#
 
 volumes:
   certificate:

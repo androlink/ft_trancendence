@@ -4,6 +4,7 @@ import fastifyJWT from "@fastify/jwt";
 import pageRoute from "./api_page";
 import { Id, JwtUserPayload } from "../common/types";
 import { initDB } from "../common/database";
+import HealthCheckRoutes from "../common/healthcheck";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -31,6 +32,8 @@ fastify.register(fastifyJWT, {
 });
 
 fastify.register(pageRoute, { prefix: "/api/page" });
+
+fastify.register(HealthCheckRoutes);
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

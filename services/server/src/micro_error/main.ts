@@ -3,6 +3,7 @@ import fastifyStatic from "@fastify/static";
 
 import errorRoutes from "./error_routes";
 import { initDB } from "../common/database";
+import HealthCheckRoutes from "../common/healthcheck";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -21,6 +22,8 @@ fastify.register(fastifyStatic, {
 });
 
 fastify.register(errorRoutes, { prefix: "/error" });
+
+fastify.register(HealthCheckRoutes);
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
