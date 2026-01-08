@@ -50,7 +50,6 @@ async function githubLogin() {
 window.addEventListener("DOMContentLoaded", async () => {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
-  console.log("code truc:", code);
 
   try {
     if (code) {
