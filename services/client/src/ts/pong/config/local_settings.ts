@@ -123,6 +123,8 @@ function player_config(playerId: 0 | 1): HTMLElement {
     players[playerId].up.key === undefined ||
     players[playerId].down.key === undefined
   ) {
+    // if it's a bot
+    // player selection button
     const button = document.createElement("button");
     button.textContent = findLanguage("add player");
     button.className =
@@ -135,6 +137,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
       loadLocalConfig();
     };
     div.append(button);
+    // difficulty below (until return)
     const span = document.createElement("span");
     span.className = "flex flex-col *:size-fit place-items-center";
     const label = document.createElement("label");
@@ -171,7 +174,9 @@ function player_config(playerId: 0 | 1): HTMLElement {
     if (placeholder !== undefined) div.append(placeholder);
     return div;
   }
+  // so we have a plyer, not a bot
   if (!tournament) {
+    // player name selector
     const input = document.createElement("input");
     input.placeholder = findLanguage("username");
     if (typeof players[playerId].view.name === "string") {
@@ -188,6 +193,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
       "text-white text-center border border-gray-400 focus:border-blue-400 outline-none rounded p-1";
     div.append(input);
   } else {
+    // player left or right indicator
     const text = document.createElement("text");
     text.textContent = selectLanguage([
       "player",
@@ -197,10 +203,11 @@ function player_config(playerId: 0 | 1): HTMLElement {
     div.append(text);
   }
   for (let i = 0; i < 2; i++) {
+    // keys selection
     const button = document.createElement("button");
-    button.textContent = players[playerId].down.key;
+    button.textContent = i ? players[playerId].down.key : players[playerId].up.key;
     button.className = "text-white border border-black rounded px-1 cursor-pointer";
-    button.onclick = (e) => changeInput(e, ["down", "up"][0] as "down" | "up", playerId);
+    button.onclick = (e) => changeInput(e, ["up","down" ][i] as "down" | "up", playerId);
     const label = document.createElement("label");
     label.textContent = ["⬆️", "⬇️"][i];
     const span = document.createElement("span");
@@ -210,6 +217,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     div.append(span);
   }
   if (!tournament) {
+    // bot selection button
     const button = document.createElement("button");
     button.textContent = findLanguage("add bot");
     button.className =
