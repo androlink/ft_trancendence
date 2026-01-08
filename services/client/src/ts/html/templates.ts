@@ -43,7 +43,7 @@ const htmlSnippetsTemplate: {
             </g>
         </svg>
 
-        <input id="user-search" type="search" spellcheck="false" placeholder="[[username]]" class="flex placeholder:italic text-sm select-none focus:outline-none w-2/3"/>
+        <input id="user-search" maxLength="20" type="search" spellcheck="false" placeholder="[[username]]" class="flex placeholder:italic text-sm select-none focus:outline-none w-2/3"/>
         <!-- div below must stay right after the input above, even empty, or we have to change the way the predictions display -->
         <div class="absolute overflow-y-scroll z-40 max-h-5/1 w-full flex flex-col top-10 -left-0.5 border border-white rounded empty:border-none empty:border-[#fff0]"></div>
       </div>
@@ -53,7 +53,14 @@ const htmlSnippetsTemplate: {
     {
       const ft_title = document.currentScript.previousElementSibling;
       ft_title.value = self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯";
-      ft_title.onchange = () => self.localStorage.setItem("ft_title", ft_title.value);
+      ft_title.onchange = () => {
+        self.localStorage.setItem("ft_title", ft_title.value);
+        const title = document.getElementById("Title");
+        if (title)
+          title.textContent = selectLanguage(
+            ["Welcome to", self.localStorage.getItem("ft_title") || "ft_ ¯\\\\_(ツ)_/¯"]
+          );
+      }
       document.currentScript.remove();
     }
     </script>
@@ -132,8 +139,8 @@ const htmlSnippetsTemplate: {
   </span>
   `,
   Profile1: `
-  <div class="h-full flex justify-center rounded-md bg-[#262d5f]">
-    <div class="w-full mt-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border-x border-t border-white bg-[#171C3D] shadow-2xl rounded-t-lg">
+  <div class="h-full flex justify-center overflow-y-auto rounded-md bg-[#262d5f]">
+    <div class="w-full size-fit my-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border border-white bg-[#171C3D] shadow-2xl rounded-lg">
 
     <div class="flex">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
@@ -213,8 +220,8 @@ const htmlSnippetsTemplate: {
           <div class="text-white text-2xl" id="label-change-password">[[change password]]</div>
           <div class="flex flex-col sm:flex-row gap-5 mb-6">
             <div class="flex gap-2 flex-col p-1">
-              <input placeholder="[[new password]]" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password">
-              <input placeholder="[[confirm password]]"px-1 class="h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password-confirm">
+              <input placeholder="[[new password]]" maxLength="71" class="px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password">
+              <input placeholder="[[confirm password]]" maxLength="71" class=" px-1 h-8 w-full rounded border border-gray-400 focus-within:border-blue-400 text-white outline-none" type="password" name="password-confirm">
             </div>
             <button class="self-center whitespace-nowrap bg-purple-500 text-white hover:bg-blue-400 rounded size-fit p-1 my-1 hover:cursor-pointer" type="submit">[[submit]]</button>
           </div>
@@ -252,7 +259,7 @@ const htmlSnippetsTemplate: {
             </style>
             <img src="${assetsPath}/menu-vertical.png" class="mt-5 size-10 cursor-pointer"></img>
             <div class="dropdown-content flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
-              <ul class ="*:hover:bg-[#ffffff7c] *:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0]">
+              <ul class ="*:hover:bg-[#ffffff7c] **:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0]">
                 <li>
                   <a id="friend request">friend request</a>
                 </li>
@@ -264,7 +271,7 @@ const htmlSnippetsTemplate: {
           </div>
         </div>
         <p class="text-white mb-1">[[biography]]</p>
-        <p class=" flex w-[250] h-full rounded-md p-1 border-2 border-gray-900 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text resize-y min-h-10 max-h-[40vh]" id="biography-p2"></p>
+        <p class="block w-full max-w-150 min-w-45 min-h-20 h-32 max-h-[40vh] overflow-auto resize rounded-md p-2 border-2 border-gray-900 bg-[#171C3D] text-[#D8D8D8] select-text whitespace-pre-wrap wrap-break-word" id="biography-p2"></p>
       </div>
     </header>
     <div class="transform-none">
@@ -293,7 +300,7 @@ const htmlSnippetsTemplate: {
       loadGameHistory();
       document.currentScript?.remove();
     </script>
-    <div class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col">
+    <div title="[[only X games]]" class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col">
       <div class="grid grid-cols-10 text-white items-center text-center mb-2">
         <span class="col-span-3">[[winner]]</span>
         <span class="col-span-3">[[loser]]</span>
@@ -360,8 +367,8 @@ const htmlSnippetsTemplate: {
     <div class="w-full max-w-md sm:max-w-lg md:max-w-xl max-h-[90vh] flex flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
       <form id="log-in-form" class="mx-8 my-6 flex flex-col gap-3 rounded-md text-white" hidden>
         <div class="my-5 mb-10 text-center text-4xl font-bold">[[log in]]</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" maxLength=20 placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" maxLength="71" name="password" placeholder="[[password]]" />
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[log in]]</button>
 
@@ -372,15 +379,15 @@ const htmlSnippetsTemplate: {
           [[log in github]]
         </button>
         <span>
-          pas de compte ?
-          <span onclick="document.getElementById('register-form').hidden = false; document.getElementById('log-in-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[register]]</span>
+        [[no account]]
+          <span tabindex="0" onkeydown="if (event.key === 'Enter') this.click()" onclick="document.getElementById('register-form').hidden = false; document.getElementById('log-in-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[register]]</span>
         </span>
       </form>
       <form id="register-form" class="mx-8 my-6 flex flex-col gap-3 rounded-md text-white">
         <div class="mt-5 text-center text-4xl font-bold">[[register]]</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password-confirm" placeholder="[[confirm password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" maxLength=20 placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" maxLength="71" placeholder="[[password]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password-confirm" maxLength="71" placeholder="[[confirm password]]" />
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[register]]</button>
 
@@ -392,7 +399,7 @@ const htmlSnippetsTemplate: {
         </button>
         <span>
           [[already an account]]
-          <span onclick="document.getElementById('log-in-form').hidden = false; document.getElementById('register-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[log in]]</span>
+          <span tabindex="0" onkeydown="if (event.key === 'Enter') this.click()" onclick="document.getElementById('log-in-form').hidden = false; document.getElementById('register-form').hidden = true" class=" text-blue-500 hover:underline hover:text-blue-500 hover:cursor-pointer">[[log in]]</span>
         </span>
       </form>
     </div>
@@ -418,11 +425,11 @@ const htmlSnippetsTemplate: {
     `,
   Pong: `
   <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
-    <h2 class="text-white justify-center self-center-safe p-4 text-5xl font-bold cursor-pointer" onclick="window.dispatchEvent(new PopStateEvent('popstate')); resetNextInner(); main({requests: false})">PONG</h2>
+    <h2 id="PONG TITLE" class="text-white justify-center self-center-safe p-4 text-5xl font-bold">PONG</h2>
     <script id="local config">
       loadLocalConfig();
     </script>
-    <canvas class=" size-full" id="canvas"></canvas>
+    <canvas class="size-full" id="canvas"></canvas>
   </div>
   `,
   RemotePong: `

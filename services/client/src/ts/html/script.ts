@@ -19,12 +19,7 @@ function loadGameHistory(): void {
   fetch(`/api/misc/history?user=${encodeURIComponent(username)}`)
     .then((res) => res.json())
     .then((json) => {
-      if (!json.length) {
-        // tbody.innerHTML = `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td></td></tr>`;
-        // tbody.firstElementChild.lastElementChild.textContent =
-        //   findLanguage("never played");
-        return;
-      }
+      if (!json.length) return;
       const fragment = document.createDocumentFragment();
       for (let game of json) {
         const div = document.createElement("div");
@@ -118,7 +113,6 @@ async function loadFriendsDisplay(): Promise<void> {
     if (json[0] <= 32 * (page - 1)) {
       page = Math.floor(json[0] / 32) + 1;
     }
-    console.log(page , "ici");
     if (span !== null && span.childElementCount === 3) {
       span.children[0].toggleAttribute("hidden", page === 1);
       span.children[1].textContent = String(page);
@@ -127,12 +121,12 @@ async function loadFriendsDisplay(): Promise<void> {
     if (grid !== null) {
       if (json[0] === 0) {
         const div = grid.parentElement;
-          div.classList.add("m-auto", "text-white");
-          div.classList.remove("flex-1");
+        div.classList.add("m-auto", "text-white");
+        div.classList.remove("flex-1");
         // div.innerHTML =
         //   '<p class="col-span-full row-span-full items-center m-auto text-white"></p>';
-          div.textContent = findLanguage("get friends");
-          grid.classList.add("hidden");
+        div.textContent = findLanguage("get friends");
+        grid.classList.add("hidden");
         return;
       }
       const fragment = document.createDocumentFragment();

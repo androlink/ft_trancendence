@@ -135,7 +135,10 @@ async function fetchApi(): Promise<ServerResponse> {
     data.headers = response.headers;
     return data;
   } catch (error) {
-    sendMessage(error instanceof Error ? error.message : String(error));
+    if (String(error) === "TypeError: NetworkError when attempting to fetch resource.")
+      sendMessage(selectLanguage("check internet"));
+    else
+      sendMessage(error instanceof Error ? error.message : String(error));
     return {};
   }
 }

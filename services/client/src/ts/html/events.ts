@@ -361,12 +361,8 @@ function setClickEventProfile(text: HTMLElement): void {
 }
 
 function setClickEventBlockRequest(text: HTMLElement): void {
-  if (
-    ["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)
-  ) {
-    text.className = "px-1";
+  if (["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText))
     return;
-  }
   text.className = "cursor-pointer";
   let username = location.pathname.substring(
     location.pathname.lastIndexOf("/") + 1
