@@ -44,7 +44,7 @@ export function getTournamentPlayer(i: number): HTMLElement | null {
   );
   input.maxLength = 20;
   input.className =
-    "text-white text-center border outline-offset-2 outline-sky-500 focus:outline-2 border-black bg-gray-700 rounded px-1 w-0 grow";
+    "text-white text-center border outline-none focus:border-blue-500 border-white bg-[#171C3D] rounded p-1 w-0 grow";
   span.append(input);
   const text = document.createElement("p");
   text.textContent = "X";
@@ -63,7 +63,7 @@ export function getTournamentPlayer(i: number): HTMLElement | null {
  */
 export function allowNewPlayer(): HTMLElement {
   const p = document.createElement("p");
-  p.className = "bg-gray-800 text-center text-white rounded cursor-pointer";
+  p.className = "bg-purple-600 hover:bg-blue-500 border text-center text-white rounded cursor-pointer";
   p.onclick = () => {
     playersInTournament.push([
       "player",

@@ -102,23 +102,40 @@ function set_key_config(
 function player_config(playerId: 0 | 1): HTMLElement {
   inputController.abort();
   const div = document.createElement("div");
-  div.className = `flex flex-col justify-around h-3/4 my-auto border border-white w-3/4 *:size-fit [&>svg]:size-10 *:mx-auto rounded-md bg-[#171C3D] ${
+  div.className = `flex flex-col h-3/4 my-auto min-h-[420px] border border-white w-3/4 *:size-fit *:mx-auto rounded-md bg-[#171C3D] ${
     playerId === 0 ? "col-start-1" : "col-start-3"
   }`;
 
-  fetch("/resources/Human.svg")
+  const isBot =
+  players[playerId].up.key === undefined ||
+  players[playerId].down.key === undefined;
+
+  const iconPath = isBot ? "/resources/Bot.svg" : "/resources/Human.svg";
+
+  const iconWrapper = document.createElement("div");
+  iconWrapper.className = "flex flex-col items-center justify-center gap-2 mt-8";
+
+  fetch(iconPath)
     .then((res) => res.text())
     .then((svgText) => {
       const template = document.createElement("template");
       template.innerHTML = svgText;
       const svg = template.content.querySelector("svg");
-      svg.classList.add("w-10", "h-10", "text-white");
-      div.append(svg);
-    });
-  if (
-    players[playerId].up.key === undefined ||
-    players[playerId].down.key === undefined
-  ) {
+      svg.classList.add("size-10", "self-center", "text-white");
+      iconWrapper.append(svg);
+      const div = document.createElement("div");
+      div.className = "text-white text-center font-bold text-2xl";
+      div.textContent = isBot ? findLanguage("bot title") : findLanguage("player title");
+      iconWrapper.append(div);
+    }
+  ).catch(console.error);
+
+  div.append(iconWrapper);
+
+  const content = document.createElement("div");
+  content.className = "flex flex-col flex-1 justify-around items-center";
+
+  if (isBot) {
     const button = document.createElement("button");
     button.textContent = findLanguage("add player");
     button.className =
@@ -130,7 +147,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
       players[playerId].down = config[1];
       loadLocalConfig();
     };
-    div.append(button);
+    content.append(button);
     const span = document.createElement("span");
     span.className = "flex flex-col *:size-fit place-items-center";
     const label = document.createElement("label");
@@ -163,7 +180,8 @@ function player_config(playerId: 0 | 1): HTMLElement {
     range.oninput = updateLabel;
     span.append(range);
     span.append(label_value);
-    div.append(span);
+    content.append(span);
+    div.append(content)
     return div;
   }
   if (!tournament) {
@@ -181,7 +199,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     input.maxLength = 20;
     input.className =
       "text-white text-center border border-gray-400 focus:border-blue-400 outline-none rounded p-1";
-    div.append(input);
+    content.append(input);
   } else {
     const text = document.createElement("text");
     text.textContent = selectLanguage([
@@ -189,18 +207,18 @@ function player_config(playerId: 0 | 1): HTMLElement {
       !playerId ? ["left"] : ["right"],
     ]);
     text.className = "text-center text-white px-1";
-    div.append(text);
+    content.append(text);
   }
   const up = document.createElement("button");
   up.textContent = players[playerId].up.key;
-  up.className = "text-white border border-black rounded px-1 cursor-pointer";
+  up.className = "text-white border border-gray-400 rounded p-1 cursor-pointer";
   up.onclick = (e) => changeInput(e, "up", playerId);
-  div.append(up);
+  content.append(up);
   const down = document.createElement("button");
   down.textContent = players[playerId].down.key;
-  down.className = "text-white border border-black rounded px-1 cursor-pointer";
+  down.className = "text-white border border-gray-400 rounded p-1 cursor-pointer";
   down.onclick = (e) => changeInput(e, "down", playerId);
-  div.append(down);
+  content.append(down);
   if (!tournament) {
     const button = document.createElement("button");
     button.textContent = findLanguage("add bot");
@@ -215,7 +233,8 @@ function player_config(playerId: 0 | 1): HTMLElement {
       players[playerId].down = {};
       loadLocalConfig();
     };
-    div.append(button);
+    content.append(button);
+    div.append(content);
   }
   return div;
 }
@@ -246,12 +265,15 @@ export function loadLocalConfig() {
     updateGameAnimation();
     return;
   }
+
   // below is in case we change page while changing keyboard config (the "Listen..." period)
   self.addEventListener("popstate", () => inputController.abort(), {
     once: true,
   });
   const inner = document.getElementById("inner");
   const launchingScript = document.getElementById("local config");
+  const title = document.getElementById('PONG TITLE');
+  title.classList.remove("hidden");
 
   if (!inner || !launchingScript) {
     console.log(
@@ -270,11 +292,12 @@ export function loadLocalConfig() {
     span.append(player_config(playerId));
   }
   fragment.append(span);
-  button.className = `max-w-1/4 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 ${
+  button.className = `max-w-1/4 bg-purple-600 hover:bg-blue-500 border border-black text-white text-lg shadow-2xl cursor-pointer rounded p-1 absolute top-1/2 ${
     !tournament ? "left-1/2" : "left-3/8"
   } transform -translate-x-1/2 -translate-y-1/2`;
   button.textContent = findLanguage("launch game");
   button.onclick = () => {
+    title.classList.add("hidden");
     if (tournament && !startTournament()) return;
     sendMessage(
       selectLanguage([
@@ -289,7 +312,7 @@ export function loadLocalConfig() {
     launchingScript.remove();
   };
   fragment.append(button);
-  button2.className = `max-w-1/4 bg-gray-500 border cursor-pointer rounded px-1 absolute top-1/2 ${
+  button2.className = `max-w-1/4 bg-purple-600 hover:bg-blue-500 border border-black text-white text-lg shadow-2xl cursor-pointer rounded p-1 absolute top-1/2 ${
     !tournament ? "left-1/2" : "left-3/8"
   } transform -translate-x-1/2 translate-y-1/2`;
   button2.textContent = findLanguage(!tournament ? "tournament" : "classic");

@@ -46,6 +46,8 @@
   "pong": "pong",
   "game presentation": "Sur notre gauche: [[0]] contre Sur notre droite: [[1]]",
   "bot": "bot niveau [[0]]",
+  "bot title": "BOT",
+  "player title": "JOUEUR",
   "player": "joueur [[0]]",
   "left": "de gauche",
   "right": "de droite",

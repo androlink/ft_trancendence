@@ -132,8 +132,8 @@ const htmlSnippetsTemplate: {
   </span>
   `,
   Profile1: `
-  <div class="h-full flex justify-center rounded-md bg-[#262d5f]">
-    <div class="w-full mt-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border-x border-t border-white bg-[#171C3D] shadow-2xl rounded-t-lg">
+  <div class="h-full flex justify-center overflow-y-auto rounded-md bg-[#262d5f]">
+    <div class="w-full size-fit my-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border border-white bg-[#171C3D] shadow-2xl rounded-lg">
 
     <div class="flex">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
@@ -264,7 +264,7 @@ const htmlSnippetsTemplate: {
           </div>
         </div>
         <p class="text-white mb-1">[[biography]]</p>
-        <p class=" flex w-[250] h-full rounded-md p-1 border-2 border-gray-900 bg-[#171C3D] text-[#D8D8D8] overflow-auto select-text resize-y min-h-10 max-h-[40vh]" id="biography-p2"></p>
+        <p class="block w-full max-w-150 min-w-45 min-h-20 h-32 max-h-[40vh] overflow-auto resize rounded-md p-2 border-2 border-gray-900 bg-[#171C3D] text-[#D8D8D8] select-text whitespace-pre-wrap wrap-break-word" id="biography-p2"></p>
       </div>
     </header>
     <div class="transform-none">
@@ -360,7 +360,7 @@ const htmlSnippetsTemplate: {
     <div class="w-full max-w-md sm:max-w-lg md:max-w-xl max-h-[90vh] flex flex-col rounded-md border border-gray-200 bg-[#171C3D] p-5 shadow-2xl">
       <form id="log-in-form" class="mx-8 my-6 flex flex-col gap-3 rounded-md text-white" hidden>
         <div class="my-5 mb-10 text-center text-4xl font-bold">[[log in]]</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" maxLength=20 placeholder="[[username]]" />
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[log in]]</button>
@@ -378,7 +378,7 @@ const htmlSnippetsTemplate: {
       </form>
       <form id="register-form" class="mx-8 my-6 flex flex-col gap-3 rounded-md text-white">
         <div class="mt-5 text-center text-4xl font-bold">[[register]]</div>
-        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" placeholder="[[username]]" />
+        <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="text" name="username" maxLength=20 placeholder="[[username]]" />
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password" placeholder="[[password]]" />
         <input spellcheck="false" class="[#2c304d00] flex rounded bg-linear-to-tr to-[#2c304d] px-1 py-2 text-lg sm:text-xl md:text-2xl" type="password" name="password-confirm" placeholder="[[confirm password]]" />
 
@@ -417,8 +417,8 @@ const htmlSnippetsTemplate: {
     </div>
     `,
   Pong: `
-  <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
-    <h2 class="text-white justify-center self-center-safe p-4 text-5xl font-bold">PONG</h2>
+  <div class="relative size-full flex flex-col overflow-scroll min-h-175 bg-[#262d5f] rounded-md">
+    <h2 id="PONG TITLE" class="text-white justify-center self-center-safe p-4 text-5xl font-bold">PONG</h2>
     <script id="local config">
       loadLocalConfig();
     </script>
