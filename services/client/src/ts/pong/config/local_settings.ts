@@ -53,7 +53,7 @@ function changeInput(
     },
     { once: true, signal: inputController.signal }
   );
-  (e.target as Element).textContent = "Listen...";
+  (e.target as Element).textContent = findLanguage("listen");
 }
 
 /**
@@ -64,8 +64,8 @@ export function getKeyConfig(
   playerId: "player_one" | "player_two"
 ): [keyControl, keyControl] {
   const defaultConfig = {
-    player_one: [{ key: "w" }, { key: "s" }] as [keyControl, keyControl],
-    player_two: [{ key: "o" }, { key: "l" }] as [keyControl, keyControl],
+    player_one: [{ key: "ArrowUp" }, { key: "ArrowDown" }] as [keyControl, keyControl],
+    player_two: [{ key: "w" }, { key: "s" }] as [keyControl, keyControl],
   };
   const res = [undefined, undefined] as [keyControl, keyControl];
   for (const which of [0, 1]) {
@@ -102,19 +102,23 @@ function set_key_config(
 function player_config(playerId: 0 | 1): HTMLElement {
   inputController.abort();
   const div = document.createElement("div");
-  div.className = `flex flex-col justify-around h-3/4 my-auto border border-white w-3/4 *:size-fit [&>svg]:size-10 *:mx-auto rounded-md bg-[#171C3D] ${
+  div.className = `flex flex-col justify-around h-3/4 my-auto border border-white w-3/4 *:size-fit size-10 [&>svg]:size-10 *:mx-auto rounded-md bg-[#171C3D] ${
     playerId === 0 ? "col-start-1" : "col-start-3"
   }`;
-
+  let placeholder = document.createElement("p");
+  placeholder.style.height = "40px";
+  placeholder.innerHTML = "ㅤ"
   fetch("/resources/Human.svg")
-    .then((res) => res.text())
-    .then((svgText) => {
-      const template = document.createElement("template");
-      template.innerHTML = svgText;
-      const svg = template.content.querySelector("svg");
-      svg.classList.add("w-10", "h-10", "text-white");
-      div.append(svg);
-    });
+  .then((res) => res.text())
+  .then((svgText) => {
+    const template = document.createElement("template");
+    template.innerHTML = svgText;
+    const svg = template.content.querySelector("svg");
+    svg.classList.add("w-10", "h-10", "text-white");
+    div.append(svg);
+    placeholder.remove();
+    placeholder = undefined;
+  }).catch(() => undefined);
   if (
     players[playerId].up.key === undefined ||
     players[playerId].down.key === undefined
@@ -122,7 +126,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     const button = document.createElement("button");
     button.textContent = findLanguage("add player");
     button.className =
-      "text-white border border-black bg-purple-600 hover:bg-blue-500 rounded p-1 cursor-pointer";
+    "text-white border border-black bg-purple-600 hover:bg-blue-500 rounded p-1 cursor-pointer";
     button.onclick = () => {
       players[playerId].view.name = ["player", playerId ? "2" : "1"];
       const config = getKeyConfig(playerId ? "player_two" : "player_one");
@@ -157,13 +161,14 @@ function player_config(playerId: 0 | 1): HTMLElement {
     function updateLabel() {
       const difficulty = range.value;
       label_value.textContent =
-        parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
+      parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
     }
     updateLabel();
     range.oninput = updateLabel;
     span.append(range);
     span.append(label_value);
     div.append(span);
+    if (placeholder !== undefined) div.append(placeholder);
     return div;
   }
   if (!tournament) {
@@ -191,16 +196,19 @@ function player_config(playerId: 0 | 1): HTMLElement {
     text.className = "text-center text-white px-1";
     div.append(text);
   }
-  const up = document.createElement("button");
-  up.textContent = players[playerId].up.key;
-  up.className = "text-white border border-black rounded px-1 cursor-pointer";
-  up.onclick = (e) => changeInput(e, "up", playerId);
-  div.append(up);
-  const down = document.createElement("button");
-  down.textContent = players[playerId].down.key;
-  down.className = "text-white border border-black rounded px-1 cursor-pointer";
-  down.onclick = (e) => changeInput(e, "down", playerId);
-  div.append(down);
+  for (let i = 0; i < 2; i++) {
+    const button = document.createElement("button");
+    button.textContent = players[playerId].down.key;
+    button.className = "text-white border border-black rounded px-1 cursor-pointer";
+    button.onclick = (e) => changeInput(e, ["down", "up"][0] as "down" | "up", playerId);
+    const label = document.createElement("label");
+    label.textContent = ["⬆️", "⬇️"][i];
+    const span = document.createElement("span");
+    span.className = "flex size-fit gap-2";
+    span.append(label);
+    span.append(button);
+    div.append(span);
+  }
   if (!tournament) {
     const button = document.createElement("button");
     button.textContent = findLanguage("add bot");
@@ -216,6 +224,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
       loadLocalConfig();
     };
     div.append(button);
+    if (placeholder !== undefined) div.append(placeholder);
   }
   return div;
 }
@@ -263,7 +272,7 @@ export function loadLocalConfig() {
 
   const fragment = document.createDocumentFragment();
   span.innerHTML = "";
-  span.className = `absolute top-0 size-full *:justify-self-center grid ${
+  span.className = `absolute top-0 size-full *:justify-self-center grid pointer-events-none **:pointer-events-auto ${
     !tournament ? "grid-cols-3" : "grid-cols-4"
   }`;
   for (const playerId of [0, 1] as [0, 1]) {

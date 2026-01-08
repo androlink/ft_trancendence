@@ -4,6 +4,10 @@ import { tick } from "./engine_tick.js";
 import { ball, ball_size, delay, players } from "./engine_variables.js";
 
 function eventKeyInputPong(event: KeyboardEvent) {
+  if (game.views.state === "waiting" && event.type === "keydown") {
+    startLocalPong();
+    return;
+  } else 
   if (event.code === "Space" && event.type === "keydown" && !event.repeat) {
     game.views.state === "playing" ? pauseLocalPong() : resumeLocalPong();
   }

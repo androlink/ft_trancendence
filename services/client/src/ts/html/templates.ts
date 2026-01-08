@@ -413,12 +413,12 @@ const htmlSnippetsTemplate: {
   `,
   PopUp: `
     <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit border border-white bg-[#171C3D] rounded shadow-xl/50 *:text-white p-1 *:text-center">
-      <p>[[pop up]][[pop_up_shortcuts]]</p>
+      <p>[[pop_up_shortcuts]]<br>[[pop up]]<br></p>
     </div>
     `,
   Pong: `
   <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
-    <h2 class="text-white justify-center self-center-safe p-4 text-5xl font-bold">PONG</h2>
+    <h2 class="text-white justify-center self-center-safe p-4 text-5xl font-bold cursor-pointer" onclick="window.dispatchEvent(new PopStateEvent('popstate')); resetNextInner(); main({requests: false})">PONG</h2>
     <script id="local config">
       loadLocalConfig();
     </script>

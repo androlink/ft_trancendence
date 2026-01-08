@@ -719,8 +719,10 @@ export function setCtrlEventUsername(): void {
       ) {
         help.innerHTML =
           "<p>" +
-          findLanguage("pop up") +
           findLanguage("pop_up_shortcuts") +
+          "<br>" +
+          findLanguage("pop up") +
+          "<br>" +
           "</p>";
         isPressed = e.code;
         app.appendChild(help);

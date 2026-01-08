@@ -80,9 +80,12 @@ export class PongDisplay implements IPongDisplay {
     context.closePath();
     context.restore();
     // display scores
-    this.displayScore(context, data_frame.players[0].score, 25, 50);
-    this.displayScore(context, data_frame.players[1].score, 75, 50);
-
+    if (data_frame.state !== "waiting")
+    {
+      this.displayScore(context, data_frame.players[0].score, 25, 40);
+      this.displayScore(context, data_frame.players[1].score, 75, 40);
+    }
+    
     // display players
     data_frame.players.forEach((player) => this.displayPlayer(context, player));
 
