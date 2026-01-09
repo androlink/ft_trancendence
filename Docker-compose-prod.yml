@@ -9,6 +9,7 @@ services:
       context: services/nginx/
     ports:
       - 8443:443
+      - 8080:80
     networks:
       - trancendence
     volumes:
@@ -57,6 +58,7 @@ services:
   #----------------------------------------------------------------------------#
 
   resources_microservice:
+    command: prod-resources
     container_name: resources_microservice
     image: resources_microservice
     build:
@@ -69,13 +71,15 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://resources_microservice:3000/"]
+      test:
+        ["CMD", "curl", "-f", "http://resources_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
 
   error_microservice:
+    command: prod-error
     container_name: error_microservice
     image: error_microservice
     build:
@@ -88,13 +92,14 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://error_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://error_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
 
   page_microservice:
+    command: prod-page
     container_name: page_microservice
     image: page_microservice
     build:
@@ -107,13 +112,14 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://page_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://page_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
 
   misc_microservice:
+    command: prod-misc
     container_name: misc_microservice
     image: misc_microservice
     build:
@@ -126,13 +132,14 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://misc_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://misc_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
 
   account_microservice:
+    command: prod-account
     container_name: account_microservice
     image: account_microservice
     build:
@@ -145,13 +152,15 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://account_microservice:3000/"]
+      test:
+        ["CMD", "curl", "-f", "http://account_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
 
   chat_microservice:
+    command: prod-chat
     container_name: chat_microservice
     image: chat_microservice
     build:
@@ -164,13 +173,14 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://chat_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://chat_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
 
   remote_microservice:
+    command: prod-remote
     container_name: remote_microservice
     image: remote_microservice
     build:
@@ -183,10 +193,10 @@ services:
       - www:/var/www
       - database:/var/db/
     healthcheck:
-      test: ["CMD", "curl", "http://remote_microservice:3000/"]
+      test: ["CMD", "curl", "-f", "http://remote_microservice:3000/healthcheck"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 13
     restart: "always"
   #----------------------------------------------------------------------------#
   #                                    CLIENT                                  #
@@ -201,6 +211,12 @@ services:
         - NPM_I_ARGS=--production
     volumes:
       - www:/var/www
+    networks:
+      - trancendence
+
+  #----------------------------------------------------------------------------#
+  #                                    VOLUMES                                 #
+  #----------------------------------------------------------------------------#
 
 volumes:
   certificate:

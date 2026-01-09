@@ -5,10 +5,6 @@ import { Id } from "../common/types";
 import fs, { realpath } from "fs";
 import { fileTypeFromBuffer } from "file-type";
 
-const CLIENT_ID = "Ov23liFNHGBJPQQnaqZa";
-// je peu en régénérer une au besoin
-const CLIENT_SECRET = "003530775d960f318554c656cc1e80c404e8cf52";
-
 /**
  * statement for database
  */
@@ -55,15 +51,19 @@ function usernameFormator(username: string): string {
     username = username.substring(0, 20);
   }
   const rows = dbQuery.getUsername.all({ username });
-  if (rows.every((row) => row.username != username)) return username;
+  console.log(rows);
+  console.log(username);
+  if (rows.find((row) => row.username != username) === undefined)
+    return username;
 
-  let nb = 0;
+  let nb = 1;
   while (
-    rows.every((row) => {
-      let newUsername = InsertNumberInUsername(username, nb++);
-      row.username != newUsername;
-    })
-  );
+    rows.find((row) => row.username === InsertNumberInUsername(username, nb)) !=
+    undefined
+  ) {
+    nb++;
+  }
+  console.log(InsertNumberInUsername(username, nb));
   return InsertNumberInUsername(username, nb);
 }
 /**
@@ -150,7 +150,7 @@ export default function authentification(fastify: FastifyInstance) {
       if (res.changes === 0) {
         // not normal
         return reply
-          .code(403)
+          .code(409)
           .send({ success: false, message: ["DB_REFUSED"] });
       }
 
@@ -176,7 +176,7 @@ export default function authentification(fastify: FastifyInstance) {
   }
 
   /**
-   * create a account or login if a user use Github
+   * create a account or log in if a user use Github
    */
   fastify.post<{
     Body: { username: string; githubId: number; pdp: URL; bio: string };
@@ -208,8 +208,8 @@ export default function authentification(fastify: FastifyInstance) {
     const { code } = req.query as { code: string };
 
     const url = new URL("https://github.com/login/oauth/access_token");
-    url.searchParams.set("client_id", CLIENT_ID);
-    url.searchParams.set("client_secret", CLIENT_SECRET);
+    url.searchParams.set("client_id", process.env.CLIENT_ID!);
+    url.searchParams.set("client_secret", process.env.CLIENT_SECRET!);
     url.searchParams.set("code", code);
 
     const response = await fetch(url, {
@@ -218,6 +218,7 @@ export default function authentification(fastify: FastifyInstance) {
     });
 
     const data = await response.json();
+    console.log(data);
     res.send(data);
   });
   /**

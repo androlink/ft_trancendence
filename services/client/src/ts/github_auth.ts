@@ -46,18 +46,19 @@ async function githubLogin() {
   // window.location.search = "";
   main();
 }
-self["loginWithGithub"] = loginWithGithub;
 
 window.addEventListener("DOMContentLoaded", async () => {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
-  console.log("code truc:", code);
 
   try {
     if (code) {
-      const res = await fetch(`/api/account/github/getAccessToken?code=${code}`, {
-        method: "GET",
-      });
+      const res = await fetch(
+        `/api/account/github/getAccessToken?code=${code}`,
+        {
+          method: "GET",
+        }
+      );
       const data = await res.json();
 
       if (data.access_token) {
@@ -73,8 +74,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-export function loginWithGithub() {
+export function logInWithGithub() {
   window.location.assign(
     `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=read:user%20user:email`
   );
 }
+self["logInWithGithub"] = logInWithGithub;

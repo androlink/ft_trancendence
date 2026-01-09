@@ -4,6 +4,7 @@ import fastifyJWT from "@fastify/jwt";
 import miscRoute from "./api_misc";
 import { initDB } from "../common/database";
 import { Id, JwtUserPayload } from "../common/types";
+import HealthCheckRoutes from "../common/healthcheck";
 
 // if changed for better naming convention
 // need to be changed in page.html and template too
@@ -31,6 +32,8 @@ fastify.register(fastifyJWT, {
 });
 
 fastify.register(miscRoute, { prefix: "/api/misc" });
+
+fastify.register(HealthCheckRoutes);
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

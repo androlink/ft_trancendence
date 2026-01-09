@@ -33,7 +33,7 @@ function loadGameHistory(): void {
         for (let result of ["winner", "loser"]) {
           if (result === "winner" && game[result] === username)
             div.className =
-          "rounded-2xl border border-[#96DF9F] p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
+              "rounded-2xl border border-[#96DF9F] p-3 bg-[#335c49] grid grid-cols-1 sm:grid-cols-3 gap-4 my-2";
           const d = document.createElement("div");
           d.className =
             "cursor-pointer flex flex-row items-center justify-center gap-2 hover:text-bold";
@@ -115,36 +115,44 @@ async function loadFriendsDisplay(): Promise<void> {
       return;
     }
     const json = await res.json();
-    if (json[0] <= 16 * (page - 1)) {
-      page = Math.floor(json[0] / 16) + 1;
+    if (json[0] <= 32 * (page - 1)) {
+      page = Math.floor(json[0] / 32) + 1;
     }
+    console.log(page, "ici");
     if (span !== null && span.childElementCount === 3) {
       span.children[0].toggleAttribute("hidden", page === 1);
       span.children[1].textContent = String(page);
-      span.children[2].toggleAttribute("hidden", json[0] <= page * 16);
+      span.children[2].toggleAttribute("hidden", json[0] <= page * 32);
     }
     if (grid !== null) {
       if (json[0] === 0) {
-        grid.innerHTML =
-          '<p class="col-span-full row-span-full m-auto text-white"></p>';
-        grid.firstElementChild.textContent = findLanguage("get friends");
+        const div = grid.parentElement;
+        div.classList.add("m-auto", "text-white");
+        div.classList.remove("flex-1");
+        // div.innerHTML =
+        //   '<p class="col-span-full row-span-full items-center m-auto text-white"></p>';
+        div.textContent = findLanguage("get friends");
+        grid.classList.add("hidden");
         return;
       }
       const fragment = document.createDocumentFragment();
-      for (let i = 0; i < json[1].length && i < 16; i++) {
+      for (let i = 0; i < json[1].length && i < 32; i++) {
         const div = document.createElement("div");
         div.className =
-          "size-full border-3 hover:bg-gray-700 border-gray-950 flex items-center overflow-hidden justify-around cursor-pointer";
+          "size-full border hover:bg-blue-200/10 border-gray-200 rounded-xl shadow-xl flex items-center overflow-hidden justify-around cursor-pointer gap-4 px-4 py-2";
         div.addEventListener("click", () =>
           goToURL(`/profile/${encodeURIUsername(json[1][i].username)}`)
         );
         const p = document.createElement("p");
-        p.className = "text-gray-300";
+        const d = document.createElement("div");
+        p.className = "text-gray-300 truncate flex-grow";
         p.textContent = json[1][i].username;
         const img = document.createElement("img");
         img.src = `${assetsPath}/pfp/${json[1][i].pfp}`;
-        img.className = "h-10 aspect-square rounded-full";
-        div.append(p, img);
+        d.className = "rounded-full overflow-hidden h-15 flex-shrink-0";
+        img.className = "object-center object-cover w-full h-full";
+        d.append(img);
+        div.append(d, p);
         fragment.append(div);
       }
       grid.innerHTML = "";
@@ -163,14 +171,14 @@ self["loadFriendsDisplay"] = loadFriendsDisplay;
 function moveFriendsDisplay(direction: number): void {
   if (typeof direction !== "number")
     throw new TypeError('"direction" must be a Finite number');
-  if (direction === 0) return;
+  if (direction === 0 || (page === 1 && direction < 0)) return;
   page = page + Math.max(direction, 1 - page);
+  console.log(page, direction, Math.max(direction, 1 - page));
   history.pushState(
     { page: "" },
     "",
     `/friends${page !== 1 ? `?page=${page}` : ""}`
   );
-  if (direction === 0 || (page === 1 && direction < 0)) return;
   console.log(page);
   loadFriendsDisplay();
 }

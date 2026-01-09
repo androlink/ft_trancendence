@@ -28,7 +28,7 @@ export function setEvents(): void {
     "chat-input": setEventChat,
     "user-search": setMultipleEventUsername,
     "pfp-form": setSubmitEventPfp,
-    "login-form": setSubmitEventLogin,
+    "log-in-form": setSubmitEventLogIn,
     "register-form": setSubmitEventRegister,
     "blocking request": setClickEventBlockRequest,
     "friend request": setClickEventFriendRequest,
@@ -84,7 +84,7 @@ function needConnection(form: HTMLFormElement): boolean {
 }
 
 /**
- * used by the login form, the default event can't be used in SPA (redirect)
+ * used by the log in form, the default event can't be used in SPA (redirect)
  * @param form the said form element
  */
 function setSubmitEventPfp(form: HTMLFormElement): void {
@@ -100,6 +100,7 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
         body: formData,
       });
 
+      document.getElementById("update-pfp")?.toggleAttribute("hidden", true);
       resetReconnectTimer(response.headers.get("x-authenticated"));
       const result: { success?: boolean; message?: string } =
         await response.json();
@@ -122,7 +123,7 @@ function setSubmitEventPfp(form: HTMLFormElement): void {
   });
 }
 
-function setSubmitEventLogin(form: HTMLFormElement): void {
+function setSubmitEventLogIn(form: HTMLFormElement): void {
   form.addEventListener("submit", async (event: SubmitEvent) => {
     event.preventDefault();
     const formData = new FormData(form);
@@ -360,12 +361,8 @@ function setClickEventProfile(text: HTMLElement): void {
 }
 
 function setClickEventBlockRequest(text: HTMLElement): void {
-  if (
-    ["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText)
-  ) {
-    text.className = "px-1";
+  if (["NOT_CONNECTED", "IT_IS_YOU"].map(findLanguage).includes(text.innerText))
     return;
-  }
   text.className = "cursor-pointer";
   let username = location.pathname.substring(
     location.pathname.lastIndexOf("/") + 1
@@ -397,19 +394,14 @@ function setClickEventBlockRequest(text: HTMLElement): void {
     main();
   });
 }
-//  ["YOU"]   -> toi, et tu mmets ta couleur tu fais ta vie,
-//  "toi" -> "toi", et la c'est un autre type,
-// Stephane sjean
 
 function setClickEventFriendRequest(text: HTMLElement): void {
   if (
     ["NOT_CONNECTED", "IT_IS_YOU", "THEY_ARE_BLOCKED"]
       .map(findLanguage)
       .includes(text.innerText)
-  ) {
-    text.className = "px-1";
+  )
     return;
-  }
   text.className = "cursor-pointer";
   let username = location.pathname.substring(
     location.pathname.lastIndexOf("/") + 1
@@ -553,12 +545,12 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
       for (let user of json) {
         const span = document.createElement("span");
         span.className =
-          "flex flex-row cursor-pointer my-auto py-2 h-fit w-full gap-5 border border-black bg-gray-400";
+          "flex flex-row cursor-pointer my-auto px-5 py-2 h-fit w-full gap-3 bg-[#1b1e38d0] hover:bg-[#ffffff7c] hover:text-white";
         span.addEventListener("pointerdown", () =>
           goToURL(`/profile/${encodeURIUsername(user.username)}`, true)
         );
         const img = document.createElement("img");
-        img.className = "size-5 rounded-full";
+        img.className = "size-5 rounded-full my-auto";
         img.src = `${assetsPath}/pfp/${user.pfp}`;
         const p = document.createElement("p");
         p.textContent = user.username;
@@ -605,6 +597,7 @@ function setChangeEventPfpInput(input: HTMLInputElement) {
     if (preview && img) preview.src = img;
     resetNextInner();
     document.getElementById("pfp-preview-div")?.removeAttribute("hidden");
+    document.getElementById("update-pfp")?.removeAttribute("hidden");
   });
 }
 
@@ -626,8 +619,13 @@ export function setCtrlEventUsername(): void {
         elem.select();
       }
     }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    const div = document.getElementById("account-disconnected");
+    if (!div) return;
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      e.key === "Enter" &&
+      !div.checkVisibility()
+    ) {
       const elem = document.getElementById("chat-input") as HTMLTextAreaElement;
       if (elem) {
         // might have to add if not hidden later
@@ -653,7 +651,7 @@ export function setCtrlEventUsername(): void {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
       if (localStorage.getItem("token")) {
         e.preventDefault();
-        fetch("api/account/logout", { method: "POST" })
+        fetch("/api/account/logout", { method: "POST" })
           .then((res) => {
             resetReconnectTimer(res.headers.get("x-authenticated"));
             sendStatusMessage();
@@ -715,7 +713,11 @@ export function setCtrlEventUsername(): void {
         !isPressed &&
         document.activeElement === document.body
       ) {
-        help.innerHTML = "<p>" + findLanguage("pop up") + "</p>";
+        help.innerHTML =
+          "<p>" +
+          findLanguage("pop up") +
+          findLanguage("pop_up_shortcuts") +
+          "</p>";
         isPressed = e.code;
         app.appendChild(help);
       }

@@ -1,8 +1,10 @@
 var exports = {};
 import {
+  countCharacter,
   htmlSnippets,
   languageString,
   selectLanguage,
+  updateInfos,
 } from "./html/templates.js";
 import {
   goToURL,
@@ -42,14 +44,18 @@ let last: ServerResponse | null = null;
  * @param params.requests if false uses the last response received without fetching, default as true
  */
 // btw no Syntax Errow throwed if params bad due to function working with 1 and 0 too, as well as "yay" and ""
-export async function main(params?: {force?: boolean, requests?: boolean}): Promise<void> {
+export async function main(params?: {
+  force?: boolean;
+  requests?: boolean;
+}): Promise<void> {
   const app = document.getElementById("app");
   if (!app) {
     console.error('We need an element (preferably a div) with id="app"');
     return;
   }
 
-  const data = ((params?.requests) === undefined || params.requests) ? await fetchApi() : last;
+  const data =
+    params?.requests === undefined || params.requests ? await fetchApi() : last;
   if (!data) {
     return;
   }
@@ -61,13 +67,20 @@ export async function main(params?: {force?: boolean, requests?: boolean}): Prom
   if (keyExist(data, "title")) {
     document.title = selectLanguage(data.title);
   }
-  if (keyExist(data, "template") && (data.template !== mainTemplate || params?.force)) {
+  if (
+    keyExist(data, "template") &&
+    (data.template !== mainTemplate || params?.force)
+  ) {
     mainTemplate = data.template;
     mainInner = null;
     changeSnippet(app, data["template"]);
   }
   const inner = document.getElementById("inner");
-  if (inner && keyExist(data, "inner") && (data.inner != mainInner || params?.force)) {
+  if (
+    inner &&
+    keyExist(data, "inner") &&
+    (data.inner != mainInner || params?.force)
+  ) {
     mainInner = data.inner;
     changeSnippet(inner, data["inner"]);
   }
@@ -84,7 +97,10 @@ export async function main(params?: {force?: boolean, requests?: boolean}): Prom
     resetReconnectTimer("false");
   }
   setEvents();
-  //(window as any).loginWithGithub = loginWithGithub;
+  countCharacter();
+  updateInfos();
+  // (window as any).loginWithGithub = loginWithGithub;
+  // initPhysics();
 }
 self["main"] = main;
 

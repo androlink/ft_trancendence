@@ -92,39 +92,11 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
           return reply.send([0, []]);
         }
         let arr = statement1.all({ id: req.user.id });
-        if (arr.length <= 16 * page) {
-          page = Math.floor(arr.length / 16);
+        if (arr.length <= 32 * page) {
+          page = Math.floor(arr.length / 32);
         }
         arr = arr.sort((a, b) => (a.username > b.username ? 1 : -1));
-        return reply.send([arr.length, arr.slice(page * 16, page * 16 + 17)]);
-      }
-    );
-  }
-
-  {
-    /**
-     * That route is purely debug
-     * It's to manually add game history,
-     * while we don't have any way to make real games
-     */
-    /** insert a game according to the winner and loser */
-    const statement1 = db.prepare<[Id, Id], undefined>(
-      // below, default is 'win' for player one
-      "INSERT INTO history_game (player_one, player_two) VALUES (?, ?)"
-    );
-    fastifyInstance.post<{ Querystring: { winner: string; loser: string } }>(
-      "/win",
-      (req, reply) => {
-        let winner_id = parseInt(req.query.winner);
-        let loser_id = parseInt(req.query.loser);
-        if (
-          winner_id != winner_id ||
-          loser_id != loser_id ||
-          loser_id === winner_id
-        )
-          return reply.send("failed");
-        statement1.run(winner_id, loser_id);
-        return reply.send("success");
+        return reply.send([arr.length, arr.slice(page * 32, page * 32 + 32)]);
       }
     );
   }

@@ -1,6 +1,7 @@
 import { main } from "./app.js";
 import { sendMessage, setCtrlEventUsername } from "./html/events.js";
 import { InitConnectionChat, sendStatusMessage } from "./chat.js";
+import { showNotification } from "./html/templates.js";
 
 //----------------------------------------------------------------------------#
 //                                HISTORY STUFF                               #
@@ -13,10 +14,7 @@ import { InitConnectionChat, sendStatusMessage } from "./chat.js";
  * @param force go to the page even if already on it, default to false
  * @returns true if main() is triggered, meaning the function was used
  */
-export function goToURL(
-  nextURL: string = "profile",
-  force: boolean = false
-): boolean {
+export function goToURL(nextURL: string = "", force: boolean = false): boolean {
   if (arguments.length > 2) {
     throw new SyntaxError("expected 0 to 2 argument");
   }
@@ -74,7 +72,6 @@ export function resetReconnectTimer(auth: string | null): boolean {
     document.getElementById(id)?.toggleAttribute("hidden", !state);
 
   clearTimeout(reconnectTimer);
-  setVisibility("account-reconnected", false);
   if (auth === "false") {
     localStorage.removeItem("token");
     setVisibility("account-disconnected", true);
@@ -88,11 +85,11 @@ export function resetReconnectTimer(auth: string | null): boolean {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (resetReconnectTimer(res.headers.get("x-authenticated")))
-        setVisibility("account-reconnected", true);
+        showNotification("[[auto reconnected]]", "green-500");
     } catch (err) {
       console.error("reconnect threw exception: ", err);
     }
-  }, 14 * 60 * 1000);
+  }, 1 * 1000);
   return true;
 }
 

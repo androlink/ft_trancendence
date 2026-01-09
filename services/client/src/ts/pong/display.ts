@@ -1,3 +1,4 @@
+import { findLanguage, selectLanguage } from "../html/templates.js";
 import { BallView, DataFrame, PlayerView } from "./engine/engine_interfaces.js";
 
 export interface IPongDisplay {
@@ -17,6 +18,11 @@ export class PongDisplay implements IPongDisplay {
     height: number;
     width: number;
   };
+  messages = {
+    ended: "Game ended",
+    paused: "Game paused",
+    waiting: "Press any key to start the game...",
+  };
 
   constructor() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -27,12 +33,18 @@ export class PongDisplay implements IPongDisplay {
       ball: "red",
       score: "green",
     };
-    this.ratio = {
-      // the text height is hard coded (usually h = 10 or h = 20)
-      // so better leave the height at 100, change the ratio by changing width
+    this.initMessages();
+  }
+
+  private initMessages() {
+    this.messages.waiting = findLanguage("PONG_WAIT_MESSAGE");
+    this.messages.paused = findLanguage("PONG_PAUSE_MESSAGE");
+    this.messages.ended = findLanguage("PONG_ENDED_MESSAGE");
+  }
+
+  private getRatio() {
+    return {
       height: 100,
-      // Any DOM related information needs the browser to load the dom to know what the size is
-      // meaning, using .clientWidth to reload the ratio on each frame would be WAY to heavy
       width:
         (this.canvas.parentElement.clientWidth /
           this.canvas.parentElement.clientHeight) *
@@ -46,15 +58,16 @@ export class PongDisplay implements IPongDisplay {
     if (!this.canvas) return;
     let context = this.canvas.getContext("2d");
 
+    this.ratio = this.getRatio();
+
     this.canvas.height = this.ratio.height * this.scale_factor;
     this.canvas.width = this.ratio.width * this.scale_factor;
     context.reset();
+    context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     context.scale(this.scale_factor, this.scale_factor);
 
-    context.fillStyle = this.color.bg;
-    context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
     context.save();
+    context.fillStyle = this.color.bg;
     context.beginPath();
     {
       context.moveTo(this.ratio.width / 2, 0);
@@ -65,7 +78,6 @@ export class PongDisplay implements IPongDisplay {
     }
     context.closePath();
     context.restore();
-
     // display scores
     this.displayScore(context, data_frame.players[0].score, 25, 50);
     this.displayScore(context, data_frame.players[1].score, 75, 50);
@@ -79,7 +91,7 @@ export class PongDisplay implements IPongDisplay {
     if (data_frame.state === "paused")
       displayText(
         context,
-        data_frame.state.toUpperCase(),
+        this.messages.paused,
         this.ratio.width / 2,
         this.ratio.height / 2,
         "white"
@@ -87,35 +99,18 @@ export class PongDisplay implements IPongDisplay {
     else if (data_frame.state === "ended")
       displayText(
         context,
-        data_frame.state.toUpperCase(),
+        this.messages.ended,
         this.ratio.width / 2,
         this.ratio.height / 2 + 20,
         "white"
       );
     else if (data_frame.state === "waiting") {
+      context.measureText(this.messages.waiting);
       displayText(
         context,
-        "click on",
+        this.messages.waiting,
         this.ratio.width / 2,
         this.ratio.height / 2 - 10,
-        "white",
-        10,
-        "grey"
-      );
-      displayText(
-        context,
-        "screen",
-        this.ratio.width / 2,
-        this.ratio.height / 2,
-        "white",
-        10,
-        "grey"
-      );
-      displayText(
-        context,
-        "to start",
-        this.ratio.width / 2,
-        this.ratio.height / 2 + 10,
         "white",
         10,
         "grey"
@@ -193,19 +188,25 @@ function displayText(
   size: number = 20,
   border: string = undefined
 ) {
+  let message = text.split("\n");
+  let globalsize = message.length;
+
   context.save();
   context.beginPath();
   {
-    context.translate(x, y);
+    context.translate(x, y - (globalsize * size) / 2);
     context.textAlign = "center";
     context.font = size + "px monospace";
     context.textBaseline = "middle";
-    if (border) {
-      context.strokeStyle = border;
-      context.strokeText(text, 0, 0);
+    for (let i = 0; i < message.length; i++) {
+      context.translate(0, size);
+      if (border) {
+        context.strokeStyle = border;
+        context.strokeText(message[i], 0, 0);
+      }
+      context.fillStyle = color;
+      context.fillText(message[i], 0, 0);
     }
-    context.fillStyle = color;
-    context.fillText(text, 0, 0);
   }
   context.closePath();
   context.restore();

@@ -4,9 +4,10 @@ import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 
 import apiAccount from "./accounts_routes";
-import apiAccountGithub from "./github_routes"
+import apiAccountGithub from "./github_routes";
 import { Id, JwtUserPayload } from "../common/types";
 import { initDB } from "../common/database";
+import HealthCheckRoutes from "../common/healthcheck";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -36,6 +37,8 @@ await initDB();
 
 fastify.register(apiAccount, { prefix: "/api/account" });
 fastify.register(apiAccountGithub, { prefix: "/api/account/github" });
+
+fastify.register(HealthCheckRoutes);
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
