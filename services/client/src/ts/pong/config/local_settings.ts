@@ -34,7 +34,7 @@ function changeInput(
     "keydown",
     (e: KeyboardEvent) => {
       // the bare minimum to forbid is Space (because it pauses the game), AltLeft, AltRight and ContextMenu (because browser shortcut)
-      if (["Space", "AltLeft", "AltRight", "ContextMenu"].includes(e.code)) {
+      if (["Space", "AltLeft", "AltRight", "ContextMenu", "Escape"].includes(e.code)) {
         loadLocalConfig();
         return;
       }

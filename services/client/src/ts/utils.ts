@@ -37,11 +37,22 @@ export function goToURL(nextURL: string = "", force: boolean = false): boolean {
 }
 self["goToURL"] = goToURL;
 
+let dummyPopstate = false;
+/**
+ * makes the next popstate not trigger main
+ */
+export function abortMainPopstate() {
+  dummyPopstate = true;
+}
+
 /**
  * reload the page when user touch history arrow buttons
  */
 function setArrowButton() {
-  self.addEventListener("popstate", () => main());
+  self.addEventListener("popstate", () => {
+    if (!dummyPopstate) main();
+    dummyPopstate = false;
+  });
 }
 
 //----------------------------------------------------------------------------#

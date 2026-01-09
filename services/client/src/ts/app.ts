@@ -27,11 +27,12 @@ interface ServerResponse {
 
 let mainTemplate: string | null = null;
 let mainInner: string | null = null;
+let resetInner: boolean = false; 
 /**
  * will cause a reload of the inner even without setting main with force to true
  */
 export function resetNextInner() {
-  mainInner = null;
+  resetInner = true;
 }
 self["resetNextInner"] = resetNextInner;
 
@@ -79,8 +80,9 @@ export async function main(params?: {
   if (
     inner &&
     keyExist(data, "inner") &&
-    (data.inner != mainInner || params?.force)
+    (data.inner != mainInner || params?.force || resetInner)
   ) {
+    resetInner = false;
     mainInner = data.inner;
     changeSnippet(inner, data["inner"]);
   }
