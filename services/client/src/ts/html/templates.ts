@@ -247,10 +247,14 @@ const htmlSnippetsTemplate: {
   Profile2: `
   <div class="bg-[#262d5f] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
     <header class="w-full flex items-start gap-4">
-      <img
-        id="profile-picture"
-        class="ws-60 h-60 rounded-full border-2 border-gray-600 aspect-square" src="${assetsPath}/default-avatar.jpg"
-      >
+      <div class="relative w-60 h-60">
+        <div class="rounded-full overflow-hidden border-2 border-gray-600 w-full h-full">
+          <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg"
+          >
+        </div>
+        <!-- <div id="user-status" class="absolute bottom-0 left-0 flex h-15 w-15 rounded-full bg-gray-600 border-2 border-[#171C3D] transition">
+        </div> -->
+      </div>
       <div class="flex flex-col justify-start h-60">
         <div class ="flex flex-row *:mt-10 *:mb-4">
           <h1 class="text-white select-text font-Hammer text-6xl" id="username-p2"></h1>

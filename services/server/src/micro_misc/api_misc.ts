@@ -76,9 +76,9 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
     /** find all the infos of the user */
     const statement1 = db.prepare<
       { id: Id },
-      { username: string; pfp: string }
+      { id: Id; username: string; pfp: string }
     >(
-      "SELECT u.username, u.pfp FROM friends f JOIN users u ON u.id = CASE WHEN f.friend_one = :id THEN f.friend_two ELSE f.friend_one END WHERE :id IN (f.friend_one, f.friend_two)"
+      "SELECT u.id, u.username, u.pfp FROM friends f JOIN users u ON u.id = CASE WHEN f.friend_one = :id THEN f.friend_two ELSE f.friend_one END WHERE :id IN (f.friend_one, f.friend_two)"
     );
     fastifyInstance.get<{ Querystring: { page: string } }>(
       "/friends",
@@ -92,6 +92,22 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
           return reply.send([0, []]);
         }
         let arr = statement1.all({ id: req.user.id });
+
+        const promise_arr = arr.map((u) => {
+          return fetch(`http://chat_microservice:3000/user_status?id=${u.id}`)
+            .then((r) => {
+              if (!r.ok) return { status: false };
+              return r.json();
+            })
+            .then((r) => {
+              u.status = r.status;
+            })
+            .catch((r) => {
+              u.status = false;
+            });
+        });
+        await Promise.all(promise_arr);
+
         if (arr.length <= 32 * page) {
           page = Math.floor(arr.length / 32);
         }

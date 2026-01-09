@@ -138,7 +138,7 @@ function GenerateRandomId(): string {
  * find if a client is on the connected list with this id
  * @param id the client id
  */
-function getClientById(id: Id) {
+export function getClientById(id: Id) {
   // check if the sender is on the list
   const client = connectedClients.get(id);
   if (client) {
