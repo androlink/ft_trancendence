@@ -66,7 +66,7 @@ let pong_party_finish: (game_id: string) => void = (game_id) => {
     if (!p) return;
     console.info(`game ${game_id} has been finished`);
 
-    const scores = p.getPlayers().map((p) => p.view.score);
+    const scores = p.getPlayers().map((p) => p.ready === "GONE" ? -1 : p.view.score);
 
     const [player_one, player_two] = p.getPlayerId();
     const result: "win" | "loss" | "draw" =

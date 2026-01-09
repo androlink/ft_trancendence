@@ -131,7 +131,7 @@ const htmlSnippetsTemplate: {
         </g>
         </svg>
 
-        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('[[not connected]]', 'red-500');">
+        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('[[not connected]]');">
           <div class="m-auto text-gray-500 text-center text-lg">[[not connected]]</div>
         </div>
         </div>

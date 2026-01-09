@@ -78,7 +78,7 @@
   "GOODBYE": "We can't have you forever",
   "EXPECTED_FORMBODY": "Expected 'application/x-www-form-urlencoded' Content-Type for [[0]] on [[1]].",
   "EXPECTED_CONTENT_TYPE": "Content-Type not found in a [[0]] request.",
-  "ALPHANUMERIC_": "[[0]] can have only letters, digits and underscores",
+  "ALPHANUMERIC_": "[[0]] can have only letters, digits, dash and underscores",
   "MAX_BYTE_LENGTH": "[[0]] must be at most [[1]] bytes long",
   "MAX_STR_LENGTH": "[[0]] must be at most [[1]] chars long",
   "MIN_STR_LENGTH": "[[0]] must be at least [[1]] chars long",

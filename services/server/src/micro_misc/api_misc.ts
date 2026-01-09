@@ -56,7 +56,7 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
       FROM history_game h
       LEFT JOIN users AS winner ON ((h.result_type = 'win' AND winner.id = h.player_one) OR (h.result_type = 'loss' AND winner.id = h.player_two))
       LEFT JOIN users AS loser ON ((h.result_type = 'win' AND loser.id = h.player_two) OR (h.result_type = 'loss' AND loser.id = h.player_one))
-      WHERE h.player_one = :targetId OR h.player_two = :targetId;
+      WHERE (h.player_one = :targetId OR h.player_two = :targetId) AND h.result_type != 'draw';
     `);
     fastifyInstance.get<{ Querystring: { user: string } }>(
       "/history",
