@@ -33,7 +33,6 @@ export class PongDisplay implements IPongDisplay {
       ball: "red",
       score: "green",
     };
-    this.ratio = this.getRatio();
     this.initMessages();
   }
 
@@ -195,7 +194,7 @@ function displayText(
   context.save();
   context.beginPath();
   {
-    context.translate(x, y - ((globalsize) * size) / 2);
+    context.translate(x, y - (globalsize * size) / 2);
     context.textAlign = "center";
     context.font = size + "px monospace";
     context.textBaseline = "middle";
