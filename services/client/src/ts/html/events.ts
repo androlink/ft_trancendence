@@ -355,7 +355,7 @@ function setClickEventProfile(text: HTMLElement): void {
   const usernameElem = document.getElementById("username-p1");
   if (!usernameElem || !usernameElem.hasAttribute("value")) return;
   const username: string = usernameElem.getAttribute("value");
-  text.addEventListener("click", (event: PointerEvent) =>
+  text.parentElement.addEventListener("click", (event: PointerEvent) =>
     goToURL(`profile/${encodeURIUsername(username)}`)
   );
 }

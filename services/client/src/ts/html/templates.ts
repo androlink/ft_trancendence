@@ -143,11 +143,11 @@ const htmlSnippetsTemplate: {
   <div class="h-full flex justify-center overflow-y-auto rounded-md bg-[#262d5f]">
     <div class="w-full size-fit my-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border border-white bg-[#171C3D] shadow-2xl rounded-lg">
 
-    <div class="flex">
+    <div class="flex cursor-pointer hover:*:text-blue-500 size-fit">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
       <svg version="1.0"
         id="go-to-profile"
-        class="p-1.5 mt-2 justify-items-end self-center select-none fill-current text-white hover:text-blue-500 size-10 cursor-pointer"
+        class="p-1.5 mt-2 justify-items-end self-center select-none fill-current text-white size-10"
         draggable="false"
         xmlns="http://www.w3.org/2000/svg"
         width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000"
@@ -310,6 +310,7 @@ const htmlSnippetsTemplate: {
       <div id="history-tbody">
       </div>
     </div>
+    <p class="text-white mx-auto">[[remote counter]]</p>
   </div>
   `,
   Friend: `
@@ -594,12 +595,15 @@ export function updateInfos() {
   bioInput.addEventListener("input", checkChanges);
 }
 
-export function showNotification(content:string, color: string) {
+export function showNotification(content:languageString, color?: string) {
   const notif = document.getElementById("notif");
   if (!notif) return;
 
-  notif.classList.add("bg-"+color);
-  notif.textContent = content;
+  if (color) {
+    notif.classList.remove("bg-red-500");
+    notif.classList.add(color);
+  }
+  notif.textContent = selectLanguage(content);
   notif.classList.remove("hidden");
   notif.classList.remove("animate-notification");
   void notif.offsetWidth;

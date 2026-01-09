@@ -92,15 +92,15 @@ export function resetReconnectTimer(auth: string | null): boolean {
   setVisibility("account-disconnected", false);
   reconnectTimer = setTimeout(async () => {
     try {
-      const res = await fetch("/api", {
+      const res = await fetch("/api/page", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (resetReconnectTimer(res.headers.get("x-authenticated")))
-        showNotification("[[auto reconnected]]", "green-500");
+        showNotification(["auto reconnected"], "bg-green-500");
     } catch (err) {
       console.error("reconnect threw exception: ", err);
     }
-  }, 1 * 1000);
+  }, 14 * 60 * 1000);
   return true;
 }
 
