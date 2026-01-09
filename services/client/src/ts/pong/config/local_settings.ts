@@ -144,7 +144,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     const button = document.createElement("button");
     button.textContent = findLanguage("add player");
     button.className =
-    "text-white border border-black bg-purple-600 hover:bg-blue-500 rounded p-1 cursor-pointer";
+      "text-white border border-black bg-purple-600 hover:bg-blue-500 rounded p-1 cursor-pointer";
     button.onclick = () => {
       players[playerId].view.name = ["player", playerId ? "2" : "1"];
       const config = getKeyConfig(playerId ? "player_two" : "player_one");
@@ -152,7 +152,6 @@ function player_config(playerId: 0 | 1): HTMLElement {
       players[playerId].down = config[1];
       loadLocalConfig();
     };
-    div.append(button);
     // difficulty below (until return)
     content.append(button);
     const span = document.createElement("span");
@@ -280,14 +279,13 @@ export function loadLocalConfig() {
     updateGameAnimation();
     return;
   }
-
   // below is in case we change page while changing keyboard config (the "Listen..." period)
   self.addEventListener("popstate", () => inputController.abort(), {
     once: true,
   });
   const inner = document.getElementById("inner");
   const launchingScript = document.getElementById("local config");
-  const title = document.getElementById('PONG TITLE');
+  const title = document.getElementById("PONG TITLE");
   title.classList.remove("hidden");
 
   if (!inner || !launchingScript) {

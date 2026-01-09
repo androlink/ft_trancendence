@@ -41,7 +41,7 @@
   "w/l ratio": "ratio V/D",
   "remote counter": "solo juegos remotos",
   "deleted": "cuenta eliminada",
-  "only X games": "Solo se muestran los últimos 100 juegos",
+  "only X games": "Solo se muestran los últimos 50 juegos",
   "pong": "pong",
   "game presentation": "A la izquierda: [[0]] VS a la derecha: [[1]]",
   "bot": "bot nivel [[0]]",

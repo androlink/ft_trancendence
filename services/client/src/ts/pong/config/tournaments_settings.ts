@@ -63,7 +63,8 @@ export function getTournamentPlayer(i: number): HTMLElement | null {
  */
 export function allowNewPlayer(): HTMLElement {
   const p = document.createElement("p");
-  p.className = "bg-purple-600 hover:bg-blue-500 border text-center text-white rounded cursor-pointer";
+  p.className =
+    "bg-purple-600 hover:bg-blue-500 border text-center text-white rounded cursor-pointer";
   p.onclick = () => {
     playersInTournament.push([
       "player",
@@ -144,7 +145,7 @@ export function prepareNextGame(lastWinner: 0 | 1): void {
       ])
     );
     resetNextInner();
-    main({requests: false});
+    main({ requests: false });
     return;
   }
   remainingPlayers.push(players[lastWinner].view.name);
@@ -155,7 +156,7 @@ export function prepareNextGame(lastWinner: 0 | 1): void {
     sendMessage(selectLanguage(["congrats", players[lastWinner].view.name]));
     abortTournament();
     resetNextInner();
-    main({requests: false});
+    main({ requests: false });
     return;
   }
   sendMessage(

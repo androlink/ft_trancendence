@@ -40,7 +40,7 @@
   "w/l ratio": "W/L ratio",
   "remote counter": "remote games only",
   "deleted": "user deleted",
-  "only X games": "Only the last 100 games are displayed",
+  "only X games": "Only the last 50 games are displayed",
   "pong": "pong",
   "send a message": "send a message or use a command",
   "game presentation": "On the left: [[0]] VS on the right: [[1]]",

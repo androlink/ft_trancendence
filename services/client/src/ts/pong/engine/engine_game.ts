@@ -1,6 +1,5 @@
 import { main, resetNextInner } from "../../app.js";
 import { abortMainPopstate } from "../../utils.js";
-import { loadLocalConfig } from "../config/local_settings.js";
 import { generateParty, resetParty } from "./engine_inits.js";
 import { GameParty } from "./engine_interfaces.js";
 import { tick } from "./engine_tick.js";

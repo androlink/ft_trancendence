@@ -1,5 +1,6 @@
 export const assetsPath = `/resources`;
 
+
 /**
  * all the HTML (and CSS) of the Single-Page-Application (not translated yet)
  */

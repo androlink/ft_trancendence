@@ -167,14 +167,11 @@ function moveFriendsDisplay(direction: number): void {
     throw new TypeError('"direction" must be a Finite number');
   if (direction === 0 || (page === 1 && direction < 0)) return;
   page = page + Math.max(direction, 1 - page);
-  console.log(page, direction, Math.max(direction, 1 - page));
   history.pushState(
     { page: "" },
     "",
     `/friends${page !== 1 ? `?page=${page}` : ""}`
   );
-
-  console.log(page);
   loadFriendsDisplay();
 }
 self["moveFriendsDisplay"] = moveFriendsDisplay;

@@ -67,7 +67,7 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
         if (!row) return reply.send([]);
         let arr = statement2.all({ targetId: row.id });
         arr = arr.sort((a, b) => (a.time < b.time ? 1 : -1));
-        return reply.send(arr.slice(0, 100));
+        return reply.send(arr.slice(0, 50));
       }
     );
   }

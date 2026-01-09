@@ -3,7 +3,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        Hammer: ['Hammer', 'sans-serif'],
+        Hammer: ["Hammer", "sans-serif"],
       },
     },
   },
