@@ -140,9 +140,12 @@ function GenerateRandomId(): string {
  */
 function getClientById(id: Id) {
   // check if the sender is on the list
-  return connectedClients.get(id)
-    ? { id, client: connectedClients.get(id)! }
-    : null;
+  const client = connectedClients.get(id);
+  if (client) {
+    client.username = dbQuery.getUserById.get({ userId: id })?.username!;
+    return { id, client };
+  }
+  return null;
 }
 
 /**
@@ -352,7 +355,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
     return;
   }
   const newMsg: WSmessage = {
-    user: sender.client.username!,
+    user: sender.client.username,
     type: TypeMessage.message,
     content: msg.content,
     msgId: GenerateRandomId(),
@@ -415,6 +418,7 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
     return;
   }
 
+  console.log(user);
   socketToId.set(socket, senderId.id);
   waitingConnections.splice(waitingConnections.indexOf(socket), 1);
   socket.onclose = () => {
@@ -422,8 +426,10 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
     client?.removeSocket(socket);
   };
 
-  if (connectedClients.get(senderId.id)) {
-    connectedClients.get(senderId.id)!.sockets.push(socket);
+  const client = connectedClients.get(senderId.id);
+  if (client) {
+    client.username = user.username;
+    client.sockets.push(socket);
     return;
   }
   connectedClients.set(senderId.id, new WSClient(socket, user.username));
