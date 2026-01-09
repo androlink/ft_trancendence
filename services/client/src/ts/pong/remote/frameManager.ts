@@ -11,9 +11,7 @@ export class FrameManager {
   private init() {
     try {
       this.display = new PongDisplay();
-    } catch (e) {
-      console.error("diplay error:", e);
-    }
+    } catch {}
   }
 
   public update(dataFrame: DataFrame) {
