@@ -78,7 +78,6 @@ function sendJoinMessage(ws: WebSocket, game_id: string) {
 
 function ws_connect(game_id: string) {
   if (ws) {
-    console.log("nop");
     sendMessage(findLanguage("ALREADY_IN_GAME"));
     return;
   }

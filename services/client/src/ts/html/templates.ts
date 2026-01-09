@@ -171,8 +171,8 @@ const htmlSnippetsTemplate: {
 
       <form id="pfp-form" class="flex flex-col ">
           <div class="relative flex flex-col">
-            <div class="relative my-6 w-40 h-40 mx-auto">
-              <div class=" rounded-full overflow-hidden w-full h-full">
+            <div class="relative my-6  w-40 h-40 mx-auto">
+              <div class=" rounded-full border border-gray-600 overflow-hidden w-full h-full">
                 <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg" />
               </div>
               <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>

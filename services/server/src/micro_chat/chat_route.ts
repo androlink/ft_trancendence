@@ -418,7 +418,6 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
     return;
   }
 
-  console.log(user);
   socketToId.set(socket, senderId.id);
   waitingConnections.splice(waitingConnections.indexOf(socket), 1);
   socket.onclose = () => {

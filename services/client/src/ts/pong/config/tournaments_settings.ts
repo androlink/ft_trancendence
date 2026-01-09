@@ -152,7 +152,6 @@ export function prepareNextGame(lastWinner: 0 | 1): void {
   remainingPlayers.splice(0, 2);
   if (remainingPlayers.length < 2) {
     game.views.state = "waiting";
-    console.log(players);
     sendMessage(selectLanguage(["congrats", players[lastWinner].view.name]));
     abortTournament();
     resetNextInner();

@@ -89,8 +89,6 @@ export async function invite_message(event: WebSocket.MessageEvent) {
 
   if (msg.type !== TypeMessage.invite) return;
 
-  console.log(msg);
-
   const players = getPlayer(msg.user, msg.target!);
   if (players.status === false) {
     event.target.send(
