@@ -268,6 +268,7 @@ class PongEngine extends EventTarget {
     };
     this.resetStartTimeout();
     if (this.players.every((p) => p.ready === "HERE")) this.start();
+    setTimeout(() => {try {ws.send(JSON.stringify({ type: "update", payload: this.views }));}catch{}}, 1000)
     return true;
   }
 

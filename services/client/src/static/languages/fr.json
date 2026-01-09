@@ -119,6 +119,8 @@
   "JOIN_GAME" : "rejoindre la partie, [[0]] contre [[1]]",
   "CREATE PASSWORD": "mettre un mot de passe",
   "PONG_WAIT_MESSAGE":"Appuyez sur\nune touche pour\ncommencer la partie...",
+  "PONG_WAIT_PLAYER_MESSAGE": "En attente de l'autre joueur",
+  "ALREADY_IN_GAME": "tu es en jeu",
   "PONG_PAUSE_MESSAGE":"Pause",
   "PONG_ENDED_MESSAGE":"Partie\nterminée",
   "": ""

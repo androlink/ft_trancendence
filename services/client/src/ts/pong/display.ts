@@ -24,6 +24,8 @@ export class PongDisplay implements IPongDisplay {
     waiting: "Press any key to start the game...",
   };
 
+  try_count = 0;
+
   constructor() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 
@@ -53,9 +55,12 @@ export class PongDisplay implements IPongDisplay {
   }
 
   public update(data_frame: DataFrame) {
-    if (!this.canvas.isConnected)
+    if (!this.canvas)
       this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    if (!this.canvas) return;
+    if (!this.canvas) 
+    {
+      return;
+    }
     let context = this.canvas.getContext("2d");
 
     this.ratio = this.getRatio();

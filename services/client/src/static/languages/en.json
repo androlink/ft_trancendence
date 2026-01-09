@@ -117,6 +117,8 @@
   "JOIN_GAME" : "join the game, [[0]] vs [[1]]",
   "CREATE PASSWORD": "set a password",
   "PONG_WAIT_MESSAGE":"Press any key\nto start the game...",
+  "PONG_WAIT_PLAYER_MESSAGE": "Waiting for the other player",
+  "ALREADY_IN_GAME": "you are in game",
   "PONG_PAUSE_MESSAGE":"Pause",
   "PONG_ENDED_MESSAGE":"Game\nended",
   "": ""

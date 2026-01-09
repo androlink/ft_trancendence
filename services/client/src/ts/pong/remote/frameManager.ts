@@ -1,5 +1,6 @@
 import { PongDisplay } from "../display.js";
 import { DataFrame } from "../engine/engine_interfaces";
+import { findLanguage, selectLanguage } from "../../html/templates.js";
 
 export class FrameManager {
   private display: PongDisplay | undefined = void 0;
@@ -11,6 +12,7 @@ export class FrameManager {
   private init() {
     try {
       this.display = new PongDisplay();
+      this.display.messages.waiting = findLanguage("PONG_WAIT_PLAYER_MESSAGE");
     } catch {}
   }
 

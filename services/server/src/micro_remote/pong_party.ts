@@ -18,14 +18,6 @@ let get_username: (id: Id) => string | undefined = (id) => {
   return get_username(id);
 };
 
-const foo = (() => {
-  const statement = () =>
-    db.prepare<{ id: Id }, { username: string }>(
-      "SELECT username FROM users WHERE id = :id"
-    );
-  return (id: Id) => statement().get({ id: id })?.username;
-})();
-
 function pong_party_log() {
   if (games.size === 0) return;
   let infos: string[] = [];
