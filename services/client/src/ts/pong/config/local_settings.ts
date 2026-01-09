@@ -107,13 +107,14 @@ function player_config(playerId: 0 | 1): HTMLElement {
   }`;
 
   const isBot =
-  players[playerId].up.key === undefined ||
-  players[playerId].down.key === undefined;
+    players[playerId].up.key === undefined ||
+    players[playerId].down.key === undefined;
 
   const iconPath = isBot ? "/resources/Bot.svg" : "/resources/Human.svg";
 
   const iconWrapper = document.createElement("div");
-  iconWrapper.className = "flex flex-col items-center justify-center gap-2 mt-8";
+  iconWrapper.className =
+    "flex flex-col items-center justify-center gap-2 mt-8";
 
   fetch(iconPath)
     .then((res) => res.text())
@@ -125,10 +126,12 @@ function player_config(playerId: 0 | 1): HTMLElement {
       iconWrapper.append(svg);
       const div = document.createElement("div");
       div.className = "text-white text-center font-bold text-2xl";
-      div.textContent = isBot ? findLanguage("bot title") : findLanguage("player title");
+      div.textContent = isBot
+        ? findLanguage("bot title")
+        : findLanguage("player title");
       iconWrapper.append(div);
-    }
-  ).catch(console.error);
+    })
+    .catch(console.error);
 
   div.append(iconWrapper);
 
@@ -181,7 +184,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     span.append(range);
     span.append(label_value);
     content.append(span);
-    div.append(content)
+    div.append(content);
     return div;
   }
   if (!tournament) {
@@ -216,7 +219,8 @@ function player_config(playerId: 0 | 1): HTMLElement {
   content.append(up);
   const down = document.createElement("button");
   down.textContent = players[playerId].down.key;
-  down.className = "text-white border border-gray-400 rounded p-1 cursor-pointer";
+  down.className =
+    "text-white border border-gray-400 rounded p-1 cursor-pointer";
   down.onclick = (e) => changeInput(e, "down", playerId);
   content.append(down);
   if (!tournament) {
@@ -265,14 +269,13 @@ export function loadLocalConfig() {
     updateGameAnimation();
     return;
   }
-
   // below is in case we change page while changing keyboard config (the "Listen..." period)
   self.addEventListener("popstate", () => inputController.abort(), {
     once: true,
   });
   const inner = document.getElementById("inner");
   const launchingScript = document.getElementById("local config");
-  const title = document.getElementById('PONG TITLE');
+  const title = document.getElementById("PONG TITLE");
   title.classList.remove("hidden");
 
   if (!inner || !launchingScript) {

@@ -111,7 +111,6 @@ function collideWithPlayers(ball: BallEntity, players: PlayerEntity[]): void {
         ball.speed.y = Math.tan(-angle) * ball.speed.x;
       }
       ball.speed.y += Math.random() * 0.01 - 0.005;
-      
     }
   }
   players.forEach(move);
