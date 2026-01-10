@@ -201,7 +201,7 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
       const data = JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${message.target} not responded`,
+        content: ["IS_UNREACHABLE", message.target],
         msgId: GenerateRandomId(),
       });
       Sender.sockets.forEach((ws) => {
@@ -275,7 +275,7 @@ function GetReadyDirectMessage(
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${msg.target} doesn't exist`,
+        content: ["DOES_NOT_EXIST", msg.target],
         msgId: GenerateRandomId(),
       })
     );
@@ -287,7 +287,7 @@ function GetReadyDirectMessage(
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${msg.target} is not connected`,
+        content: ["IS_NOT_CONNECTED", msg.target],
         msgId: GenerateRandomId(),
       })
     );
@@ -298,7 +298,7 @@ function GetReadyDirectMessage(
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${msg.target} is you`,
+        content: ["THAT_IS_YOU"],
         msgId: GenerateRandomId(),
       })
     );
@@ -343,7 +343,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: "You are not connected",
+        content: ["R_NOT_CONNECTED"],
       })
     );
   }
@@ -354,7 +354,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: "You are not connected",
+        content: ["R_NOT_CONNECTED"],
       })
     );
   }
@@ -364,7 +364,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: "message size is fixed at 280 characters",
+        content: ["MAX_STR_LENGTH", ["message content"], "280"],
         msgId: GenerateRandomId(),
       })
     );
