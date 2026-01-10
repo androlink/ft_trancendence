@@ -262,8 +262,8 @@ const htmlSnippetsTemplate: {
             <style>
               .dropdown:hover .dropdown-content {display: flex;}
             </style>
-            <img src="${assetsPath}/menu-vertical.png" class="mt-5 size-10 cursor-pointer"></img>
-            <div class="dropdown-content flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
+            <img src="${assetsPath}/socials-icon.png" class="mt-5 ml-2 invert-100 size-10 cursor-pointer"></img>
+            <div class="dropdown-content flex-col absolute top-12 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
               <ul class ="*:hover:bg-[#ffffff7c] **:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0]">
                 <li>
                   <a id="friend request">friend request</a>
