@@ -1,4 +1,8 @@
-import { findLanguage, languageString, selectLanguage } from "./html/templates.js";
+import {
+  findLanguage,
+  languageString,
+  selectLanguage,
+} from "./html/templates.js";
 import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
@@ -274,7 +278,11 @@ function showMessageToChat(message: WSmessage): boolean {
       break;
     case TypeMessage.serverMessage:
       para.className = "text-red-500 font-bold text-center";
-      if (message.content === ["R_NOT_CONNECTED"]) goToURL("/profile");
+      if (
+        Array.isArray(message.content) &&
+        message.content[0] === "R_NOT_CONNECTED"
+      )
+        goToURL("/profile");
       para.appendChild(node);
 
       break;
