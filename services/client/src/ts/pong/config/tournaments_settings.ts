@@ -48,7 +48,7 @@ export function getTournamentPlayer(i: number): HTMLElement | null {
   span.append(input);
   const text = document.createElement("p");
   text.textContent = "X";
-  text.className = "font-bold text-white cursor-pointer";
+  text.className = "font-bold my-auto text-white cursor-pointer";
   text.onclick = () => {
     playersInTournament.splice(i, 1);
     loadLocalConfig();

@@ -190,7 +190,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     div.append(content);
     return div;
   }
-  // so we have a plyer, not a bot
+  // so we have a player, not a bot
   if (!tournament) {
     // player name selector
     const input = document.createElement("input");
