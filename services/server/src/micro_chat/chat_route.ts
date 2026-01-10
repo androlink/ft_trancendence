@@ -31,6 +31,30 @@ class WSClient {
   }
 }
 
+/***********************************************************/
+function logClientList() {
+  console.log("Connected clients:");
+  connectedClients.forEach((client, id) => {
+    console.log(
+      `ID: ${id}, Username: ${client.username}, Sockets: ${client.sockets.length}`
+    );
+  });
+
+  console.log("Waiting connections:");
+  waitingConnections.forEach((sock, index) => {
+    console.log(`${index + 1}: Socket State: ${sock.readyState}`);
+  });
+
+  console.log("Socket to ID Mapping:");
+  socketToId.forEach((id, sock) => {
+    console.log(`Socket State: ${sock.readyState}, ID: ${id}`);
+  });
+}
+
+// setInterval(logClientList, 10000); // uncomment for log trace
+
+/***********************************************************/
+
 export const connectedClients: Map<Id, WSClient> = new Map();
 
 const waitingConnections: WebSocket[] = [];
@@ -116,15 +140,17 @@ function sendAll(senderId: Id, msg: WSmessage) {
  * disconnect a client
  * @param socket Websocket of client
  */
-function disconnectedClient(socket: WebSocket) {
+function disconnectedClient(socket: WebSocket, closed: boolean = false) {
   const sender = getClientById(socketToId.get(socket)!);
   if (sender) {
+    socket.onclose = null;
+    socketToId.delete(socket);
     sender.client.removeSocket(socket);
 
     if (sender.client.sockets.length == 0) {
       connectedClients.delete(sender.id);
     }
-    waitingConnections.push(socket);
+    if (!closed) waitingConnections.push(socket);
   }
 }
 /**
@@ -389,7 +415,7 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   try {
     senderId = fastify.jwt.decode(msg.user);
   } catch {
-    if (socketToId.get(socket)) {
+    if (socketToId.has(socket)) {
       disconnectedClient(socket);
     }
     return;
@@ -421,8 +447,7 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   socketToId.set(socket, senderId.id);
   waitingConnections.splice(waitingConnections.indexOf(socket), 1);
   socket.onclose = () => {
-    const client = connectedClients.get(senderId!.id)!;
-    client?.removeSocket(socket);
+    disconnectedClient(socket, true);
   };
 
   const client = connectedClients.get(senderId.id);
