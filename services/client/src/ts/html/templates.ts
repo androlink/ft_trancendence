@@ -184,7 +184,15 @@ const htmlSnippetsTemplate: {
                 <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
               </div>
               <label for="pfp-input" class="absolute bottom-0 right-0 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-purple-500 border-2 border-[#171C3D] hover:bg-blue-400 transition">
-                <img src="${assetsPath}/Pencil.svg" class="fill-white px-2"/>
+              <svg width="90" height="90" class="size-full p-1.5 fill-white" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <rect width="90" height="90" fill="url(#pattern0_111_2)"/>
+                <defs>
+                  <pattern id="pattern0_111_2" patternContentUnits="objectBoundingBox" width="1" height="1">
+                    <use xlink:href="#image0_111_2" transform="scale(0.0111111)"/>
+                  </pattern>
+                  <image id="image0_111_2" width="90" height="90" preserveAspectRatio="none" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAACJ0lEQVR4nO3cu4oUQRhA4UKTjUQzMTQSFBFMDQ018g1MDQQNTISeRNin8LbxbrKpZr7CvoCXTRUU8QZHGlvQZWx7eqr/mt46Xz4zVYearuqGmZQkSZIkSZsLuALsAO+Ab8Bb4ClwqfTYjg3gPvCD5b4Dd0qPcfaABcM8LD3WGiL/ZuyAyMYOjGzsVQAP1gxt7KGMPa9LSMujX1Ds9px9cdCH1Y71Yz8pPYdaYr9OlYdbjHjNGF9Tjfg7WETsN6k2LA81dexnqSb0B5oqdvvU73KqBcPCTBH7XqoFq33VtzPeQTapFozbvHLENnJAbCOvaMw1e6XXzBp5Io9a2dUgb2RjB0Y2dmBkYwdGrjs2sZHrjE2ZyC3PyQGMHMDIAYwcwMgBjBzAyAGMHMDIAYwcwMgBjBzAyAGMHMDIAYwcwMgBjBzAyAGMbOTMgPPAXeCVkYO0v70D9iaOvIiaz0YDbkwYuSk9v40BnDVyEODQyAGAfSPP68jXRIy39g2xKT2PGjbEpvQcZgM4A1zrbmaeAwdGDgKcA2723NR4M5ITcMGV/A/A1czvd+BKPgI40f1B6vYER8Am13vOHnA99+rj1wMoV/KfgMdV/7AmArAFvF+yeRk7J+BWz5nX2LkAuz2hjZ0DcAr4/J/Qxl4XcJthDnOfs6sCvOiJ+6E7jbRHv5OlxzprwMcjcb90zynaDXKr9PiODeAR8Al42V1GTpcekyRJkiQp5fETrJONnOWWPKUAAAAASUVORK5CYII="/>
+                </defs>
+                </svg>  
               </label>
             </div>
             <button id="update-pfp" hidden class=" mx-auto size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
