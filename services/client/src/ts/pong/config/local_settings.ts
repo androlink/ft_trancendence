@@ -4,6 +4,7 @@ import { createLocalPong, game } from "../engine/engine_game.js";
 import { keyControl } from "../engine/engine_interfaces.js";
 import { players } from "../engine/engine_variables.js";
 import { updateGameAnimation } from "../pong.js";
+import { createBotSvg, createHumanSvg } from "./create_svg_elements.js";
 import {
   abortTournament,
   createTournament,
@@ -34,7 +35,11 @@ function changeInput(
     "keydown",
     (e: KeyboardEvent) => {
       // the bare minimum to forbid is Space (because it pauses the game), AltLeft, AltRight and ContextMenu (because browser shortcut)
-      if (["Space", "AltLeft", "AltRight", "ContextMenu", "Escape"].includes(e.code)) {
+      if (
+        ["Space", "AltLeft", "AltRight", "ContextMenu", "Escape"].includes(
+          e.code
+        )
+      ) {
         loadLocalConfig();
         return;
       }
@@ -64,7 +69,10 @@ export function getKeyConfig(
   playerId: "player_one" | "player_two"
 ): [keyControl, keyControl] {
   const defaultConfig = {
-    player_one: [{ key: "ArrowUp" }, { key: "ArrowDown" }] as [keyControl, keyControl],
+    player_one: [{ key: "ArrowUp" }, { key: "ArrowDown" }] as [
+      keyControl,
+      keyControl,
+    ],
     player_two: [{ key: "w" }, { key: "s" }] as [keyControl, keyControl],
   };
   const res = [undefined, undefined] as [keyControl, keyControl];
@@ -107,34 +115,22 @@ function player_config(playerId: 0 | 1): HTMLElement {
   }`;
 
   const isBot =
-  players[playerId].up.key === undefined ||
-  players[playerId].down.key === undefined;
+    players[playerId].up.key === undefined ||
+    players[playerId].down.key === undefined;
 
-  const iconPath = isBot ? "/resources/Bot.svg" : "/resources/Human.svg";
-
+  // this is for the svg and the word player or bot
   const iconWrapper = document.createElement("div");
-  iconWrapper.className = "flex flex-col items-center justify-center gap-2 mt-8";
-
-  let placeholder = document.createElement("p");
-  placeholder.style.height = "80px";
-  placeholder.innerHTML = "ㅤ"
-  div.append(placeholder);
-  fetch(iconPath)
-    .then((res) => res.text())
-    .then((svgText) => {
-      const template = document.createElement("template");
-      template.innerHTML = svgText;
-      const svg = template.content.querySelector("svg");
-      svg.classList.add("size-10", "self-center", "text-white");
-      iconWrapper.append(svg);
-      const div = document.createElement("div");
-      div.className = "text-white text-center font-bold text-2xl";
-      div.textContent = isBot ? findLanguage("bot title") : findLanguage("player title");
-      placeholder.remove();
-      iconWrapper.append(div);
-    }
-  ).catch(console.error);
-
+  iconWrapper.className =
+    "flex flex-col items-center justify-center gap-2 mt-8";
+  const svg = isBot ? createBotSvg() : createHumanSvg();
+  svg.classList.add("size-10", "self-center", "text-white");
+  iconWrapper.append(svg);
+  const iconDiv = document.createElement("div");
+  iconDiv.className = "text-white text-center font-bold text-2xl";
+  iconDiv.textContent = isBot
+    ? findLanguage("bot title")
+    : findLanguage("player title");
+  iconWrapper.append(iconDiv);
   div.append(iconWrapper);
 
   const content = document.createElement("div");
@@ -180,7 +176,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
     function updateLabel() {
       const difficulty = range.value;
       label_value.textContent =
-      parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
+        parseFloat(difficulty) < 4 ? difficulty : findLanguage("wall");
     }
     updateLabel();
     range.oninput = updateLabel;
@@ -221,9 +217,13 @@ function player_config(playerId: 0 | 1): HTMLElement {
   for (let i = 0; i < 2; i++) {
     // keys selection
     const button = document.createElement("button");
-    button.textContent = i ? players[playerId].down.key : players[playerId].up.key;
-    button.className = "text-white border border-black rounded px-1 cursor-pointer";
-    button.onclick = (e) => changeInput(e, ["up","down" ][i] as "down" | "up", playerId);
+    button.textContent = i
+      ? players[playerId].down.key
+      : players[playerId].up.key;
+    button.className =
+      "text-white border border-black rounded px-1 cursor-pointer";
+    button.onclick = (e) =>
+      changeInput(e, ["up", "down"][i] as "down" | "up", playerId);
     const label = document.createElement("label");
     label.textContent = ["⬆️", "⬇️"][i];
     const span = document.createElement("span");
