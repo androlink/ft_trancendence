@@ -208,7 +208,7 @@ services:
       context: services/client/
       target: prod
       args:
-        - NPM_I_ARGS=--production
+        - NPM_I_ARGS=--omit=dev
     volumes:
       - www:/var/www
     networks:
