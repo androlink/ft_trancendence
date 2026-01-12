@@ -56,7 +56,7 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
       FROM history_game h
       LEFT JOIN users AS winner ON ((h.result_type = 'win' AND winner.id = h.player_one) OR (h.result_type = 'loss' AND winner.id = h.player_two))
       LEFT JOIN users AS loser ON ((h.result_type = 'win' AND loser.id = h.player_two) OR (h.result_type = 'loss' AND loser.id = h.player_one))
-      WHERE h.player_one = :targetId OR h.player_two = :targetId;
+      WHERE (h.player_one = :targetId OR h.player_two = :targetId) AND h.result_type != 'draw';
     `);
     fastifyInstance.get<{ Querystring: { user: string } }>(
       "/history",
@@ -67,7 +67,7 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
         if (!row) return reply.send([]);
         let arr = statement2.all({ targetId: row.id });
         arr = arr.sort((a, b) => (a.time < b.time ? 1 : -1));
-        return reply.send(arr.slice(0, 100));
+        return reply.send(arr.slice(0, 50));
       }
     );
   }
@@ -76,9 +76,9 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
     /** find all the infos of the user */
     const statement1 = db.prepare<
       { id: Id },
-      { username: string; pfp: string }
+      { id: Id; username: string; pfp: string }
     >(
-      "SELECT u.username, u.pfp FROM friends f JOIN users u ON u.id = CASE WHEN f.friend_one = :id THEN f.friend_two ELSE f.friend_one END WHERE :id IN (f.friend_one, f.friend_two)"
+      "SELECT u.id, u.username, u.pfp FROM friends f JOIN users u ON u.id = CASE WHEN f.friend_one = :id THEN f.friend_two ELSE f.friend_one END WHERE :id IN (f.friend_one, f.friend_two)"
     );
     fastifyInstance.get<{ Querystring: { page: string } }>(
       "/friends",
@@ -92,6 +92,22 @@ export default async function apiMisc(fastifyInstance: FastifyInstance) {
           return reply.send([0, []]);
         }
         let arr = statement1.all({ id: req.user.id });
+
+        const promise_arr = arr.map((u) => {
+          return fetch(`http://chat_microservice:3000/user_status?id=${u.id}`)
+            .then((r) => {
+              if (!r.ok) return { status: false };
+              return r.json();
+            })
+            .then((r) => {
+              u.status = r.status;
+            })
+            .catch((r) => {
+              u.status = false;
+            });
+        });
+        await Promise.all(promise_arr);
+
         if (arr.length <= 32 * page) {
           page = Math.floor(arr.length / 32);
         }

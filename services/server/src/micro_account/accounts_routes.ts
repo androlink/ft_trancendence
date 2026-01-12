@@ -47,7 +47,8 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
           return reply
             .code(401)
             .send({ success: false, message: `query ${field} missing` });
-        if (presenceOnly || (req.user && req.user.admin)) continue;
+        //if (presenceOnly || (req.user && req.user.admin)) continue;
+        if (presenceOnly) continue;
         if (typeof req.body[field] !== "string")
           return reply
             .code(401)
@@ -326,7 +327,7 @@ export default async function apiAccount(fastifyInstance: FastifyInstance) {
         ) {
           return reply.code(401).send({ success: false, message: ["NOT_IMG"] });
         }
-        const filename = `${req.user.id}${String(Math.random()).substring(2)}.${
+        const filename = `${req.user.id}.${String(Math.random()).substring(2)}.${
           detectedType.ext
         }`;
         try {

@@ -1,4 +1,8 @@
-import { findLanguage, selectLanguage } from "./html/templates.js";
+import {
+  findLanguage,
+  languageString,
+  selectLanguage,
+} from "./html/templates.js";
 import { join_party } from "./pong/remote/remote_client.js";
 import { goToURL } from "./utils.js";
 
@@ -56,7 +60,7 @@ type WSmessage =
       type: Exclude<TypeMessage, TypeMessage.replyInvite>;
       user: string;
       target?: string;
-      content?: string;
+      content?: languageString;
       msgId: string;
     };
 
@@ -220,7 +224,7 @@ function showMessageToChat(message: WSmessage): boolean {
 
   const para = document.createElement("p");
   const userLink = document.createElement("span");
-  const node = document.createTextNode(message.content);
+  const node = document.createTextNode(selectLanguage(message.content));
   para.className = "**:text-justify";
 
   switch (message.type) {
@@ -274,7 +278,11 @@ function showMessageToChat(message: WSmessage): boolean {
       break;
     case TypeMessage.serverMessage:
       para.className = "text-red-500 font-bold text-center";
-      if (message.content === "You are not connected") goToURL("/profile");
+      if (
+        Array.isArray(message.content) &&
+        message.content[0] === "R_NOT_CONNECTED"
+      )
+        goToURL("/profile");
       para.appendChild(node);
 
       break;
@@ -361,7 +369,7 @@ export function sendChatMessage() {
     const err: WSmessage = {
       user: null,
       type: TypeMessage.serverMessage,
-      content: "message size is fixed at 280 characters",
+      content: ["MAX_STR_LENGTH", ["message content"], "280"],
       msgId: GenerateRandomId(),
     };
     showMessageToChat(err);

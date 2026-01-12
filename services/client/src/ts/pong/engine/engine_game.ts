@@ -1,11 +1,23 @@
+import { main, resetNextInner } from "../../app.js";
+import { abortMainPopstate } from "../../utils.js";
 import { generateParty, resetParty } from "./engine_inits.js";
 import { GameParty } from "./engine_interfaces.js";
 import { tick } from "./engine_tick.js";
 import { ball, ball_size, delay, players } from "./engine_variables.js";
 
 function eventKeyInputPong(event: KeyboardEvent) {
+  if (game.views.state === "waiting" && event.type === "keydown") {
+    startLocalPong();
+    return;
+  }
   if (event.code === "Space" && event.type === "keydown" && !event.repeat) {
     game.views.state === "playing" ? pauseLocalPong() : resumeLocalPong();
+  }
+  if (event.key === "Escape" && event.type === "keydown") {
+    abortMainPopstate();
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    resetNextInner();
+    main({ requests: false });
   }
 
   game.players.forEach((player) => {

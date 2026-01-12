@@ -1,5 +1,5 @@
 DOCKER_COMPOSE = docker compose
-DOCKER_TARGET = Docker-compose-dev.yml
+DOCKER_TARGET = Docker-compose-prod.yml
 
 export COMPOSE_BAKE=true
 
@@ -14,7 +14,6 @@ build:
 .PHONY: start
 start: build
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
-	$(MAKE) --no-print-directory static
 
 .PHONY: restart
 restart:
@@ -48,6 +47,7 @@ static:
 repair_vscode:
 	-docker exec resources_microservice cp -r node_modules src
 	-docker exec client cp -r node_modules src
-.PHONY: prod
-prod: prune
-	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-prod.yml"
+.PHONY: dev
+dev: prune
+	$(MAKE) --no-print-directory all DOCKER_TARGET="Docker-compose-dev.yml"
+	$(MAKE) --no-print-directory static

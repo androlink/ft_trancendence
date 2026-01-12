@@ -31,6 +31,30 @@ class WSClient {
   }
 }
 
+/***********************************************************/
+function logClientList() {
+  console.log("Connected clients:");
+  connectedClients.forEach((client, id) => {
+    console.log(
+      `ID: ${id}, Username: ${client.username}, Sockets: ${client.sockets.length}`
+    );
+  });
+
+  console.log("Waiting connections:");
+  waitingConnections.forEach((sock, index) => {
+    console.log(`${index + 1}: Socket State: ${sock.readyState}`);
+  });
+
+  console.log("Socket to ID Mapping:");
+  socketToId.forEach((id, sock) => {
+    console.log(`Socket State: ${sock.readyState}, ID: ${id}`);
+  });
+}
+
+// setInterval(logClientList, 10000); // uncomment for log trace
+
+/***********************************************************/
+
 export const connectedClients: Map<Id, WSClient> = new Map();
 
 const waitingConnections: WebSocket[] = [];
@@ -116,15 +140,17 @@ function sendAll(senderId: Id, msg: WSmessage) {
  * disconnect a client
  * @param socket Websocket of client
  */
-function disconnectedClient(socket: WebSocket) {
+function disconnectedClient(socket: WebSocket, closed: boolean = false) {
   const sender = getClientById(socketToId.get(socket)!);
   if (sender) {
+    socket.onclose = null;
+    socketToId.delete(socket);
     sender.client.removeSocket(socket);
 
     if (sender.client.sockets.length == 0) {
       connectedClients.delete(sender.id);
     }
-    waitingConnections.push(socket);
+    if (!closed) waitingConnections.push(socket);
   }
 }
 /**
@@ -138,11 +164,14 @@ function GenerateRandomId(): string {
  * find if a client is on the connected list with this id
  * @param id the client id
  */
-function getClientById(id: Id) {
+export function getClientById(id: Id) {
   // check if the sender is on the list
-  return connectedClients.get(id)
-    ? { id, client: connectedClients.get(id)! }
-    : null;
+  const client = connectedClients.get(id);
+  if (client) {
+    client.username = dbQuery.getUserById.get({ userId: id })?.username!;
+    return { id, client };
+  }
+  return null;
 }
 
 /**
@@ -172,7 +201,7 @@ function setTimeoutDirectMsg(Sender: WSClient, message: WSmessage): void {
       const data = JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${message.target} not responded`,
+        content: ["IS_UNREACHABLE", message.target],
         msgId: GenerateRandomId(),
       });
       Sender.sockets.forEach((ws) => {
@@ -246,7 +275,7 @@ function GetReadyDirectMessage(
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${msg.target} doesn't exist`,
+        content: ["DOES_NOT_EXIST", msg.target],
         msgId: GenerateRandomId(),
       })
     );
@@ -258,7 +287,7 @@ function GetReadyDirectMessage(
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${msg.target} is not connected`,
+        content: ["IS_NOT_CONNECTED", msg.target],
         msgId: GenerateRandomId(),
       })
     );
@@ -269,7 +298,7 @@ function GetReadyDirectMessage(
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: `${msg.target} is you`,
+        content: ["THAT_IS_YOU"],
         msgId: GenerateRandomId(),
       })
     );
@@ -314,7 +343,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: "You are not connected",
+        content: ["R_NOT_CONNECTED"],
       })
     );
   }
@@ -325,7 +354,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: "You are not connected",
+        content: ["R_NOT_CONNECTED"],
       })
     );
   }
@@ -335,7 +364,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
       JSON.stringify({
         user: "server",
         type: TypeMessage.serverMessage,
-        content: "message size is fixed at 280 characters",
+        content: ["MAX_STR_LENGTH", ["message content"], "280"],
         msgId: GenerateRandomId(),
       })
     );
@@ -352,7 +381,7 @@ function Message(msg: WSmessage, SenderSocket: WebSocket) {
     return;
   }
   const newMsg: WSmessage = {
-    user: sender.client.username!,
+    user: sender.client.username,
     type: TypeMessage.message,
     content: msg.content,
     msgId: GenerateRandomId(),
@@ -386,7 +415,7 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   try {
     senderId = fastify.jwt.decode(msg.user);
   } catch {
-    if (socketToId.get(socket)) {
+    if (socketToId.has(socket)) {
       disconnectedClient(socket);
     }
     return;
@@ -418,12 +447,13 @@ function connectUser(msg: WSmessage, socket: WebSocket): void {
   socketToId.set(socket, senderId.id);
   waitingConnections.splice(waitingConnections.indexOf(socket), 1);
   socket.onclose = () => {
-    const client = connectedClients.get(senderId!.id)!;
-    client?.removeSocket(socket);
+    disconnectedClient(socket, true);
   };
 
-  if (connectedClients.get(senderId.id)) {
-    connectedClients.get(senderId.id)!.sockets.push(socket);
+  const client = connectedClients.get(senderId.id);
+  if (client) {
+    client.username = user.username;
+    client.sockets.push(socket);
     return;
   }
   connectedClients.set(senderId.id, new WSClient(socket, user.username));

@@ -105,26 +105,6 @@ export async function initDB() {
 
   try {
     createDB.exclusive();
-    const pass = await hashPassword(process.env.ADMIN_PASSWORD || "password");
-    const fake_scores = db.prepare(
-      "INSERT INTO history_game (player_one, player_two, result_type) VALUES (?, ?, ?)"
-    );
-
-    const fake_friends = db.prepare(
-      "INSERT INTO friends (friend_one, friend_two) VALUES (?, ?)"
-    );
-
-    const fake_accounts = db.prepare(
-      "INSERT INTO users (username, password, bio, admin) VALUES (?, ?, ?, ?)"
-    );
-
-    for (let index = 1; index < 50; index++) {
-      console.log("david" + index);
-      let rand = Math.random() > 0.5;
-      fake_scores.run(1, 2, rand ? "win" : "loss");
-      fake_accounts.run("david" + index, pass, "feur", 0);
-      fake_friends.run(1, index);
-    }
   } catch (e) {
     console.error(e);
   }

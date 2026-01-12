@@ -4,6 +4,7 @@ import { createLocalPong, game } from "../engine/engine_game.js";
 import { keyControl } from "../engine/engine_interfaces.js";
 import { players } from "../engine/engine_variables.js";
 import { updateGameAnimation } from "../pong.js";
+import { createBotSvg, createHumanSvg } from "./create_svg_elements.js";
 import {
   abortTournament,
   createTournament,
@@ -34,7 +35,11 @@ function changeInput(
     "keydown",
     (e: KeyboardEvent) => {
       // the bare minimum to forbid is Space (because it pauses the game), AltLeft, AltRight and ContextMenu (because browser shortcut)
-      if (["Space", "AltLeft", "AltRight", "ContextMenu"].includes(e.code)) {
+      if (
+        ["Space", "AltLeft", "AltRight", "ContextMenu", "Escape"].includes(
+          e.code
+        )
+      ) {
         loadLocalConfig();
         return;
       }
@@ -53,7 +58,7 @@ function changeInput(
     },
     { once: true, signal: inputController.signal }
   );
-  (e.target as Element).textContent = "Listen...";
+  (e.target as Element).textContent = findLanguage("listen");
 }
 
 /**
@@ -64,8 +69,11 @@ export function getKeyConfig(
   playerId: "player_one" | "player_two"
 ): [keyControl, keyControl] {
   const defaultConfig = {
-    player_one: [{ key: "w" }, { key: "s" }] as [keyControl, keyControl],
-    player_two: [{ key: "o" }, { key: "l" }] as [keyControl, keyControl],
+    player_one: [{ key: "ArrowUp" }, { key: "ArrowDown" }] as [
+      keyControl,
+      keyControl,
+    ],
+    player_two: [{ key: "w" }, { key: "s" }] as [keyControl, keyControl],
   };
   const res = [undefined, undefined] as [keyControl, keyControl];
   for (const which of [0, 1]) {
@@ -110,29 +118,19 @@ function player_config(playerId: 0 | 1): HTMLElement {
     players[playerId].up.key === undefined ||
     players[playerId].down.key === undefined;
 
-  const iconPath = isBot ? "/resources/Bot.svg" : "/resources/Human.svg";
-
+  // this is for the svg and the word player or bot
   const iconWrapper = document.createElement("div");
   iconWrapper.className =
     "flex flex-col items-center justify-center gap-2 mt-8";
-
-  fetch(iconPath)
-    .then((res) => res.text())
-    .then((svgText) => {
-      const template = document.createElement("template");
-      template.innerHTML = svgText;
-      const svg = template.content.querySelector("svg");
-      svg.classList.add("size-10", "self-center", "text-white");
-      iconWrapper.append(svg);
-      const div = document.createElement("div");
-      div.className = "text-white text-center font-bold text-2xl";
-      div.textContent = isBot
-        ? findLanguage("bot title")
-        : findLanguage("player title");
-      iconWrapper.append(div);
-    })
-    .catch(console.error);
-
+  const svg = isBot ? createBotSvg() : createHumanSvg();
+  svg.classList.add("size-10", "self-center", "text-white");
+  iconWrapper.append(svg);
+  const iconDiv = document.createElement("div");
+  iconDiv.className = "text-white text-center font-bold text-2xl";
+  iconDiv.textContent = isBot
+    ? findLanguage("bot title")
+    : findLanguage("player title");
+  iconWrapper.append(iconDiv);
   div.append(iconWrapper);
 
   const content = document.createElement("div");
@@ -150,6 +148,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
       players[playerId].down = config[1];
       loadLocalConfig();
     };
+    // difficulty below (until return)
     content.append(button);
     const span = document.createElement("span");
     span.className = "flex flex-col *:size-fit place-items-center";
@@ -187,7 +186,9 @@ function player_config(playerId: 0 | 1): HTMLElement {
     div.append(content);
     return div;
   }
+  // so we have a player, not a bot
   if (!tournament) {
+    // player name selector
     const input = document.createElement("input");
     input.placeholder = findLanguage("username");
     if (typeof players[playerId].view.name === "string") {
@@ -204,6 +205,7 @@ function player_config(playerId: 0 | 1): HTMLElement {
       "text-white text-center border border-gray-400 focus:border-blue-400 outline-none rounded p-1";
     content.append(input);
   } else {
+    // player left or right indicator
     const text = document.createElement("text");
     text.textContent = selectLanguage([
       "player",
@@ -212,18 +214,26 @@ function player_config(playerId: 0 | 1): HTMLElement {
     text.className = "text-center text-white px-1";
     content.append(text);
   }
-  const up = document.createElement("button");
-  up.textContent = players[playerId].up.key;
-  up.className = "text-white border border-gray-400 rounded p-1 cursor-pointer";
-  up.onclick = (e) => changeInput(e, "up", playerId);
-  content.append(up);
-  const down = document.createElement("button");
-  down.textContent = players[playerId].down.key;
-  down.className =
-    "text-white border border-gray-400 rounded p-1 cursor-pointer";
-  down.onclick = (e) => changeInput(e, "down", playerId);
-  content.append(down);
+  for (let i = 0; i < 2; i++) {
+    // keys selection
+    const button = document.createElement("button");
+    button.textContent = i
+      ? players[playerId].down.key
+      : players[playerId].up.key;
+    button.className =
+      "text-white border border-black rounded px-1 cursor-pointer";
+    button.onclick = (e) =>
+      changeInput(e, ["up", "down"][i] as "down" | "up", playerId);
+    const label = document.createElement("label");
+    label.textContent = ["⬆️", "⬇️"][i];
+    const span = document.createElement("span");
+    span.className = "flex size-fit gap-2";
+    span.append(label);
+    span.append(button);
+    content.append(span);
+  }
   if (!tournament) {
+    // bot selection button
     const button = document.createElement("button");
     button.textContent = findLanguage("add bot");
     button.className =
@@ -238,8 +248,8 @@ function player_config(playerId: 0 | 1): HTMLElement {
       loadLocalConfig();
     };
     content.append(button);
-    div.append(content);
   }
+  div.append(content);
   return div;
 }
 
@@ -288,7 +298,7 @@ export function loadLocalConfig() {
 
   const fragment = document.createDocumentFragment();
   span.innerHTML = "";
-  span.className = `absolute top-0 size-full *:justify-self-center grid ${
+  span.className = `absolute top-0 size-full *:justify-self-center grid pointer-events-none **:pointer-events-auto ${
     !tournament ? "grid-cols-3" : "grid-cols-4"
   }`;
   for (const playerId of [0, 1] as [0, 1]) {

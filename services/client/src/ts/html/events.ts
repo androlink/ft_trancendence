@@ -355,7 +355,7 @@ function setClickEventProfile(text: HTMLElement): void {
   const usernameElem = document.getElementById("username-p1");
   if (!usernameElem || !usernameElem.hasAttribute("value")) return;
   const username: string = usernameElem.getAttribute("value");
-  text.addEventListener("click", (event: PointerEvent) =>
+  text.parentElement.addEventListener("click", (event: PointerEvent) =>
     goToURL(`profile/${encodeURIUsername(username)}`)
   );
 }
@@ -549,12 +549,16 @@ function setMultipleEventUsername(textarea: HTMLInputElement): void {
         span.addEventListener("pointerdown", () =>
           goToURL(`/profile/${encodeURIUsername(user.username)}`, true)
         );
+        const imgSlot = document.createElement("div");
         const img = document.createElement("img");
-        img.className = "size-5 rounded-full my-auto";
+        imgSlot.className =
+          "rounded-full overflow-hidden border border-gray-600 w-5 h-5 flex-shrink-0";
+        img.className = "object-center object-cover w-full h-full";
         img.src = `${assetsPath}/pfp/${user.pfp}`;
+        imgSlot.append(img);
         const p = document.createElement("p");
         p.textContent = user.username;
-        span.append(img, p);
+        span.append(imgSlot, p);
         fragment.appendChild(span);
       }
       div.innerHTML = "";
@@ -715,8 +719,12 @@ export function setCtrlEventUsername(): void {
       ) {
         help.innerHTML =
           "<p>" +
-          findLanguage("pop up") +
+          findLanguage("pop_up_commands") +
+          "<br>" +
           findLanguage("pop_up_shortcuts") +
+          "<br>" +
+          findLanguage("pop_up_keys") +
+          "<br>" +
           "</p>";
         isPressed = e.code;
         app.appendChild(help);

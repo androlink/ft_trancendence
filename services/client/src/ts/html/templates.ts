@@ -131,7 +131,7 @@ const htmlSnippetsTemplate: {
         </g>
         </svg>
 
-        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('[[not connected]]', 'red-500');">
+        <div id="account-disconnected" hidden="" class="size-full absolute z-10 rounded-md bg-white cursor-pointer" onclick="goToURL('profile'); showNotification('[[not connected]]');">
           <div class="m-auto text-gray-500 text-center text-lg">[[not connected]]</div>
         </div>
         </div>
@@ -143,11 +143,11 @@ const htmlSnippetsTemplate: {
   <div class="h-full flex justify-center overflow-y-auto rounded-md bg-[#262d5f]">
     <div class="w-full size-fit my-5 overflow-y-auto max-w-4xl px-4 sm:px-8 border border-white bg-[#171C3D] shadow-2xl rounded-lg">
 
-    <div class="flex">
+    <div class="flex cursor-pointer hover:*:text-blue-500 size-fit">
       <div class="text-4xl text-white px-3 mt-1">[[public infos]]</div>
       <svg version="1.0"
         id="go-to-profile"
-        class="p-1.5 mt-2 justify-items-end self-center select-none fill-current text-white hover:text-blue-500 size-10 cursor-pointer"
+        class="p-1.5 mt-2 justify-items-end self-center select-none fill-current text-white size-10"
         draggable="false"
         xmlns="http://www.w3.org/2000/svg"
         width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000"
@@ -171,8 +171,8 @@ const htmlSnippetsTemplate: {
 
       <form id="pfp-form" class="flex flex-col ">
           <div class="relative flex flex-col">
-            <div class="relative my-6 w-40 h-40 mx-auto">
-              <div class=" rounded-full overflow-hidden w-full h-full">
+            <div class="relative my-6  w-40 h-40 mx-auto">
+              <div class=" rounded-full border border-gray-600 overflow-hidden w-full h-full">
                 <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg" />
               </div>
               <input type="file" name="uploadfile" accept="image/*" id="pfp-input" style="display:none;"/>
@@ -184,7 +184,15 @@ const htmlSnippetsTemplate: {
                 <p class="absolute top-2 bg-gray-400 border px-1 rounded ">preview</p>
               </div>
               <label for="pfp-input" class="absolute bottom-0 right-0 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-purple-500 border-2 border-[#171C3D] hover:bg-blue-400 transition">
-                <img src="${assetsPath}/Pencil.svg" class="fill-white px-2"/>
+              <svg width="90" height="90" class="size-full p-1.5 fill-white" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <rect width="90" height="90" fill="url(#pattern0_111_2)"/>
+                <defs>
+                  <pattern id="pattern0_111_2" patternContentUnits="objectBoundingBox" width="1" height="1">
+                    <use xlink:href="#image0_111_2" transform="scale(0.0111111)"/>
+                  </pattern>
+                  <image id="image0_111_2" width="90" height="90" preserveAspectRatio="none" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAACJ0lEQVR4nO3cu4oUQRhA4UKTjUQzMTQSFBFMDQ018g1MDQQNTISeRNin8LbxbrKpZr7CvoCXTRUU8QZHGlvQZWx7eqr/mt46Xz4zVYearuqGmZQkSZIkSZsLuALsAO+Ab8Bb4ClwqfTYjg3gPvCD5b4Dd0qPcfaABcM8LD3WGiL/ZuyAyMYOjGzsVQAP1gxt7KGMPa9LSMujX1Ds9px9cdCH1Y71Yz8pPYdaYr9OlYdbjHjNGF9Tjfg7WETsN6k2LA81dexnqSb0B5oqdvvU73KqBcPCTBH7XqoFq33VtzPeQTapFozbvHLENnJAbCOvaMw1e6XXzBp5Io9a2dUgb2RjB0Y2dmBkYwdGrjs2sZHrjE2ZyC3PyQGMHMDIAYwcwMgBjBzAyAGMHMDIAYwcwMgBjBzAyAGMHMDIAYwcwMgBjBzAyAGMbOTMgPPAXeCVkYO0v70D9iaOvIiaz0YDbkwYuSk9v40BnDVyEODQyAGAfSPP68jXRIy39g2xKT2PGjbEpvQcZgM4A1zrbmaeAwdGDgKcA2723NR4M5ITcMGV/A/A1czvd+BKPgI40f1B6vYER8Am13vOHnA99+rj1wMoV/KfgMdV/7AmArAFvF+yeRk7J+BWz5nX2LkAuz2hjZ0DcAr4/J/Qxl4XcJthDnOfs6sCvOiJ+6E7jbRHv5OlxzprwMcjcb90zynaDXKr9PiODeAR8Al42V1GTpcekyRJkiQp5fETrJONnOWWPKUAAAAASUVORK5CYII="/>
+                </defs>
+                </svg>  
               </label>
             </div>
             <button id="update-pfp" hidden class=" mx-auto size-fit cursor-pointer rounded bg-purple-500 p-1 text-white hover:bg-blue-400" type="submit">[[update]]</button>
@@ -247,10 +255,14 @@ const htmlSnippetsTemplate: {
   Profile2: `
   <div class="bg-[#262d5f] rounded-md p-3 size-full flex flex-col overflow-y-scroll">
     <header class="w-full flex items-start gap-4">
-      <img
-        id="profile-picture"
-        class="ws-60 h-60 rounded-full border-2 border-gray-600 aspect-square" src="${assetsPath}/default-avatar.jpg"
-      >
+      <div class="relative w-60 h-60">
+        <div class="rounded-full overflow-hidden border-2 border-gray-600 w-full h-full">
+          <img id="profile-picture" class="object-center object-cover w-full h-full" src="${assetsPath}/default-avatar.jpg"
+          >
+        </div>
+        <!-- <div id="user-status" class="absolute bottom-0 left-0 flex h-15 w-15 rounded-full bg-gray-600 border-2 border-[#171C3D] transition">
+        </div> -->
+      </div>
       <div class="flex flex-col justify-start h-60">
         <div class ="flex flex-row *:mt-10 *:mb-4">
           <h1 class="text-white select-text font-Hammer text-6xl" id="username-p2"></h1>
@@ -258,8 +270,8 @@ const htmlSnippetsTemplate: {
             <style>
               .dropdown:hover .dropdown-content {display: flex;}
             </style>
-            <img src="${assetsPath}/menu-vertical.png" class="mt-5 size-10 cursor-pointer"></img>
-            <div class="dropdown-content flex-col absolute top-10 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
+            <img src="${assetsPath}/socials-icon.png" class="mt-5 ml-2 invert-100 size-10 cursor-pointer"></img>
+            <div class="dropdown-content flex-col absolute top-12 z-1 *:whitespace-nowrap hidden size-fit m-2 border border-white">
               <ul class ="*:hover:bg-[#ffffff7c] **:px-1 *:text-white *:hover:text-white bg-[#1b1e38d0]">
                 <li>
                   <a id="friend request">friend request</a>
@@ -301,7 +313,7 @@ const htmlSnippetsTemplate: {
       loadGameHistory();
       document.currentScript?.remove();
     </script>
-    <div class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col">
+    <div title="[[only X games]]" class="m-4 bg-center mx-auto p-4 w-full md:w-200 rounded-2xl border border-gray-200 bg-[#171C3D] flex flex-col">
       <div class="grid grid-cols-10 text-white items-center text-center mb-2">
         <span class="col-span-3">[[winner]]</span>
         <span class="col-span-3">[[loser]]</span>
@@ -310,6 +322,7 @@ const htmlSnippetsTemplate: {
       <div id="history-tbody">
       </div>
     </div>
+    <p class="text-white mx-auto">[[remote counter]]</p>
   </div>
   `,
   Friend: `
@@ -373,7 +386,7 @@ const htmlSnippetsTemplate: {
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[log in]]</button>
 
-        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5 cursor-pointer">
+        <button onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl mb-5 cursor-pointer">
           <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
@@ -392,7 +405,7 @@ const htmlSnippetsTemplate: {
 
         <button class="my-1 rounded-sm bg-purple-600 py-2 text-2xl font-bold shadow-2xl hover:bg-blue-500 cursor-pointer">[[register]]</button>
 
-        <button id="goToGithub" onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl cursor-pointer">
+        <button onClick="logInWithGithub()" type="button" class="gap-2 rounded bg-[#0f1419] from-green-400 via-green-500 to-green-600 px-4 py-2 text-[135%] hover:bg-linear-to-r shadow-2xl cursor-pointer">
           <svg class="inline-flex h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"></path>
           </svg>
@@ -421,16 +434,16 @@ const htmlSnippetsTemplate: {
   `,
   PopUp: `
     <div class="absolute top-2 -translate-x-1/2 left-1/2 w-1/2 h-fit border border-white bg-[#171C3D] rounded shadow-xl/50 *:text-white p-1 *:text-center">
-      <p>[[pop up]][[pop_up_shortcuts]]</p>
+      <p>[[pop_up_commands]]<br>[[pop_up_shortcuts]]<br>[[pop_up_keys]]<br></p>
     </div>
     `,
   Pong: `
-  <div class="relative size-full flex flex-col overflow-scroll min-h-175 bg-[#262d5f] rounded-md">
+  <div class="relative size-full flex flex-col overflow-scroll bg-[#262d5f] rounded-md">
     <h2 id="PONG TITLE" class="text-white justify-center self-center-safe p-4 text-5xl font-bold">PONG</h2>
     <script id="local config">
       loadLocalConfig();
     </script>
-    <canvas class=" size-full" id="canvas"></canvas>
+    <canvas class="size-full" id="canvas"></canvas>
   </div>
   `,
   RemotePong: `
@@ -594,12 +607,15 @@ export function updateInfos() {
   bioInput.addEventListener("input", checkChanges);
 }
 
-export function showNotification(content:string, color: string) {
+export function showNotification(content:languageString, color?: string) {
   const notif = document.getElementById("notif");
   if (!notif) return;
 
-  notif.classList.add("bg-"+color);
-  notif.textContent = content;
+  if (color) {
+    notif.classList.remove("bg-red-500");
+    notif.classList.add(color);
+  }
+  notif.textContent = selectLanguage(content);
   notif.classList.remove("hidden");
   notif.classList.remove("animate-notification");
   void notif.offsetWidth;

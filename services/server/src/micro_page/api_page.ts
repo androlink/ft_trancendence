@@ -83,7 +83,7 @@ export default async function apiPage(fastifyInstance: FastifyInstance) {
   fastifyInstance.get("/pong", (req, reply) => {
     return reply.send({
       template: "Home",
-      title: "actually the real Pong",
+      title: "Pong",
       inner: "Pong",
     });
   });

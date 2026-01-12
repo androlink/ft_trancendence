@@ -19,12 +19,7 @@ function loadGameHistory(): void {
   fetch(`/api/misc/history?user=${encodeURIComponent(username)}`)
     .then((res) => res.json())
     .then((json) => {
-      if (!json.length) {
-        // tbody.innerHTML = `<tr class="*:border *:border-gray-300 *:text-center"><td></td><td></td><td></td></tr>`;
-        // tbody.firstElementChild.lastElementChild.textContent =
-        //   findLanguage("never played");
-        return;
-      }
+      if (!json.length) return;
       const fragment = document.createDocumentFragment();
       for (let game of json) {
         const div = document.createElement("div");
@@ -45,10 +40,14 @@ function loadGameHistory(): void {
             div.append(d);
             continue;
           }
+          const imgSlot = document.createElement("div");
+          imgSlot.className =
+            "rounded-full overflow-hidden  border border-gray-600 w-8 h-8 flex-shrink-0";
           const img = document.createElement("img");
-          img.className = "size-8 aspect-square rounded-full";
+          img.className = "object-center object-cover w-full h-full";
           img.src = `/resources/pfp/${game[result + "_pfp"]}`;
-          d.append(img);
+          imgSlot.append(img);
+          d.append(imgSlot);
           if (game[result] !== username) {
             span.className = "text-white hover:text-bold";
             span.addEventListener("click", () =>
@@ -118,7 +117,6 @@ async function loadFriendsDisplay(): Promise<void> {
     if (json[0] <= 32 * (page - 1)) {
       page = Math.floor(json[0] / 32) + 1;
     }
-    console.log(page, "ici");
     if (span !== null && span.childElementCount === 3) {
       span.children[0].toggleAttribute("hidden", page === 1);
       span.children[1].textContent = String(page);
@@ -145,13 +143,24 @@ async function loadFriendsDisplay(): Promise<void> {
         );
         const p = document.createElement("p");
         const d = document.createElement("div");
+        const imgSlot = document.createElement("div");
         p.className = "text-gray-300 truncate flex-grow";
         p.textContent = json[1][i].username;
         const img = document.createElement("img");
+        const status = document.createElement("div");
         img.src = `${assetsPath}/pfp/${json[1][i].pfp}`;
-        d.className = "rounded-full overflow-hidden h-15 flex-shrink-0";
+        d.className = "relative";
+        imgSlot.className =
+          "rounded-full overflow-hidden  border-2 border-gray-600 w-15 h-15 flex-shrink-0";
         img.className = "object-center object-cover w-full h-full";
-        d.append(img);
+        status.className = `absolute w-5 h-5 bottom-0 left-0 flex border-2 ${
+          json[1][i].status
+            ? "bg-green-400 border-green-800"
+            : "bg-gray-600 border-[#171C3D]"
+        } rounded-full`;
+        imgSlot.append(img);
+        d.append(imgSlot);
+        d.append(status);
         div.append(d, p);
         fragment.append(div);
       }
@@ -173,13 +182,11 @@ function moveFriendsDisplay(direction: number): void {
     throw new TypeError('"direction" must be a Finite number');
   if (direction === 0 || (page === 1 && direction < 0)) return;
   page = page + Math.max(direction, 1 - page);
-  console.log(page, direction, Math.max(direction, 1 - page));
   history.pushState(
     { page: "" },
     "",
     `/friends${page !== 1 ? `?page=${page}` : ""}`
   );
-  console.log(page);
   loadFriendsDisplay();
 }
 self["moveFriendsDisplay"] = moveFriendsDisplay;

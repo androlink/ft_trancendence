@@ -48,7 +48,7 @@ export function getTournamentPlayer(i: number): HTMLElement | null {
   span.append(input);
   const text = document.createElement("p");
   text.textContent = "X";
-  text.className = "font-bold text-white cursor-pointer";
+  text.className = "font-bold my-auto text-white cursor-pointer";
   text.onclick = () => {
     playersInTournament.splice(i, 1);
     loadLocalConfig();
@@ -152,7 +152,6 @@ export function prepareNextGame(lastWinner: 0 | 1): void {
   remainingPlayers.splice(0, 2);
   if (remainingPlayers.length < 2) {
     game.views.state = "waiting";
-    console.log(players);
     sendMessage(selectLanguage(["congrats", players[lastWinner].view.name]));
     abortTournament();
     resetNextInner();

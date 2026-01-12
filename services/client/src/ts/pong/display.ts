@@ -24,6 +24,8 @@ export class PongDisplay implements IPongDisplay {
     waiting: "Press any key to start the game...",
   };
 
+  try_count = 0;
+
   constructor() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 
@@ -53,9 +55,12 @@ export class PongDisplay implements IPongDisplay {
   }
 
   public update(data_frame: DataFrame) {
-    if (!this.canvas.isConnected)
+    if (!this.canvas)
       this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    if (!this.canvas) return;
+    if (!this.canvas) 
+    {
+      return;
+    }
     let context = this.canvas.getContext("2d");
 
     this.ratio = this.getRatio();
@@ -79,9 +84,12 @@ export class PongDisplay implements IPongDisplay {
     context.closePath();
     context.restore();
     // display scores
-    this.displayScore(context, data_frame.players[0].score, 25, 50);
-    this.displayScore(context, data_frame.players[1].score, 75, 50);
-
+    if (data_frame.state !== "waiting")
+    {
+      this.displayScore(context, data_frame.players[0].score, 25, 40);
+      this.displayScore(context, data_frame.players[1].score, 75, 40);
+    }
+    
     // display players
     data_frame.players.forEach((player) => this.displayPlayer(context, player));
 

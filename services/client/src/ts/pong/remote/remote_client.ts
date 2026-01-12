@@ -78,6 +78,7 @@ function sendJoinMessage(ws: WebSocket, game_id: string) {
 
 function ws_connect(game_id: string) {
   if (ws) {
+    sendMessage(findLanguage("ALREADY_IN_GAME"));
     return;
   }
   ws = new WebSocket("/api/remote");
